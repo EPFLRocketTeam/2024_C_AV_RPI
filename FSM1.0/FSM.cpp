@@ -8,9 +8,9 @@ class FSM
 private:
     AvState currentState;
     // this function calls the logical functions that updates the state of the FSM
-    AvState update(AvState instate)
+    AvState update()
     {
-        switch (instate)
+        switch (currentState)
         {
         case AvState::ManualVent:
             return fromManualVent();
@@ -48,6 +48,7 @@ private:
             return fromErrorArmed();
         }
     }
+    
 
 public:
     // constructor
@@ -60,15 +61,15 @@ public:
     {
         currentState = AvState::None;
     }
-    // this function allows to deconstruct the FSM
-    void SetNextState(AvState state)
-    {
-        currentState = update(state);
-    }
+    
     // this function allows to get the current state of the FSM
     AvState getCurrentState()
     {
         return currentState;
+    }
+    void NextState()
+    {
+        currentState = update();
     }
     char *FSMtoString() const
     {
