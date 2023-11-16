@@ -1,7 +1,9 @@
 #ifndef AVSTATE_H
 #define AVSTATE_H
 
-enum class AvState{
+enum class AvState
+{
+    None,
     ManualVent,
     Armed,
     Calibration,
@@ -21,7 +23,7 @@ enum class AvState{
     ErrorArmed,
 };
 
-//Update: AvState
+// Update: AvState
 AvState fromManualVent();
 
 AvState fromArmed();
@@ -56,5 +58,6 @@ AvState fromErrorGround();
 
 AvState fromErrorArmed();
 
+char* AvStatetoString(AvState state) const;
 
-
+#endif // AVSTATE_H

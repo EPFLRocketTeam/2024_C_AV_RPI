@@ -69,7 +69,7 @@ AvState fromErrorArmed(){
     return AvState::ErrorArmed;
 }
 
-char* toString(AvState state){
+char* AvStatetoString(AvState state){
         switch(state){
             case AvState::ManualVent:
                 return "ManualVent";
