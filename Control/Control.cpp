@@ -10,10 +10,13 @@ public:
     ~Control(){
         fsm.~FSM(); 
     }
-    void update(){
-        fsm.nextState();
+    void execute(){
+        while true{
+            fsm.update();
+        }
     }
 };
+
 
 
 

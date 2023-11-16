@@ -22,6 +22,12 @@ enum class AvState
     ErrorGround,
     ErrorArmed,
 };
+private:
+    bool noPressure();
+    bool sensorError();
+    bool softwareError();
+bool pressurized();
+public:
 
 // Update: AvState
 AvState fromManualVent();
