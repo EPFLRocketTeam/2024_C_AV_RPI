@@ -11,7 +11,7 @@ public:
         fsm.~FSM(); 
     }
     void execute(){
-        while true{
+        while (true){
             fsm.update();
         }
     }

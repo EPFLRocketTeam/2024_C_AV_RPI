@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
+//here  must be replaced by an AVDATA variable object 
 float thresholdPressure = 100.0;
 float pressure = 0.0;
 std::string radMess = "radio message";
+
 
 bool pressurized()
 {
@@ -35,166 +36,193 @@ bool noError(){
     return !sensorError() && !softwareError() && !thrussequenceError();
 }
 
-
-AvState fromManualVent()
-{
-    return AvState::ManualVent;
+// parameters of this function will take just the object tht contains the actual data, that will inturn
+//call the functions "pressurized()" and "noError()" to get the actual values
+/*eg:
+fromArmed(AvData avdata){
+if(pressurized(avdata) && noError(avdata) && avdata.telemMess._Equals("READY")")){
+    return AvState::READY;
 }
-
-AvState fromArmed()
-{
-    if (noPressure())
-    {
-        return AvState::IdleGround;
-    }
-   
-}
-
-AvState fromCalibration()
-{
-    return AvState::IdleGround;
-}
-
-AvState fromPressurization()
-{
+else{
     return AvState::Armed;
 }
-
+*/
+AvState fromManual()
+{
+    if (pressurized())
+    {
+        return AvState::READY;
+    }
+    else
+    {
+        return AvState::MANUAL;
+    }
+}
+AvState fromArmed()
+{
+    if (pressurized())
+    {
+        return AvState::READY;
+    }
+    else
+    {
+        return AvState::ARMED;
+    }
+}
+AvState fromCalibration()
+{
+    if (pressurized())
+    {
+        return AvState::READY;
+    }
+    else
+    {
+        return AvState::ERRORGROUND;
+    }
+}
 AvState fromThrustSequence()
-{ 
-    if(radMess._Equal("unsafe")){
-        return AvState::EmergencyRec;
+{
+    if (noError())
+    {
+        if (thrustsequenceEnded)
+        {
+            return AvState::ASCENT;
+        }
+        else
+        {
+            return AvState::THRUSTSEQUENCE;
+        }
     }
-
-    return AvState::IdleFlight;
-}
-
-AvState fromIdleGround()
-{
-    if(softwareError()||sensorError()){
-        return AvState::ErrorGround;
-    }else if(radMess._Equal("calibrate")){
-        return AvState::Calibration;
-    }else if(radMess._Equal("arm")){
-        return AvState::Armed;}
-    else{
-        return AvState::IdleGround;
+    else
+    {
+        return AvState::ERRORGROUND;
     }
-    
-   
 }
-
-AvState fromIdleFlight()
+AvState fromAscent()
 {
-    if(radMess._Equal("unsafe")){
-        return AvState::LandedSafe;
-}else if(landed){
-    return AvState::LandedSafe;
-}else if (apogeeReached){
-    return AvState::RecFirstStage; /* code */
-}else if(recSecondStageEnded){
-    return AvState::LandedSafe;
-    }else{
-        return AvState::IdleFlight;
-    }}
-
-
-
-AvState fromLandedSafe()
-{
-    return AvState::LandedSafe;
-}
-
-AvState fromLandedUnsafe()
-{
-    return AvState::LandedUnsafe;
-}
-
-AvState fromRecFirstStage()
-{
-    if(recFirstStageEnded){
-        return AvState::IdleFlight;
-    }else{
-    return AvState::RecFirstStage;}
-}
-
-AvState fromRecSecondStage()
-{
-    if(recSecondStageEnded){
-        return AvState::IdleFlight;
-    }else{
-    return AvState::RecSecondtStage;}
-}
-
-AvState fromEmergencyRec()
-{   if(landed){
-        return AvState::LandedUnsafe;
+    if (noError())
+    {
+        if (apogeeReached)
+        {
+            return AvState::DESCENT;
+        }
+        else
+        {
+            return AvState::ASCENT;
+        }
     }
-    return AvState::EmergencyRec;
+    else
+    {
+        return AvState::ERRORFLIGHT;
+    }
 }
-
-AvState fromVentAsk()
+AvState fromDescent()
 {
-    return AvState::VentAsk;
+    if (noError())
+    {
+        if (landed)
+        {
+            return AvState::LANDED;
+        }
+        else
+        {
+            return AvState::DESCENT;
+        }
+    }
+    else
+    {
+        return AvState::ERRORFLIGHT;
+    }
 }
-
-AvState fromRadioControlled()
+AvState fromLanded()
 {
-    return AvState::RadioControlled;
+    if (noError())
+    {
+        return AvState::IDLE;
+    }
+    else
+    {
+        return AvState::ERRORGROUND;
+    }
+}   
+
+AvState fromIdle()
+{
+    if (noError())
+    {
+        return AvState::IDLE;
+    }
+    else
+    {
+        return AvState::ERRORGROUND;
+    }
+}  
+AvState fromErrorGround()
+{
+    if (noError())
+    {
+        return AvState::IDLE;
+    }
+    else
+    {
+        return AvState::ERRORGROUND;
+    }
 }
 
 AvState fromErrorFlight()
-{   
-    return AvState::ErrorFlight;
+{
+    if (noError())
+    {
+        return AvState::IDLE;
+    }
+    else
+    {
+        return AvState::ERRORFLIGHT;
+    }
 }
 
-AvState fromErrorGround()
+AvState fromReady()
 {
-    return AvState::ErrorGround;
+    if (noError())
+    {
+        return AvState::READY;
+    }
+    else
+    {
+        return AvState::ERRORGROUND;
+    }
 }
 
-AvState fromErrorArmed()
-{
-    return AvState::ErrorArmed;
-}
+
 
 char *AvStatetoString(AvState state)
 {
-    switch (state)
-    {
-    case AvState::ManualVent:
-        return "ManualVent";
-    case AvState::Armed:
-        return "Armed";
-    case AvState::Calibration:
-        return "Calibration";
-    case AvState::Pressurization:
-        return "Pressurization";
-    case AvState::ThrustSequence:
-        return "ThrustSequence";
-    case AvState::IdleGround:
-        return "IdleGround";
-    case AvState::IdleFlight:
-        return "IdleFlight";
-    case AvState::LandedSafe:
-        return "LandedSafe";
-    case AvState::LandedUnsafe:
-        return "LandedUnsafe";
-    case AvState::RecFirstStage:
-        return "RecFirstStage";
-    case AvState::RecSecondStage:
-        return "RecSecondStage";
-    case AvState::EmergencyRec:
-        return "EmergencyRec";
-    case AvState::VentAsk:
-        return "VentAsk";
-    case AvState::RadioControlled:
-        return "RadioControlled";
-    case AvState::ErrorFlight:
-        return "ErrorFlight";
-    case AvState::ErrorGround:
-        return "ErrorGround";
-    case AvState::ErrorArmed:
-        return "ErrorArmed";
+    switch(state){
+        case AvState::IDLE:
+            return "IDLE";
+        case AvState::LANDED:
+            return "LANDED";
+        case AvState::DESCENT:
+            return "DESCENT";
+        case AvState::ASCENT:
+            return "ASCENT";
+        case AvState::CALIBRATION:
+            return "CALIBRATION";
+        case AvState::ERRORGROUND:
+            return "ERRORGROUND";
+        case AvState::ERRORFLIGHT:
+            return "ERRORFLIGHT";
+        case AvState::THRUSTSEQUENCE:
+            return "THRUSTSEQUENCE";
+        case AvState::ARMED:
+            return "ARMED";
+        case AvState::READY:
+            return "READY";
+        case AvState::MANUAL:
+            return "MANUAL";
+        default:
+            return "ERROR";
+
+
     }
 }

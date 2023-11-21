@@ -3,25 +3,20 @@
 
 enum class AvState
 {
-    None,
-    ManualVent,
-    Armed,
-    Calibration,
-    Pressurization,
-    ThrustSequence,
-    IdleGround,
-    IdleFlight,
-    LandedSafe,
-    LandedUnsafe,
-    RecFirstStage,
-    RecSecondStage,
-    EmergencyRec,
-    VentAsk,
-    RadioControlled,
-    ErrorFlight,
-    ErrorGround,
-    ErrorArmed,
+    IDLE,
+    LANDED,
+    DESCENT,
+    ASCENT,
+    CALIBRATION,
+    ERRORGROUND,
+    ERRORFLIGHT,
+    THRUSTSEQUENCE,
+    ARMED,
+    READY,
+    MANUAL,
 };
+
+
 private:
     bool noPressure();
     bool sensorError();
@@ -29,40 +24,18 @@ private:
 bool pressurized();
 public:
 
-// Update: AvState
-AvState fromManualVent();
-
+AvState fromManual();
 AvState fromArmed();
-
 AvState fromCalibration();
-
-AvState fromPressurization();
-
 AvState fromThrustSequence();
-
-AvState fromIdleGround();
-
-AvState fromIdleFlight();
-
-AvState fromLandedSafe();
-
-AvState fromLandedUnsafe();
-
-AvState fromRecFirstStage();
-
-AvState fromRecSecondStage();
-
-AvState fromEmergencyRec();
-
-AvState fromVentAsk();
-
-AvState fromRadioControlled();
-
-AvState fromErrorFlight();
-
+AvState fromAscent();
+AvState fromDescent();
+AvState fromLanded();
+AvState fromIdle();
 AvState fromErrorGround();
+AvState fromErrorFlight();
+AvState fromReady();
 
-AvState fromErrorArmed();
 
 char* AvStatetoString(AvState state) const;
 
