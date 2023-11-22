@@ -2,7 +2,6 @@
 #define _I2C_COMMON_H
 
 /* Header includes */
-#include <pigpio.h>
 
 /*! CPP guard */
 #ifdef __cplusplus
@@ -13,6 +12,20 @@ extern "C" {
  *  @brief Macros for error management
  */
 #define COMM_FAIL -2;
+
+/*!
+ *  @brief Function to initialise GPIO with pigpio.
+ *
+ *  @return Status of execution
+ *  @retval 0 -> Success
+ *  @retval < 0 -> Failure
+ */
+int8_t gpio_initialise();
+
+/*!
+ *  @brief Function to deinitialise GPIO with pigpio.
+ */
+void gpio_terminate();
 
 /*!
  *  @brief Function to return the unique pointer to an address.

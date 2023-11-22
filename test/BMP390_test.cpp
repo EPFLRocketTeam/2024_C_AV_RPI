@@ -9,9 +9,9 @@
 #include <stdint.h>
 #include <math.h>
 #include <unistd.h>
-#include <pigpio.h>
 
 #include "bmp3.h"
+#include "i2c_common.h"
 
 /************************************************************************/
 /*********                     Macros                              ******/
@@ -26,7 +26,7 @@
 static int error_return() {
     bmp3_i2c_deinit(BMP3_ADDR_I2C_PRIM);
     bmp3_i2c_deinit(BMP3_ADDR_I2C_SEC);
-    gpioTerminate();
+    gpio_terminate();
     return 1;
 }
 
@@ -64,10 +64,10 @@ int main(void)
     struct bmp3_status status1 = { { 0 } }, status2 = { { 0 } };
 
     // Initialising the GPIO for I2C communication
-    rslt = gpioInitialise();
+    rslt = gpio_initialise();
     printf("Initialised GPIO with return %d\n", rslt);
     if (rslt < 0) {
-        gpioTerminate();
+        gpio_terminate();
         return 1;
     }
 
@@ -76,7 +76,7 @@ int main(void)
     printf("Initialized bmp3 PRIMARY I2C with return %d\n", rslt);
     if (rslt!=0) {
         bmp3_i2c_deinit(BMP3_ADDR_I2C_PRIM);
-        gpioTerminate();
+        gpio_terminate();
         return 1;
     }
 
@@ -166,7 +166,7 @@ int main(void)
 
     bmp3_i2c_deinit(BMP3_ADDR_I2C_PRIM);
     bmp3_i2c_deinit(BMP3_ADDR_I2C_SEC);
-    gpioTerminate();
+    gpio_terminate();
 
     return 0;
 }

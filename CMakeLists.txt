@@ -11,11 +11,11 @@ add_subdirectory(include/I2C_Common)
 
 # Test for he BMP390 sensor
 add_executable(BMP390_test test/BMP390_test.cpp)
-target_link_libraries(BMP390_test pigpio BMP3)
+target_link_libraries(BMP390_test BMP3 I2C_Common)
 
 # Test for the BMI088 sensor
 add_executable(BMI088_test test/BMI088_test.cpp)
-target_link_libraries(BMI088_test pigpio BMI08x)
+target_link_libraries(BMI088_test BMI08x I2C_Common)
 
 enable_testing()
 
