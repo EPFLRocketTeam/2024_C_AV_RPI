@@ -11,11 +11,19 @@
 /*!
  *  @brief handle list where each handle used by pigpio is stored.
  */
-static int handle_list[0x7F];
+static uint8_t handle_list[0x7F] = {0};
 /*!
  *  @brief address list where each address is stored.
  */
-int i2c_addr_list[0x7F];
+uint8_t i2c_addr_list[0x7F] = {0};
+
+int8_t gpio_initialise() {
+    return gpioInitialise();
+}
+
+void gpio_terminate() {
+    gpioTerminate();
+}
 
 int8_t get_intf_ptr(uint8_t addr, void **intf_ptr) {
     if (i2c_addr_list[addr] == addr) {
@@ -57,17 +65,19 @@ int8_t i2c_close(uint8_t addr) {
 int8_t i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr) {
     (void)intf_ptr;
     int handle = handle_list[*(uint8_t *)intf_ptr];
-    
-    if (i2cReadI2CBlockData(handle, reg_addr, reg_data, len) > 0)
-        return 0;
-    return COMM_FAIL;
+
+    int rslt = i2cReadI2CBlockData(handle, reg_addr, reg_data, len);
+    if (rslt <= 0)
+        return COMM_FAIL;
+    return 0;
 }
 
 int8_t i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr) {
     (void)intf_ptr;
     int handle = handle_list[*(uint8_t *)intf_ptr];
 
-    if (i2cWriteI2CBlockData(handle, reg_addr, (uint8_t*)reg_data, len) == 0)
-        return 0;
-    return COMM_FAIL;
+    int rslt = i2cWriteI2CBlockData(handle, reg_addr, (uint8_t*)(reg_data), len);
+    if (rslt != 0)
+        return rslt;
+    return 0;
 }

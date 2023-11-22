@@ -666,7 +666,7 @@ int8_t bmi08_init(struct bmi08_dev *bmi08dev)
         rslt = bmi08g_init(bmi08dev);
         bmi08_error_codes_print_result("bmi08g_init", rslt);
     }
-
+    rslt = bmi08a_get_power_mode(bmi08dev);
     if (rslt == BMI08_OK)
     {
         printf("Uploading config file !\n");
@@ -891,7 +891,7 @@ int8_t bmi08_i2c_init(struct bmi08_dev *bmi08, uint8_t variant, uint8_t acc_dev_
     /* Selection of bmi085 or bmi088 sensor variant */
     bmi08->variant = (enum bmi08_variant)variant;
     /* Configure max read/write length (in bytes) ( Supported length depends on target machine) */
-    bmi08->read_write_len = BMI08_READ_WRITE_LEN;
+    bmi08->read_write_len = 32;
 
     /* Assign accel device address to accel interface pointer */
     if (get_intf_ptr(acc_dev_add, &(bmi08->intf_ptr_accel)) != 0) {
