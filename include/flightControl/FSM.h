@@ -7,14 +7,13 @@ class FSM
 {
 private:
     AvState currentState;
-    AvState update();
+    
   
 
 public:
     FSM();
     ~FSM();
-   
-    void nextState();
+    void update();
     char *toString(AvState instate);
     AvState getCurrentState();
 
