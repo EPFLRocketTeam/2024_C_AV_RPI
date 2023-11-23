@@ -732,7 +732,11 @@ int8_t enable_bmi08_interrupt(struct bmi08_dev *bmi08dev,
     if (rslt != BMI08_OK) return rslt;
 
     /* Set accel interrupt pin configuration */
-    accel_int_config->int_channel = BMI08_INT_CHANNEL_1;
+    if (*(uint8_t *)(bmi08dev->intf_ptr_accel) == BMI08_ACCEL_I2C_ADDR_PRIMARY) {
+        accel_int_config->int_channel = BMI08_INT_CHANNEL_1;
+    } else {
+        accel_int_config->int_channel = BMI08_INT_CHANNEL_2;
+    }
     accel_int_config->int_type = BMI08_ACCEL_INT_DATA_RDY;
     accel_int_config->int_pin_cfg.output_mode = BMI08_INT_MODE_PUSH_PULL;
     accel_int_config->int_pin_cfg.lvl = BMI08_INT_ACTIVE_HIGH;
@@ -746,7 +750,11 @@ int8_t enable_bmi08_interrupt(struct bmi08_dev *bmi08dev,
     if (rslt == BMI08_OK)
     {
         /* Set gyro interrupt pin configuration */
-        gyro_int_config->int_channel = BMI08_INT_CHANNEL_3;
+        if (*(uint8_t *)(bmi08dev->intf_ptr_gyro) == BMI08_GYRO_I2C_ADDR_PRIMARY) {
+            gyro_int_config->int_channel = BMI08_INT_CHANNEL_3;
+        } else {
+            gyro_int_config->int_channel = BMI08_INT_CHANNEL_4;
+        }
         gyro_int_config->int_type = BMI08_GYRO_INT_DATA_RDY;
         gyro_int_config->int_pin_cfg.output_mode = BMI08_INT_MODE_PUSH_PULL;
         gyro_int_config->int_pin_cfg.lvl = BMI08_INT_ACTIVE_HIGH;
@@ -756,9 +764,6 @@ int8_t enable_bmi08_interrupt(struct bmi08_dev *bmi08dev,
         rslt = bmi08g_set_int_config((const struct bmi08_gyro_int_channel_cfg *)gyro_int_config,
                                      bmi08dev);
         bmi08_error_codes_print_result("bmi08g_set_int_config", rslt);
-
-        rslt = bmi08g_get_regs(BMI08_REG_GYRO_INT3_INT4_IO_MAP, &data, 1, bmi08dev);
-        bmi08_error_codes_print_result("bmi08g_get_regs", rslt);
     }
 
     return rslt;
@@ -783,7 +788,11 @@ int8_t disable_bmi08_interrupt(struct bmi08_dev *bmi08dev,
     if (rslt != BMI08_OK) return rslt;
 
     /* Set accel interrupt pin configuration */
-    accel_int_config->int_channel = BMI08_INT_CHANNEL_1;
+    if (*(uint8_t *)(bmi08dev->intf_ptr_accel) == BMI08_ACCEL_I2C_ADDR_PRIMARY) {
+        accel_int_config->int_channel = BMI08_INT_CHANNEL_1;
+    } else {
+        accel_int_config->int_channel = BMI08_INT_CHANNEL_2;
+    }
     accel_int_config->int_type = BMI08_ACCEL_INT_DATA_RDY;
     accel_int_config->int_pin_cfg.output_mode = BMI08_INT_MODE_PUSH_PULL;
     accel_int_config->int_pin_cfg.lvl = BMI08_INT_ACTIVE_HIGH;
@@ -797,7 +806,11 @@ int8_t disable_bmi08_interrupt(struct bmi08_dev *bmi08dev,
     if (rslt == BMI08_OK)
     {
         /* Set gyro interrupt pin configuration */
-        gyro_int_config->int_channel = BMI08_INT_CHANNEL_3;
+        if (*(uint8_t *)(bmi08dev->intf_ptr_gyro) == BMI08_GYRO_I2C_ADDR_PRIMARY) {
+            gyro_int_config->int_channel = BMI08_INT_CHANNEL_3;
+        } else {
+            gyro_int_config->int_channel = BMI08_INT_CHANNEL_4;
+        }
         gyro_int_config->int_type = BMI08_GYRO_INT_DATA_RDY;
         gyro_int_config->int_pin_cfg.output_mode = BMI08_INT_MODE_PUSH_PULL;
         gyro_int_config->int_pin_cfg.lvl = BMI08_INT_ACTIVE_HIGH;
@@ -902,7 +915,6 @@ int8_t bmi08_i2c_init(struct bmi08_dev *bmi08, uint8_t variant, uint8_t acc_dev_
     if (get_intf_ptr(gyro_dev_add, &(bmi08->intf_ptr_gyro)) != 0) {
         return BMI08_E_COM_FAIL;
     }
-
     return 0;
 }
 
@@ -910,7 +922,9 @@ int8_t bmi08_i2c_init(struct bmi08_dev *bmi08, uint8_t variant, uint8_t acc_dev_
  * @brief Function to deinitialise the I2C interface, with functions from i2c_common.h
  */
 int8_t bmi08_i2c_deinit(uint8_t acc_dev_add, uint8_t gyro_dev_add) {
-    if(i2c_close(acc_dev_add) != 0 || i2c_close(gyro_dev_add) != 0) {
+    uint8_t rslt = i2c_close(gyro_dev_add);
+    rslt += i2c_close(acc_dev_add);
+    if(rslt != 0) {
         return BMI08_E_COM_FAIL;
     }
     

@@ -5,7 +5,7 @@
 #include <pigpio.h>
 #include <stdio.h>
 #include <unistd.h>
-
+#include <string.h>
 #include "i2c_common.h"
 
 /*!
@@ -15,13 +15,17 @@ static uint8_t handle_list[0x7F] = {0};
 /*!
  *  @brief address list where each address is stored.
  */
-uint8_t i2c_addr_list[0x7F] = {0};
+static uint8_t i2c_addr_list[0x7F] = {0};
 
 int8_t gpio_initialise() {
+    memset(handle_list, 0, 0x7F);
+    memset(i2c_addr_list, 0, 0x7F);
     return gpioInitialise();
 }
 
 void gpio_terminate() {
+    memset(handle_list, 0, 0x7F);
+    memset(i2c_addr_list, 0, 0x7F);
     gpioTerminate();
 }
 
@@ -50,7 +54,7 @@ int8_t i2c_open(uint8_t addr) {
 
     handle_list[addr] = handle;
     i2c_addr_list[addr] = addr;
-
+    usleep(10000);
     return 0;
 }
 

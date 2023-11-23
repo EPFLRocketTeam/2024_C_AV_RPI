@@ -46,8 +46,13 @@ add_test (
     NAME BMP390_test
     COMMAND $<TARGET_FILE:BMP390_test>
 )
+set_tests_properties(BMP390_test PROPERTIES TIMEOUT 5)
 add_test (
     NAME BMI088_test
     COMMAND $<TARGET_FILE:BMI088_test>
 )
+<<<<<<< HEAD
 >>>>>>> 4db086c (Changed CMakeLists)
+=======
+set_tests_properties(BMI088_test PROPERTIES TIMEOUT 5)
+>>>>>>> 3cbf43e (Interrupts for accelerometer working now)

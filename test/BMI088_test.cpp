@@ -38,10 +38,7 @@ int main(void)
     float x = 0.0, y = 0.0, z = 0.0;
     uint8_t status_BMI = 0;
 
-    /* Interface reference is given as a parameter
-     *         For I2C : BMP3_I2C_INTF
-     *         For SPI : BMP3_SPI_INTF
-     */
+    // Initialising gpio interface
     rslt = gpio_initialise();
     printf("Initialised GPIO with return %d\n", rslt);
     if (rslt < 0) {
@@ -49,6 +46,7 @@ int main(void)
         return 1;
     }
 
+    // Initialising i2c interface for both devices
     rslt = bmi08_i2c_init(&dev1, BMI088_VARIANT, BMI08_ACCEL_I2C_ADDR_PRIMARY,
                           BMI08_GYRO_I2C_ADDR_PRIMARY);
     if (rslt != 0) {
@@ -61,6 +59,13 @@ int main(void)
     rslt = bmi08_i2c_init(&dev2, BMI088_VARIANT, BMI08_ACCEL_I2C_ADDR_SECONDARY,
                           BMI08_GYRO_I2C_ADDR_SECONDARY);
     if (rslt != 0) return error_return("bmi08_interface_init", rslt);
+
+
+    // Soft resetting both devices (necessary) to start from a known state
+    bmi08a_soft_reset(&dev1);
+    bmi08a_soft_reset(&dev2);
+    // Delay for the soft reset 
+    usleep(10000);
 
     rslt = bmi08_init(&dev1);
     if (rslt != 0) return error_return("bmi08_init", rslt);
@@ -85,63 +90,42 @@ int main(void)
         while (times_to_read < 10) {
             rslt = bmi08a_get_data_int_status(&status_BMI, &dev1);
             if (rslt != 0) return error_return("bmi08a_get_data_int_status", rslt);
-            rslt = bmi08a_get_data(&bmi08_accel1, &dev1);
-            if (rslt != 0) return error_return("bmi08a_get_data", rslt);
 
-            /* Converting lsb to meter per second squared for 16 bit accelerometer at 24G range. */
-            x = lsb_to_mps2(bmi08_accel1.x, 24, 16);
-            y = lsb_to_mps2(bmi08_accel1.y, 24, 16);
-            z = lsb_to_mps2(bmi08_accel1.z, 24, 16);
+            if (status_BMI & BMI08_ACCEL_DATA_READY_INT) {
+                rslt = bmi08a_get_data(&bmi08_accel1, &dev1);
+                if (rslt != 0) return error_return("bmi08a_get_data", rslt);
 
-            printf("%d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
-                    times_to_read,
-                    bmi08_accel1.x, bmi08_accel1.y, bmi08_accel1.z,
-                    x, y, z);
+                /* Converting lsb to meter per second squared for 16 bit accelerometer at 24G range. */
+                x = lsb_to_mps2(bmi08_accel1.x, 24, 16);
+                y = lsb_to_mps2(bmi08_accel1.y, 24, 16);
+                z = lsb_to_mps2(bmi08_accel1.z, 24, 16);
+
+                printf("PRIMARY: %d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
+                        times_to_read,
+                        bmi08_accel1.x, bmi08_accel1.y, bmi08_accel1.z,
+                        x, y, z);
+                times_to_read = times_to_read + 1;
+            }
 
             rslt = bmi08a_get_data_int_status(&status_BMI, &dev2);
             if (rslt != 0) return error_return("bmi08a_get_data_int_status", rslt);
-            rslt = bmi08a_get_data(&bmi08_accel2, &dev2);
-            if (rslt != 0) return error_return("bmi08a_get_data", rslt);
 
-            /* Converting lsb to meter per second squared for 16 bit accelerometer at 24G range. */
-            x = lsb_to_mps2(bmi08_accel2.x, 24, 16);
-            y = lsb_to_mps2(bmi08_accel2.y, 24, 16);
-            z = lsb_to_mps2(bmi08_accel2.z, 24, 16);
+            if (status_BMI & BMI08_ACCEL_DATA_READY_INT) {
+                rslt = bmi08a_get_data(&bmi08_accel2, &dev2);
+                if (rslt != 0) return error_return("bmi08a_get_data", rslt);
 
-            printf("%d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
-                    times_to_read,
-                    bmi08_accel2.x, bmi08_accel2.y, bmi08_accel2.z,
-                    x, y, z);
+                /* Converting lsb to meter per second squared for 16 bit accelerometer at 24G range. */
+                x = lsb_to_mps2(bmi08_accel2.x, 24, 16);
+                y = lsb_to_mps2(bmi08_accel2.y, 24, 16);
+                z = lsb_to_mps2(bmi08_accel2.z, 24, 16);
 
-            times_to_read = times_to_read + 1;
-            // if (status_BMI & BMI08_ACCEL_DATA_READY_INT) {
-            //     rslt = bmi08a_get_data(&bmi08_accel, &bmi08dev);
-            //     if (rslt != 0) return error_return("bmi08a_get_data", rslt);
+                printf("SECONDARY: %d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
+                        times_to_read,
+                        bmi08_accel2.x, bmi08_accel2.y, bmi08_accel2.z,
+                        x, y, z);
 
-            //     if (bmi08dev.variant == BMI085_VARIANT) {
-            //         /* Converting lsb to meter per second squared for 16 bit accelerometer at 16G range. */
-            //         x = lsb_to_mps2(bmi08_accel.x, 16, 16);
-            //         y = lsb_to_mps2(bmi08_accel.y, 16, 16);
-            //         z = lsb_to_mps2(bmi08_accel.z, 16, 16);
-            //     }
-            //     else if (bmi08dev.variant == BMI088_VARIANT) {
-            //         /* Converting lsb to meter per second squared for 16 bit accelerometer at 24G range. */
-            //         x = lsb_to_mps2(bmi08_accel.x, 24, 16);
-            //         y = lsb_to_mps2(bmi08_accel.y, 24, 16);
-            //         z = lsb_to_mps2(bmi08_accel.z, 24, 16);
-            //     }
-
-            //     printf("%d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
-            //             times_to_read,
-            //             bmi08_accel.x,
-            //             bmi08_accel.y,
-            //             bmi08_accel.z,
-            //             x,
-            //             y,
-            //             z);
-
-            //     times_to_read = times_to_read + 1;
-            // }
+                times_to_read = times_to_read + 1;
+            }
         }
     }
     if (dev1.gyro_cfg.power == BMI08_GYRO_PM_NORMAL  && dev2.gyro_cfg.power == BMI08_GYRO_PM_NORMAL) {
@@ -166,10 +150,11 @@ int main(void)
                 y = lsb_to_dps(bmi08_gyro1.y, (float)250, 16);
                 z = lsb_to_dps(bmi08_gyro1.z, (float)250, 16);
 
-                printf("%d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
+                printf("PRIMARY: %d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
                         times_to_read,
                         bmi08_gyro1.x, bmi08_gyro1.y, bmi08_gyro1.z,
                         x, y, z);
+                times_to_read = times_to_read + 1;
             }
 
             rslt = bmi08g_get_data_int_status(&status_BMI, &dev2);
@@ -184,7 +169,7 @@ int main(void)
                 y = lsb_to_dps(bmi08_gyro2.y, (float)250, 16);
                 z = lsb_to_dps(bmi08_gyro2.z, (float)250, 16);
 
-                printf("%d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
+                printf("SECONDARY: %d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
                         times_to_read,
                         bmi08_gyro2.x, bmi08_gyro2.y, bmi08_gyro2.z,
                         x, y, z);
