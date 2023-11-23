@@ -24,7 +24,9 @@ add_test (
     NAME BMP390_test
     COMMAND $<TARGET_FILE:BMP390_test>
 )
+set_tests_properties(BMP390_test PROPERTIES TIMEOUT 5)
 add_test (
     NAME BMI088_test
     COMMAND $<TARGET_FILE:BMI088_test>
 )
+set_tests_properties(BMI088_test PROPERTIES TIMEOUT 5)

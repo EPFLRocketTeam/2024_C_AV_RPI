@@ -17,7 +17,7 @@
 /*********                     Macros                              ******/
 /************************************************************************/
 /* Iteration count to run example code */
-#define ITERATION  UINT8_C(4)
+#define ITERATION  UINT8_C(3)
 
 /************************************************************************/
 /*********                     Test code                           ******/
@@ -161,7 +161,7 @@ int main(void)
         if (rslt!=0) return rslt;
 
         loop = loop + 1;
-        sleep(1);
+        if (loop < ITERATION) sleep(1);
     }
 
     bmp3_i2c_deinit(BMP3_ADDR_I2C_PRIM);
