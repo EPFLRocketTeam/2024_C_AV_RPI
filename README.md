@@ -4,7 +4,7 @@ Once in the repository, execute:
 mkdir build
 cd build
 cmake ..
-build
+make
 ```
 
 Then you can either run the tests individually with:
