@@ -7,6 +7,7 @@ include_directories(include)
 
 add_subdirectory(include/BMP3)
 add_subdirectory(include/BMI08x)
+add_subdirectory(include/ADXL375)
 add_subdirectory(include/I2C_Common)
 
 # Test for he BMP390 sensor
