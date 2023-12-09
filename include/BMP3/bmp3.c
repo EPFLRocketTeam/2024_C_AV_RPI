@@ -2961,7 +2961,8 @@ static int8_t get_err_status(struct bmp3_status *status, struct bmp3_dev *dev)
 }
 
 /*!
- * @brief Function to initialise the I2C interface, with functions from i2c_common.h
+ * @brief Function to initialise the I2C interface, with functions from
+ * i2c_common.h
  */
 int8_t bmp3_i2c_init(struct bmp3_dev *bmp3, uint8_t addr) {
     if (i2c_open(addr) != 0) {
@@ -2985,7 +2986,8 @@ int8_t bmp3_i2c_init(struct bmp3_dev *bmp3, uint8_t addr) {
 }
 
 /*!
- * @brief Function to deinitialise the I2C interface, with functions from i2c_common.h
+ * @brief Function to deinitialise the I2C interface, with functions from
+ * i2c_common.h
  */
 int8_t bmp3_i2c_deinit(uint8_t addr) {
     if(i2c_close(addr) != 0) {

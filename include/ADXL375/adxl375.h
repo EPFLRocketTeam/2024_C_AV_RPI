@@ -293,27 +293,88 @@ int8_t adxl375_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
  * @retval <0 -> Error
  */
 int8_t adxl375_set_regs(uint8_t *reg_addr, const uint8_t *reg_data,
-						  int32_t len, struct adxl375_dev *dev);
+						int32_t len, struct adxl375_dev *dev);
 
-/*! Initializes the I2C peripheral and checks if the ADXL375 part is present. */
+/*!
+ * @details Initializes the communication peripheral, checks if the ADXL375
+ *		  part is present and sets configuration values.
+ *  @param[in] dev       : Structure instance of adxl375_dev.
+ *  @param[in] addr      : Selection between ADXL375_ADDR_I2C_PRIM and
+ *                         ADXL375_ADDR_I2C_SEC
+ *
+ * @return Result of API execution status
+ * @retval 0  -> Success
+ * @retval >0 -> Warning
+ * @retval <0 -> Error
+ */
 int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr);
 
-/*! Places the device into standby/measure mode. */
-int8_t adxl375_set_power_mode(uint8_t pwrMode, struct adxl375_dev *dev);
+/*!
+ * @details Places the device into standby/measure mode.
+ *
+ *  @param[in] pwr_mode  : Selection between standy(0x0)/measure(0x1).
+ *  @param[in] dev      : Structure instance of adxl375_dev
+ *
+ * @return Result of API execution status
+ * @retval 0  -> Success
+ * @retval >0 -> Warning
+ * @retval <0 -> Error
+ */
+int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev);
 
-/*! Reads the output data of each axis. */
-void adxl375_get_xyz(int16_t* x,
-					int16_t* y,
-					int16_t* z);
+/*!
+ * @details Reads the output data of each axis.
+ *
+ *  @param[in] dev      : Structure instance of adxl375_dev
+ *  @param[out] x       : Where x value is stored
+ *  @param[out] y       : Where y value is stored
+ *  @param[out] z       : Where z value is stored
+ *
+ * @return Result of API execution status
+ * @retval 0  -> Success
+ * @retval >0 -> Warning
+ * @retval <0 -> Error
+ */
+int8_t adxl375_get_xyz(struct adxl375_dev *dev,
+					 int16_t* x, int16_t* y, int16_t* z);
 
-/*! Enables/disables the tap detection. */					
-void adxl375_set_tap_detection(unsigned char tapType,
-							 unsigned char tapAxes,
-							 unsigned char tapDur,
-							 unsigned char tapLatent,
-							 unsigned char tapWindow,
-							 unsigned char tapThresh,
-							 unsigned char tapInt);
+/*!
+ * @details Enables/disables the tap detection.
+ *
+ * @param tapType - Tap type (none, single, double).
+ *					Example: 0x0 - disables tap detection.	
+ *							 ADXL375_SINGLE_TAP - enables single tap detection.
+ *							 ADXL375_DOUBLE_TAP - enables double tap detection.
+ * @param tapAxes - Axes which participate in tap detection.
+ *					Example: 0x0 - disables axes participation.
+ *							 ADXL375_TAP_X_EN - enables x-axis participation.
+ *							 ADXL375_TAP_Y_EN - enables y-axis participation.
+ *							 ADXL375_TAP_Z_EN - enables z-axis participation.
+ * @param tapDur - Tap duration. The scale factor is 625us is/LSB.
+ * @param tapLatent - Tap latency. The scale factor is 1.25 ms/LSB.
+ * @param tapWindow - Tap window. The scale factor is 1.25 ms/LSB.
+ * @param tapThresh - Tap threshold. The scale factor is 62.5 mg/LSB.
+ * @param tapInt - Interrupts pin.
+ *				   Example: 0x0 - interrupts on INT1 pin.
+ *							ADXL375_SINGLE_TAP - single tap interrupts on
+ *												 INT2 pin.
+ *							ADXL375_DOUBLE_TAP - double tap interrupts on
+ *												 INT2 pin.
+ *
+ * @return Result of API execution status
+ * @retval 0  -> Success
+ * @retval >0 -> Warning
+ * @retval <0 -> Error
+ */
+		
+int8_t adxl375_set_tap_detection(struct adxl375_dev *dev,
+							 uint8_t tapType,
+							 uint8_t tapAxes,
+							 uint8_t tapDur,
+							 uint8_t tapLatent,
+							 uint8_t tapWindow,
+							 uint8_t tapThresh,
+							 uint8_t tapInt) ;
 
 /*! Enables/disables the activity detection. */							 
 void adxl375_set_activity_detection(unsigned char actOnOff,
@@ -342,15 +403,30 @@ void adxl375_set_offset(unsigned char xOffset,
 					   unsigned char zOffset);
 
 /*!
- *  @brief Function to initialise the I2C interface, with functions from i2c_common.h
+ *  @brief Function to initialise the I2C interface, with functions from
+ *         i2c_common.h
  *
  *  @param[in] adxl375      : Structure instance of adxl375_dev
- *  @param[in] addr     : Selection between ADXL375_ADDR_I2C_PRIM and ADXL375_ADDR_I2C_SEC
+ *  @param[in] addr      : Selection between ADXL375_ADDR_I2C_PRIM and
+ *                         ADXL375_ADDR_I2C_SEC
  *
  *  @return Status of execution
  *  @retval 0 -> Success
  *  @retval < 0 -> Failure Info
  */
 int8_t adxl375_i2c_init(struct adxl375_dev *adxl375, uint8_t addr);
+
+/*!
+ *  @brief Function to deinitialise the I2C interface, with functions from
+ *         i2c_common.h
+ *
+ *  @param[in] addr      : Selection between ADXL375_ADDR_I2C_PRIM and
+ *                         ADXL375_ADDR_I2C_SEC
+ *
+ *  @return Status of execution
+ *  @retval 0 -> Success
+ *  @retval < 0 -> Failure Info
+ */
+int8_t adxl375_i2c_deinit(uint8_t addr);
 
 #endif	/* __ADXL375_H__ */

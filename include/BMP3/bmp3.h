@@ -546,10 +546,12 @@ int8_t bmp3_fifo_flush(struct bmp3_dev *dev);
 int8_t bmp3_get_status(struct bmp3_status *status, struct bmp3_dev *dev);
 
 /*!
- *  @brief Function to initialise the I2C interface, with functions from i2c_common.h
+ *  @brief Function to initialise the I2C interface, with functions from
+ *         i2c_common.h
  *
  *  @param[in] bmp3      : Structure instance of bmp3_dev
- *  @param[in] addr     : Selection between BMP3_ADDR_I2C_PRIM and BMP3_ADDR_I2C_SEC
+ *  @param[in] addr      : Selection between BMP3_ADDR_I2C_PRIM and
+ *                         BMP3_ADDR_I2C_SEC
  *
  *  @return Status of execution
  *  @retval 0 -> Success
@@ -558,10 +560,11 @@ int8_t bmp3_get_status(struct bmp3_status *status, struct bmp3_dev *dev);
 int8_t bmp3_i2c_init(struct bmp3_dev *bmp3, uint8_t addr);
 
 /*!
- *  @brief Function to deinitialise the I2C interface, with functions from i2c_common.h
+ *  @brief Function to deinitialise the I2C interface, with functions from
+ *         i2c_common.h
  *
- *  @param[in] bmp3      : Structure instance of bmp3_dev
- *  @param[in] addr     : Selection between BMP3_ADDR_I2C_PRIM and BMP3_ADDR_I2C_SEC
+ *  @param[in] addr      : Selection between BMP3_ADDR_I2C_PRIM and
+ *                         BMP3_ADDR_I2C_SEC
  *
  *  @return Status of execution
  *  @retval 0 -> Success
