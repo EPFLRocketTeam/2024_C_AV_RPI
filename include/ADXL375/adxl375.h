@@ -40,6 +40,7 @@
  *   SVN Revision: 795
 *******************************************************************************/
 #include <stdint.h>
+#include <stddef.h>
 
 #ifndef __ADXL375_H__
 #define __ADXL375_H__
@@ -166,6 +167,18 @@
 /* ADXL375 ID */
 #define ADXL375_ID				0xE5
 
+/**\name API success code */
+#define ADXL375_OK                                 INT8_C(0)
+
+/**\name API error codes */
+#define ADXL375_E_NULL_PTR                         INT8_C(-1)
+#define ADXL375_E_COMM_FAIL                        INT8_C(-2)
+#define ADXL375_E_INVALID_ODR_OSR_SETTINGS         INT8_C(-3)
+#define ADXL375_E_CMD_EXEC_FAILED                  INT8_C(-4)
+#define ADXL375_E_CONFIGURATION_ERR                INT8_C(-5)
+#define ADXL375_E_INVALID_LEN                      INT8_C(-6)
+#define ADXL375_E_DEV_NOT_FOUND                    INT8_C(-7)
+
 /********************************************************/
 
 /*!
@@ -231,6 +244,9 @@ struct adxl375_dev
      */
     void *intf_ptr;
     
+	/*! To store interface pointer error */
+    int8_t intf_rslt;
+
     /*! Read function pointer */
     adxl375_read_fptr_t read;
 
@@ -245,18 +261,45 @@ struct adxl375_dev
 /************************ Functions Declarations ******************************/
 /******************************************************************************/
 
-/*! Reads the value of a register. */
-unsigned char adxl375_get_reg_vals(unsigned char registerAddress);
+/*!
+ * @brief This API reads the data from the given register address of the sensor.
+ *
+ *  @param[in] reg_addr  : Register address from where the data to be read
+ *  @param[out] reg_data : Pointer to data buffer to store the read data.
+ *  @param[in] len       : No. of bytes of data to be read.
+ *  @param[in] dev       : Structure instance of adxl375_dev.
+ *
+ * @return Result of API execution status
+ * @retval 0  -> Success
+ * @retval >0 -> Warning
+ * @retval <0 -> Error
+ */
+int8_t adxl375_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
+						struct adxl375_dev *dev);
 
-/*! Writes data into a register. */
-void adxl375_set_reg_vals(unsigned char registerAddress,
-							  unsigned char registerValue);
+/*!
+ * @details This API writes the given data to the register address
+ * of the sensor.
+ *
+ *  @param[in] reg_addr  : Register address to where the data to be written.
+ *  @param[in] reg_data  : Pointer to data buffer which is to be written
+ *                         in the sensor.
+ *  @param[in] len       : No. of bytes of data to write.
+ *  @param[in] dev       : Structure instance of adxl375_dev.
+ *
+ * @return Result of API execution status
+ * @retval 0  -> Success
+ * @retval >0 -> Warning
+ * @retval <0 -> Error
+ */
+int8_t adxl375_set_regs(uint8_t *reg_addr, const uint8_t *reg_data,
+						  int32_t len, struct adxl375_dev *dev);
 
 /*! Initializes the I2C peripheral and checks if the ADXL375 part is present. */
-unsigned char adxl375_init(struct adxl375_dev *adxl375, uint8_t addr);
+int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr);
 
 /*! Places the device into standby/measure mode. */
-void adxl375_set_power_mode(unsigned char pwrMode);
+int8_t adxl375_set_power_mode(uint8_t pwrMode, struct adxl375_dev *dev);
 
 /*! Reads the output data of each axis. */
 void adxl375_get_xyz(int16_t* x,
