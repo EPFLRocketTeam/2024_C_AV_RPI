@@ -39,11 +39,17 @@
 ********************************************************************************
  *   SVN Revision: 795
 *******************************************************************************/
-#include <stdint.h>
-#include <stddef.h>
 
 #ifndef __ADXL375_H__
 #define __ADXL375_H__
+
+#include <stdint.h>
+#include <stddef.h>
+
+/*! CPP guard */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /******************************************************************************/
 /******************************** ADXL375 *************************************/
@@ -515,5 +521,9 @@ int8_t adxl375_i2c_init(struct adxl375_dev *adxl375, uint8_t addr);
  *  @retval < 0 -> Failure Info
  */
 int8_t adxl375_i2c_deinit(uint8_t addr);
+
+#ifdef __cplusplus
+}
+#endif /* End of CPP guard */
 
 #endif	/* __ADXL375_H__ */

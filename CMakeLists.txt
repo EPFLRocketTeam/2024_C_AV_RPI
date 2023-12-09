@@ -40,6 +40,10 @@ target_link_libraries(main_test pigpio BMP3 BMI08x)
 add_executable(BMI088_test test/BMI088_test.cpp)
 target_link_libraries(BMI088_test BMI08x I2C_Common)
 
+# Test for the ADXL375 sensor
+add_executable(ADXL375_test test/ADXL375_test.cpp)
+target_link_libraries(ADXL375_test ADXL375 I2C_Common)
+
 enable_testing()
 
 # Defining tests
@@ -48,12 +52,23 @@ add_test (
     COMMAND $<TARGET_FILE:BMP390_test>
 )
 set_tests_properties(BMP390_test PROPERTIES TIMEOUT 5)
+
 add_test (
     NAME BMI088_test
     COMMAND $<TARGET_FILE:BMI088_test>
 )
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 4db086c (Changed CMakeLists)
 =======
 set_tests_properties(BMI088_test PROPERTIES TIMEOUT 5)
 >>>>>>> 3cbf43e (Interrupts for accelerometer working now)
+=======
+set_tests_properties(BMI088_test PROPERTIES TIMEOUT 5)
+
+add_test (
+    NAME ADXL375_test
+    COMMAND $<TARGET_FILE:ADXL375_test>
+)
+set_tests_properties(ADXL375_test PROPERTIES TIMEOUT 5)
+>>>>>>> c7df872 (Made the test for adxl375)
