@@ -55,54 +55,104 @@
 /************************ Functions Definitions *******************************/
 /******************************************************************************/
 
-/***************************************************************************//**
- * @brief Reads the value of a register.
- *
- * @param registerAddress - Address of the register.
- *
- * @return registerValue - Value of the register.
-*******************************************************************************/
-unsigned char adxl375_get_reg_vals(unsigned char registerAddress)
+/*!
+ * @brief This internal API is used to validate the device structure pointer for
+ * null conditions.
+ */
+static int8_t null_ptr_check(const struct adxl375_dev *dev)
 {
-	unsigned char readData[2]   = {0, 0};
-    unsigned char registerValue = 0,i,t1;
-    
-	// for(i=0;i<100;i++) //For loop to perform multiple read attempts - if there is an issue with I2C communication
-	//{
-		I2C_Write(ADXL375_ADDRESS,  // Address of the slave device.
-					&registerAddress, // Transmission data.
-					1,                // Number of bytes to write.
-					0);               // Stop condition control.
-		
-		t1 = I2C_Read(ADXL375_ADDRESS,   // Address of the slave device.
-					&registerValue,    // Received data.
-					1,                 // Number of bytes to read.
-					1);                // Stop condition control.
-		//if(0==t1)
-		//	break;
-	//}
-	//printf("t1 status: %u, Iteration: %u \r\n",t1,i);
+    int8_t rslt;
 
-	return registerValue;
+    if ((dev == NULL) || (dev->read == NULL) || (dev->write == NULL) ||
+		(dev->delay_us == NULL) || (dev->intf_ptr == NULL))
+    {
+        /* Device structure pointer is not valid */
+        rslt = ADXL375_E_NULL_PTR;
+    }
+    else
+    {
+        /* Device structure is fine */
+        rslt = ADXL375_OK;
+    }
+
+    return rslt;
 }
 
-/***************************************************************************//**
- * @brief Writes data into a register.
- *
- * @param registerAddress - Address of the register.
- * @param registerValue - Data value to write.
- *
- * @return None.
-*******************************************************************************/
-void adxl375_set_reg_vals(unsigned char registerAddress,
-							  unsigned char registerValue)
+/*!
+ * @brief This internal API interleaves the register address between the
+ * register data buffer for burst write operation.
+ */
+static void interleave_reg_addr(const uint8_t *reg_addr, uint8_t *temp_buff,
+								const uint8_t *reg_data, uint32_t len)
 {
-	unsigned char writeData[2] = {0, 0};
+    uint32_t index;
 
-	writeData[0] = registerAddress;
-	writeData[1] = registerValue;
-	I2C_Write(ADXL375_ADDRESS, writeData, 2, 1);
+    for (index = 1; index < len; index++)
+    {
+        temp_buff[(index * 2) - 1] = reg_addr[index];
+        temp_buff[index * 2] = reg_data[index];
+    }
+}
+
+/*!
+ * @brief This API reads the data from the given register address of the sensor.
+ */
+int8_t adxl375_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
+						struct adxl375_dev *dev) {
+	int8_t rslt;
     
+	/* Check for null pointer in the device structure */
+	rslt = null_ptr_check(dev);
+	
+	/* Proceed if null check is fine */
+    if ((rslt != ADXL375_OK) || (reg_data == NULL)) {
+		return ADXL375_E_NULL_PTR;
+	}
+
+	/* Read the data using I2C */
+	dev->intf_rslt = dev->read(reg_addr, reg_data, len, dev->intf_ptr);
+	
+	/* Check for communication error */
+	if (dev->intf_rslt != ADXL375_OK) {
+		return ADXL375_E_COMM_FAIL;
+	}
+
+	return ADXL375_OK;
+}
+
+/*!
+ * @brief This API writes the data from the given register address of the sensor.
+ */
+int8_t adxl375_set_regs(uint8_t *reg_addr, const uint8_t *reg_data,
+						  int32_t len, struct adxl375_dev *dev) {
+	int8_t rslt;
+	uint8_t temp_buff[len * 2];
+    uint32_t temp_len;
+	/* Check for null pointer in the device structure */
+    rslt = null_ptr_check(dev);
+
+	/* Proceed if null check is fine */
+    if ((rslt != ADXL375_OK) || (reg_addr == NULL) || (reg_data == NULL)) {
+		return ADXL375_E_NULL_PTR;
+	}
+
+	if (len == 0) return ADXL375_E_INVALID_LEN;
+
+	/* Burst write mode */
+	if (len > 1) {
+		/* Interleave register address w.r.t data for burst write */
+		interleave_reg_addr(reg_addr, temp_buff, reg_data, len);
+		temp_len = len * 2;
+	} else {
+		temp_len = len;
+	}
+
+	dev->intf_rslt = dev->write(reg_addr[0],temp_buff,temp_len,dev->intf_ptr);
+
+	/* Check for communication error */
+	if (dev->intf_rslt != ADXL375_OK) return ADXL375_E_COMM_FAIL;
+    
+	return ADXL375_OK;
 }
 
 /***************************************************************************//**
@@ -117,29 +167,56 @@ void adxl375_set_reg_vals(unsigned char registerAddress,
  *                           0x1 - I2C/SPI peripheral is initialized and ADXL375
  *                                 part is present.
 *******************************************************************************/
-unsigned char adxl375_init(struct adxl375_dev *adxl375, uint8_t addr)
-{
-	unsigned char status = 1,temp=0;
+int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr) {
+	int8_t rslt;
+    uint8_t chip_id = 0;
 
-	status = adxl375_i2c_init(adxl375, addr);
-	
-	temp = adxl375_get_reg_vals(ADXL375_DEVID);
-	
-	if( temp!= ADXL375_ID)
-	{
-		status = 0;
-	}
-	//printf("ADXL375_DevID: 0x%x, Status: %u \r\n",temp,status);
+	/* Initialize the I2C interface */
+	rslt = adxl375_i2c_init(dev, addr);
+	if (rslt) return rslt;
+
+	/* Check for null pointer in the device structure */
+    rslt = null_ptr_check(dev);
+	if (rslt) return rslt;
+
+	/* Read the chip-id of adxl375 sensor */
+	rslt = adxl375_get_regs(ADXL375_DEVID, &chip_id, 1, dev);
+	if (rslt) return ADXL375_E_DEV_NOT_FOUND;
 	
 	//Configure the ADXL375
-	adxl375_set_reg_vals(ADXL375_BW_RATE, (0x00|ADXL375_RATE(0x0A))); // Normal Power Mode, 100Hz operation
- 	adxl375_set_reg_vals(ADXL375_DATA_FORMAT, (0x00|ADXL375_RANGE(ADXL375_RANGE_PM_2G)|ADXL375_FULL_RES)); //SelfTest:Off, SPI: 4-wire, Interrupts: Active High, Full_Res: On, Justify: Right justified with sign extension
-	adxl375_set_reg_vals(ADXL375_FIFO_CTL, (0x00|ADXL375_FIFO_MODE(0x2)|ADXL375_SAMPLES(0x1E))); //FIFO mode - Stream, Watermark interrupt set @ 30 (0x1E)samples - which at ~100Hz(or even greater) provides sufficient time for FIFO to be emptied
-	adxl375_set_reg_vals(ADXL375_INT_MAP,(0x00|~ADXL375_WATERMARK));//Watermark interrupt to Int 1 - all others to Int 2
-	adxl375_set_reg_vals(ADXL375_INT_ENABLE,(0x00|ADXL375_WATERMARK));//Enables Watermark interrupt on Int 1 - GPIO 17
-	adxl375_set_power_mode(0x1);//Start the ADXL375
 	
-	return status;
+	// Normal Power Mode, 100Hz operation
+	uint8_t reg_addr = ADXL375_BW_RATE;
+	uint8_t reg_val = (0x00|ADXL375_RATE(0x0A));
+	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+
+	//SelfTest:Off, SPI: 4-wire, Interrupts: Active High, Full_Res: On,
+	//Justify: Right justified with sign extension
+	reg_addr = ADXL375_DATA_FORMAT;
+	reg_val=(0x00|ADXL375_RANGE(ADXL375_RANGE_PM_2G)|ADXL375_FULL_RES);
+	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+
+	//FIFO mode - Stream, Watermark interrupt set @ 30 (0x1E)samples -
+	//which at ~100Hz(or even greater) provides sufficient time for FIFO to
+	//be emptied
+	reg_addr = ADXL375_FIFO_CTL;
+	reg_val = (0x00|ADXL375_FIFO_MODE(0x2)|ADXL375_SAMPLES(0x1E));
+	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+
+	//Watermark interrupt to Int 1 - all others to Int 2
+	reg_addr = ADXL375_INT_MAP;
+	reg_val = (0x00|~ADXL375_WATERMARK);
+	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+
+	//Enables Watermark interrupt on Int 1 - GPIO 17
+	reg_addr = ADXL375_INT_ENABLE;
+	reg_val = (0x00|ADXL375_WATERMARK);
+	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+
+	//Start the ADXL375
+	adxl375_set_power_mode(0x1, dev);
+
+	return ADXL375_OK;
 }
 
 /***************************************************************************//**
@@ -151,15 +228,20 @@ unsigned char adxl375_init(struct adxl375_dev *adxl375, uint8_t addr)
  *
  * @return None.
 *******************************************************************************/
-void adxl375_set_power_mode(unsigned char pwrMode)
+int8_t adxl375_set_power_mode(uint8_t pwrMode, struct adxl375_dev *dev)
 {
-	unsigned char oldPowerCtl = 0;
-	unsigned char newPowerCtl = 0;
+	uint8_t oldPowerCtl = 0;
+	uint8_t newPowerCtl = 0;
+	int8_t rslt;
     
-	oldPowerCtl = adxl375_get_reg_vals(ADXL375_POWER_CTL);
+    rslt = adxl375_get_regs(ADXL375_POWER_CTL, &oldPowerCtl, 1, dev);
+	if (rslt) return rslt;
 	newPowerCtl = oldPowerCtl & ~ADXL375_PCTL_MEASURE;
 	newPowerCtl = newPowerCtl | (pwrMode * ADXL375_PCTL_MEASURE);
-	adxl375_set_reg_vals(ADXL375_POWER_CTL, newPowerCtl);
+
+	uint8_t reg_addr = ADXL375_POWER_CTL;
+	rslt = adxl375_set_regs(&reg_addr, &newPowerCtl, 1, dev);
+	if (rslt) return rslt;
 }
 
 /***************************************************************************//**
@@ -175,12 +257,12 @@ void adxl375_get_xyz(int16_t* x,
 					int16_t* y,
 					int16_t* z)
 {
-	*x = adxl375_get_reg_vals(ADXL375_DATAX1) << 8;
-	*x += adxl375_get_reg_vals(ADXL375_DATAX0);
-	*y = adxl375_get_reg_vals(ADXL375_DATAY1) << 8;
-	*y += adxl375_get_reg_vals(ADXL375_DATAY0);
-	*z = adxl375_get_reg_vals(ADXL375_DATAZ1) << 8;
-	*z += adxl375_get_reg_vals(ADXL375_DATAZ0);
+	*x = adxl375_get_regs(ADXL375_DATAX1) << 8;
+	*x += adxl375_get_regs(ADXL375_DATAX0);
+	*y = adxl375_get_regs(ADXL375_DATAY1) << 8;
+	*y += adxl375_get_regs(ADXL375_DATAY0);
+	*z = adxl375_get_regs(ADXL375_DATAZ1) << 8;
+	*z += adxl375_get_regs(ADXL375_DATAZ0);
 }
 
 
@@ -224,24 +306,24 @@ void adxl375_set_tap_detection(unsigned char tapType,
 	unsigned char oldIntEnable = 0;
 	unsigned char newIntEnable = 0;
     
-	oldTapAxes = adxl375_get_reg_vals(ADXL375_TAP_AXES);
+	oldTapAxes = adxl375_get_regs(ADXL375_TAP_AXES);
 	newTapAxes = oldTapAxes & ~(ADXL375_TAP_X_EN |
 								ADXL375_TAP_Y_EN |
 								ADXL375_TAP_Z_EN);
 	newTapAxes = newTapAxes | tapAxes;
-	adxl375_set_reg_vals(ADXL375_TAP_AXES, newTapAxes);
-	adxl375_set_reg_vals(ADXL375_DUR, tapDur);
-	adxl375_set_reg_vals(ADXL375_LATENT, tapLatent);
-	adxl375_set_reg_vals(ADXL375_WINDOW, tapWindow);
-	adxl375_set_reg_vals(ADXL375_THRESH_TAP, tapThresh);
-	oldIntMap = adxl375_get_reg_vals(ADXL375_INT_MAP);
+	adxl375_set_regs(ADXL375_TAP_AXES, newTapAxes);
+	adxl375_set_regs(ADXL375_DUR, tapDur);
+	adxl375_set_regs(ADXL375_LATENT, tapLatent);
+	adxl375_set_regs(ADXL375_WINDOW, tapWindow);
+	adxl375_set_regs(ADXL375_THRESH_TAP, tapThresh);
+	oldIntMap = adxl375_get_regs(ADXL375_INT_MAP);
 	newIntMap = oldIntMap & ~(ADXL375_SINGLE_TAP | ADXL375_DOUBLE_TAP);
 	newIntMap = newIntMap | tapInt;
-	adxl375_set_reg_vals(ADXL375_INT_MAP, newIntMap);
-	oldIntEnable = adxl375_get_reg_vals(ADXL375_INT_ENABLE);
+	adxl375_set_regs(ADXL375_INT_MAP, newIntMap);
+	oldIntEnable = adxl375_get_regs(ADXL375_INT_ENABLE);
 	newIntEnable = oldIntEnable & ~(ADXL375_SINGLE_TAP | ADXL375_DOUBLE_TAP);
 	newIntEnable = newIntEnable | tapType;
-	adxl375_set_reg_vals(ADXL375_INT_ENABLE, newIntEnable);
+	adxl375_set_regs(ADXL375_INT_ENABLE, newIntEnable);
 }
 
 /***************************************************************************//**
@@ -279,22 +361,22 @@ void adxl375_set_activity_detection(unsigned char actOnOff,
 	unsigned char oldIntEnable   = 0;
 	unsigned char newIntEnable   = 0;
     
-	oldActInactCtl = adxl375_get_reg_vals(ADXL375_INT_ENABLE);
+	oldActInactCtl = adxl375_get_regs(ADXL375_INT_ENABLE);
 	newActInactCtl = oldActInactCtl & ~(ADXL375_ACT_ACDC |
 										ADXL375_ACT_X_EN |
 										ADXL375_ACT_Y_EN |
 										ADXL375_ACT_Z_EN);
 	newActInactCtl = newActInactCtl | (actAcDc | actAxes);
-	adxl375_set_reg_vals(ADXL375_ACT_INACT_CTL, newActInactCtl);
-	adxl375_set_reg_vals(ADXL375_THRESH_ACT, actThresh);
-	oldIntMap = adxl375_get_reg_vals(ADXL375_INT_MAP);
+	adxl375_set_regs(ADXL375_ACT_INACT_CTL, newActInactCtl);
+	adxl375_set_regs(ADXL375_THRESH_ACT, actThresh);
+	oldIntMap = adxl375_get_regs(ADXL375_INT_MAP);
 	newIntMap = oldIntMap & ~(ADXL375_ACTIVITY);
 	newIntMap = newIntMap | actInt;
-	adxl375_set_reg_vals(ADXL375_INT_MAP, newIntMap);
-	oldIntEnable = adxl375_get_reg_vals(ADXL375_INT_ENABLE);
+	adxl375_set_regs(ADXL375_INT_MAP, newIntMap);
+	oldIntEnable = adxl375_get_regs(ADXL375_INT_ENABLE);
 	newIntEnable = oldIntEnable & ~(ADXL375_ACTIVITY);
 	newIntEnable = newIntEnable | (ADXL375_ACTIVITY * actOnOff);
-	adxl375_set_reg_vals(ADXL375_INT_ENABLE, newIntEnable);
+	adxl375_set_regs(ADXL375_INT_ENABLE, newIntEnable);
 }
 
 /***************************************************************************//**
@@ -335,23 +417,23 @@ void adxl375_set_inactivity_detection(unsigned char inactOnOff,
 	unsigned char oldIntEnable   = 0;
 	unsigned char newIntEnable   = 0;
     
-	oldActInactCtl = adxl375_get_reg_vals(ADXL375_INT_ENABLE);
+	oldActInactCtl = adxl375_get_regs(ADXL375_INT_ENABLE);
 	newActInactCtl = oldActInactCtl & ~(ADXL375_INACT_ACDC |
 										ADXL375_INACT_X_EN |
 										ADXL375_INACT_Y_EN |
 										ADXL375_INACT_Z_EN);
 	newActInactCtl = newActInactCtl | (inactAcDc | inactAxes);
-	adxl375_set_reg_vals(ADXL375_ACT_INACT_CTL, newActInactCtl);
-	adxl375_set_reg_vals(ADXL375_THRESH_INACT, inactThresh);
-	adxl375_set_reg_vals(ADXL375_TIME_INACT, inactTime);
-	oldIntMap = adxl375_get_reg_vals(ADXL375_INT_MAP);
+	adxl375_set_regs(ADXL375_ACT_INACT_CTL, newActInactCtl);
+	adxl375_set_regs(ADXL375_THRESH_INACT, inactThresh);
+	adxl375_set_regs(ADXL375_TIME_INACT, inactTime);
+	oldIntMap = adxl375_get_regs(ADXL375_INT_MAP);
 	newIntMap = oldIntMap & ~(ADXL375_INACTIVITY);
 	newIntMap = newIntMap | inactInt;
-	adxl375_set_reg_vals(ADXL375_INT_MAP, newIntMap);
-	oldIntEnable = adxl375_get_reg_vals(ADXL375_INT_ENABLE);
+	adxl375_set_regs(ADXL375_INT_MAP, newIntMap);
+	oldIntEnable = adxl375_get_regs(ADXL375_INT_ENABLE);
 	newIntEnable = oldIntEnable & ~(ADXL375_INACTIVITY);
 	newIntEnable = newIntEnable | (ADXL375_INACTIVITY * inactOnOff);
-	adxl375_set_reg_vals(ADXL375_INT_ENABLE, newIntEnable);
+	adxl375_set_regs(ADXL375_INT_ENABLE, newIntEnable);
 }
 
 /***************************************************************************//**
@@ -380,16 +462,16 @@ void adxl375_set_freefall_detection(unsigned char ffOnOff,
 	unsigned char oldIntEnable = 0;
 	unsigned char newIntEnable = 0;
     
-	adxl375_set_reg_vals(ADXL375_THRESH_FF, ffThresh);
-	adxl375_set_reg_vals(ADXL375_TIME_FF, ffTime);
-	oldIntMap = adxl375_get_reg_vals(ADXL375_INT_MAP);
+	adxl375_set_regs(ADXL375_THRESH_FF, ffThresh);
+	adxl375_set_regs(ADXL375_TIME_FF, ffTime);
+	oldIntMap = adxl375_get_regs(ADXL375_INT_MAP);
 	newIntMap = oldIntMap & ~(ADXL375_FREE_FALL);
 	newIntMap = newIntMap | ffInt;
-	adxl375_set_reg_vals(ADXL375_INT_MAP, newIntMap);
-	oldIntEnable = adxl375_get_reg_vals(ADXL375_INT_ENABLE);
+	adxl375_set_regs(ADXL375_INT_MAP, newIntMap);
+	oldIntEnable = adxl375_get_regs(ADXL375_INT_ENABLE);
 	newIntEnable = oldIntEnable & ~ADXL375_FREE_FALL;
 	newIntEnable = newIntEnable | (ADXL375_FREE_FALL * ffOnOff);
-	adxl375_set_reg_vals(ADXL375_INT_ENABLE, newIntEnable);	
+	adxl375_set_regs(ADXL375_INT_ENABLE, newIntEnable);	
 }
 
 /***************************************************************************//**
@@ -405,9 +487,9 @@ void adxl375_set_offset(unsigned char xOffset,
 					   unsigned char yOffset,
 					   unsigned char zOffset)
 {
-	adxl375_set_reg_vals(ADXL375_OFSX, xOffset);
-	adxl375_set_reg_vals(ADXL375_OFSY, yOffset);
-	adxl375_set_reg_vals(ADXL375_OFSZ, yOffset);
+	adxl375_set_regs(ADXL375_OFSX, xOffset);
+	adxl375_set_regs(ADXL375_OFSY, yOffset);
+	adxl375_set_regs(ADXL375_OFSZ, yOffset);
 }
 
 

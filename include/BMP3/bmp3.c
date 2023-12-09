@@ -2981,7 +2981,7 @@ int8_t bmp3_i2c_init(struct bmp3_dev *bmp3, uint8_t addr) {
         return BMP3_E_COMM_FAIL;
     }
 
-    return 0;
+    return BMP3_OK;
 }
 
 /*!
@@ -2992,5 +2992,5 @@ int8_t bmp3_i2c_deinit(uint8_t addr) {
         return BMP3_E_COMM_FAIL;
     }
 
-    return 0;
+    return BMP3_OK;
 }
