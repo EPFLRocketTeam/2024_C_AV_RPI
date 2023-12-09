@@ -124,7 +124,7 @@ int8_t adxl375_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
  * @brief This API writes the data from the given register address of the sensor.
  */
 int8_t adxl375_set_regs(uint8_t *reg_addr, const uint8_t *reg_data,
-						  int32_t len, struct adxl375_dev *dev) {
+					    int32_t len, struct adxl375_dev *dev) {
 	int8_t rslt;
 	uint8_t temp_buff[len * 2];
     uint32_t temp_len;
@@ -155,18 +155,10 @@ int8_t adxl375_set_regs(uint8_t *reg_addr, const uint8_t *reg_data,
 	return ADXL375_OK;
 }
 
-/***************************************************************************//**
- * @brief Initializes the communication peripheral and checks if the ADXL375
- *		  part is present.
- *
- * @param addr - device I2C address
- *
- * @return status - Result of the initialization procedure.
- *                  Example: 0x0 - I2C/SPI peripheral was not initialized or
- *                                 ADXL375 part is not present.
- *                           0x1 - I2C/SPI peripheral is initialized and ADXL375
- *                                 part is present.
-*******************************************************************************/
+/*!
+ * @brief Initializes the communication peripheral, checks if the ADXL375
+ *		  part is present and sets configuration values.
+ */
 int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr) {
 	int8_t rslt;
     uint8_t chip_id = 0;
@@ -219,17 +211,10 @@ int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr) {
 	return ADXL375_OK;
 }
 
-/***************************************************************************//**
+/*!
  * @brief Places the device into standby/measure mode.
- *
- * @param pwrMode - Power mode.
- *					Example: 0x0 - standby mode.
- *							 0x1 - measure mode.
- *
- * @return None.
-*******************************************************************************/
-int8_t adxl375_set_power_mode(uint8_t pwrMode, struct adxl375_dev *dev)
-{
+ */
+int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev) {
 	uint8_t oldPowerCtl = 0;
 	uint8_t newPowerCtl = 0;
 	int8_t rslt;
@@ -237,93 +222,94 @@ int8_t adxl375_set_power_mode(uint8_t pwrMode, struct adxl375_dev *dev)
     rslt = adxl375_get_regs(ADXL375_POWER_CTL, &oldPowerCtl, 1, dev);
 	if (rslt) return rslt;
 	newPowerCtl = oldPowerCtl & ~ADXL375_PCTL_MEASURE;
-	newPowerCtl = newPowerCtl | (pwrMode * ADXL375_PCTL_MEASURE);
+	newPowerCtl = newPowerCtl | (pwr_mode * ADXL375_PCTL_MEASURE);
 
 	uint8_t reg_addr = ADXL375_POWER_CTL;
 	rslt = adxl375_set_regs(&reg_addr, &newPowerCtl, 1, dev);
 	if (rslt) return rslt;
 }
 
-/***************************************************************************//**
+/*!
  * @brief Reads the output data of each axis.
- *
- * @param x - X-axis's output data.
- * @param y - Y-axis's output data.
- * @param z - Z-axis's output data.
- *
- * @return None.
-*******************************************************************************/
-void adxl375_get_xyz(int16_t* x,
-					int16_t* y,
-					int16_t* z)
-{
-	*x = adxl375_get_regs(ADXL375_DATAX1) << 8;
-	*x += adxl375_get_regs(ADXL375_DATAX0);
-	*y = adxl375_get_regs(ADXL375_DATAY1) << 8;
-	*y += adxl375_get_regs(ADXL375_DATAY0);
-	*z = adxl375_get_regs(ADXL375_DATAZ1) << 8;
-	*z += adxl375_get_regs(ADXL375_DATAZ0);
+ */
+int8_t adxl375_get_xyz(struct adxl375_dev *dev,
+					 int16_t* x, int16_t* y, int16_t* z) {
+	int8_t rslt;
+
+	rslt = adxl375_get_regs(ADXL375_DATAX0, (uint8_t*)x, 2, dev);
+	if (rslt) return rslt;
+	rslt = adxl375_get_regs(ADXL375_DATAY0, (uint8_t*)y, 2, dev);
+	if (rslt) return rslt;
+	rslt = adxl375_get_regs(ADXL375_DATAZ0, (uint8_t*)z, 2, dev);
+	if (rslt) return rslt;
+
+	return ADXL375_OK;	
 }
 
 
-/***************************************************************************//**
+/*!
  * @brief Enables/disables the tap detection.
- *
- * @param tapType - Tap type (none, single, double).
- *					Example: 0x0 - disables tap detection.	
- *							 ADXL375_SINGLE_TAP - enables single tap detection.
- *							 ADXL375_DOUBLE_TAP - enables double tap detection.
- * @param tapAxes - Axes which participate in tap detection.
- *					Example: 0x0 - disables axes participation.
- *							 ADXL375_TAP_X_EN - enables x-axis participation.
- *							 ADXL375_TAP_Y_EN - enables y-axis participation.
- *							 ADXL375_TAP_Z_EN - enables z-axis participation.
- * @param tapDur - Tap duration. The scale factor is 625us is/LSB.
- * @param tapLatent - Tap latency. The scale factor is 1.25 ms/LSB.
- * @param tapWindow - Tap window. The scale factor is 1.25 ms/LSB.
- * @param tapThresh - Tap threshold. The scale factor is 62.5 mg/LSB.
- * @param tapInt - Interrupts pin.
- *				   Example: 0x0 - interrupts on INT1 pin.
- *							ADXL375_SINGLE_TAP - single tap interrupts on
- *												 INT2 pin.
- *							ADXL375_DOUBLE_TAP - double tap interrupts on
- *												 INT2 pin.
- *
- * @return None.
-*******************************************************************************/
-void adxl375_set_tap_detection(unsigned char tapType,
-							 unsigned char tapAxes,
-							 unsigned char tapDur,
-							 unsigned char tapLatent,
-							 unsigned char tapWindow,
-							 unsigned char tapThresh,
-							 unsigned char tapInt)
-{
-	unsigned char oldTapAxes   = 0;
-	unsigned char newTapAxes   = 0;
-	unsigned char oldIntMap    = 0;
-	unsigned char newIntMap    = 0;
-	unsigned char oldIntEnable = 0;
-	unsigned char newIntEnable = 0;
-    
-	oldTapAxes = adxl375_get_regs(ADXL375_TAP_AXES);
+ */
+int8_t adxl375_set_tap_detection(struct adxl375_dev *dev,
+							 uint8_t tapType,
+							 uint8_t tapAxes,
+							 uint8_t tapDur,
+							 uint8_t tapLatent,
+							 uint8_t tapWindow,
+							 uint8_t tapThresh,
+							 uint8_t tapInt) {
+	uint8_t oldTapAxes   = 0;
+	uint8_t newTapAxes   = 0;
+	uint8_t oldIntMap    = 0;
+	uint8_t newIntMap    = 0;
+	uint8_t oldIntEnable = 0;
+	uint8_t newIntEnable = 0;
+    int8_t rslt;
+
+	rslt = adxl375_get_regs(ADXL375_TAP_AXES, &oldTapAxes, 1, dev);
+	if (rslt) return rslt;
 	newTapAxes = oldTapAxes & ~(ADXL375_TAP_X_EN |
 								ADXL375_TAP_Y_EN |
 								ADXL375_TAP_Z_EN);
 	newTapAxes = newTapAxes | tapAxes;
-	adxl375_set_regs(ADXL375_TAP_AXES, newTapAxes);
-	adxl375_set_regs(ADXL375_DUR, tapDur);
-	adxl375_set_regs(ADXL375_LATENT, tapLatent);
-	adxl375_set_regs(ADXL375_WINDOW, tapWindow);
-	adxl375_set_regs(ADXL375_THRESH_TAP, tapThresh);
-	oldIntMap = adxl375_get_regs(ADXL375_INT_MAP);
+
+	uint8_t reg_addr = ADXL375_TAP_AXES;
+	rslt = adxl375_set_regs(&reg_addr, &newTapAxes, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_DUR;
+	rslt = adxl375_set_regs(&reg_addr, &tapDur, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_LATENT;
+	rslt = adxl375_set_regs(&reg_addr, &tapLatent, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_WINDOW;
+	rslt = adxl375_set_regs(&reg_addr, &tapWindow, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_THRESH_TAP;
+	rslt = adxl375_set_regs(&reg_addr, &tapThresh, 1, dev);
+	if (rslt) return rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_MAP, &oldIntMap, 1, dev);
+	if (rslt) return rslt;
+
 	newIntMap = oldIntMap & ~(ADXL375_SINGLE_TAP | ADXL375_DOUBLE_TAP);
 	newIntMap = newIntMap | tapInt;
-	adxl375_set_regs(ADXL375_INT_MAP, newIntMap);
-	oldIntEnable = adxl375_get_regs(ADXL375_INT_ENABLE);
+
+	reg_addr = ADXL375_INT_MAP;
+	rslt = adxl375_set_regs(&reg_addr, &newIntMap, 1, dev);
+	if (rslt) return rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_ENABLE, &oldIntEnable, 1, dev);
+	if (rslt) return rslt;
+
 	newIntEnable = oldIntEnable & ~(ADXL375_SINGLE_TAP | ADXL375_DOUBLE_TAP);
 	newIntEnable = newIntEnable | tapType;
-	adxl375_set_regs(ADXL375_INT_ENABLE, newIntEnable);
+	reg_addr = ADXL375_INT_ENABLE;
+	adxl375_set_regs(&reg_addr, &newIntEnable, 1, dev);
 }
 
 /***************************************************************************//**
@@ -348,18 +334,18 @@ void adxl375_set_tap_detection(unsigned char tapType,
  *
  * @return None.
 *******************************************************************************/
-void adxl375_set_activity_detection(unsigned char actOnOff,
-								  unsigned char actAxes,
-								  unsigned char actAcDc,
-								  unsigned char actThresh,
-								  unsigned char actInt)
+void adxl375_set_activity_detection(uint8_t actOnOff,
+								  uint8_t actAxes,
+								  uint8_t actAcDc,
+								  uint8_t actThresh,
+								  uint8_t actInt)
 {
-	unsigned char oldActInactCtl = 0;
-	unsigned char newActInactCtl = 0;
-	unsigned char oldIntMap      = 0;
-	unsigned char newIntMap      = 0;
-	unsigned char oldIntEnable   = 0;
-	unsigned char newIntEnable   = 0;
+	uint8_t oldActInactCtl = 0;
+	uint8_t newActInactCtl = 0;
+	uint8_t oldIntMap      = 0;
+	uint8_t newIntMap      = 0;
+	uint8_t oldIntEnable   = 0;
+	uint8_t newIntEnable   = 0;
     
 	oldActInactCtl = adxl375_get_regs(ADXL375_INT_ENABLE);
 	newActInactCtl = oldActInactCtl & ~(ADXL375_ACT_ACDC |
@@ -403,19 +389,19 @@ void adxl375_set_activity_detection(unsigned char actOnOff,
  *
  * @return None.
 *******************************************************************************/
-void adxl375_set_inactivity_detection(unsigned char inactOnOff,
-									unsigned char inactAxes,
-									unsigned char inactAcDc,
-									unsigned char inactThresh,
-									unsigned char inactTime,
-									unsigned char inactInt)
+void adxl375_set_inactivity_detection(uint8_t inactOnOff,
+									uint8_t inactAxes,
+									uint8_t inactAcDc,
+									uint8_t inactThresh,
+									uint8_t inactTime,
+									uint8_t inactInt)
 {
-	unsigned char oldActInactCtl = 0;
-	unsigned char newActInactCtl = 0;
-	unsigned char oldIntMap      = 0;
-	unsigned char newIntMap      = 0;
-	unsigned char oldIntEnable   = 0;
-	unsigned char newIntEnable   = 0;
+	uint8_t oldActInactCtl = 0;
+	uint8_t newActInactCtl = 0;
+	uint8_t oldIntMap      = 0;
+	uint8_t newIntMap      = 0;
+	uint8_t oldIntEnable   = 0;
+	uint8_t newIntEnable   = 0;
     
 	oldActInactCtl = adxl375_get_regs(ADXL375_INT_ENABLE);
 	newActInactCtl = oldActInactCtl & ~(ADXL375_INACT_ACDC |
@@ -452,15 +438,15 @@ void adxl375_set_inactivity_detection(unsigned char inactOnOff,
  *
  * @return None.
 *******************************************************************************/
-void adxl375_set_freefall_detection(unsigned char ffOnOff,
-								  unsigned char ffThresh,
-								  unsigned char ffTime,
-								  unsigned char ffInt)
+void adxl375_set_freefall_detection(uint8_t ffOnOff,
+								  uint8_t ffThresh,
+								  uint8_t ffTime,
+								  uint8_t ffInt)
 {
-	unsigned char oldIntMap    = 0;
-	unsigned char newIntMap    = 0;
-	unsigned char oldIntEnable = 0;
-	unsigned char newIntEnable = 0;
+	uint8_t oldIntMap    = 0;
+	uint8_t newIntMap    = 0;
+	uint8_t oldIntEnable = 0;
+	uint8_t newIntEnable = 0;
     
 	adxl375_set_regs(ADXL375_THRESH_FF, ffThresh);
 	adxl375_set_regs(ADXL375_TIME_FF, ffTime);
@@ -483,16 +469,47 @@ void adxl375_set_freefall_detection(unsigned char ffOnOff,
  *
  * @return None.
 *******************************************************************************/
-void adxl375_set_offset(unsigned char xOffset,
-					   unsigned char yOffset,
-					   unsigned char zOffset)
+void adxl375_set_offset(uint8_t xOffset,
+					   uint8_t yOffset,
+					   uint8_t zOffset)
 {
 	adxl375_set_regs(ADXL375_OFSX, xOffset);
 	adxl375_set_regs(ADXL375_OFSY, yOffset);
 	adxl375_set_regs(ADXL375_OFSZ, yOffset);
 }
 
+/*!
+ *  @brief Function to initialise the I2C interface, with functions from
+ *         i2c_common.h
+ */
+int8_t adxl375_i2c_init(struct adxl375_dev *dev, uint8_t addr) {
+    if (i2c_open(addr) != 0) {
+        return ADXL375_E_COMM_FAIL;
+    }
 
-int8_t adxl375_i2c_init(struct adxl375_dev *adxl375, uint8_t addr) {
-    return 0;
+    /* To initialize the user I2C function */
+    dev->read = i2c_read;
+    dev->write = i2c_write;
+    
+    /* Configure delay in microseconds */
+    dev->delay_us = i2c_delay_us;
+
+    /* Assign device address to interface pointer */
+    if (get_intf_ptr(addr, &(dev->intf_ptr)) != 0) {
+        return ADXL375_E_COMM_FAIL;
+    }
+
+    return ADXL375_OK;
+}
+
+/*!
+ *  @brief Function to deinitialise the I2C interface, with functions from
+ *         i2c_common.h
+ */
+int8_t adxl375_i2c_deinit(uint8_t addr) {
+    if(i2c_close(addr) != 0) {
+        return ADXL375_E_COMM_FAIL;
+    }
+
+    return ADXL375_OK;
 }
