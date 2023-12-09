@@ -262,24 +262,24 @@ struct adxl375_dev
 /******************************************************************************/
 
 /*!
- * @brief This API reads the data from the given register address of the sensor.
+ *  @brief This API reads the data from the given register address of the sensor.
  *
  *  @param[in] reg_addr  : Register address from where the data to be read
  *  @param[out] reg_data : Pointer to data buffer to store the read data.
  *  @param[in] len       : No. of bytes of data to be read.
  *  @param[in] dev       : Structure instance of adxl375_dev.
  *
- * @return Result of API execution status
- * @retval 0  -> Success
- * @retval >0 -> Warning
- * @retval <0 -> Error
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
  */
 int8_t adxl375_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
 						struct adxl375_dev *dev);
 
 /*!
- * @details This API writes the given data to the register address
- * of the sensor.
+ *  @details This API writes the given data to the register address
+ *  of the sensor.
  *
  *  @param[in] reg_addr  : Register address to where the data to be written.
  *  @param[in] reg_data  : Pointer to data buffer which is to be written
@@ -287,25 +287,25 @@ int8_t adxl375_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len,
  *  @param[in] len       : No. of bytes of data to write.
  *  @param[in] dev       : Structure instance of adxl375_dev.
  *
- * @return Result of API execution status
- * @retval 0  -> Success
- * @retval >0 -> Warning
- * @retval <0 -> Error
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
  */
 int8_t adxl375_set_regs(uint8_t *reg_addr, const uint8_t *reg_data,
 						int32_t len, struct adxl375_dev *dev);
 
 /*!
- * @details Initializes the communication peripheral, checks if the ADXL375
+ *  @details Initializes the communication peripheral, checks if the ADXL375
  *		  part is present and sets configuration values.
  *  @param[in] dev       : Structure instance of adxl375_dev.
  *  @param[in] addr      : Selection between ADXL375_ADDR_I2C_PRIM and
  *                         ADXL375_ADDR_I2C_SEC
  *
- * @return Result of API execution status
- * @retval 0  -> Success
- * @retval >0 -> Warning
- * @retval <0 -> Error
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
  */
 int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr);
 
@@ -315,10 +315,10 @@ int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr);
  *  @param[in] pwr_mode  : Selection between standy(0x0)/measure(0x1).
  *  @param[in] dev      : Structure instance of adxl375_dev
  *
- * @return Result of API execution status
- * @retval 0  -> Success
- * @retval >0 -> Warning
- * @retval <0 -> Error
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
  */
 int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev);
 
@@ -330,31 +330,32 @@ int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev);
  *  @param[out] y       : Where y value is stored
  *  @param[out] z       : Where z value is stored
  *
- * @return Result of API execution status
- * @retval 0  -> Success
- * @retval >0 -> Warning
- * @retval <0 -> Error
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
  */
 int8_t adxl375_get_xyz(struct adxl375_dev *dev,
 					 int16_t* x, int16_t* y, int16_t* z);
 
 /*!
- * @details Enables/disables the tap detection.
+ *  @details Enables/disables the tap detection.
  *
- * @param tapType - Tap type (none, single, double).
+ *  @param[in] dev      : Structure instance of adxl375_dev
+ *  @param[in] tapType  : Tap type (none, single, double).
  *					Example: 0x0 - disables tap detection.	
  *							 ADXL375_SINGLE_TAP - enables single tap detection.
  *							 ADXL375_DOUBLE_TAP - enables double tap detection.
- * @param tapAxes - Axes which participate in tap detection.
+ *  @param[in] tapAxes  : Axes which participate in tap detection.
  *					Example: 0x0 - disables axes participation.
  *							 ADXL375_TAP_X_EN - enables x-axis participation.
  *							 ADXL375_TAP_Y_EN - enables y-axis participation.
  *							 ADXL375_TAP_Z_EN - enables z-axis participation.
- * @param tapDur - Tap duration. The scale factor is 625us is/LSB.
- * @param tapLatent - Tap latency. The scale factor is 1.25 ms/LSB.
- * @param tapWindow - Tap window. The scale factor is 1.25 ms/LSB.
- * @param tapThresh - Tap threshold. The scale factor is 62.5 mg/LSB.
- * @param tapInt - Interrupts pin.
+ *  @param[in] tapDur 	: Tap duration. The scale factor is 625us is/LSB.
+ *  @param[in] tapLatent : Tap latency. The scale factor is 1.25 ms/LSB.
+ *  @param[in] tapWindow : Tap window. The scale factor is 1.25 ms/LSB.
+ *  @param[in] tapThresh : Tap threshold. The scale factor is 62.5 mg/LSB.
+ *  @param[in] tapInt 	: Interrupts pin.
  *				   Example: 0x0 - interrupts on INT1 pin.
  *							ADXL375_SINGLE_TAP - single tap interrupts on
  *												 INT2 pin.
@@ -365,8 +366,7 @@ int8_t adxl375_get_xyz(struct adxl375_dev *dev,
  * @retval 0  -> Success
  * @retval >0 -> Warning
  * @retval <0 -> Error
- */
-		
+ */	
 int8_t adxl375_set_tap_detection(struct adxl375_dev *dev,
 							 uint8_t tapType,
 							 uint8_t tapAxes,
@@ -376,31 +376,118 @@ int8_t adxl375_set_tap_detection(struct adxl375_dev *dev,
 							 uint8_t tapThresh,
 							 uint8_t tapInt) ;
 
-/*! Enables/disables the activity detection. */							 
-void adxl375_set_activity_detection(unsigned char actOnOff,
-								  unsigned char actAxes,
-								  unsigned char actAcDc,
-								  unsigned char actThresh,
-								  unsigned char actInt);
+/*!
+ * @brief Enables/disables the activity detection.
+ *
+ * @param[in] adxl375	: Structure instance of adxl375_dev
+ * @param[in] actOnOff 	: Enables/disables the activity detection.
+ *					 	Example: 0x0 - disables the activity detection.
+ *							  0x1 - enables the activity detection.
+ * @param[in] actAxes	: Axes which participate in detecting activity.
+ *					    Example: 0x0 - disables axes participation.
+ *							 ADXL375_ACT_X_EN - enables x-axis participation.
+ *							 ADXL375_ACT_Y_EN - enables y-axis participation.
+ *							 ADXL375_ACT_Z_EN - enables z-axis participation.
+ * @param[in] actAcDc 	: Selects dc-coupled or ac-coupled operation.
+ *						Example: 0x0 - dc-coupled operation.
+ *							 ADXL375_ACT_ACDC - ac-coupled operation.
+ * @param[in] actThresh : Threshold value for detecting activity. The scale
+ * 						  factor is 62.5 mg/LSB.
+ * @param[in] actInt 	: Interrupts pin.
+ *				  		Example: 0x0 - activity interrupts on INT1 pin.
+ *							ADXL375_ACTIVITY - activity interrupts on INT2 pin.
+ *
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
+ */					 
+int8_t adxl375_set_activity_detection(struct adxl375_dev *dev,
+								  uint8_t actOnOff,
+								  uint8_t actAxes,
+								  uint8_t actAcDc,
+								  uint8_t actThresh,
+								  uint8_t actInt);
 
-/*! Enables/disables the inactivity detection. */								  
-void adxl375_set_inactivity_detection(unsigned char inactOnOff,
-									unsigned char inactAxes,
-									unsigned char inactAcDc,
-									unsigned char inactThresh,
-									unsigned char inactTime,
-									unsigned char inactInt);
+/*!
+ * @brief Enables/disables the inactivity detection.
+ *
+ *  @param[in] adxl375      : Structure instance of adxl375_dev
+ *  @param[in] inactOnOff   : Enables/disables the inactivity detection.
+ *					   		Example: 0x0 - disables the inactivity detection.
+ *							    0x1 - enables the inactivity detection.
+ *  @param[in] inactAxes 	: Axes which participate in detecting inactivity.
+ *					        Example: 0x0 - disables axes participation.
+ *						  	   ADXL375_INACT_X_EN - enables x-axis.
+ *							   ADXL375_INACT_Y_EN - enables y-axis.
+ *							   ADXL375_INACT_Z_EN - enables z-axis.
+ *  @param[in] inactAcDc 	: Selects dc-coupled or ac-coupled operation.
+ *					        Example: 0x0 - dc-coupled operation.
+ *							   ADXL375_INACT_ACDC - ac-coupled operation.
+ *  @param[in] inactThresh 	: Threshold value for detecting inactivity.
+ * 							  The scale factor is 62.5 mg/LSB.
+ *  @param[in] inactTime 	: Inactivity time. The scale factor is 1 sec/LSB.
+ *  @param[in] inactInt 	: Interrupts pin.
+ *				            Example: 0x0 - inactivity interrupts on INT1 pin.
+ *							  ADXL375_INACTIVITY - inactivity interrupts on
+ *												   INT2 pin.
+ *
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
+ */
+int8_t adxl375_set_inactivity_detection(struct adxl375_dev *dev,
+									uint8_t inactOnOff,
+									uint8_t inactAxes,
+									uint8_t inactAcDc,
+									uint8_t inactThresh,
+									uint8_t inactTime,
+									uint8_t inactInt);
 
-/*! Enables/disables the free-fall detection. */									
-void adxl375_set_freefall_detection(unsigned char ffOnOff,
-								  unsigned char ffThresh,
-								  unsigned char ffTime,
-								  unsigned char ffInt);
+/*!
+ *  @brief Enables/disables the free-fall detection.
+ *
+ *  @param[in] adxl375      : Structure instance of adxl375_dev
+ *  @param[in] ffOnOff 		: Enables/disables the free-fall detection.
+ *					        Example: 0x0 - disables the free-fall detection.
+ *							 0x1 - enables the free-fall detection.
+ *  @param[in] ffThresh 	: Threshold value for free-fall detection. The scale factor 
+    					      is 62.5 mg/LSB.
+ *  @param[in] ffTime 		: Time value for free-fall detection. The scale factor is 
+                   			  5 ms/LSB.
+ *  @param[in] ffInt 		: Interrupts pin.
+ *				           Example: 0x0 - free-fall interrupts on INT1 pin.
+ *						   ADXL375_FREE_FALL - free-fall interrupts on INT2 pin.
+ *
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
+ */									
+int8_t adxl375_set_freefall_detection(struct adxl375_dev *dev,
+								  uint8_t ffOnOff,
+								  uint8_t ffThresh,
+								  uint8_t ffTime,
+								  uint8_t ffInt);
 
-/*! Sets an offset value for each axis (Offset Calibration). */
-void adxl375_set_offset(unsigned char xOffset,
-					   unsigned char yOffset,
-					   unsigned char zOffset);
+/*!
+ *  @brief Sets an offset value for each axis (Offset Calibration).
+ *
+ *  @param[in] adxl375      : Structure instance of adxl375_dev
+ *  @param[in] xOffset      : X-axis' offset.
+ *  @param[in] yOffset 		: Y-axis' offset.
+ *  @param[in] zOffset 		: Z-axis' offset.
+ *
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
+ */	
+int8_t adxl375_set_offset(struct adxl375_dev *dev,
+					   uint8_t xOffset,
+					   uint8_t yOffset,
+					   uint8_t zOffset) ;
 
 /*!
  *  @brief Function to initialise the I2C interface, with functions from

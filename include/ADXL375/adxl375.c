@@ -312,170 +312,184 @@ int8_t adxl375_set_tap_detection(struct adxl375_dev *dev,
 	adxl375_set_regs(&reg_addr, &newIntEnable, 1, dev);
 }
 
-/***************************************************************************//**
+/*!
  * @brief Enables/disables the activity detection.
- *
- * @param actOnOff - Enables/disables the activity detection.
- *					 Example: 0x0 - disables the activity detection.
- *							  0x1 - enables the activity detection.
- * @param actAxes - Axes which participate in detecting activity.
- *					Example: 0x0 - disables axes participation.
- *							 ADXL375_ACT_X_EN - enables x-axis participation.
- *							 ADXL375_ACT_Y_EN - enables y-axis participation.
- *							 ADXL375_ACT_Z_EN - enables z-axis participation.
- * @param actAcDc - Selects dc-coupled or ac-coupled operation.
- *					Example: 0x0 - dc-coupled operation.
- *							 ADXL375_ACT_ACDC - ac-coupled operation.
- * @param actThresh - Threshold value for detecting activity. The scale factor 
-                      is 62.5 mg/LSB.
- * @patam actInt - Interrupts pin.
- *				   Example: 0x0 - activity interrupts on INT1 pin.
- *							ADXL375_ACTIVITY - activity interrupts on INT2 pin.
- *
- * @return None.
-*******************************************************************************/
-void adxl375_set_activity_detection(uint8_t actOnOff,
+ */
+int8_t adxl375_set_activity_detection(struct adxl375_dev *dev,
+								  uint8_t actOnOff,
 								  uint8_t actAxes,
 								  uint8_t actAcDc,
 								  uint8_t actThresh,
-								  uint8_t actInt)
-{
+								  uint8_t actInt) {
 	uint8_t oldActInactCtl = 0;
 	uint8_t newActInactCtl = 0;
 	uint8_t oldIntMap      = 0;
 	uint8_t newIntMap      = 0;
 	uint8_t oldIntEnable   = 0;
 	uint8_t newIntEnable   = 0;
-    
-	oldActInactCtl = adxl375_get_regs(ADXL375_INT_ENABLE);
+    int8_t rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_ENABLE, &oldActInactCtl, 1, dev);
+	if (rslt) return rslt;
+
 	newActInactCtl = oldActInactCtl & ~(ADXL375_ACT_ACDC |
 										ADXL375_ACT_X_EN |
 										ADXL375_ACT_Y_EN |
 										ADXL375_ACT_Z_EN);
 	newActInactCtl = newActInactCtl | (actAcDc | actAxes);
-	adxl375_set_regs(ADXL375_ACT_INACT_CTL, newActInactCtl);
-	adxl375_set_regs(ADXL375_THRESH_ACT, actThresh);
-	oldIntMap = adxl375_get_regs(ADXL375_INT_MAP);
+	uint8_t reg_addr = ADXL375_ACT_INACT_CTL;
+	rslt = adxl375_set_regs(&reg_addr, &newActInactCtl, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_THRESH_ACT;
+	rslt = adxl375_set_regs(&reg_addr, &actThresh, 1, dev);
+	if (rslt) return rslt;
+
+
+	rslt = adxl375_get_regs(ADXL375_INT_MAP, &oldIntMap, 1, dev);
+	if (rslt) return rslt;
+
 	newIntMap = oldIntMap & ~(ADXL375_ACTIVITY);
 	newIntMap = newIntMap | actInt;
-	adxl375_set_regs(ADXL375_INT_MAP, newIntMap);
-	oldIntEnable = adxl375_get_regs(ADXL375_INT_ENABLE);
+	reg_addr = ADXL375_INT_MAP;
+	rslt = adxl375_set_regs(&reg_addr, &newIntMap, 1, dev);
+	if (rslt) return rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_ENABLE, &oldIntEnable, 1, dev);
+	if (rslt) return rslt;
+
 	newIntEnable = oldIntEnable & ~(ADXL375_ACTIVITY);
 	newIntEnable = newIntEnable | (ADXL375_ACTIVITY * actOnOff);
-	adxl375_set_regs(ADXL375_INT_ENABLE, newIntEnable);
+	reg_addr = ADXL375_INT_ENABLE;
+	rslt = adxl375_set_regs(&reg_addr, &newIntEnable, 1, dev);
+	if (rslt) return rslt;
+
+	return ADXL375_OK;
 }
 
-/***************************************************************************//**
+/*!
  * @brief Enables/disables the inactivity detection.
- *
- * @param inactOnOff - Enables/disables the inactivity detection.
- *					   Example: 0x0 - disables the inactivity detection.
- *							    0x1 - enables the inactivity detection.
- * @param inactAxes - Axes which participate in detecting inactivity.
- *					  Example: 0x0 - disables axes participation.
- *						  	   ADXL375_INACT_X_EN - enables x-axis.
- *							   ADXL375_INACT_Y_EN - enables y-axis.
- *							   ADXL375_INACT_Z_EN - enables z-axis.
- * @param inactAcDc - Selects dc-coupled or ac-coupled operation.
- *					  Example: 0x0 - dc-coupled operation.
- *							   ADXL375_INACT_ACDC - ac-coupled operation.
- * @param inactThresh - Threshold value for detecting inactivity. The scale 
-                        factor is 62.5 mg/LSB.
- * @param inactTime - Inactivity time. The scale factor is 1 sec/LSB.
- * @patam inactInt - Interrupts pin.
- *				     Example: 0x0 - inactivity interrupts on INT1 pin.
- *							  ADXL375_INACTIVITY - inactivity interrupts on
- *												   INT2 pin.
- *
- * @return None.
-*******************************************************************************/
-void adxl375_set_inactivity_detection(uint8_t inactOnOff,
+ */
+int8_t adxl375_set_inactivity_detection(struct adxl375_dev *dev,
+									uint8_t inactOnOff,
 									uint8_t inactAxes,
 									uint8_t inactAcDc,
 									uint8_t inactThresh,
 									uint8_t inactTime,
-									uint8_t inactInt)
-{
+									uint8_t inactInt) {
 	uint8_t oldActInactCtl = 0;
 	uint8_t newActInactCtl = 0;
 	uint8_t oldIntMap      = 0;
 	uint8_t newIntMap      = 0;
 	uint8_t oldIntEnable   = 0;
 	uint8_t newIntEnable   = 0;
-    
-	oldActInactCtl = adxl375_get_regs(ADXL375_INT_ENABLE);
-	newActInactCtl = oldActInactCtl & ~(ADXL375_INACT_ACDC |
-										ADXL375_INACT_X_EN |
-										ADXL375_INACT_Y_EN |
-										ADXL375_INACT_Z_EN);
+    int8_t rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_ENABLE, &oldActInactCtl, 1, dev);
+	if (rslt) return rslt;
+
+	newActInactCtl = oldActInactCtl & ~(ADXL375_ACT_ACDC |
+										ADXL375_ACT_X_EN |
+										ADXL375_ACT_Y_EN |
+										ADXL375_ACT_Z_EN);
 	newActInactCtl = newActInactCtl | (inactAcDc | inactAxes);
-	adxl375_set_regs(ADXL375_ACT_INACT_CTL, newActInactCtl);
-	adxl375_set_regs(ADXL375_THRESH_INACT, inactThresh);
-	adxl375_set_regs(ADXL375_TIME_INACT, inactTime);
-	oldIntMap = adxl375_get_regs(ADXL375_INT_MAP);
-	newIntMap = oldIntMap & ~(ADXL375_INACTIVITY);
+	uint8_t reg_addr = ADXL375_ACT_INACT_CTL;
+	rslt = adxl375_set_regs(&reg_addr, &newActInactCtl, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_THRESH_ACT;
+	rslt = adxl375_set_regs(&reg_addr, &inactThresh, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_TIME_INACT;
+	rslt = adxl375_set_regs(&reg_addr, &inactTime, 1, dev);
+	if (rslt) return rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_MAP, &oldIntMap, 1, dev);
+	if (rslt) return rslt;
+
+	newIntMap = oldIntMap & ~(ADXL375_ACTIVITY);
 	newIntMap = newIntMap | inactInt;
-	adxl375_set_regs(ADXL375_INT_MAP, newIntMap);
-	oldIntEnable = adxl375_get_regs(ADXL375_INT_ENABLE);
-	newIntEnable = oldIntEnable & ~(ADXL375_INACTIVITY);
-	newIntEnable = newIntEnable | (ADXL375_INACTIVITY * inactOnOff);
-	adxl375_set_regs(ADXL375_INT_ENABLE, newIntEnable);
+	reg_addr = ADXL375_INT_MAP;
+	rslt = adxl375_set_regs(&reg_addr, &newIntMap, 1, dev);
+	if (rslt) return rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_ENABLE, &oldIntEnable, 1, dev);
+	if (rslt) return rslt;
+
+	newIntEnable = oldIntEnable & ~(ADXL375_ACTIVITY);
+	newIntEnable = newIntEnable | (ADXL375_ACTIVITY * inactOnOff);
+	reg_addr = ADXL375_INT_ENABLE;
+	rslt = adxl375_set_regs(&reg_addr, &newIntEnable, 1, dev);
+	if (rslt) return rslt;
+
+	return ADXL375_OK;
 }
 
-/***************************************************************************//**
+/*!
  * @brief Enables/disables the free-fall detection.
- *
- * @param ffOnOff - Enables/disables the free-fall detection.
- *					Example: 0x0 - disables the free-fall detection.
- *							 0x1 - enables the free-fall detection.
- * @param ffThresh - Threshold value for free-fall detection. The scale factor 
-                     is 62.5 mg/LSB.
- * @param ffTime - Time value for free-fall detection. The scale factor is 
-                   5 ms/LSB.
- * @param ffInt - Interrupts pin.
- *				  Example: 0x0 - free-fall interrupts on INT1 pin.
- *						   ADXL375_FREE_FALL - free-fall interrupts on INT2 pin.
- *
- * @return None.
-*******************************************************************************/
-void adxl375_set_freefall_detection(uint8_t ffOnOff,
+ */
+int8_t adxl375_set_freefall_detection(struct adxl375_dev *dev,
+								  uint8_t ffOnOff,
 								  uint8_t ffThresh,
 								  uint8_t ffTime,
-								  uint8_t ffInt)
-{
+								  uint8_t ffInt) {
 	uint8_t oldIntMap    = 0;
 	uint8_t newIntMap    = 0;
 	uint8_t oldIntEnable = 0;
 	uint8_t newIntEnable = 0;
-    
-	adxl375_set_regs(ADXL375_THRESH_FF, ffThresh);
-	adxl375_set_regs(ADXL375_TIME_FF, ffTime);
-	oldIntMap = adxl375_get_regs(ADXL375_INT_MAP);
+    int8_t rslt;
+
+	uint8_t reg_addr = ADXL375_THRESH_FF;
+	rslt = adxl375_set_regs(&reg_addr, &ffThresh, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_TIME_FF;
+	rslt = adxl375_set_regs(&reg_addr, &ffTime, 1, dev);
+	if (rslt) return rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_MAP, &oldIntMap, 1, dev);
+	if (rslt) return rslt;
+
 	newIntMap = oldIntMap & ~(ADXL375_FREE_FALL);
 	newIntMap = newIntMap | ffInt;
-	adxl375_set_regs(ADXL375_INT_MAP, newIntMap);
-	oldIntEnable = adxl375_get_regs(ADXL375_INT_ENABLE);
+	reg_addr = ADXL375_INT_MAP;
+	rslt = adxl375_set_regs(&reg_addr, &newIntMap, 1, dev);
+	if (rslt) return rslt;
+
+	rslt = adxl375_get_regs(ADXL375_INT_ENABLE, &oldIntEnable, 1, dev);
+	if (rslt) return rslt;
+
 	newIntEnable = oldIntEnable & ~ADXL375_FREE_FALL;
 	newIntEnable = newIntEnable | (ADXL375_FREE_FALL * ffOnOff);
-	adxl375_set_regs(ADXL375_INT_ENABLE, newIntEnable);	
+	reg_addr = ADXL375_INT_ENABLE;
+	rslt = adxl375_set_regs(&reg_addr, &newIntEnable, 1, dev);
+	if (rslt) return rslt;
+
+	return ADXL375_OK;
 }
 
-/***************************************************************************//**
+/*!
  * @brief Sets an offset value for each axis (Offset Calibration).
- *
- * @param xOffset - X-axis's offset.
- * @param yOffset - Y-axis's offset.
- * @param zOffset - Z-axis's offset.
- *
- * @return None.
-*******************************************************************************/
-void adxl375_set_offset(uint8_t xOffset,
+ */
+int8_t adxl375_set_offset(struct adxl375_dev *dev,
+					   uint8_t xOffset,
 					   uint8_t yOffset,
-					   uint8_t zOffset)
-{
-	adxl375_set_regs(ADXL375_OFSX, xOffset);
-	adxl375_set_regs(ADXL375_OFSY, yOffset);
-	adxl375_set_regs(ADXL375_OFSZ, yOffset);
+					   uint8_t zOffset) {
+	int8_t rslt;
+	uint8_t reg_addr = ADXL375_OFSX;
+	rslt = adxl375_set_regs(&reg_addr, &xOffset, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_OFSY;
+	rslt = adxl375_set_regs(&reg_addr, &yOffset, 1, dev);
+	if (rslt) return rslt;
+
+	reg_addr = ADXL375_OFSZ;
+	rslt = adxl375_set_regs(&reg_addr, &zOffset, 1, dev);
+	if (rslt) return rslt;
+
+	return ADXL375_OK; 
 }
 
 /*!
