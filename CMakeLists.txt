@@ -21,12 +21,17 @@ cmake_minimum_required(VERSION 3.25)
 
 project(sensors_test VERSION 0.1 LANGUAGES C CXX)
 
+# Set the build type to Debug
+set(CMAKE_BUILD_TYPE Debug)
+
 include_directories(include)
 
 add_subdirectory(include/BMP3)
 add_subdirectory(include/BMI08x)
 add_subdirectory(include/ADXL375)
 add_subdirectory(include/I2C_Common)
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 
 # Test for he BMP390 sensor
 add_executable(BMP390_test test/BMP390_test.cpp)
