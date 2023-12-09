@@ -180,33 +180,39 @@ int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr) {
 	// Normal Power Mode, 100Hz operation
 	uint8_t reg_addr = ADXL375_BW_RATE;
 	uint8_t reg_val = (0x00|ADXL375_RATE(0x0A));
-	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	rslt = adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	if (rslt) return rslt;
 
 	//SelfTest:Off, SPI: 4-wire, Interrupts: Active High, Full_Res: On,
 	//Justify: Right justified with sign extension
 	reg_addr = ADXL375_DATA_FORMAT;
 	reg_val=(0x00|ADXL375_RANGE(ADXL375_RANGE_PM_2G)|ADXL375_FULL_RES);
-	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	rslt = adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	if (rslt) return rslt;
 
 	//FIFO mode - Stream, Watermark interrupt set @ 30 (0x1E)samples -
 	//which at ~100Hz(or even greater) provides sufficient time for FIFO to
 	//be emptied
 	reg_addr = ADXL375_FIFO_CTL;
 	reg_val = (0x00|ADXL375_FIFO_MODE(0x2)|ADXL375_SAMPLES(0x1E));
-	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	rslt = adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	if (rslt) return rslt;
 
 	//Watermark interrupt to Int 1 - all others to Int 2
 	reg_addr = ADXL375_INT_MAP;
 	reg_val = (0x00|~ADXL375_WATERMARK);
-	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	rslt = adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	if (rslt) return rslt;
 
 	//Enables Watermark interrupt on Int 1 - GPIO 17
 	reg_addr = ADXL375_INT_ENABLE;
 	reg_val = (0x00|ADXL375_WATERMARK);
-	adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	rslt = adxl375_set_regs(&reg_addr, &reg_val,1,dev);
+	if (rslt) return rslt;
 
 	//Start the ADXL375
-	adxl375_set_power_mode(0x1, dev);
+	rslt = adxl375_set_power_mode(0x1, dev);
+	if (rslt) return rslt;
 
 	return ADXL375_OK;
 }
@@ -227,6 +233,8 @@ int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev) {
 	uint8_t reg_addr = ADXL375_POWER_CTL;
 	rslt = adxl375_set_regs(&reg_addr, &newPowerCtl, 1, dev);
 	if (rslt) return rslt;
+
+	return ADXL375_OK;
 }
 
 /*!
@@ -309,7 +317,10 @@ int8_t adxl375_set_tap_detection(struct adxl375_dev *dev,
 	newIntEnable = oldIntEnable & ~(ADXL375_SINGLE_TAP | ADXL375_DOUBLE_TAP);
 	newIntEnable = newIntEnable | tapType;
 	reg_addr = ADXL375_INT_ENABLE;
-	adxl375_set_regs(&reg_addr, &newIntEnable, 1, dev);
+	rslt = adxl375_set_regs(&reg_addr, &newIntEnable, 1, dev);
+	if (rslt) return rslt;
+
+	return ADXL375_OK;
 }
 
 /*!

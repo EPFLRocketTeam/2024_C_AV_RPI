@@ -45,7 +45,8 @@ int main(void) {
         return 1;
     }
 
-    adxl375_init(&dev1, ADXL375_ADDR_I2C_PRIM);
+    rslt = adxl375_init(&dev1, ADXL375_ADDR_I2C_PRIM);
+    usleep(100000);
     printf("Initialized adxl375 PRIMARY I2C with return %d\n", rslt);
     if (rslt < 0) {
         adxl375_i2c_deinit(ADXL375_ADDR_I2C_PRIM);
@@ -53,7 +54,8 @@ int main(void) {
         return 1;
     }
 
-    adxl375_init(&dev2, ADXL375_ADDR_I2C_SEC);
+    rslt = adxl375_init(&dev2, ADXL375_ADDR_I2C_SEC);
+    usleep(100000);
     printf("Initialized adxl357 SECONDARY I2C with return %d\n", rslt);
     if (rslt!=0) return error_return();
 
@@ -61,13 +63,13 @@ int main(void) {
         rslt = adxl375_get_xyz(&dev1, &x1, &y1, &z1);
         if (rslt!=0) return error_return();
 
-        printf("PRIMARY data[%d] x: %.2f, y: %.2f, z: %.2f\n",
+        printf("PRIMARY data[%d] x: %d, y: %d, z: %d\n",
                loop, x1, y1, z1);
 
         rslt = adxl375_get_xyz(&dev2, &x2, &y2, &z2);
         if (rslt!=0) return error_return();
 
-        printf("SECONDARY data[%d] x: %.2f, y: %.2f, z: %.2f\n",
+        printf("SECONDARY data[%d] x: %d, y: %d, z: %d\n",
                loop, x2, y2, z2);
         
         usleep(1000000);
