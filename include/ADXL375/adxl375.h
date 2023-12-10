@@ -185,6 +185,9 @@ extern "C" {
 #define ADXL375_E_INVALID_LEN                      INT8_C(-6)
 #define ADXL375_E_DEV_NOT_FOUND                    INT8_C(-7)
 
+/* ADXL375 mg/LSB scale for output data */
+#define ADXL375_OUTPUT_SCALE					   0.049
+
 /********************************************************/
 
 /*!
@@ -329,7 +332,7 @@ int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr);
 int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev);
 
 /*!
- * @details Reads the output data of each axis.
+ * @details Reads the output data of each axis. Gives the value in g unit.
  *
  *  @param[in] dev      : Structure instance of adxl375_dev
  *  @param[out] x       : Where x value is stored
@@ -342,7 +345,7 @@ int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev);
  *  @retval <0 -> Error
  */
 int8_t adxl375_get_xyz(struct adxl375_dev *dev,
-					 int16_t* x, int16_t* y, int16_t* z);
+					 float* x, float* y, float* z);
 
 /*!
  *  @details Enables/disables the tap detection.
