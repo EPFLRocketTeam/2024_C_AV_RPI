@@ -35,7 +35,7 @@ int main(void) {
     uint8_t loop = 0;
     uint16_t settings_sel;
     struct adxl375_dev dev1, dev2;
-    int16_t x1, y1, z1, x2, y2, z2;
+    float x1, y1, z1, x2, y2, z2;
 
     // Initialising the GPIO for I2C communication
     rslt = gpio_initialise();
@@ -63,13 +63,13 @@ int main(void) {
         rslt = adxl375_get_xyz(&dev1, &x1, &y1, &z1);
         if (rslt!=0) return error_return();
 
-        printf("PRIMARY data[%d] x: %d, y: %d, z: %d\n",
+        printf("PRIMARY data[%d] x: %.2f g, y: %.2f g, z: %.2f g\n",
                loop, x1, y1, z1);
 
         rslt = adxl375_get_xyz(&dev2, &x2, &y2, &z2);
         if (rslt!=0) return error_return();
 
-        printf("SECONDARY data[%d] x: %d, y: %d, z: %d\n",
+        printf("SECONDARY data[%d] x: %.2f g, y: %.2f g, z: %.2f g\n",
                loop, x2, y2, z2);
         
         usleep(1000000);

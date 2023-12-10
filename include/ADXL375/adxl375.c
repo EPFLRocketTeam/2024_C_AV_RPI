@@ -177,9 +177,9 @@ int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr) {
 	
 	//Configure the ADXL375
 	
-	// Normal Power Mode, 100Hz operation
+	// Normal Power Mode, 1600Hz operation
 	uint8_t reg_addr = ADXL375_BW_RATE;
-	uint8_t reg_val = (0x00|ADXL375_RATE(0x0A));
+	uint8_t reg_val = (0x00|ADXL375_RATE(0x0E));
 	rslt = adxl375_set_regs(&reg_addr, &reg_val,1,dev);
 	if (rslt) return rslt;
 
@@ -241,15 +241,23 @@ int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev) {
  * @brief Reads the output data of each axis.
  */
 int8_t adxl375_get_xyz(struct adxl375_dev *dev,
-					 int16_t* x, int16_t* y, int16_t* z) {
+					 float* x, float* y, float* z) {
 	int8_t rslt;
+	uint8_t values[6];
+	int16_t tmp;
 
-	rslt = adxl375_get_regs(ADXL375_DATAX0, (uint8_t*)x, 2, dev);
+	/* Reading all the data at once so that the FIFO doesn't replace with newer
+	 * data (read datasheet page 24). Have to first convert the values into 
+	 * int16_t, then to float with the scale, hence the temporary variable.
+	 */
+	rslt = adxl375_get_regs(ADXL375_DATAX0, values, 6, dev);
 	if (rslt) return rslt;
-	rslt = adxl375_get_regs(ADXL375_DATAY0, (uint8_t*)y, 2, dev);
-	if (rslt) return rslt;
-	rslt = adxl375_get_regs(ADXL375_DATAZ0, (uint8_t*)z, 2, dev);
-	if (rslt) return rslt;
+	tmp = (values[0] + (values[1] << 8));
+	*x = ADXL375_OUTPUT_SCALE*tmp;
+	tmp = (values[2] + (values[3] << 8));
+	*y = ADXL375_OUTPUT_SCALE*tmp;
+	tmp = values[4] + (values[5] << 8);
+	*z = ADXL375_OUTPUT_SCALE*tmp;
 
 	return ADXL375_OK;	
 }
