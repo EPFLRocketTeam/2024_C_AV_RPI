@@ -17,7 +17,7 @@ Or run all the tests with:
 sudo ctest
 ```
 
-A workaround to run gdb with sudo:
+### A workaround to run gdb with sudo:
 ```
 cd /usr/bin
 sudo mv gdb gdborig
