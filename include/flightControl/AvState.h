@@ -1,7 +1,4 @@
-#ifndef AVSTATE_H
-#define AVSTATE_H
-
-enum class AvState
+enum class State
 {
     IDLE,
     LANDED,
@@ -11,32 +8,42 @@ enum class AvState
     ERRORGROUND,
     ERRORFLIGHT,
     THRUSTSEQUENCE,
-    ARMED,
-    READY,
     MANUAL,
+    ARMED,
+    READY
 };
 
+// Path: AV-Firehorn-Rpi/include/flightControl/AvState.h
+// Compare this snippet from AV-Firehorn-Rpi/src/flightControl/FSM.cpp:
+//     // this function allows to get the current state of the FSM
+// functions that transition from one state to others possible states
+class AvState
+{
+public:
+    // constructor
+    AState();
+    // destructor
+    ~AvState();
+
+    // this function allows to get the current state of the FSM
+    State getCurrentState();
+    char *AvStateToString(State state) const;
+    State AvState::update(AvData data);
 
 private:
-    bool noPressure();
-    bool sensorError();
-    bool softwareError();
-bool pressurized();
-public:
-
-AvState fromManual();
-AvState fromArmed();
-AvState fromCalibration();
-AvState fromThrustSequence();
-AvState fromAscent();
-AvState fromDescent();
-AvState fromLanded();
-AvState fromIdle();
-AvState fromErrorGround();
-AvState fromErrorFlight();
-AvState fromReady();
-
-
-char* AvStatetoString(AvState state) const;
-
-#endif // AVSTATE_H
+    State fromIdle(AvData data);
+    State fromLanded();
+    State fromDescent(AvData data);
+    State fromAscent(AvData data);
+    State fromCalibration(AvData data);
+    State fromErrorGround(AvData data);
+    State fromErrorFlight();
+    State fromThrustSequence(AvData data);
+    State fromManual(AvData data);
+    State fromArmed(AvData data);
+    State fromReady(AvData data);
+    State currentState;
+    State *possibleStates();
+    char *telemetry_set[10];
+    char *StatetoString(State state);
+};
