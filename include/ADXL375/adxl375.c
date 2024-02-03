@@ -138,6 +138,8 @@ int8_t adxl375_set_regs(uint8_t *reg_addr, const uint8_t *reg_data,
 
 	if (len == 0) return ADXL375_E_INVALID_LEN;
 
+	temp_buff[0] = reg_data[0];
+	
 	/* Burst write mode */
 	if (len > 1) {
 		/* Interleave register address w.r.t data for burst write */
