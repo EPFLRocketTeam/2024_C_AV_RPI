@@ -35,6 +35,7 @@
 * @version    v2.0.6
 *
 */
+#include <stdio.h>
 
 /*! @file bmp3.c
  * @brief Sensor driver for BMP3 sensor */
@@ -2996,3 +2997,75 @@ int8_t bmp3_i2c_deinit(uint8_t addr) {
 
     return BMP3_OK;
 }
+
+
+// Bmp390 class functions
+
+Bmp390::Bmp390(uint8_t addr, uint16_t settings_sel) :
+    addr(addr), settings_sel(settings_sel) {
+    settings.int_settings.drdy_en = BMP3_ENABLE;
+    settings.press_en = BMP3_ENABLE;
+    settings.temp_en = BMP3_ENABLE;
+
+    settings.odr_filter.press_os = BMP3_OVERSAMPLING_2X;
+    settings.odr_filter.temp_os = BMP3_OVERSAMPLING_2X;
+    settings.odr_filter.odr = BMP3_ODR_100_HZ;
+
+    settings.op_mode = BMP3_MODE_NORMAL;
+}
+
+Bmp390::~Bmp390() {
+    bmp3_i2c_deinit(addr);
+}
+
+int8_t Bmp390::init() {
+    int8_t rslt = bmp3_i2c_init(&dev, addr);
+    printf("Initialized bmp3 I2C with return %d\n", rslt);
+    if (rslt!=0) return 1;
+
+    rslt = bmp3_init(&dev);
+    printf("Initialized bmp3 with return %d\n", rslt);
+    if (rslt!=0) {
+        return 1;
+    }
+
+    rslt = bmp3_set_sensor_settings(settings_sel, &settings, &dev);
+    printf("Set settings with return %d\n", rslt);
+    if (rslt!=0) return 1;
+
+    rslt = bmp3_set_op_mode(&settings, &dev);
+    printf("Set mode with return %d\n", rslt);
+    if (rslt!=0) return 1;
+
+    return 0;
+}
+
+int8_t Bmp390::test_data() {
+    if (data.temperature > 50 || data.temperature < 5
+        || data.pressure > 120000 || data.pressure < 80000) {
+            return 1;
+    }
+    return 0;
+}
+
+int8_t Bmp390::get_status() {
+    int8_t rslt = bmp3_get_status(&status, &dev);
+    printf("status rslt : %d\r", rslt);
+    if (rslt!=0) return 1;
+
+    return 0;
+}
+
+int8_t Bmp390::get_sensor_data(uint8_t sensor_comp) {
+    int8_t rslt = bmp3_get_sensor_data(sensor_comp, &data, &dev);
+    printf("get sensor rslt : %d\r", rslt);
+    if (rslt!=0) return 1;
+
+    /* NOTE : Read status register again to clear data ready interrupt status */
+    rslt = bmp3_get_status(&status, &dev);
+    printf("status rslt : %d\r", rslt);
+    if (rslt!=0) return 1;
+
+    return 0;
+}
+
