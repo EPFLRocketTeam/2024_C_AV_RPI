@@ -576,4 +576,29 @@ int8_t bmp3_i2c_deinit(uint8_t addr);
 }
 #endif /* End of CPP guard */
 
+class Bmp390 {
+private:
+    uint8_t addr;
+
+    uint16_t settings_sel;
+    struct bmp3_dev dev = { 0 };
+    struct bmp3_data data = { 0 };
+    struct bmp3_settings settings = { 0 };
+    struct bmp3_status status = { { 0 } };
+public:
+    Bmp390(uint8_t addr, uint16_t settings_sel = BMP3_SEL_PRESS_EN | BMP3_SEL_TEMP_EN |
+        BMP3_SEL_PRESS_OS | BMP3_SEL_TEMP_OS | BMP3_SEL_ODR | BMP3_SEL_DRDY_EN);
+    ~Bmp390();
+    int8_t init();
+    int8_t test_data();
+    int8_t get_status();
+    int8_t get_sensor_data(uint8_t sensor_comp = BMP3_PRESS_TEMP);
+    /*
+    * sensor_comp indicates the type of data to be read
+    * BMP3_PRESS_TEMP : To read pressure and temperature data
+    * BMP3_TEMP       : To read only temperature data
+    * BMP3_PRESS      : To read only pressure data
+    */
+} ;
+
 #endif /* _BMP3_H */

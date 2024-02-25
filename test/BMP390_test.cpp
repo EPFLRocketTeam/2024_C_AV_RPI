@@ -96,8 +96,8 @@ int main(void)
     initialize_settings(&settings1);
     initialize_settings(&settings2);
 
-    settings_sel = BMP3_SEL_PRESS_EN | BMP3_SEL_TEMP_EN | BMP3_SEL_PRESS_OS | BMP3_SEL_TEMP_OS | BMP3_SEL_ODR |
-                   BMP3_SEL_DRDY_EN;
+    settings_sel = BMP3_SEL_PRESS_EN | BMP3_SEL_TEMP_EN | BMP3_SEL_PRESS_OS |
+                   BMP3_SEL_TEMP_OS | BMP3_SEL_ODR | BMP3_SEL_DRDY_EN;
 
     rslt = bmp3_set_sensor_settings(settings_sel, &settings1, &dev1);
     printf("Set settings on PRIMARY with return %d\n", rslt);
