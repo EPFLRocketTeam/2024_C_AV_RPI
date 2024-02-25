@@ -1,5 +1,7 @@
 #include <string.h>
 #include <string>
+#ifndef AVDATA_H
+#define AVDATA_H
 
 class AvData{
     public:
@@ -17,8 +19,10 @@ class AvData{
         float capacity;
         float efficiency;
         float time;
-        float temperature;
-        char* telemetry;
+       
+        std::string telemetry;
         bool ignited;
-        
+ 
 };
+
+#endif

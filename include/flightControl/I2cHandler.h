@@ -4,6 +4,9 @@
 
 #include <cstdint>
 
+#ifndef I2CHANDLER_H
+#define I2CHANDLER_H
+
 class I2CHandler {
     
 
@@ -52,3 +55,5 @@ enum class Regs{
     Clock,
     Adresse
 };
+
+#endif
