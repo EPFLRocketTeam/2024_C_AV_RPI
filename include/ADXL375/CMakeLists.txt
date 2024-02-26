@@ -1,4 +1,4 @@
-add_library(ADXL375 adxl375.c adxl375.h)
+add_library(ADXL375 adxl375.cpp adxl375.h)
 
 target_include_directories(ADXL375
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}

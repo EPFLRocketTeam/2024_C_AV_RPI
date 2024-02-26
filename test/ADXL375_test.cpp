@@ -23,19 +23,11 @@
 /*********                     Test code                           ******/
 /************************************************************************/
 
-static int error_return() {
-    adxl375_i2c_deinit(ADXL375_ADDR_I2C_PRIM);
-    adxl375_i2c_deinit(ADXL375_ADDR_I2C_SEC);
-    gpio_terminate();
-    return 1;
-}
 
 int main(void) {
     int8_t rslt;
     uint8_t loop = 0;
-    uint16_t settings_sel;
-    struct adxl375_dev dev1, dev2;
-    float x1, y1, z1, x2, y2, z2;
+    Adxl375 adxl1(ADXL375_ADDR_I2C_PRIM), adxl2(ADXL375_ADDR_I2C_SEC);
 
     // Initialising the GPIO for I2C communication
     rslt = gpio_initialise();
@@ -45,39 +37,52 @@ int main(void) {
         return 1;
     }
 
-    rslt = adxl375_init(&dev1, ADXL375_ADDR_I2C_PRIM);
-    usleep(100000);
+    rslt = adxl1.init();
     printf("Initialized adxl375 PRIMARY I2C with return %d\n", rslt);
     if (rslt < 0) {
-        adxl375_i2c_deinit(ADXL375_ADDR_I2C_PRIM);
+        adxl1.deinit();
         gpio_terminate();
         return 1;
     }
 
-    rslt = adxl375_init(&dev2, ADXL375_ADDR_I2C_SEC);
-    usleep(100000);
+    rslt = adxl2.init();
     printf("Initialized adxl357 SECONDARY I2C with return %d\n", rslt);
-    if (rslt!=0) return error_return();
+    if (rslt < 0) {
+        adxl1.deinit();
+        adxl2.deinit();
+        gpio_terminate();
+        return 1;
+    }
 
     while (loop < ITERATION) {
-        rslt = adxl375_get_xyz(&dev1, &x1, &y1, &z1);
-        if (rslt!=0) return error_return();
+        rslt = adxl1.get_data();
+        if (rslt < 0) {
+            adxl1.deinit();
+            adxl2.deinit();
+            gpio_terminate();
+            return 1;
+        }
 
         printf("PRIMARY data[%d] x: %.2f g, y: %.2f g, z: %.2f g\n",
-               loop, x1, y1, z1);
+               loop, adxl1.data.x, adxl1.data.y, adxl1.data.z);
 
-        rslt = adxl375_get_xyz(&dev2, &x2, &y2, &z2);
-        if (rslt!=0) return error_return();
+        rslt = adxl2.get_data();
+        if (rslt < 0) {
+            adxl1.deinit();
+            adxl2.deinit();
+            gpio_terminate();
+            return 1;
+        }
 
         printf("SECONDARY data[%d] x: %.2f g, y: %.2f g, z: %.2f g\n",
-               loop, x2, y2, z2);
-        
+               loop, adxl2.data.x, adxl2.data.y, adxl2.data.z);
+
         usleep(1000000);
         loop++;
     }
 
-    adxl375_i2c_deinit(ADXL375_ADDR_I2C_PRIM);
-    adxl375_i2c_deinit(ADXL375_ADDR_I2C_SEC);
+    adxl1.deinit();
+    adxl2.deinit();
     gpio_terminate();
 
     return 0;
