@@ -240,8 +240,7 @@ typedef void (*adxl375_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
 /*!
  * @brief adxl375 device structure
  */
-struct adxl375_dev
-{
+struct adxl375_dev {
     /*! Chip Id */
     uint8_t chip_id;
 
@@ -264,6 +263,15 @@ struct adxl375_dev
 
     /*! Delay function pointer */
     adxl375_delay_us_fptr_t delay_us;
+};
+
+/*!
+ * @brief adxl375 data structure
+ */
+struct adxl375_data {
+	float x;
+	float y;
+	float z;
 };
 
 /******************************************************************************/
@@ -335,17 +343,16 @@ int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev);
  * @details Reads the output data of each axis. Gives the value in g unit.
  *
  *  @param[in] dev      : Structure instance of adxl375_dev
- *  @param[out] x       : Where x value is stored
- *  @param[out] y       : Where y value is stored
- *  @param[out] z       : Where z value is stored
+ *  @param[out] data.x  : Where x value is stored
+ *  @param[out] data.y  : Where y value is stored
+ *  @param[out] data.z  : Where z value is stored
  *
  *  @return Result of API execution status
  *  @retval 0  -> Success
  *  @retval >0 -> Warning
  *  @retval <0 -> Error
  */
-int8_t adxl375_get_xyz(struct adxl375_dev *dev,
-					 float* x, float* y, float* z);
+int8_t adxl375_get_xyz(struct adxl375_dev *dev, struct adxl375_data *data);
 
 /*!
  *  @details Enables/disables the tap detection.
@@ -528,5 +535,21 @@ int8_t adxl375_i2c_deinit(uint8_t addr);
 #ifdef __cplusplus
 }
 #endif /* End of CPP guard */
+
+class Adxl375 {
+private:
+	uint8_t addr;
+	struct adxl375_dev dev;
+public:
+	struct adxl375_data data;
+	uint8_t status = 0;
+    
+    Adxl375(uint8_t addr);
+    int8_t init();
+    int8_t deinit();
+    int8_t test_data();
+    int8_t get_status();
+    int8_t get_data();
+} ;
 
 #endif	/* __ADXL375_H__ */

@@ -46,6 +46,7 @@
 #include "adxl375.h"		// ADXL375 definitions.
 #include "i2c_common.h"	// Communication definitions.
 #include <stdint.h>
+#include <stdio.h>
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
@@ -242,8 +243,7 @@ int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev) {
 /*!
  * @brief Reads the output data of each axis.
  */
-int8_t adxl375_get_xyz(struct adxl375_dev *dev,
-					 float* x, float* y, float* z) {
+int8_t adxl375_get_xyz(struct adxl375_dev *dev, struct adxl375_data *data) {
 	int8_t rslt;
 	uint8_t values[6];
 	int16_t tmp;
@@ -255,11 +255,11 @@ int8_t adxl375_get_xyz(struct adxl375_dev *dev,
 	rslt = adxl375_get_regs(ADXL375_DATAX0, values, 6, dev);
 	if (rslt) return rslt;
 	tmp = (values[0] + (values[1] << 8));
-	*x = ADXL375_OUTPUT_SCALE*tmp;
+	data->x = ADXL375_OUTPUT_SCALE*tmp;
 	tmp = (values[2] + (values[3] << 8));
-	*y = ADXL375_OUTPUT_SCALE*tmp;
+	data->y = ADXL375_OUTPUT_SCALE*tmp;
 	tmp = values[4] + (values[5] << 8);
-	*z = ADXL375_OUTPUT_SCALE*tmp;
+	data->z = ADXL375_OUTPUT_SCALE*tmp;
 
 	return ADXL375_OK;	
 }
@@ -547,4 +547,38 @@ int8_t adxl375_i2c_deinit(uint8_t addr) {
     }
 
     return ADXL375_OK;
+}
+
+Adxl375::Adxl375(uint8_t addr) : addr(addr) {}
+
+int8_t Adxl375::init() {
+	uint8_t rslt = adxl375_init(&dev, addr);
+	if (rslt!=0) {
+		printf("Error during adxl375 %d initialisation.", addr);
+		return 1;
+	}
+
+	return 0;
+}
+
+int8_t Adxl375::deinit() {
+	return adxl375_i2c_deinit(addr);
+}
+
+int8_t Adxl375::test_data() {
+	return 0;
+}
+
+int8_t Adxl375::get_status() {
+	return 0;
+}
+
+int8_t Adxl375::get_data() {
+	uint8_t rslt = adxl375_get_xyz(&dev, &data);
+	if (rslt!=0) {
+		printf("Error during adxl375 %d data fetching.", addr);
+		return 1;
+	}
+
+	return 0;
 }
