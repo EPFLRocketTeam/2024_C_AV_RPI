@@ -581,11 +581,11 @@ private:
     uint8_t addr;
 
     uint16_t settings_sel;
-    struct bmp3_dev dev = { 0 };
-    struct bmp3_settings settings = { 0 };
-    struct bmp3_status status = { { 0 } };
+    struct bmp3_dev dev;
+    struct bmp3_settings settings;
+    struct bmp3_status status;
 public:
-    struct bmp3_data data = { 0 };
+    struct bmp3_data data;
     
     Bmp390(uint8_t addr, uint16_t settings_sel = BMP3_SEL_PRESS_EN | BMP3_SEL_TEMP_EN |
         BMP3_SEL_PRESS_OS | BMP3_SEL_TEMP_OS | BMP3_SEL_ODR | BMP3_SEL_DRDY_EN);

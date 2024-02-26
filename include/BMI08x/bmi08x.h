@@ -312,4 +312,29 @@ int8_t bmi08_i2c_deinit(uint8_t acc_dev_add, uint8_t gyro_dev_add);
 }
 #endif
 
+class Bmi088 {
+private:
+    uint8_t accel_addr;
+    uint8_t gyro_addr;
+
+    struct bmi08_dev dev;
+    struct bmi08_accel_int_channel_cfg accel_int_config;
+    struct bmi08_gyro_int_channel_cfg gyro_int_config;
+    struct bmi08_sensor_data accel_data_raw;
+    struct bmi08_sensor_data gyro_data_raw;
+
+public:
+    struct bmi08_sensor_data_f accel_data;
+    struct bmi08_sensor_data_f gyro_data;
+    uint8_t status = 0;
+    
+    Bmi088(uint8_t accel_addr, uint8_t gyro_addr);
+    int8_t init();
+    int8_t deinit();
+    int8_t test_data();
+    int8_t get_status();
+    int8_t get_accel_data();
+    int8_t get_gyro_data();
+} ;
+
 #endif /* _BMI08X_H */
