@@ -17,26 +17,12 @@
 /*********                     Test code                           ******/
 /************************************************************************/
 
-static int error_return(const char api_name[], int8_t rslt) {
-    bmi08_error_codes_print_result(api_name, rslt);
-    bmi08_i2c_deinit(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY);
-    bmi08_i2c_deinit(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY);
-    gpio_terminate();
-    return 1;
-}
-
 int main(void)
 {
     int8_t rslt;
-    struct bmi08_dev dev1, dev2;
-
     uint8_t times_to_read = 0;
-    struct bmi08_sensor_data bmi08_accel1, bmi08_accel2;
-    struct bmi08_sensor_data bmi08_gyro1, bmi08_gyro2;
-    struct bmi08_accel_int_channel_cfg accel_int_config1, accel_int_config2;
-    struct bmi08_gyro_int_channel_cfg gyro_int_config1, gyro_int_config2;
-    float x = 0.0, y = 0.0, z = 0.0;
-    uint8_t status_BMI = 0;
+    Bmi088 bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY);
+    Bmi088 bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY);
 
     // Initialising gpio interface
     rslt = gpio_initialise();
@@ -47,143 +33,139 @@ int main(void)
     }
 
     // Initialising i2c interface for both devices
-    rslt = bmi08_i2c_init(&dev1, BMI088_VARIANT, BMI08_ACCEL_I2C_ADDR_PRIMARY,
-                          BMI08_GYRO_I2C_ADDR_PRIMARY);
+    rslt = bmi1.init();
     if (rslt != 0) {
-        bmi08_error_codes_print_result("bmi08_interface_init", rslt);
-        bmi08_i2c_deinit(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY);
+        bmi1.deinit();
         gpio_terminate();
         return 1;
     }
 
-    rslt = bmi08_i2c_init(&dev2, BMI088_VARIANT, BMI08_ACCEL_I2C_ADDR_SECONDARY,
-                          BMI08_GYRO_I2C_ADDR_SECONDARY);
-    if (rslt != 0) return error_return("bmi08_interface_init", rslt);
-
-
-    // Soft resetting both devices (necessary) to start from a known state
-    bmi08a_soft_reset(&dev1);
-    bmi08a_soft_reset(&dev2);
-    // Delay for the soft reset 
-    usleep(10000);
-
-    rslt = bmi08_init(&dev1);
-    if (rslt != 0) return error_return("bmi08_init", rslt);
-
-    rslt = bmi08_init(&dev2);
-    if (rslt != 0) return error_return("bmi08_init", rslt);
-
-    /* Enable data ready interrupts */
-    rslt = enable_bmi08_interrupt(&dev1, &accel_int_config1, &gyro_int_config1);
-    if (rslt != 0) return error_return("enable_bmi08_interrupt", rslt);
-
-    rslt = enable_bmi08_interrupt(&dev2, &accel_int_config2, &gyro_int_config2);
-    if (rslt != 0) return error_return("enable_bmi08_interrupt", rslt);
-
-    if (dev1.accel_cfg.power == BMI08_ACCEL_PM_ACTIVE && dev2.accel_cfg.power == BMI08_ACCEL_PM_ACTIVE) {
-        printf("\nACCEL DATA\n");
-        printf("Accel data in LSB units and Gravity data in m/s^2\n");
-        printf("Accel data range : 16G for BMI085 and 24G for BMI088\n\n");
-
-        printf("Sample_Count, Acc_Raw_X, Acc_Raw_Y, Acc_Raw_Z, Acc_ms2_X, Acc_ms2_Y, Acc_ms2_Z\n");
-
-        while (times_to_read < 10) {
-            rslt = bmi08a_get_data_int_status(&status_BMI, &dev1);
-            if (rslt != 0) return error_return("bmi08a_get_data_int_status", rslt);
-
-            if (status_BMI & BMI08_ACCEL_DATA_READY_INT) {
-                rslt = bmi08a_get_data(&bmi08_accel1, &dev1);
-                if (rslt != 0) return error_return("bmi08a_get_data", rslt);
-
-                /* Converting lsb to meter per second squared for 16 bit accelerometer at 24G range. */
-                x = lsb_to_mps2(bmi08_accel1.x, 24, 16);
-                y = lsb_to_mps2(bmi08_accel1.y, 24, 16);
-                z = lsb_to_mps2(bmi08_accel1.z, 24, 16);
-
-                printf("PRIMARY: %d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
-                        times_to_read,
-                        bmi08_accel1.x, bmi08_accel1.y, bmi08_accel1.z,
-                        x, y, z);
-                times_to_read = times_to_read + 1;
-            }
-
-            rslt = bmi08a_get_data_int_status(&status_BMI, &dev2);
-            if (rslt != 0) return error_return("bmi08a_get_data_int_status", rslt);
-
-            if (status_BMI & BMI08_ACCEL_DATA_READY_INT) {
-                rslt = bmi08a_get_data(&bmi08_accel2, &dev2);
-                if (rslt != 0) return error_return("bmi08a_get_data", rslt);
-
-                /* Converting lsb to meter per second squared for 16 bit accelerometer at 24G range. */
-                x = lsb_to_mps2(bmi08_accel2.x, 24, 16);
-                y = lsb_to_mps2(bmi08_accel2.y, 24, 16);
-                z = lsb_to_mps2(bmi08_accel2.z, 24, 16);
-
-                printf("SECONDARY: %d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
-                        times_to_read,
-                        bmi08_accel2.x, bmi08_accel2.y, bmi08_accel2.z,
-                        x, y, z);
-
-                times_to_read = times_to_read + 1;
-            }
-        }
+    rslt = bmi2.init();
+    if (rslt != 0) {
+        bmi1.deinit();
+        bmi2.deinit();
+        gpio_terminate();
+        return 1;
     }
-    if (dev1.gyro_cfg.power == BMI08_GYRO_PM_NORMAL  && dev2.gyro_cfg.power == BMI08_GYRO_PM_NORMAL) {
-        times_to_read = 0;
 
-        printf("\n\nGYRO DATA\n");
-        printf("Gyro data in LSB units and degrees per second\n");
-        printf("Gyro data range : 250 dps for BMI085 and BMI088\n\n");
 
-        printf("Sample_Count, Gyr_Raw_X, Gyr_Raw_Y, Gyr_Raw_Z, Gyr_DPS_X, Gyr_DPS_Y, Gyr_DPS_Z\n");
+    // // Soft resetting both devices (necessary) to start from a known state
+    // bmi08a_soft_reset(&dev1);
+    // bmi08a_soft_reset(&dev2);
+    // // Delay for the soft reset 
+    // usleep(10000);
 
-        while (times_to_read < 10) {
-            rslt = bmi08g_get_data_int_status(&status_BMI, &dev1);
-            if (rslt != 0) return error_return("bmi08g_get_data_int_status", rslt);
+    printf("\nACCEL DATA\n");
+    printf("Accel data in m/s^2\n");
+    printf("Accel data range 24G for BMI088\n\n");
 
-            if (status_BMI & BMI08_GYRO_DATA_READY_INT) {
-                rslt = bmi08g_get_data(&bmi08_gyro1, &dev1);
-                if (rslt != 0) return error_return("bmi08g_get_data", rslt);
+    printf("Sample_Count, Acc_Raw_X, Acc_Raw_Y, Acc_Raw_Z, Acc_ms2_X, Acc_ms2_Y, Acc_ms2_Z\n");
 
-                /* Converting lsb to degree per second for 16 bit gyro at 250 dps range. */
-                x = lsb_to_dps(bmi08_gyro1.x, (float)250, 16);
-                y = lsb_to_dps(bmi08_gyro1.y, (float)250, 16);
-                z = lsb_to_dps(bmi08_gyro1.z, (float)250, 16);
-
-                printf("PRIMARY: %d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
-                        times_to_read,
-                        bmi08_gyro1.x, bmi08_gyro1.y, bmi08_gyro1.z,
-                        x, y, z);
-                times_to_read = times_to_read + 1;
-            }
-
-            rslt = bmi08g_get_data_int_status(&status_BMI, &dev2);
-            if (rslt != 0) return error_return("bmi08g_get_data_int_status", rslt);
-
-            if (status_BMI & BMI08_GYRO_DATA_READY_INT) {
-                rslt = bmi08g_get_data(&bmi08_gyro2, &dev2);
-                if (rslt != 0) return error_return("bmi08g_get_data", rslt);
-
-                /* Converting lsb to degree per second for 16 bit gyro at 250 dps range. */
-                x = lsb_to_dps(bmi08_gyro2.x, (float)250, 16);
-                y = lsb_to_dps(bmi08_gyro2.y, (float)250, 16);
-                z = lsb_to_dps(bmi08_gyro2.z, (float)250, 16);
-
-                printf("SECONDARY: %d, %5d, %5d, %5d, %4.2f, %4.2f, %4.2f\n",
-                        times_to_read,
-                        bmi08_gyro2.x, bmi08_gyro2.y, bmi08_gyro2.z,
-                        x, y, z);
-
-                times_to_read = times_to_read + 1;
-            }
+    while (times_to_read < 10) {
+        rslt = bmi1.get_status();
+        if (rslt != 0) {
+            bmi1.deinit();
+            bmi2.deinit();
+            gpio_terminate();
+            return 1;
         }
+
+        if (bmi1.status & BMI08_ACCEL_DATA_READY_INT) {
+            rslt = bmi1.get_accel_data();
+            if (rslt != 0) {
+                bmi1.deinit();
+                bmi2.deinit();
+                gpio_terminate();
+                return 1;
+            }
+
+            printf("PRIMARY: %d, %4.2f, %4.2f, %4.2f\n",
+                    times_to_read,
+                    bmi1.accel_data.x, bmi1.accel_data.y, bmi1.accel_data.z);
+        }
+
+        rslt = bmi2.get_status();
+        if (rslt != 0) {
+            bmi1.deinit();
+            bmi2.deinit();
+            gpio_terminate();
+            return 1;
+        }
+
+        if (bmi2.status & BMI08_ACCEL_DATA_READY_INT) {
+            rslt = bmi2.get_accel_data();
+            if (rslt != 0) {
+                bmi1.deinit();
+                bmi2.deinit();
+                gpio_terminate();
+                return 1;
+            }
+
+            printf("SECONDARY: %d, %4.2f, %4.2f, %4.2f\n",
+                    times_to_read,
+                    bmi2.accel_data.x, bmi2.accel_data.y, bmi2.accel_data.z);
+        }
+        times_to_read = times_to_read + 1;
+    }
+
+    times_to_read = 0;
+
+    printf("\n\nGYRO DATA\n");
+    printf("Gyro data in degrees per second\n");
+    printf("Gyro data range : 250 dps for BMI088\n\n");
+
+    printf("Sample_Count, Gyr_Raw_X, Gyr_Raw_Y, Gyr_Raw_Z, Gyr_DPS_X, Gyr_DPS_Y, Gyr_DPS_Z\n");
+
+    while (times_to_read < 10) {
+        rslt = bmi1.get_status();
+        if (rslt != 0) {
+            bmi1.deinit();
+            bmi2.deinit();
+            gpio_terminate();
+            return 1;
+        }
+
+        if (bmi1.status & BMI08_GYRO_DATA_READY_INT) {
+            rslt = bmi1.get_gyro_data();
+            if (rslt != 0) {
+                bmi1.deinit();
+                bmi2.deinit();
+                gpio_terminate();
+                return 1;
+            }
+
+            printf("PRIMARY: %d, %4.2f, %4.2f, %4.2f\n",
+                    times_to_read,
+                    bmi1.gyro_data.x, bmi1.gyro_data.y, bmi1.gyro_data.z);
+        }
+
+        rslt = bmi2.get_status();
+        if (rslt != 0) {
+            bmi1.deinit();
+            bmi2.deinit();
+            gpio_terminate();
+            return 1;
+        }
+
+        if (bmi2.status & BMI08_GYRO_DATA_READY_INT) {
+            rslt = bmi2.get_gyro_data();
+            if (rslt != 0) {
+                bmi1.deinit();
+                bmi2.deinit();
+                gpio_terminate();
+                return 1;
+            }
+
+            printf("SECONDARY: %d, %4.2f, %4.2f, %4.2f\n",
+                    times_to_read,
+                    bmi2.gyro_data.x, bmi2.gyro_data.y, bmi2.gyro_data.z);
+        }
+        times_to_read = times_to_read + 1;
     }
 
     /* Disable data ready interrupts */
-    rslt = disable_bmi08_interrupt(&dev1, &accel_int_config1, &gyro_int_config1);
-    rslt = disable_bmi08_interrupt(&dev2, &accel_int_config2, &gyro_int_config2);
-    bmi08_i2c_deinit(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY);
-    bmi08_i2c_deinit(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY);
+    bmi1.deinit();
+    bmi2.deinit();
     gpio_terminate();
     return rslt;
 }

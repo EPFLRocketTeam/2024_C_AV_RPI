@@ -1167,3 +1167,84 @@ static int8_t set_range(struct bmi08_dev *dev)
 }
 
 /*! @endcond */
+
+// Class methods definitions
+
+Bmi088::Bmi088(uint8_t accel_addr, uint8_t gyro_addr) : accel_addr(accel_addr),
+    gyro_addr(gyro_addr) {}
+
+int8_t Bmi088::init() {
+    int8_t rslt = bmi08_i2c_init(&dev, BMI088_VARIANT, accel_addr, gyro_addr);
+    if (rslt != 0) {
+        bmi08_error_codes_print_result("bmi08_interface_init", rslt);
+        return 1;
+    }
+
+    bmi08a_soft_reset(&dev); //reset to start from a known state
+
+    rslt = bmi08_init(&dev);
+    if (rslt != 0) {
+        bmi08_error_codes_print_result("bmi08_init", rslt);
+        return 1;
+    }
+
+    /* Enable data ready interrupts */
+    rslt = enable_bmi08_interrupt(&dev, &accel_int_config, &gyro_int_config);
+    if (rslt != 0) {
+        bmi08_error_codes_print_result("enable_bmi08_interrupt", rslt);
+        return 1;
+    }
+    
+    return 0;
+}
+
+int8_t Bmi088::deinit() {
+    disable_bmi08_interrupt(&dev, &accel_int_config, &gyro_int_config);
+    bmi08a_soft_reset(&dev);
+    return bmi08_i2c_deinit(accel_addr, gyro_addr);
+}
+
+int8_t Bmi088::test_data() {
+    return 0;
+}
+
+int8_t Bmi088::get_status() {
+    int8_t rslt = bmi08a_get_data_int_status(&status, &dev);
+    if (rslt != 0) {
+        bmi08_error_codes_print_result("bmi08a_get_data_int_status", rslt);
+        return 1;
+    }
+
+    return 0;
+}
+
+int8_t Bmi088::get_accel_data() {
+    int8_t rslt = bmi08a_get_data(&accel_data_raw, &dev);
+    if (rslt != 0) {
+        bmi08_error_codes_print_result("bmi08a_get_data", rslt);
+        return 1;
+    }
+
+    /* Converting lsb to meter per second squared for 16 bit accelerometer at 
+     * 24G range. */
+    accel_data.x = lsb_to_mps2(accel_data_raw.x, 24, 16);
+    accel_data.y = lsb_to_mps2(accel_data_raw.y, 24, 16);
+    accel_data.z = lsb_to_mps2(accel_data_raw.z, 24, 16);
+
+    return 0;
+}
+
+int8_t Bmi088::get_gyro_data() {
+    int8_t rslt = bmi08g_get_data(&gyro_data_raw, &dev);
+    if (rslt != 0) {
+        bmi08_error_codes_print_result("bmi08g_get_data", rslt);
+        return 1;
+    }
+
+    /* Converting lsb to degree per second for 16 bit gyro at 250 dps range. */
+    gyro_data.x = lsb_to_dps(gyro_data_raw.x, (float)250, 16);
+    gyro_data.y = lsb_to_dps(gyro_data_raw.y, (float)250, 16);
+    gyro_data.z = lsb_to_dps(gyro_data_raw.z, (float)250, 16);
+
+    return 0;
+}

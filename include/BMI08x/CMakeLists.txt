@@ -1,4 +1,4 @@
-add_library(BMI08x bmi08xa.c bmi08x.h bmi08a.c bmi08g.c)
+add_library(BMI08x bmi08xa.cpp bmi08x.h bmi08a.cpp bmi08g.cpp bmi08.h)
 
 # Include directories for BMI
 target_include_directories(BMI08x

@@ -3021,9 +3021,7 @@ int8_t Bmp390::init() {
 
     rslt = bmp3_init(&dev);
     printf("Initialized bmp3 with return %d\n", rslt);
-    if (rslt!=0) {
-        return 1;
-    }
+    if (rslt!=0) return 1;
 
     rslt = bmp3_set_sensor_settings(settings_sel, &settings, &dev);
     printf("Set settings with return %d\n", rslt);
