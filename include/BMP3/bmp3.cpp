@@ -3014,10 +3014,6 @@ Bmp390::Bmp390(uint8_t addr, uint16_t settings_sel) :
     settings.op_mode = BMP3_MODE_NORMAL;
 }
 
-Bmp390::~Bmp390() {
-    bmp3_i2c_deinit(addr);
-}
-
 int8_t Bmp390::init() {
     int8_t rslt = bmp3_i2c_init(&dev, addr);
     printf("Initialized bmp3 I2C with return %d\n", rslt);
@@ -3038,6 +3034,10 @@ int8_t Bmp390::init() {
     if (rslt!=0) return 1;
 
     return 0;
+}
+
+int8_t Bmp390::deinit() {
+    return bmp3_i2c_deinit(addr);
 }
 
 int8_t Bmp390::test_data() {
