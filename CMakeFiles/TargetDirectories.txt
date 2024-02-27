@@ -1,3 +1,0 @@
-/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/CMakeFiles/flight_control_test.dir
-/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/CMakeFiles/edit_cache.dir
-/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/CMakeFiles/rebuild_cache.dir
