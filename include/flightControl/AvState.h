@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <string>
-#include "AvData.h"
+
 
 #ifndef AVSTATE_H
 #define AVSTATE_H
