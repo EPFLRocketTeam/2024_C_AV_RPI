@@ -1,7 +1,8 @@
 #include "telecom.h"
 
-Telecom::Telecom() 
-:   new_cmd_received(false), last_packet{0, 0} {}
+Telecom::Telecom() : new_cmd_received(false), last_packet{0, 0} {}
+
+Telecom::~Telecom() {}
 
 void Telecom::update() {
     /* TODO */

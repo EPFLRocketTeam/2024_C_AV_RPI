@@ -23,13 +23,15 @@ struct SensorsData {
 
 class Sensors {
 public:
-    Sensors() {}
-    ~Sensors() {}
+    Sensors();
+    ~Sensors();
 
     bool update();
-
     inline SensorsData dump() const { return m_data; }
 private:
+    // Adxl375 m_adxl375;
+    // Bmi088 m_bmi088;
+    // Bmp390 m_bmp390;
     SensorsData m_data;
 };
 

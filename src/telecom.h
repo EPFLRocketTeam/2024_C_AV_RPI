@@ -12,12 +12,11 @@ struct UPLink {
 class Telecom {
 public:
     Telecom();
-    ~Telecom() {}
+    ~Telecom();
 
     void update();
     UPLink get_cmd() const;
     void reset_cmd();
-    
 private:
     av_uplink_t last_packet;
     bool new_cmd_received;
