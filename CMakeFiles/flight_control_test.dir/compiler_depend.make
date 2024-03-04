@@ -185,7 +185,6 @@ CMakeFiles/flight_control_test.dir/src/flightControl/AvState.cpp.o: src/flightCo
   include/flightControl/AvData.h \
   /usr/include/string.h \
   /usr/include/strings.h \
-  include/flightControl/AvData.h \
   /usr/include/c++/11/list \
   /usr/include/c++/11/bits/stl_list.h \
   /usr/include/c++/11/bits/allocated_ptr.h \

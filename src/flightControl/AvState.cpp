@@ -1,6 +1,7 @@
 #include "../../include/flightControl/AvState.h"
 #include "../../include/flightControl/AvData.h"
 #include <string.h>
+#include "../../include/flightControl/AvData.h"
 #include <list>
 
 
