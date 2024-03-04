@@ -22,6 +22,8 @@ class AvData{
        
         std::string telemetry;
         bool ignited;
+
+        void update(std::string telemetry);
  
 };
 
