@@ -44,7 +44,7 @@
 /**\name        Header files
  ****************************************************************************/
 #include "bmi08x.h"
-#include "i2c_common.h"
+#include "i2c_wrappers.h"
 
 /****************************************************************************/
 
@@ -1170,59 +1170,57 @@ static int8_t set_range(struct bmi08_dev *dev)
 
 // Class methods definitions
 
-Bmi088::Bmi088(uint8_t accel_addr, uint8_t gyro_addr) : accel_addr(accel_addr),
-    gyro_addr(gyro_addr) {}
-
-int8_t Bmi088::init() {
+Bmi088::Bmi088(uint8_t accel_addr, uint8_t gyro_addr) : accel_addr(accel_addr), gyro_addr(gyro_addr) {
     int8_t rslt = bmi08_i2c_init(&dev, BMI088_VARIANT, accel_addr, gyro_addr);
     if (rslt != 0) {
-        bmi08_error_codes_print_result("bmi08_interface_init", rslt);
-        return 1;
+        throw Bmi088Exception("bmi08_interface_init failed with error: " + std::to_string(rslt));
     }
 
-    bmi08a_soft_reset(&dev); //reset to start from a known state
+    bmi08a_soft_reset(&dev); // Reset to start from a known state
 
     rslt = bmi08_init(&dev);
     if (rslt != 0) {
-        bmi08_error_codes_print_result("bmi08_init", rslt);
-        return 1;
+        throw Bmi088Exception("bmi08_init failed with error: " + std::to_string(rslt));
     }
 
     /* Enable data ready interrupts */
     rslt = enable_bmi08_interrupt(&dev, &accel_int_config, &gyro_int_config);
     if (rslt != 0) {
-        bmi08_error_codes_print_result("enable_bmi08_interrupt", rslt);
-        return 1;
+        throw Bmi088Exception("enable_bmi08_interrupt failed with error: " + std::to_string(rslt));
     }
-    
-    return 0;
 }
 
-int8_t Bmi088::deinit() {
+Bmi088::~Bmi088() {
     disable_bmi08_interrupt(&dev, &accel_int_config, &gyro_int_config);
     bmi08a_soft_reset(&dev);
-    return bmi08_i2c_deinit(accel_addr, gyro_addr);
+    int8_t rslt = bmi08_i2c_deinit(accel_addr, gyro_addr);
+    if (rslt != 0) {
+        printf("Error during BMI088 I2C deinitialization: %d\n", rslt);
+    }
 }
 
-int8_t Bmi088::test_data() {
-    return 0;
+void Bmi088::test_data() {
+    // Example: If there's a test that can fail, handle it similarly
+	// int8_t rslt = some_test_function();
+	// if (rslt != BMI088_OK) {
+	//     throw Bmi088Exception(rslt);
+	// }
 }
 
-int8_t Bmi088::get_status() {
+uint8_t Bmi088::get_status() {
     int8_t rslt = bmi08a_get_data_int_status(&status, &dev);
     if (rslt != 0) {
-        bmi08_error_codes_print_result("bmi08a_get_data_int_status", rslt);
-        return 1;
+        throw Bmi088Exception("bmi08a_get_data_int_status failed with error: " + std::to_string(rslt));
     }
 
-    return 0;
+    return status;
 }
 
-int8_t Bmi088::get_accel_data() {
+bmi08_sensor_data_f Bmi088::get_accel_data() {
+    bmi08_sensor_data accel_data_raw;
     int8_t rslt = bmi08a_get_data(&accel_data_raw, &dev);
     if (rslt != 0) {
-        bmi08_error_codes_print_result("bmi08a_get_data", rslt);
-        return 1;
+        throw Bmi088Exception("bmi08a_get_data failed with error: " + std::to_string(rslt));
     }
 
     /* Converting lsb to meter per second squared for 16 bit accelerometer at 
@@ -1231,14 +1229,14 @@ int8_t Bmi088::get_accel_data() {
     accel_data.y = lsb_to_mps2(accel_data_raw.y, 24, 16);
     accel_data.z = lsb_to_mps2(accel_data_raw.z, 24, 16);
 
-    return 0;
+    return accel_data;
 }
 
-int8_t Bmi088::get_gyro_data() {
+bmi08_sensor_data_f Bmi088::get_gyro_data() {
+    bmi08_sensor_data gyro_data_raw;
     int8_t rslt = bmi08g_get_data(&gyro_data_raw, &dev);
     if (rslt != 0) {
-        bmi08_error_codes_print_result("bmi08g_get_data", rslt);
-        return 1;
+        throw Bmi088Exception("bmi08g_get_data failed with error: " + std::to_string(rslt));
     }
 
     /* Converting lsb to degree per second for 16 bit gyro at 250 dps range. */
@@ -1246,5 +1244,6 @@ int8_t Bmi088::get_gyro_data() {
     gyro_data.y = lsb_to_dps(gyro_data_raw.y, (float)250, 16);
     gyro_data.z = lsb_to_dps(gyro_data_raw.z, (float)250, 16);
 
-    return 0;
+    return gyro_data;
 }
+

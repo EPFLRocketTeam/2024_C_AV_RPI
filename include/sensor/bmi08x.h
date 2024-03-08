@@ -47,6 +47,9 @@
 #ifndef _BMI08X_H
 #define _BMI08X_H
 
+#include <stdexcept>
+#include <string>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -317,24 +320,29 @@ private:
     uint8_t accel_addr;
     uint8_t gyro_addr;
 
-    struct bmi08_dev dev;
-    struct bmi08_accel_int_channel_cfg accel_int_config;
-    struct bmi08_gyro_int_channel_cfg gyro_int_config;
-    struct bmi08_sensor_data accel_data_raw;
-    struct bmi08_sensor_data gyro_data_raw;
-
-public:
-    struct bmi08_sensor_data_f accel_data;
-    struct bmi08_sensor_data_f gyro_data;
+    bmi08_dev dev;
+    bmi08_accel_int_channel_cfg accel_int_config;
+    bmi08_gyro_int_channel_cfg gyro_int_config;
+    bmi08_sensor_data_f accel_data;
+    bmi08_sensor_data_f gyro_data;
     uint8_t status = 0;
-    
+
+public:    
     Bmi088(uint8_t accel_addr, uint8_t gyro_addr);
-    int8_t init();
-    int8_t deinit();
-    int8_t test_data();
-    int8_t get_status();
-    int8_t get_accel_data();
-    int8_t get_gyro_data();
+    ~Bmi088();
+    void test_data();
+    uint8_t get_status();
+    bmi08_sensor_data_f get_accel_data();
+    bmi08_sensor_data_f get_gyro_data();
 } ;
+
+class Bmi088Exception : public std::runtime_error {
+public:
+    explicit Bmi088Exception(const std::string& message)
+        : std::runtime_error(message) {}
+
+    explicit Bmi088Exception(int error_code)
+        : std::runtime_error("BMI088 Error: " + std::to_string(error_code)) {}
+};
 
 #endif /* _BMI08X_H */

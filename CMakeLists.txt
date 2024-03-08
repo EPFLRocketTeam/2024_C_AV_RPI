@@ -1,31 +1,43 @@
 #New CMake build file for FireHorn
 cmake_minimum_required(VERSION 3.25)
 
-project(sensors_test VERSION 0.1 LANGUAGES C CXX)
+project(flight_computer VERSION 0.1 LANGUAGES C CXX)
 
 # Set the build type to Debug
 set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(include)
 
-add_subdirectory(include/BMP3)
-add_subdirectory(include/BMI08x)
-add_subdirectory(include/ADXL375)
-add_subdirectory(include/I2C_Common)
+add_library(ADXL375 src/sensor/adxl375.cpp include/sensor/adxl375.h)
+target_include_directories(ADXL375 PUBLIC include/sensor)
+target_link_libraries(ADXL375 PRIVATE I2CInterface)
+
+add_library(BMP3 src/sensor/bmp3.cpp include/sensor/bmp3.h)
+target_include_directories(BMP3 PUBLIC include/sensor)
+target_link_libraries(BMP3 PRIVATE I2CInterface)
+
+add_library(BMI08x src/sensor/bmi08xa.cpp src/sensor/bmi08a.cpp src/sensor/bmi08g.cpp include/sensor/bmi08x.h include/sensor/bmi08.h)
+target_include_directories(BMI08x PUBLIC include/sensor)
+target_link_libraries(BMI08x PRIVATE I2CInterface)
+
+add_library(I2CInterface src/I2CInterface/I2CInterface.cpp include/I2CInterface/I2CInterface.h include/I2CInterface/i2c_wrappers.h)
+target_include_directories(I2CInterface PUBLIC include/I2CInterface)
+target_link_libraries(I2CInterface PRIVATE pigpio)
+
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 
 # Test for he BMP390 sensor
 add_executable(BMP390_test test/BMP390_test.cpp)
-target_link_libraries(BMP390_test BMP3 I2C_Common)
+target_link_libraries(BMP390_test BMP3)
 
 # Test for the BMI088 sensor
 add_executable(BMI088_test test/BMI088_test.cpp)
-target_link_libraries(BMI088_test BMI08x I2C_Common)
+target_link_libraries(BMI088_test BMI08x)
 
 # Test for the ADXL375 sensor
 add_executable(ADXL375_test test/ADXL375_test.cpp)
-target_link_libraries(ADXL375_test ADXL375 I2C_Common)
+target_link_libraries(ADXL375_test ADXL375)
 
 enable_testing()
 

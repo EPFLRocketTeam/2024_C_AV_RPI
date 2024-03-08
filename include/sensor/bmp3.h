@@ -45,6 +45,8 @@
 
 /* Header includes */
 #include "bmp3_defs.h"
+#include <stdexcept>
+#include <string>
 
 /*! CPP guard */
 #ifdef __cplusplus
@@ -581,19 +583,18 @@ private:
     uint8_t addr;
 
     uint16_t settings_sel;
-    struct bmp3_dev dev;
-    struct bmp3_settings settings;
-    struct bmp3_status status;
+    bmp3_dev dev;
+    bmp3_settings settings;
+    bmp3_status status;
+    bmp3_data data;
 public:
-    struct bmp3_data data;
     
     Bmp390(uint8_t addr, uint16_t settings_sel = BMP3_SEL_PRESS_EN | BMP3_SEL_TEMP_EN |
         BMP3_SEL_PRESS_OS | BMP3_SEL_TEMP_OS | BMP3_SEL_ODR | BMP3_SEL_DRDY_EN);
-    int8_t init();
-    int8_t deinit();
-    int8_t test_data();
-    int8_t get_status();
-    int8_t get_sensor_data(uint8_t sensor_comp = BMP3_PRESS_TEMP);
+    ~Bmp390();
+    int test_data();
+    bmp3_status get_status();
+    bmp3_data get_sensor_data(uint8_t sensor_comp = BMP3_PRESS_TEMP);
     /*
     * sensor_comp indicates the type of data to be read
     * BMP3_PRESS_TEMP : To read pressure and temperature data
@@ -601,5 +602,18 @@ public:
     * BMP3_PRESS      : To read only pressure data
     */
 } ;
+
+class Bmp390Exception : public std::runtime_error {
+public:
+    explicit Bmp390Exception(int error)
+        : std::runtime_error("BMP390 error: " + std::to_string(error)), error(error) {}
+
+    int getError() const {
+        return error;
+    }
+
+private:
+    int error;
+};
 
 #endif /* _BMP3_H */
