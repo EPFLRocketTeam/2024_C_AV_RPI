@@ -46,7 +46,7 @@ target_link_libraries(I2CInterface PRIVATE pigpio)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 
 # Test for he BMP390 sensor
-add_executable(BMP390_test test/BMP390_test.cpp)
+add_executable(BMP390_test tests/BMP390_test.cpp)
 target_link_libraries(BMP390_test BMP3)
 
 <<<<<<< HEAD
@@ -54,11 +54,11 @@ target_link_libraries(main_test pigpio BMP3 BMI08x)
 >>>>>>> 182b2ad (Add files via upload)
 =======
 # Test for the BMI088 sensor
-add_executable(BMI088_test test/BMI088_test.cpp)
+add_executable(BMI088_test tests/BMI088_test.cpp)
 target_link_libraries(BMI088_test BMI08x)
 
 # Test for the ADXL375 sensor
-add_executable(ADXL375_test test/ADXL375_test.cpp)
+add_executable(ADXL375_test tests/ADXL375_test.cpp)
 target_link_libraries(ADXL375_test ADXL375)
 
 enable_testing()
