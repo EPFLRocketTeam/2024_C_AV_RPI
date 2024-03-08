@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #include "bmp3.h"
-#include "i2c_common.h"
 
 /************************************************************************/
 /*********                     Macros                              ******/
@@ -25,53 +24,12 @@
 
 int main(void)
 {
-    int8_t rslt;
-    uint8_t loop = 0;
+    int loop = 0;
     Bmp390 bmp1(BMP3_ADDR_I2C_PRIM), bmp2(BMP3_ADDR_I2C_SEC);
-
-    // Initialising the GPIO for I2C communication
-    rslt = gpio_initialise();
-    printf("Initialised GPIO with return %d\n", rslt);
-    if (rslt < 0) {
-        gpio_terminate();
-        return 1;
-    }
-
-    // Initialising the I2C channels
-    rslt = bmp1.init();
-    if (rslt!=0) {
-        bmp1.deinit();
-        gpio_terminate();
-        return 1;
-    }
-
-    rslt = bmp2.init();
-    if (rslt!=0) {
-        bmp1.deinit();
-        bmp2.deinit();
-        gpio_terminate();
-        return 1;
-    }
 
     // Main get data loop
     while (loop < ITERATION)
     {
-        rslt = bmp1.get_status();
-        if (rslt!=0) {
-            bmp1.deinit();
-            bmp2.deinit();
-            gpio_terminate();
-            return 1;
-        }
-
-        rslt = bmp2.get_status();
-        if (rslt!=0) {
-            bmp1.deinit();
-            bmp2.deinit();
-            gpio_terminate();
-            return 1;
-        }
-        
         /* Read temperature and pressure data iteratively based on data ready interrupt */
         /*
             * First parameter indicates the type of data to be read
@@ -79,36 +37,26 @@ int main(void)
             * BMP3_TEMP       : To read only temperature data
             * BMP3_PRESS      : To read only pressure data
             */
-        rslt = bmp1.get_sensor_data();
+        if (bmp1.get_status().intr.drdy) {
+            bmp3_data data1 = bmp1.get_sensor_data();
 
-        #ifdef BMP3_FLOAT_COMPENSATION
-        printf("Data[%d] PRIMARY T: %.2f deg C, P: %.2f Pa\n", loop, (bmp1.data.temperature), (bmp1.data.pressure));
-        #else
-        printf("Data[%d]  T: %ld deg C, P: %lu Pa\n", loop, (long int)(int32_t)(data1.temperature / 100),
-                (long unsigned int)(uint32_t)(data1.pressure / 100));
-        #endif
-        rslt = bmp1.test_data();
-        if (rslt!=0) return rslt;
+            printf("Data[%d] PRIMARY T: %.2f deg C, P: %.2f Pa\n", loop, (data1.temperature), (data1.pressure));
 
+            int rslt = bmp1.test_data();
+            if (rslt!=0) return rslt;
+        }
 
-        rslt = bmp2.get_sensor_data();
+        if (bmp2.get_status().intr.drdy) {
+            bmp3_data data2 = bmp2.get_sensor_data();
 
-        #ifdef BMP3_FLOAT_COMPENSATION
-        printf("Data[%d] SECONDARY T: %.2f deg C, P: %.2f Pa\n", loop, (bmp2.data.temperature), (bmp2.data.pressure));
-        #else
-        printf("Data[%d]  T: %ld deg C, P: %lu Pa\n", loop, (long int)(int32_t)(data2.temperature / 100),
-                (long unsigned int)(uint32_t)(data2.pressure / 100));
-        #endif
-        rslt = bmp2.test_data();
-        if (rslt!=0) return rslt;
+            printf("Data[%d] SECONDARY T: %.2f deg C, P: %.2f Pa\n", loop, (data2.temperature), (data2.pressure));
+
+            int rslt = bmp2.test_data();
+            if (rslt!=0) return rslt;
+        }
 
         loop = loop + 1;
         if (loop < ITERATION) sleep(1);
     }
-
-    bmp1.deinit();
-    bmp2.deinit();
-    gpio_terminate();
-
     return 0;
 }

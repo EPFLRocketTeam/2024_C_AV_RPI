@@ -1,5 +1,5 @@
-#ifndef _I2C_COMMON_H
-#define _I2C_COMMON_H
+#ifndef I2C_WRAPPERS_H
+#define I2C_WRAPPERS_H
 
 /* Header includes */
 
@@ -12,20 +12,6 @@ extern "C" {
  *  @brief Macros for error management
  */
 #define COMM_FAIL -2;
-
-/*!
- *  @brief Function to initialise GPIO with pigpio.
- *
- *  @return Status of execution
- *  @retval 0 -> Success
- *  @retval < 0 -> Failure
- */
-int8_t gpio_initialise();
-
-/*!
- *  @brief Function to deinitialise GPIO with pigpio.
- */
-void gpio_terminate();
 
 /*!
  *  @brief Function to return the unique pointer to an address.
@@ -107,4 +93,4 @@ void i2c_delay_us(uint32_t period, void *intf_ptr);
 }
 #endif /* End of CPP guard */
 
-#endif /* _BMP3_H */
+#endif /* I2C_WRAPPERS_H */

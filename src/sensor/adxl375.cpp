@@ -44,9 +44,10 @@
 /***************************** Include Files **********************************/
 /******************************************************************************/
 #include "adxl375.h"		// ADXL375 definitions.
-#include "i2c_common.h"	// Communication definitions.
+#include "i2c_wrappers.h"	// Communication definitions.
 #include <stdint.h>
 #include <stdio.h>
+
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
@@ -197,7 +198,7 @@ int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr) {
 	//which at ~100Hz(or even greater) provides sufficient time for FIFO to
 	//be emptied
 	reg_addr = ADXL375_FIFO_CTL;
-	reg_val = (0x00|ADXL375_FIFO_MODE(0x2)|ADXL375_SAMPLES(0x1E));
+	reg_val = (0x00|ADXL375_FIFO_MODE(ADXL375_FIFO_STREAM)|ADXL375_SAMPLES(0x1E));
 	rslt = adxl375_set_regs(&reg_addr, &reg_val,1,dev);
 	if (rslt) return rslt;
 
@@ -238,6 +239,23 @@ int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev) {
 	if (rslt) return rslt;
 
 	return ADXL375_OK;
+}
+
+/*!
+ * @brief This API gets the interrupt (fifo watermark, fifo full, data ready)
+ * status from the sensor.
+ */
+int8_t adxl375_get_int_status(struct adxl375_dev *dev, uint8_t *status)
+{
+    int8_t rslt;
+    uint8_t tmp;
+
+    rslt = adxl375_get_regs(ADXL375_INT_SOURCE, &tmp, 1, dev);
+
+    if (rslt) return rslt;
+    *status = tmp;
+
+    return rslt;
 }
 
 /*!
@@ -549,36 +567,41 @@ int8_t adxl375_i2c_deinit(uint8_t addr) {
     return ADXL375_OK;
 }
 
-Adxl375::Adxl375(uint8_t addr) : addr(addr) {}
-
-int8_t Adxl375::init() {
-	uint8_t rslt = adxl375_init(&dev, addr);
-	if (rslt!=0) {
-		printf("Error during adxl375 %d initialisation.", addr);
-		return 1;
+Adxl375::Adxl375(uint8_t addr) : addr(addr) {
+	int8_t rslt = adxl375_init(&dev, addr);
+	if (rslt != ADXL375_OK) {
+		throw Adxl375Exception(rslt);
 	}
-
-	return 0;
 }
 
-int8_t Adxl375::deinit() {
-	return adxl375_i2c_deinit(addr);
-}
-
-int8_t Adxl375::test_data() {
-	return 0;
-}
-
-int8_t Adxl375::get_status() {
-	return 0;
-}
-
-int8_t Adxl375::get_data() {
-	uint8_t rslt = adxl375_get_xyz(&dev, &data);
-	if (rslt!=0) {
-		printf("Error during adxl375 %d data fetching.", addr);
-		return 1;
+Adxl375::~Adxl375() {
+	int8_t rslt = adxl375_i2c_deinit(addr);
+	if (rslt != ADXL375_OK) {
+		printf("Error during ADXL375 I2C deinitialization: %d\n", rslt);
 	}
+}
 
+int Adxl375::test_data() {
+	// Example: If there's a test that can fail, handle it similarly
+	// int8_t rslt = some_test_function();
+	// if (rslt != ADXL375_OK) {
+	//     throw Adxl375Exception(rslt);
+	// }
 	return 0;
+}
+
+uint8_t Adxl375::get_status() {
+	int8_t rslt = adxl375_get_int_status(&dev, &status);
+	if (rslt != ADXL375_OK) {
+		throw Adxl375Exception(rslt);
+	}
+	return status;
+}
+
+adxl375_data Adxl375::get_data() {
+	int8_t rslt = adxl375_get_xyz(&dev, &data);
+	if (rslt != ADXL375_OK) {
+		throw Adxl375Exception(rslt);
+	}
+	return data;
 }

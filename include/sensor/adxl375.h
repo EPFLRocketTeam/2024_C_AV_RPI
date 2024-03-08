@@ -45,6 +45,8 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <exception>
+#include <string>
 
 /*! CPP guard */
 #ifdef __cplusplus
@@ -340,6 +342,19 @@ int8_t adxl375_init(struct adxl375_dev *dev, uint8_t addr);
 int8_t adxl375_set_power_mode(uint8_t pwr_mode, struct adxl375_dev *dev);
 
 /*!
+ * @details Gets the interrupt status from register (INT_SOURCE)
+ *
+ *  @param[in] dev      : Structure instance of adxl375_dev
+ *  @param[out] status  : Where the interrupt status is stored
+ *
+ *  @return Result of API execution status
+ *  @retval 0  -> Success
+ *  @retval >0 -> Warning
+ *  @retval <0 -> Error
+ */
+int8_t get_int_status(struct adxl375_dev *dev, uint8_t *status);
+
+/*!
  * @details Reads the output data of each axis. Gives the value in g unit.
  *
  *  @param[in] dev      : Structure instance of adxl375_dev
@@ -540,16 +555,53 @@ class Adxl375 {
 private:
 	uint8_t addr;
 	struct adxl375_dev dev;
-public:
 	struct adxl375_data data;
 	uint8_t status = 0;
-    
+public:
     Adxl375(uint8_t addr);
-    int8_t init();
-    int8_t deinit();
-    int8_t test_data();
-    int8_t get_status();
-    int8_t get_data();
+	~Adxl375();
+    int test_data();
+    uint8_t get_status();
+    adxl375_data get_data();
 } ;
+
+class Adxl375Exception : public std::exception {
+private:
+    std::string message;
+
+public:
+    Adxl375Exception(int8_t errorCode) {
+        switch (errorCode) {
+            case ADXL375_E_NULL_PTR:
+                message = "Null pointer error.";
+                break;
+            case ADXL375_E_COMM_FAIL:
+                message = "Communication failure.";
+                break;
+            case ADXL375_E_INVALID_ODR_OSR_SETTINGS:
+                message = "Invalid ODR/OSR settings.";
+                break;
+            case ADXL375_E_CMD_EXEC_FAILED:
+                message = "Command execution failed.";
+                break;
+            case ADXL375_E_CONFIGURATION_ERR:
+                message = "Configuration error.";
+                break;
+            case ADXL375_E_INVALID_LEN:
+                message = "Invalid length error.";
+                break;
+            case ADXL375_E_DEV_NOT_FOUND:
+                message = "Device not found.";
+                break;
+            default:
+                message = "Unknown error.";
+                break;
+        }
+    }
+
+    virtual const char* what() const throw () {
+        return message.c_str();
+    }
+};
 
 #endif	/* __ADXL375_H__ */
