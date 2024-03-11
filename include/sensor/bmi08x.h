@@ -330,7 +330,6 @@ private:
 public:    
     Bmi088(uint8_t accel_addr, uint8_t gyro_addr);
     ~Bmi088();
-    void test_data();
     uint8_t get_status();
     bmi08_sensor_data_f get_accel_data();
     bmi08_sensor_data_f get_gyro_data();

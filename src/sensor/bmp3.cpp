@@ -3035,14 +3035,6 @@ Bmp390::~Bmp390() {
     bmp3_i2c_deinit(addr);
 }
 
-int Bmp390::test_data() {
-    if (data.temperature > 50 || data.temperature < 5
-        || data.pressure > 120000 || data.pressure < 80000) {
-            return 1;
-    }
-    return 0;
-}
-
 bmp3_status Bmp390::get_status() {
     int8_t rslt = bmp3_get_status(&status, &dev);
     if (rslt != 0) {

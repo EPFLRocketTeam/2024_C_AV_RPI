@@ -187,7 +187,7 @@ extern "C" {
 #define ADXL375_E_INVALID_LEN                      INT8_C(-6)
 #define ADXL375_E_DEV_NOT_FOUND                    INT8_C(-7)
 
-/* ADXL375 mg/LSB scale for output data */
+/* ADXL375 mg/LSB scale for output data. Std of 0.00167 */
 #define ADXL375_OUTPUT_SCALE					   0.049
 
 /********************************************************/
@@ -554,15 +554,19 @@ int8_t adxl375_i2c_deinit(uint8_t addr);
 class Adxl375 {
 private:
 	uint8_t addr;
-	struct adxl375_dev dev;
-	struct adxl375_data data;
+	adxl375_dev dev;
+    adxl375_data offset={0,0,0};
+    float scale=ADXL375_OUTPUT_SCALE;
+	adxl375_data data;
 	uint8_t status = 0;
 public:
     Adxl375(uint8_t addr);
 	~Adxl375();
-    int test_data();
     uint8_t get_status();
     adxl375_data get_data();
+    void set_offset(adxl375_data offset_in);
+    void set_scale(float scale_in);
+    void calibrate();
 } ;
 
 class Adxl375Exception : public std::exception {

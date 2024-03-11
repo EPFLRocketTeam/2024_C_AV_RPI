@@ -150,7 +150,8 @@
         "ostream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "list": "cpp"
     }
 >>>>>>> a6fdb6a (Added exceptions and moved everything around)
 }
