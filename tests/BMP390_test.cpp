@@ -4,12 +4,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  **/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include <iostream>
 #include <math.h>
 #include <unistd.h>
-
+#include <cassert>
 #include "bmp3.h"
 
 /************************************************************************/
@@ -26,7 +24,7 @@ int main(void)
 {
     int loop = 0;
     Bmp390 bmp1(BMP3_ADDR_I2C_PRIM), bmp2(BMP3_ADDR_I2C_SEC);
-
+    bmp3_data data;
     // Main get data loop
     while (loop < ITERATION)
     {
@@ -38,23 +36,25 @@ int main(void)
             * BMP3_PRESS      : To read only pressure data
             */
         if (bmp1.get_status().intr.drdy) {
-            bmp3_data data1 = bmp1.get_sensor_data();
+            data = bmp1.get_sensor_data();
 
-            printf("Data[%d] PRIMARY T: %.2f deg C, P: %.2f Pa\n", loop, (data1.temperature), (data1.pressure));
-
-            // test data
-
+            std::cout << "Data[" << loop << "] PRIMARY T: " << data.temperature
+                << " deg C, P: " << data.pressure << " Pa\n";
             
+            /* assertions for unit testing. Pretty arbitrary numbers */
+            assert((0 < data.temperature) and (data.temperature < 85));
+            assert((80000 < data.pressure) and (data.pressure < 120000));
         }
 
         if (bmp2.get_status().intr.drdy) {
-            bmp3_data data2 = bmp2.get_sensor_data();
+            data = bmp2.get_sensor_data();
 
-            printf("Data[%d] SECONDARY T: %.2f deg C, P: %.2f Pa\n", loop, (data2.temperature), (data2.pressure));
+            std::cout << "Data[" << loop << "] SECONDARY T: " << data.temperature
+                << " deg C, P: " << data.pressure << " Pa\n";
 
-            // test data
-
-            
+            /* assertions for unit testing. Pretty arbitrary numbers */
+            assert((0 < data.temperature) and (data.temperature < 85));
+            assert((80000 < data.pressure) and (data.pressure < 120000));
         }
 
         loop = loop + 1;
