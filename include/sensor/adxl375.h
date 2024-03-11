@@ -190,6 +190,8 @@ extern "C" {
 /* ADXL375 mg/LSB scale for output data. Std of 0.00167 */
 #define ADXL375_OUTPUT_SCALE					   0.049
 
+#define GRAVITY_CONSTANT                            9.807
+
 /********************************************************/
 
 /*!
@@ -522,7 +524,7 @@ int8_t adxl375_set_offset(struct adxl375_dev *dev,
 
 /*!
  *  @brief Function to initialise the I2C interface, with functions from
- *         i2c_common.h
+ *         i2c_wrappers.h
  *
  *  @param[in] adxl375      : Structure instance of adxl375_dev
  *  @param[in] addr      : Selection between ADXL375_ADDR_I2C_PRIM and
@@ -536,7 +538,7 @@ int8_t adxl375_i2c_init(struct adxl375_dev *adxl375, uint8_t addr);
 
 /*!
  *  @brief Function to deinitialise the I2C interface, with functions from
- *         i2c_common.h
+ *         i2c_wrappers.h
  *
  *  @param[in] addr      : Selection between ADXL375_ADDR_I2C_PRIM and
  *                         ADXL375_ADDR_I2C_SEC

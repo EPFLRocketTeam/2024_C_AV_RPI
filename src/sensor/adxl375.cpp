@@ -534,7 +534,7 @@ int8_t adxl375_set_offset(struct adxl375_dev *dev,
 
 /*!
  *  @brief Function to initialise the I2C interface, with functions from
- *         i2c_common.h
+ *         i2c_wrappers.h
  */
 int8_t adxl375_i2c_init(struct adxl375_dev *dev, uint8_t addr) {
     if (i2c_open(addr) != 0) {
@@ -558,7 +558,7 @@ int8_t adxl375_i2c_init(struct adxl375_dev *dev, uint8_t addr) {
 
 /*!
  *  @brief Function to deinitialise the I2C interface, with functions from
- *         i2c_common.h
+ *         i2c_wrappers.h
  */
 int8_t adxl375_i2c_deinit(uint8_t addr) {
     if(i2c_close(addr) != 0) {
@@ -568,6 +568,7 @@ int8_t adxl375_i2c_deinit(uint8_t addr) {
     return ADXL375_OK;
 }
 
+//Initialises device.
 Adxl375::Adxl375(uint8_t addr) : addr(addr) {
 	int8_t rslt = adxl375_init(&dev, addr);
 	if (rslt != ADXL375_OK) {
@@ -582,6 +583,7 @@ Adxl375::~Adxl375() {
 	}
 }
 
+//Returns interrupt status
 uint8_t Adxl375::get_status() {
 	int8_t rslt = adxl375_get_int_status(&dev, &status);
 	if (rslt != ADXL375_OK) {
@@ -590,6 +592,7 @@ uint8_t Adxl375::get_status() {
 	return status;
 }
 
+//Returns data in m/s^2
 adxl375_data Adxl375::get_data() {
 	adxl375_data xyz;
 	int8_t rslt = adxl375_get_xyz(&dev, &xyz);
@@ -597,9 +600,9 @@ adxl375_data Adxl375::get_data() {
 		throw Adxl375Exception(rslt);
 	}
 
-	xyz.x = (xyz.x - offset.x)*scale;
-	xyz.y = (xyz.y - offset.y)*scale;
-	xyz.z = (xyz.z - offset.z)*scale;
+	xyz.x = (xyz.x - offset.x)*scale*GRAVITY_CONSTANT;
+	xyz.y = (xyz.y - offset.y)*scale*GRAVITY_CONSTANT;
+	xyz.z = (xyz.z - offset.z)*scale*GRAVITY_CONSTANT;
 	data = xyz;
 	
 	return data;

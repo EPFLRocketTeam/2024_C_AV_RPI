@@ -5,7 +5,6 @@
  **/
 
 #include <iostream>
-#include <math.h>
 #include <unistd.h>
 #include <cassert>
 #include "bmp3.h"

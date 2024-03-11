@@ -10,7 +10,7 @@ public:
     explicit I2CInterfaceException(const std::string& msg) : std::runtime_error(msg) {}
 };
 
-// Singleton class because there is only one i2c interface
+// Singleton class because there is only one i2c interface.
 class I2CInterface {
 private:
     I2CInterface() { initialize(); } // Constructor is private now
@@ -20,6 +20,8 @@ private:
     uint8_t handle_list[0x7F] = {0};
     uint8_t i2c_addr_list[0x7F] = {0};
 public:
+    // getInstance initializes the singleton class on first call, otherwise it returns
+    // that instance. Makes the initialisation automatic for any i2c function call
     static I2CInterface& getInstance() {
         static I2CInterface instance;
         return instance;
