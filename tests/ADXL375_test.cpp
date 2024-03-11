@@ -32,26 +32,27 @@ int main(void) {
     while (loop < ITERATION) {
         if (adxl1.get_status() & ADXL375_DATA_READY) {
             data = adxl1.get_data();
-            std::cout << "PRIMARY data[" << loop << "] x: " << data.x << " g, y: "
-                      << data.y << " g, z: " << data.z << " g" << std::endl;
+            std::cout << "Secondary data[" << loop << "] x: " << data.x << ", y: "
+                      << data.y << ", z: " << data.z << std::endl;
         }
 
         /* data test (when sensor board facing up, so we're supposed to have
-        x: 0g, y: 0g, z: 1g) based on typical adxl375 performance (in datasheet)*/
-        assert((-0.6 < data.x) and (data.x < 1.4));
-        assert((-1.4 < data.y) and (data.y < 0.6));
-        assert((-1.2 < data.z) and (data.z < 2.4));
+        x: 0m/s^2, y: 0m/s^2,, z: 9.81m/s^2) based on typical adxl375 performance (in datasheet)*/
+        assert((-5.89< data.x) and (data.x < 13.73));
+        assert((-13.73 < data.y) and (data.y < 5.89));
+        assert((-11.77 < data.z) and (data.z < 23.5));
 
         if (adxl2.get_status() & ADXL375_DATA_READY) {
            data = adxl2.get_data();
 
-            std::cout << "Secondary data[" << loop << "] x: " << data.x << " g, y: "
-                      << data.y << " g, z: " << data.z << " g" << std::endl;
+            std::cout << "Secondary data[" << loop << "] x: " << data.x << ", y: "
+                      << data.y << ", z: " << data.z << std::endl;
         }
 
-        assert((-0.6 < data.x) and (data.x < 1.4));
-        assert((-1.4 < data.y) and (data.y < 0.6));
-        assert((-1.2 < data.z) and (data.z < 2.4));
+        // Data test for sensor 2
+        assert((-5.89< data.x) and (data.x < 13.73));
+        assert((-13.73 < data.y) and (data.y < 5.89));
+        assert((-11.77 < data.z) and (data.z < 23.5));
 
         usleep(1000000);
         loop++;
