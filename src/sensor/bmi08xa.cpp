@@ -1199,14 +1199,6 @@ Bmi088::~Bmi088() {
     }
 }
 
-void Bmi088::test_data() {
-    // Example: If there's a test that can fail, handle it similarly
-	// int8_t rslt = some_test_function();
-	// if (rslt != BMI088_OK) {
-	//     throw Bmi088Exception(rslt);
-	// }
-}
-
 uint8_t Bmi088::get_status() {
     int8_t rslt = bmi08a_get_data_int_status(&status, &dev);
     if (rslt != 0) {

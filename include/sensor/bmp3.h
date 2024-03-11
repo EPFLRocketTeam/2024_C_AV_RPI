@@ -592,7 +592,6 @@ public:
     Bmp390(uint8_t addr, uint16_t settings_sel = BMP3_SEL_PRESS_EN | BMP3_SEL_TEMP_EN |
         BMP3_SEL_PRESS_OS | BMP3_SEL_TEMP_OS | BMP3_SEL_ODR | BMP3_SEL_DRDY_EN);
     ~Bmp390();
-    int test_data();
     bmp3_status get_status();
     bmp3_data get_sensor_data(uint8_t sensor_comp = BMP3_PRESS_TEMP);
     /*

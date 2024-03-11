@@ -42,8 +42,9 @@ int main(void)
 
             printf("Data[%d] PRIMARY T: %.2f deg C, P: %.2f Pa\n", loop, (data1.temperature), (data1.pressure));
 
-            int rslt = bmp1.test_data();
-            if (rslt!=0) return rslt;
+            // test data
+
+            
         }
 
         if (bmp2.get_status().intr.drdy) {
@@ -51,8 +52,9 @@ int main(void)
 
             printf("Data[%d] SECONDARY T: %.2f deg C, P: %.2f Pa\n", loop, (data2.temperature), (data2.pressure));
 
-            int rslt = bmp2.test_data();
-            if (rslt!=0) return rslt;
+            // test data
+
+            
         }
 
         loop = loop + 1;

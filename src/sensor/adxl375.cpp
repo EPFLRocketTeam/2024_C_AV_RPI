@@ -47,6 +47,7 @@
 #include "i2c_wrappers.h"	// Communication definitions.
 #include <stdint.h>
 #include <stdio.h>
+#include <unistd.h>
 
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
@@ -273,11 +274,11 @@ int8_t adxl375_get_xyz(struct adxl375_dev *dev, struct adxl375_data *data) {
 	rslt = adxl375_get_regs(ADXL375_DATAX0, values, 6, dev);
 	if (rslt) return rslt;
 	tmp = (values[0] + (values[1] << 8));
-	data->x = ADXL375_OUTPUT_SCALE*tmp;
+	data->x = tmp;
 	tmp = (values[2] + (values[3] << 8));
-	data->y = ADXL375_OUTPUT_SCALE*tmp;
+	data->y = tmp;
 	tmp = values[4] + (values[5] << 8);
-	data->z = ADXL375_OUTPUT_SCALE*tmp;
+	data->z = tmp;
 
 	return ADXL375_OK;	
 }
@@ -581,15 +582,6 @@ Adxl375::~Adxl375() {
 	}
 }
 
-int Adxl375::test_data() {
-	// Example: If there's a test that can fail, handle it similarly
-	// int8_t rslt = some_test_function();
-	// if (rslt != ADXL375_OK) {
-	//     throw Adxl375Exception(rslt);
-	// }
-	return 0;
-}
-
 uint8_t Adxl375::get_status() {
 	int8_t rslt = adxl375_get_int_status(&dev, &status);
 	if (rslt != ADXL375_OK) {
@@ -599,9 +591,51 @@ uint8_t Adxl375::get_status() {
 }
 
 adxl375_data Adxl375::get_data() {
-	int8_t rslt = adxl375_get_xyz(&dev, &data);
+	adxl375_data xyz;
+	int8_t rslt = adxl375_get_xyz(&dev, &xyz);
 	if (rslt != ADXL375_OK) {
 		throw Adxl375Exception(rslt);
 	}
+
+	xyz.x = (xyz.x - offset.x)*scale;
+	xyz.y = (xyz.y - offset.y)*scale;
+	xyz.z = (xyz.z - offset.z)*scale;
+	data = xyz;
+	
 	return data;
+}
+
+void Adxl375::set_offset(adxl375_data offset_in) {
+	offset = offset_in;
+}
+
+void Adxl375::set_scale(float scale_in) {
+	scale = scale_in;
+}
+
+// Calibrate the offset. The scale is not calibrated.
+void Adxl375::calibrate() {
+
+	float samples = 0;
+    adxl375_data sum = {0, 0, 0};
+	int8_t rslt;
+
+    // Sum up samples for averaging
+    while (samples < 1000) {
+		if (this->get_status() & ADXL375_DATA_READY) {
+			int8_t rslt = adxl375_get_xyz(&dev, &data);
+			if (rslt != ADXL375_OK) {
+				throw Adxl375Exception(rslt);
+			}
+			sum.x += data.x;
+			sum.y += data.y;
+			sum.z += data.z - 1/scale; //removing gravity
+			samples++;
+		}
+		usleep(5);
+    }
+	// Compute average offset
+    offset.x = sum.x / samples;
+	offset.y = sum.y / samples;
+	offset.z = sum.z / samples;
 }
