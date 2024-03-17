@@ -1,5 +1,9 @@
 #include "data.h"
 
+Data::Data() {}
+
+Data::~Data() {}
+
 bool Data::update() {
     m_telecom.update();
     updated = m_sensors.update();
@@ -8,8 +12,5 @@ bool Data::update() {
 }
 
 DataDump Data::dump() const {
-    DataDump out;
-    out.telecom_status = m_telecom.get_cmd();
-    out.sensors_data = m_sensors.dump();
-    return out;
+    return {m_telecom.get_cmd(), m_sensors.dump()};
 }
