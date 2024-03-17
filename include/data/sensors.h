@@ -68,6 +68,9 @@ private:
     SensStatus status;
     SensRaw raw_data;
     SensFiltered clean_data;
+
+    // Read sensors status
+    void update_status();
 };
 
 #endif /* SENSORS_H */
