@@ -36,12 +36,7 @@ Sensors::Sensors()
     bmp1(BMP3_ADDR_I2C_PRIM),
     bmp2(BMP3_ADDR_I2C_SEC) 
 {
-    status.adxl_status = adxl1.get_status();
-    status.adxl_aux_status = adxl2.get_status();
-    status.bmi_status = bmi1.get_status();
-    status.bmi_aux_status = bmi2.get_status();
-    status.bmp_status = bmp1.get_status();
-    status.bmp_aux_status = bmp2.get_status();
+    update_status();
 }
 
 Sensors::~Sensors() {}
@@ -53,6 +48,8 @@ void Sensors::calibrate() {
 }
 
 bool Sensors::update() {
+    update_status();
+
     // Update raw sensors values
     raw_data.adxl = adxl1.get_data();
     raw_data.adxl_aux = adxl2.get_data();
@@ -69,4 +66,13 @@ bool Sensors::update() {
     // Something like: clean_data = Kalmann(SensRaw raw_data); ?
 
     return true;
+}
+
+void Sensors::update_status() {
+    status.adxl_status = adxl1.get_status();
+    status.adxl_aux_status = adxl2.get_status();
+    status.bmi_status = bmi1.get_status();
+    status.bmi_aux_status = bmi2.get_status();
+    status.bmp_status = bmp1.get_status();
+    status.bmp_aux_status = bmp2.get_status();
 }
