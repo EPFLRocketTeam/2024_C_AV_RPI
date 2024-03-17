@@ -6,7 +6,7 @@
 
 struct DataDump {
     UPLink telecom_status;
-    SensorsData sensors_data;
+    SensFiltered sensors_data;
 };
 
 class Data {
