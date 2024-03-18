@@ -18,6 +18,7 @@
     {
         currentState = State::IDLE;
     }
+    AvData data;
     
     // this function allows to get the current state of the FSM
     State AvState::getCurrentState()
@@ -170,8 +171,10 @@
         return data.pressure > 0.5;
     }
 
-    void AvState::update(AvData data)
+    void AvState::update()
     {
+        data.update(telemetry_set[0]);
+        
         switch (currentState)
         {
         case State::IDLE:

@@ -117,24 +117,48 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named flight_control_test
+# Target rules for targets named basic_init_test
 
 # Build rule for target.
-flight_control_test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 flight_control_test
-.PHONY : flight_control_test
+basic_init_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 basic_init_test
+.PHONY : basic_init_test
 
 # fast build rule for target.
-flight_control_test/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/flight_control_test.dir/build.make CMakeFiles/flight_control_test.dir/build
-.PHONY : flight_control_test/fast
+basic_init_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/build
+.PHONY : basic_init_test/fast
+
+src/flightControl/AvData.o: src/flightControl/AvData.cpp.o
+.PHONY : src/flightControl/AvData.o
+
+# target to build an object file
+src/flightControl/AvData.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/src/flightControl/AvData.cpp.o
+.PHONY : src/flightControl/AvData.cpp.o
+
+src/flightControl/AvData.i: src/flightControl/AvData.cpp.i
+.PHONY : src/flightControl/AvData.i
+
+# target to preprocess a source file
+src/flightControl/AvData.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/src/flightControl/AvData.cpp.i
+.PHONY : src/flightControl/AvData.cpp.i
+
+src/flightControl/AvData.s: src/flightControl/AvData.cpp.s
+.PHONY : src/flightControl/AvData.s
+
+# target to generate assembly for a file
+src/flightControl/AvData.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/src/flightControl/AvData.cpp.s
+.PHONY : src/flightControl/AvData.cpp.s
 
 src/flightControl/AvState.o: src/flightControl/AvState.cpp.o
 .PHONY : src/flightControl/AvState.o
 
 # target to build an object file
 src/flightControl/AvState.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/flight_control_test.dir/build.make CMakeFiles/flight_control_test.dir/src/flightControl/AvState.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/src/flightControl/AvState.cpp.o
 .PHONY : src/flightControl/AvState.cpp.o
 
 src/flightControl/AvState.i: src/flightControl/AvState.cpp.i
@@ -142,7 +166,7 @@ src/flightControl/AvState.i: src/flightControl/AvState.cpp.i
 
 # target to preprocess a source file
 src/flightControl/AvState.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/flight_control_test.dir/build.make CMakeFiles/flight_control_test.dir/src/flightControl/AvState.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/src/flightControl/AvState.cpp.i
 .PHONY : src/flightControl/AvState.cpp.i
 
 src/flightControl/AvState.s: src/flightControl/AvState.cpp.s
@@ -150,32 +174,32 @@ src/flightControl/AvState.s: src/flightControl/AvState.cpp.s
 
 # target to generate assembly for a file
 src/flightControl/AvState.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/flight_control_test.dir/build.make CMakeFiles/flight_control_test.dir/src/flightControl/AvState.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/src/flightControl/AvState.cpp.s
 .PHONY : src/flightControl/AvState.cpp.s
 
-tests/test_AvState.o: tests/test_AvState.cpp.o
-.PHONY : tests/test_AvState.o
+tests/basicTest_avState.o: tests/basicTest_avState.cpp.o
+.PHONY : tests/basicTest_avState.o
 
 # target to build an object file
-tests/test_AvState.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/flight_control_test.dir/build.make CMakeFiles/flight_control_test.dir/tests/test_AvState.cpp.o
-.PHONY : tests/test_AvState.cpp.o
+tests/basicTest_avState.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/tests/basicTest_avState.cpp.o
+.PHONY : tests/basicTest_avState.cpp.o
 
-tests/test_AvState.i: tests/test_AvState.cpp.i
-.PHONY : tests/test_AvState.i
+tests/basicTest_avState.i: tests/basicTest_avState.cpp.i
+.PHONY : tests/basicTest_avState.i
 
 # target to preprocess a source file
-tests/test_AvState.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/flight_control_test.dir/build.make CMakeFiles/flight_control_test.dir/tests/test_AvState.cpp.i
-.PHONY : tests/test_AvState.cpp.i
+tests/basicTest_avState.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/tests/basicTest_avState.cpp.i
+.PHONY : tests/basicTest_avState.cpp.i
 
-tests/test_AvState.s: tests/test_AvState.cpp.s
-.PHONY : tests/test_AvState.s
+tests/basicTest_avState.s: tests/basicTest_avState.cpp.s
+.PHONY : tests/basicTest_avState.s
 
 # target to generate assembly for a file
-tests/test_AvState.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/flight_control_test.dir/build.make CMakeFiles/flight_control_test.dir/tests/test_AvState.cpp.s
-.PHONY : tests/test_AvState.cpp.s
+tests/basicTest_avState.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_init_test.dir/build.make CMakeFiles/basic_init_test.dir/tests/basicTest_avState.cpp.s
+.PHONY : tests/basicTest_avState.cpp.s
 
 # Help Target
 help:
@@ -185,13 +209,16 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... flight_control_test"
+	@echo "... basic_init_test"
+	@echo "... src/flightControl/AvData.o"
+	@echo "... src/flightControl/AvData.i"
+	@echo "... src/flightControl/AvData.s"
 	@echo "... src/flightControl/AvState.o"
 	@echo "... src/flightControl/AvState.i"
 	@echo "... src/flightControl/AvState.s"
-	@echo "... tests/test_AvState.o"
-	@echo "... tests/test_AvState.i"
-	@echo "... tests/test_AvState.s"
+	@echo "... tests/basicTest_avState.o"
+	@echo "... tests/basicTest_avState.i"
+	@echo "... tests/basicTest_avState.s"
 .PHONY : help
 
 

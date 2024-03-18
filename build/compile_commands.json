@@ -1,12 +1,17 @@
 [
 {
   "directory": "/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/build",
-  "command": "/usr/bin/g++  -I/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/include -g -o CMakeFiles/flight_control_test.dir/src/flightControl/AvState.cpp.o -c /mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/src/flightControl/AvState.cpp",
+  "command": "/usr/bin/g++  -I/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/include -g -o CMakeFiles/basic_init_test.dir/tests/basicTest_avState.cpp.o -c /mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/tests/basicTest_avState.cpp",
+  "file": "/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/tests/basicTest_avState.cpp"
+},
+{
+  "directory": "/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/build",
+  "command": "/usr/bin/g++  -I/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/include -g -o CMakeFiles/basic_init_test.dir/src/flightControl/AvState.cpp.o -c /mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/src/flightControl/AvState.cpp",
   "file": "/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/src/flightControl/AvState.cpp"
 },
 {
   "directory": "/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/build",
-  "command": "/usr/bin/g++  -I/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/include -g -o CMakeFiles/flight_control_test.dir/tests/test_AvState.cpp.o -c /mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/tests/test_AvState.cpp",
-  "file": "/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/tests/test_AvState.cpp"
+  "command": "/usr/bin/g++  -I/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/include -g -o CMakeFiles/basic_init_test.dir/src/flightControl/AvData.cpp.o -c /mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/src/flightControl/AvData.cpp",
+  "file": "/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/src/flightControl/AvData.cpp"
 }
 ]

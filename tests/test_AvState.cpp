@@ -1,6 +1,7 @@
 
 #include "../include/flightControl/AvState.h"
 #include "../include/flightControl/AvData.h"
+#include <cassert>
 
 
 // Add more test cases as needed
@@ -45,6 +46,8 @@ int main() {
         std::cout << "Pressure: " << avData.pressure << std::endl;
 
         avState.update(avData);
+        assert(avState.getCurrentState() == State::IDLE);
+        
         //print in console the current state
         std::cout << "Current state: " << avState.stateToString(avState.getCurrentState()) << std::endl;
 
