@@ -41,7 +41,7 @@ public:
     // this function allows to get the current state of the FSM
     State getCurrentState();
     
-    void update(AvData data);
+    void update();
 
 
     State *possibleStates();
