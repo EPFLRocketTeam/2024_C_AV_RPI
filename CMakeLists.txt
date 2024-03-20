@@ -10,12 +10,12 @@ include_directories(include)
 
 # Define the source files
 set(SOURCES 
-    src/flightControl/AvState.cpp
+    
     tests/test_AvState.cpp
 )
 
 # Create the executable
-add_executable(flight_control_test ${SOURCES})
+add_executable(flight_control_test src/flightControl/AvState.cpp ${SOURCES})
 
 add_library(ADXL375 src/sensor/adxl375.cpp include/sensor/adxl375.h)
 target_include_directories(ADXL375 PUBLIC include/sensor)

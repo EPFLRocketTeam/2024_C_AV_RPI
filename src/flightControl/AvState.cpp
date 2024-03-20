@@ -3,14 +3,19 @@
 #include <string.h>
 #include <list>
 
+#include "../../include/data/data.h"
+
 
 
     // constructor
      State currentState;
+     Data data;
 
-    AvState::AvState()
+
+    AvState::AvState(Data data)
     {
         currentState = State::IDLE;
+        this->data = data;
     }
     // destructor
     AvState::~AvState()
@@ -34,8 +39,9 @@
         return false;
     }
     
-    State fromIdle(AvData data)
+    State fromIdle(Data data)
     {
+        
         if ((data.telemetry == telemetry_set[0]   ))
         {
             return State::CALIBRATION;
@@ -169,8 +175,9 @@
         return data.pressure > 0.5;
     }
 
-    void AvState::update(AvData data)
+    void AvState::update(Data data)
     {
+        Sensors sensors = data.getSensors();
         switch (currentState)
         {
         case State::IDLE:
