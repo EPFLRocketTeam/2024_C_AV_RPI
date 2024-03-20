@@ -1,5 +1,5 @@
 #New CMake build file for FireHorn
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22.1)
 
 project(flight_computer VERSION 0.1 LANGUAGES C CXX)
 
@@ -9,13 +9,11 @@ set(CMAKE_BUILD_TYPE Debug)
 include_directories(include)
 
 # Define the source files
-set(SOURCES 
-    
-    tests/test_AvState.cpp
-)
+
 
 # Create the executable
-add_executable(flight_control_test src/flightControl/AvState.cpp ${SOURCES})
+
+add_executable(feedTest ../tests/feeder_test.cpp)
 
 add_library(ADXL375 src/sensor/adxl375.cpp include/sensor/adxl375.h)
 target_include_directories(ADXL375 PUBLIC include/sensor)

@@ -1,5 +1,5 @@
 #include "../../include/flightControl/AvState.h"
-#include "../../include/flightControl/AvData.h"
+
 #include <string.h>
 #include <list>
 
@@ -42,142 +42,141 @@
     State fromIdle(Data data)
     {
         
-        if ((data.telemetry == telemetry_set[0]   ))
+        /*if (("data.telemetry "== telemetry_set[0]   ))
         {
             return State::CALIBRATION;
         }
         {
             return State::CALIBRATION;
-        }
+        }*/
         return State::IDLE;
     }
     State fromLanded() { return State::LANDED; }
-    State fromDescent(AvData data)
-    {
-        if (data.velocity < 0)
+    State fromDescent(Data data)
+    {/*
+        if ("data.velocity" < 0)
         {
             return State::LANDED;
-        }
+        }*/
         return State::DESCENT;
     }
-    State fromAscent(AvData data)
-    {
-        if (data.velocity == 0)
+    State fromAscent(Data data)
+    {/*
+        if ("data.velocity" == 0)
         {
             return State::DESCENT;
-        }
+        }*/
         return State::ASCENT;
     }
 
-    State fromCalibration(AvData data)
-    {
-        if ((data.telemetry== telemetry_set[2]))
+    State fromCalibration(Data data)
+    {/*
+        if (("data.telemetry"== telemetry_set[2]))
         {
             return State::READY;
             // TODO: check errors
         }
-        else if (data.pressure > 0.5)
+        else if ("data.pressure" > 0.5)
         {
             return State::ARMED;
-        }
+        }*/
 
         return State::CALIBRATION;
     }
-    State fromErrorGround(AvData data)
-    {
-        if (!error() && (data.telemetry== "check"))
+    State fromErrorGround(Data data)
+    {/*
+        if (!error() && ("data.telemetry"== "check"))
         {
             return State::IDLE;
-        }
-        else
-        {
+        }*/
+        
             return State::ERRORGROUND;
-        }
+        
     }
     State fromErrorFlight()
     {
         return State::ERRORFLIGHT;
     }
-    State fromThrustSequence(AvData data)
-    {
-        if ((data.telemetry== telemetry_set[4]))
+    State fromThrustSequence(Data data)
+    {/*
+        if (("data.telemetry"== telemetry_set[4]))
         {
             return State::ERRORFLIGHT;
         }
-        else if (data.ignited)
+        else if ("data.ignited")
         {
             return State::ASCENT;
-        }
+        }*/
         return State::THRUSTSEQUENCE;
     }
-    State fromManual(AvData data)
+    State fromManual(Data data)
     {
-        if (error())
+        /*if (error())
         {
             return State::ERRORGROUND;
         }
-        else if ((data.telemetry== telemetry_set[4]))
+        else if (("data.telemetry"== telemetry_set[4]))
         {
             return State::ERRORGROUND;
         }
-        else if ((data.telemetry== telemetry_set[5]))
+        else if (("data.telemetry"== telemetry_set[5]))
         {
             return State::READY;
-        }
+        }*/
         return State::MANUAL;
     }
-    State fromArmed(AvData data)
+    State fromArmed(Data data)
     {
-        if (error())
+        /*if (error())
         {
             return State::ERRORGROUND;
         }
-        else if ((data.telemetry== telemetry_set[4]))
+        else if (("data.telemetry"== telemetry_set[4]))
         {
             return State::ERRORGROUND;
         }
-        else if ((data.telemetry== telemetry_set[5]))
+        else if (("data.telemetry"== telemetry_set[5]))
         {
             return State::READY;
         }
-        else if (data.pressure > 0.5)
+        else if ("data.pressure" == 0.5)
         {
             return State::ARMED;
         }
-        else if (data.telemetry == telemetry_set[3])
+        else if ("data.telemetry" == telemetry_set[3])
         {
             return State::THRUSTSEQUENCE;
-        }
+        }*/
         return State::ARMED;
     }
-    State fromReady(AvData data)
-    {
+    State fromReady(Data data)
+    {/*
         if (error())
         {
             return State::ERRORGROUND;
         }
-        else if ((data.telemetry== telemetry_set[4]))
+        else if (("data.telemetry"== telemetry_set[4]))
         {
             return State::ERRORGROUND;
         }
-        else if ((data.telemetry== telemetry_set[5]))
+        else if (("data.telemetry"== telemetry_set[5]))
         {
             return State::ARMED;
-        }
+        }*/
         return State::READY;
     }
     State *possibleStates();
     
  
    
-    bool pressurized(AvData data)
+    bool pressurized(Data data)
     {
-        return data.pressure > 0.5;
+        return false;
     }
 
-    void AvState::update(Data data)
+    void AvState:: update(Data data)
     {
-        Sensors sensors = data.getSensors();
+        
         switch (currentState)
         {
         case State::IDLE:

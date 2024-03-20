@@ -4,7 +4,8 @@
 
 #include <iostream>
 #include <string>
-#include "AvData.h"
+#include "../data/data.h"
+
 
 #ifndef AVSTATE_H
 #define AVSTATE_H
@@ -33,19 +34,25 @@ class AvState
 {
 public:
     // constructor
-    AvState();
+    AvState(Data data);
     // destructor
     ~AvState();
 
     // this function allows to get the current state of the FSM
     State getCurrentState();
     
-    void update(AvData data);
+    void update(Data data);
 
 
     State *possibleStates();
 
     std::string stateToString(State state);
+private:
+    State currentState;
+    Data data;
 };
+
+
+
 
 #endif
