@@ -1,18 +1,17 @@
 #include "../../include/flightControl/AvState.h"
-
 #include <string.h>
 #include <list>
-
-#include "../../include/data/data.h"
+#include "../../include/data/fakeData.h"
 
 
 
     // constructor
      State currentState;
-     Data data;
+     FakeData data;
+     
 
 
-    AvState::AvState(Data data)
+    AvState::AvState(FakeData data)
     {
         currentState = State::IDLE;
         this->data = data;
@@ -39,7 +38,7 @@
         return false;
     }
     
-    State fromIdle(Data data)
+    State fromIdle(FakeData data)
     {
         
         /*if (("data.telemetry "== telemetry_set[0]   ))
@@ -52,7 +51,7 @@
         return State::IDLE;
     }
     State fromLanded() { return State::LANDED; }
-    State fromDescent(Data data)
+    State fromDescent(FakeData data)
     {/*
         if ("data.velocity" < 0)
         {
@@ -60,7 +59,7 @@
         }*/
         return State::DESCENT;
     }
-    State fromAscent(Data data)
+    State fromAscent(FakeData data)
     {/*
         if ("data.velocity" == 0)
         {
@@ -69,7 +68,7 @@
         return State::ASCENT;
     }
 
-    State fromCalibration(Data data)
+    State fromCalibration(FakeData data)
     {/*
         if (("data.telemetry"== telemetry_set[2]))
         {
@@ -83,7 +82,7 @@
 
         return State::CALIBRATION;
     }
-    State fromErrorGround(Data data)
+    State fromErrorGround(FakeData data)
     {/*
         if (!error() && ("data.telemetry"== "check"))
         {
@@ -97,7 +96,7 @@
     {
         return State::ERRORFLIGHT;
     }
-    State fromThrustSequence(Data data)
+    State fromThrustSequence(FakeData data)
     {/*
         if (("data.telemetry"== telemetry_set[4]))
         {
@@ -109,7 +108,7 @@
         }*/
         return State::THRUSTSEQUENCE;
     }
-    State fromManual(Data data)
+    State fromManual(FakeData data)
     {
         /*if (error())
         {
@@ -125,7 +124,7 @@
         }*/
         return State::MANUAL;
     }
-    State fromArmed(Data data)
+    State fromArmed(FakeData data)
     {
         /*if (error())
         {
@@ -149,7 +148,7 @@
         }*/
         return State::ARMED;
     }
-    State fromReady(Data data)
+    State fromReady(FakeData data)
     {/*
         if (error())
         {
@@ -169,12 +168,12 @@
     
  
    
-    bool pressurized(Data data)
+    bool pressurized(FakeData data)
     {
         return false;
     }
 
-    void AvState:: update(Data data)
+    void AvState:: update(FakeData data)
     {
         
         switch (currentState)

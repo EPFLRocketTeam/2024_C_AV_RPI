@@ -73,4 +73,5 @@ private:
     void update_status();
 };
 
+
 #endif /* SENSORS_H */

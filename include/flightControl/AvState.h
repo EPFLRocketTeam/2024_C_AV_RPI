@@ -4,7 +4,8 @@
 
 #include <iostream>
 #include <string>
-#include "../data/data.h"
+#include "../data/fakeData.h"
+
 
 
 #ifndef AVSTATE_H
@@ -34,14 +35,14 @@ class AvState
 {
 public:
     // constructor
-    AvState(Data data);
+    AvState(FakeData data);
     // destructor
     ~AvState();
 
     // this function allows to get the current state of the FSM
     State getCurrentState();
     
-    void update(Data data);
+    void update(FakeData data);
 
 
     State *possibleStates();
@@ -49,7 +50,7 @@ public:
     std::string stateToString(State state);
 private:
     State currentState;
-    Data data;
+    FakeData data;
 };
 
 

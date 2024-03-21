@@ -22,4 +22,17 @@ private:
     bool new_cmd_received;
 };
 
+class FakeTelecom : public Telecom {
+public:
+    FakeTelecom();
+    ~FakeTelecom();
+
+    void set_cmd(CMD_ID id, uint8_t value);
+    void reset_cmd();
+    UPLink get_cmd() const;
+private:
+    UPLink cmd;
+
+};
+
 #endif /* TELECOM_H */

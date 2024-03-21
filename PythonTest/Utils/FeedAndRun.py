@@ -9,7 +9,7 @@ import socket
 # Sample DataFrame
 
 print(f"current working directory: {os.getcwd()}")
-df = pd.read_csv('../data/combined2.csv')
+df = pd.read_csv('../data/combined3.csv')
 startTime = datetime.datetime.now()
 print(f"Start time: {startTime}")
 print(f"Dataframe: {df.columns}")
@@ -36,8 +36,15 @@ def handle_request(maxTime = sys.maxsize ):
     #if elapsed time is not in the dataframe, use the just before the value eg: 1:00:00 is not in the dataframe, use 0:59:59
     print(f"Elapsed time: {elapsedTime}")
     currentRow = df[df['Time(ms)'] <= elapsedTime].tail(1)
+    caps = ""
+    for i in df.columns:
+        caps += f"{i}:{currentRow[i].values[0]};"
 
-    return currentRow
+    #remove the last comma
+    caps = caps[:-1]
+        
+
+    return caps
 
 while True:
     print("Waiting for connection")
@@ -51,7 +58,6 @@ while True:
         print(f"Request received")
         
         info = handle_request(maxTime)
-        info = info.to_string(index=False)
         print(f"Info: {info}")
         client_socket.send(info.encode('utf-8'))
         print(f"Info sent")
