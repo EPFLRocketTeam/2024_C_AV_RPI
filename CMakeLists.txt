@@ -13,7 +13,6 @@ include_directories(include)
 
 # Create the executable
 
-add_executable(feedTest ../tests/feeder_test.cpp)
 
 add_library(ADXL375 src/sensor/adxl375.cpp include/sensor/adxl375.h)
 target_include_directories(ADXL375 PUBLIC include/sensor)
@@ -45,6 +44,16 @@ target_link_libraries(BMI088_test BMI08x)
 # Test for the ADXL375 sensor
 add_executable(ADXL375_test tests/ADXL375_test.cpp)
 target_link_libraries(ADXL375_test ADXL375)
+
+add_executable(feedTest tests/feeder_test.cpp)
+
+add_library(Fakers src/data/fakeData.cpp src/flightControl/AvState.cpp src/data/fakeSensor.cpp)
+
+add_executable(simTest tests/test_sim.cpp)
+target_link_libraries(simTest Fakers)
+
+
+
 
 enable_testing()
 

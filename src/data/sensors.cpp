@@ -26,7 +26,7 @@ SensFiltered::SensFiltered()
     LOX_inj_pressure(0),
     fuel_inj_pressure(0),
     chamber_pressure(0)
-{}
+{} 
 
 Sensors::Sensors() 
 :   adxl1(ADXL375_ADDR_I2C_PRIM),

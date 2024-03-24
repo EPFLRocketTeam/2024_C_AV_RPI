@@ -5,8 +5,19 @@ import datetime
 import sys
 import os
 import socket
+import numpy as np
 
 # Sample DataFrame
+
+def noise(row_data):
+
+    #apply a gaussian noise to the data of each column expect the time and command  columns
+    
+    for i in row_data.split(";"):
+        if i.split(":")[0] != "Time(ms)" and i.split(":")[0] != "Command":
+            row_data = row_data.replace(i.split(":")[1], str(float(i.split(":")[1]) + np.random.normal(0, 0.1)))
+    return row_data
+
 
 print(f"current working directory: {os.getcwd()}")
 df = pd.read_csv('../data/combined3.csv')
@@ -58,8 +69,15 @@ while True:
         print(f"Request received")
         
         info = handle_request(maxTime)
+        info = noise(info)
         print(f"Info: {info}")
         client_socket.send(info.encode('utf-8'))
         print(f"Info sent")
+
+
+
+
+    
+
         
     
