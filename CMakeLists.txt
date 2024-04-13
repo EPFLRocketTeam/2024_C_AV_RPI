@@ -1,5 +1,5 @@
 #New CMake build file for FireHorn
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22.1)
 
 project(flight_computer VERSION 0.1 LANGUAGES C CXX)
 
@@ -12,6 +12,7 @@ include_directories(include)
 set(SOURCES 
     src/flightControl/AvState.cpp
     tests/test_AvState.cpp
+        include/data/fakeTelecom.h
 )
 
 # Create the executable

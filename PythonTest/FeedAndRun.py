@@ -1,5 +1,5 @@
 import csv
-<<<<<<< HEAD
+
 
 def get_data_from_csv():
     # Read data from a CSV file
@@ -25,7 +25,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-=======
 import subprocess
 
 # Function to read data from CSV
@@ -69,4 +68,4 @@ if __name__ == "__main__":
         # For simplicity, let's just remove the first row
         input_data.pop(0)
         write_data_to_csv('input.csv', input_data)
->>>>>>> d1acead (correction Avstate and CMake creation)
+

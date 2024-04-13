@@ -1,6 +1,3 @@
-
-#include "../include/flightControl/AvState.h"
-#include "../include/flightControl/AvData.h"
 //
 // Created by marin on 13/04/2024.
 //
@@ -26,40 +23,40 @@ int main() {
     const char* request = "request";
     char buffer[1024] = {0};
 
+    
 
-
-
+   
 
     while (true) {
 
+        
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        std::cerr << "Socket creation error" << std::endl;
+        return -1;
+    }
 
-        if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-            std::cerr << "Socket creation error" << std::endl;
-            return -1;
-        }
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
 
-        serv_addr.sin_family = AF_INET;
-        serv_addr.sin_port = htons(PORT);
+     if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
+        std::cerr << "Invalid address/ Address not supported" << std::endl;
+        return -1;
+    }
 
-        if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
-            std::cerr << "Invalid address/ Address not supported" << std::endl;
-            return -1;
-        }
+     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+       
+        std::cerr << "Connection Failed" << std::endl;
+        return -1;
 
-        if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    }
 
-            std::cerr << "Connection Failed" << std::endl;
-            return -1;
-
-        }
-
-
+       
 
         std::cout << "Sending request" << std::endl;
-
+        
         send(sock, request, strlen(request), 0);
         std::cout << "Request sent" << std::endl;
-
+        
         valread = read(sock, buffer, 1024);
         // print the response in blue
         std::cout << "\033[1;34m";
@@ -72,4 +69,4 @@ int main() {
 
     close(sock); // Close the socket
     return 0;
-}}
+}
