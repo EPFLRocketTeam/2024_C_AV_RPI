@@ -33,6 +33,21 @@ add_library(I2CInterface src/I2CInterface/I2CInterface.cpp include/I2CInterface/
 target_include_directories(I2CInterface PUBLIC include/I2CInterface)
 target_link_libraries(I2CInterface PRIVATE pigpio)
 
+# Build LoRa4Raspi library
+set(LORA_SOURCES
+    LoRa4Raspi/src/LoRa.cpp
+    LoRa4Raspi/src/LoRa.h
+    LoRa4Raspi/src/Print.cpp
+    LoRa4Raspi/src/Print.h
+    LoRa4Raspi/src/Printable.h
+    LoRa4Raspi/src/WString.cpp
+    LoRa4Raspi/src/WString.h
+    LoRa4Raspi/src/itoa.cpp
+    LoRa4Raspi/src/itoa.h
+)
+add_library(LoRa4Raspi ${LORA_SOURCES})
+target_include_directories(LoRa4Raspi PUBLIC LoRa4Raspi/src)
+target_link_libraries(LoRa4Raspi PRIVATE pigpio)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 
@@ -47,6 +62,10 @@ target_link_libraries(BMI088_test BMI08x)
 # Test for the ADXL375 sensor
 add_executable(ADXL375_test tests/ADXL375_test.cpp)
 target_link_libraries(ADXL375_test ADXL375)
+
+# Test for the RFM95 LoRa
+add_executable(LoRa_test tests/LoRa_test.cpp)
+target_link_libraries(LoRa_test LoRa4Raspi)
 
 enable_testing()
 
