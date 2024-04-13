@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-cmake_minimum_required(VERSION 3.5)
-
-project(FlightControlTest)
-
-# Define the include directories
-include_directories(include)
-
-# Define the source files
-set(SOURCES 
-src/flightControl/AvState.cpp
-src/flightControl/AvData.cpp
-)
-
-# Create the executable
-#add_executable(flight_control_test tests/test_AvState.cpp ${SOURCES})
-add_executable(basic_init_test tests/basicTest_avState.cpp ${SOURCES})
-=======
 #New CMake build file for FireHorn
 cmake_minimum_required(VERSION 3.25)
 
@@ -25,6 +7,15 @@ project(flight_computer VERSION 0.1 LANGUAGES C CXX)
 set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(include)
+
+# Define the source files
+set(SOURCES 
+    src/flightControl/AvState.cpp
+    tests/test_AvState.cpp
+)
+
+# Create the executable
+add_executable(flight_control_test ${SOURCES})
 
 add_library(ADXL375 src/sensor/adxl375.cpp include/sensor/adxl375.h)
 target_include_directories(ADXL375 PUBLIC include/sensor)
@@ -49,10 +40,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
 add_executable(BMP390_test tests/BMP390_test.cpp)
 target_link_libraries(BMP390_test BMP3)
 
-<<<<<<< HEAD
-target_link_libraries(main_test pigpio BMP3 BMI08x)
->>>>>>> 182b2ad (Add files via upload)
-=======
 # Test for the BMI088 sensor
 add_executable(BMI088_test tests/BMI088_test.cpp)
 target_link_libraries(BMI088_test BMI08x)
@@ -74,13 +61,6 @@ add_test (
     NAME BMI088_test
     COMMAND $<TARGET_FILE:BMI088_test>
 )
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 4db086c (Changed CMakeLists)
-=======
-set_tests_properties(BMI088_test PROPERTIES TIMEOUT 5)
->>>>>>> 3cbf43e (Interrupts for accelerometer working now)
-=======
 set_tests_properties(BMI088_test PROPERTIES TIMEOUT 5)
 
 add_test (
@@ -88,4 +68,3 @@ add_test (
     COMMAND $<TARGET_FILE:ADXL375_test>
 )
 set_tests_properties(ADXL375_test PROPERTIES TIMEOUT 5)
->>>>>>> c7df872 (Made the test for adxl375)
