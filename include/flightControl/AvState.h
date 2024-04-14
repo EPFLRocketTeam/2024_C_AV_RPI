@@ -3,6 +3,8 @@
 // The class has a constructor and a destructor, as well as a number of functions that transition from one state to others possible states.
 
 #include <iostream>
+#include <list>
+#include "data/thresholds.h"
 #include <string>
 #include <data/fakeSensors.h>
 
@@ -30,31 +32,6 @@ enum class State
     READY
 };
 
-class Thresholds
-{
-    // a class that contains the thresholds for the different data values
-    // this class is used to hold the thresholds for the different data values
-
-    Thresholds(const double speed_zero, const double speed_max, const double altitude_max, const double acceleration_max, const double pressure_max, const double pressure_wanted, const double pressure_min)
-    {
-        this->speed_zero = speed_zero;
-        this->speed_max = speed_max;
-        this->altitude_max = altitude_max;
-        this->acceleration_max = acceleration_max;
-        this->pressure_max = pressure_max;
-        this->pressure_wanted = pressure_wanted;
-        this->pressure_min = pressure_min;
-    }
-
-public:
-    double speed_zero;
-    double speed_max;
-    double altitude_max;
-    double acceleration_max;
-    double pressure_max;
-    double pressure_wanted;
-    double pressure_min;
-};
 
 // Path: AV-Firehorn-Rpi/include/flightControl/AvState.h
 // Compare this snippet from AV-Firehorn-Rpi/src/flightControl/FSM.cpp:
@@ -64,7 +41,7 @@ class AvState
 {
 public:
     // constructor
-    AvState(Thresholds thresholds);
+    explicit AvState(const Thresholds& thresholds);
     // destructor
     ~AvState();
 

@@ -20,7 +20,7 @@ public:
     FakeData();
     ~FakeData();
 
-    bool update();
+    bool update(const std::string &data);
     DataDump dump() const;
 private:
     bool updated;

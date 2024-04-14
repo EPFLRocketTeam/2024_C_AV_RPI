@@ -13,13 +13,14 @@ FakeData::~FakeData()
 {
 }
 
-bool FakeData::update()
+bool FakeData::update(const std::string& data)
 {
-    m_telecom.update();
+    m_telecom.update(data);
     updated = m_sensors.update();
 
     return updated;
 }
+
 
 DataDump FakeData::dump() const
 {

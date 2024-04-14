@@ -8,7 +8,7 @@
 
 
 
-AvState::AvState(Thresholds thresholds)
+AvState::AvState(const Thresholds& thresholds)
 
 {
     this->currentState = State::IDLE;
@@ -251,5 +251,6 @@ std::string AvState::stateToString(State state)
     }
 
 }
+
 
 

@@ -14,9 +14,9 @@ struct Vector3 {
 };
 
 struct SensFiltered {
-    Vector3   speed;
-    Vector3   accel;
-    Vector3   attitude;
+    Vector3   speed{};
+    Vector3   accel{};
+    Vector3   attitude{};
     double baro;
     double    N2_pressure;
     double    fuel_pressure;

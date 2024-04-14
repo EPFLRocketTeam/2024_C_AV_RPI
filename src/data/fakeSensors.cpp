@@ -8,23 +8,47 @@
 #include <string>
 #include <utility>
 
-FakeSensors::FakeSensors()
-{
+FakeSensors::FakeSensors(){
     clean_data = SensFiltered();
 }
-
 FakeSensors::~FakeSensors()
-{
-}
+= default;
 
 void FakeSensors::calibrate()
 {
     clean_data = SensFiltered();
 }
-
 bool FakeSensors::update()
 {
     return true;
+}
+
+SensFiltered::SensFiltered()
+{
+    speed.x = 0;
+    speed.y = 0;
+    speed.z = 0;
+
+    accel.x = 0;
+    accel.y = 0;
+    accel.z = 0;
+
+    attitude.x = 0;
+    attitude.y = 0;
+    attitude.z = 0;
+
+    baro = 0;
+    N2_pressure = 0;
+    fuel_pressure = 0;
+    LOX_pressure = 0;
+    fuel_level = 0;
+    LOX_level = 0;
+    engine_temperature = 0;
+    igniter_pressure = 0;
+    LOX_inj_pressure = 0;
+    fuel_inj_pressure = 0;
+    chamber_pressure = 0;
+    altitude = 0;
 }
 
 SensFiltered parse_data(std::string data)

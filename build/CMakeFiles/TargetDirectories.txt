@@ -1,3 +1,11 @@
-/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/build/CMakeFiles/basic_init_test.dir
-/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/build/CMakeFiles/edit_cache.dir
-/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI-1/build/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/flight_computer.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/ADXL375.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/BMP3.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/BMI08x.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/I2CInterface.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/BMP390_test.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/BMI088_test.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/ADXL375_test.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/test.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/edit_cache.dir
+/mnt/c/Users/marin/Documents/Ma2/2024_C_AV_RPI/build/CMakeFiles/rebuild_cache.dir

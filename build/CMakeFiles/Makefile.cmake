@@ -43,5 +43,12 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/basic_init_test.dir/DependInfo.cmake"
+  "CMakeFiles/flight_computer.dir/DependInfo.cmake"
+  "CMakeFiles/ADXL375.dir/DependInfo.cmake"
+  "CMakeFiles/BMP3.dir/DependInfo.cmake"
+  "CMakeFiles/BMI08x.dir/DependInfo.cmake"
+  "CMakeFiles/I2CInterface.dir/DependInfo.cmake"
+  "CMakeFiles/BMP390_test.dir/DependInfo.cmake"
+  "CMakeFiles/BMI088_test.dir/DependInfo.cmake"
+  "CMakeFiles/ADXL375_test.dir/DependInfo.cmake"
   )
