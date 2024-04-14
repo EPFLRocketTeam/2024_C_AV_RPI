@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up QEMU Docker container
-        run: docker run -d --name qemu_rpi -p 2222:2222 stawiski/qemu-raspberrypi-3b:2023-05-03-raspios-bullseye-arm64
+        run: docker run --rm -p 2222:2222 ptrsr/pi-ci start
 
       - name: Wait for container to start
         run: sleep 30
