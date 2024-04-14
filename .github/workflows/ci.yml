@@ -1,23 +1,39 @@
-name: CI
+name: Raspberry Pi Emulation CI
 
 on:
   push:
     branches:
-      - main  # adjust branch name as needed
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # or choose an appropriate runner
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Docker
-        uses: docker/setup-qemu-action@v1
+      - name: Set up QEMU Docker container
+        run: docker run -d --name qemu_rpi -p 2222:2222 stawiski/qemu-raspberrypi-3b:2023-05-03-raspios-bullseye-arm64
 
-      - name: Pull Docker Image
-        run: docker pull stawiski/qemu-raspberrypi-3b:2023-05-03-raspios-bullseye-arm64
+      - name: Wait for container to start
+        run: sleep 30
 
-      - name: Run Docker Container
-        run: docker run -it --rm -p 2222:2222 stawiski/qemu-raspberrypi-3b:2023-05-03-raspios-bullseye-arm64
+      - name: SSH into Raspberry Pi Emulation
+        uses: appleboy/ssh-action@master
+        with:
+          host: localhost
+          port: 2222
+          username: pi
+          password: raspberry
+          script: |
+            # Now you can run your compilation and testing commands here
+            # For example:
+            echo "Compiling and running tests on emulated Raspberry Pi..."
+            # Your compilation and testing commands go here
+
+      - name: Stop and remove QEMU Docker container
+        run: docker stop qemu_rpi && docker rm qemu_rpi
