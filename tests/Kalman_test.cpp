@@ -9,7 +9,6 @@
 #include "../include/flightControl/AvData.h"
 #include "../include/flightControl/Kalman.h"
 
-
 bool isFloat(const std::string & str) {
     try {
         std::stof(str);
@@ -18,7 +17,6 @@ bool isFloat(const std::string & str) {
         return false;
     }
 }
-
 
 std::vector<AvData> parseCSV(std::string filename) {
 
@@ -41,7 +39,7 @@ std::vector<AvData> parseCSV(std::string filename) {
     }
 
     int lineNumber = 0;
-    while (std::getline(input, line) /**/&& lineNumber < 30000) { // CONDITION ON LINE_NUMBER!
+    while (std::getline(input, line) && lineNumber < /*10*/ 60764-1) { // CONDITION ON LINE_NUMBER!
         ++lineNumber;
         std::cout << "Line: " << lineNumber << std::endl;
 
@@ -51,7 +49,7 @@ std::vector<AvData> parseCSV(std::string filename) {
         // Read each comma-separated value
         std::string value;
 
-        // altitude
+        // altitude (in m)
         if (std::getline(ss, value, ',') && isFloat(value)) {
             avData.altitude = std::stof(value);
         } else {
@@ -59,7 +57,7 @@ std::vector<AvData> parseCSV(std::string filename) {
             break;
         }
         
-        // velocity
+        // velocity (in m/s)
         if (std::getline(ss, value, ',') && isFloat(value)) {
             avData.velocity = std::stof(value);
         } else {
@@ -70,12 +68,17 @@ std::vector<AvData> parseCSV(std::string filename) {
         // time (convert from milliseconds to seconds and add base)
         if (std::getline(ss, value, ',') && isFloat(value)) {
             avData.time = (std::stof(value) + 2463759.0) / 1000.0;
+            if (avData.time >= 2465.04 && avData.time <= 7175.29) {
+                avData.ignited = true;
+            } else {
+                avData.ignited = false;
+            }
         } else {
             std::cerr << "Error: Invalid time value on line " << lineNumber << "\n" << std::endl;
             break;
         }
         
-        // acceleration (extract x, y, z values from the tuple and use only x)
+        // acceleration (extract x, y, z values from the tuple and use only x) (in m/s²)
         size_t start = line.find("(");
         size_t end = line.find(")", start);
         std::string accStr = line.substr(start + 1, end - start - 1);
@@ -84,7 +87,7 @@ std::vector<AvData> parseCSV(std::string filename) {
         float x, y, z;
         if (accStream >> x >> comma >> y >> comma >> z) {
             //avData.acceleration = std::sqrt(x * x + y * y + z * z);
-            avData.acceleration = std::abs(x);
+            avData.acceleration = x ; // in m/s^2? //std::abs(x);
         } else {
             std::cerr << "Error: Invalid acceleration value on line " << lineNumber << std::endl;
             break;
@@ -92,7 +95,6 @@ std::vector<AvData> parseCSV(std::string filename) {
 
         std::string remaining = line.substr(end + 3);
         std::istringstream remainingStream(remaining);
-
 
         // pressure
         if (std::getline(remainingStream, value, ',') && isFloat(value)) {
@@ -110,7 +112,6 @@ std::vector<AvData> parseCSV(std::string filename) {
     return data;
 
 }
-
 
 int main(void) {
 

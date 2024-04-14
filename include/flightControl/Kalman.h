@@ -47,7 +47,7 @@ struct Kalman_Rocket_State_ {
     Eigen::Matrix<float, 6, 3> G; // represents the effect of control inputs on the system dynamics, if any
 
     // Last time stamp
-    unsigned int last_time;
+    uint32_t last_time;
 
 };
 
