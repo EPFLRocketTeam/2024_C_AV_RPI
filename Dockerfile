@@ -16,6 +16,13 @@ RUN apt-get -y install flex
 RUN apt-get -y install bison
 RUN apt-get -y install libssl-dev
 RUN apt-get -y install make
+RUN apt-get -y install gcc
+RUN apt-get -y install systemctl
+
+
+RUN echo "HRNGDEVICE=/dev/urandom" >> /etc/default/rng-tools
+
+
 
 
 
@@ -24,6 +31,7 @@ RUN # Verify signatures...
 RUN wget "https://download.qemu.org/${QEMU_TARBALL}.sig"
 RUN gpg --keyserver keyserver.ubuntu.com --recv-keys CEACC9E15534EBABB82D3FA03353C9CEF108B584
 RUN gpg --verify "${QEMU_TARBALL}.sig" "${QEMU_TARBALL}"
+
 
 RUN tar xvf "${QEMU_TARBALL}"
 
@@ -54,7 +62,11 @@ RUN cd /tmp && \
 VOLUME /sdcard
 
 ADD ./entrypoint.sh /entrypoint.sh
+
 RUN chmod +x /entrypoint.sh
+
+RUN ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
+
 ENTRYPOINT ["./entrypoint.sh"]
 
 FROM pidoc-vm as pidoc
