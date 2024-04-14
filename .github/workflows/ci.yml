@@ -25,6 +25,13 @@ jobs:
       - name: Pull PI-CI Docker image
         run: docker pull ptrsr/pi-ci
 
-      - name: Build and test
+      - name: Compile and test C++ code
         run: |
           docker run --rm -v $PWD:/workspace ptrsr/pi-ci start
+          cd /workspace
+          mkdir build
+          cd build
+          cmake ..
+          make
+          ctest
+          docker run --rm -v $PWD:/workspace ptrsr/pi-ci export --input /workspace/dist/image.qcow2 --output /workspace/dist/image.img
