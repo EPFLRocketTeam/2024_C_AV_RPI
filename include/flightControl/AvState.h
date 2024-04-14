@@ -31,21 +31,28 @@ enum class State
 // functions that transition from one state to others possible states
 class AvState
 {
+
 public:
     // constructor
     AvState();
     // destructor
-    ~AvState();
+    //~AvState();
 
     // this function allows to get the current state of the FSM
     State getCurrentState();
     
-    void update(AvData data);
+    //void update(AvData data);
 
+    // only for kalman filter test
+    void setCurrentState(State state);
 
-    State *possibleStates();
+    //State *possibleStates(); // for kalman filter test
 
-    std::string stateToString(State state);
+    //std::string stateToString(State state);
+
+// for kalman filter test
+private:
+    State currentState;
 };
 
 #endif

@@ -7,6 +7,7 @@
 #include <tuple>
 
 #include "../include/flightControl/AvData.h"
+#include "../include/flightControl/AvState.h"
 #include "../include/flightControl/Kalman.h"
 
 bool isFloat(const std::string & str) {
@@ -18,9 +19,9 @@ bool isFloat(const std::string & str) {
     }
 }
 
-std::vector<AvData> parseCSV(std::string filename) {
+std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
-    std::vector<AvData> data;
+    std::vector<std::tuple<AvData, AvState>> data;
 
     std::ifstream input{filename.c_str()};
     if (!input.is_open()) {
@@ -45,6 +46,7 @@ std::vector<AvData> parseCSV(std::string filename) {
 
         std::istringstream ss(line);
         AvData avData;
+        AvState avState;
 
         // Read each comma-separated value
         std::string value;
@@ -69,9 +71,9 @@ std::vector<AvData> parseCSV(std::string filename) {
         if (std::getline(ss, value, ',') && isFloat(value)) {
             avData.time = (std::stof(value) + 2463759.0) / 1000.0;
             if (avData.time >= 2465.04 && avData.time <= 7175.29) {
-                avData.ignited = true;
+                avState.setCurrentState(State::ASCENT);
             } else {
-                avData.ignited = false;
+                avState.setCurrentState(State::IDLE);
             }
         } else {
             std::cerr << "Error: Invalid time value on line " << lineNumber << "\n" << std::endl;
@@ -105,7 +107,7 @@ std::vector<AvData> parseCSV(std::string filename) {
             break;
         }
 
-        data.push_back(avData);
+        data.push_back(std::make_tuple(avData, avState));
     }
 
     input.close();
@@ -116,7 +118,7 @@ std::vector<AvData> parseCSV(std::string filename) {
 int main(void) {
 
     // Load data from CSV file
-    std::vector<AvData> testData = parseCSV("../tests/combined_data.csv");
+    std::vector<std::tuple<AvData, AvState>> testData = parseCSV("../tests/combined_data.csv");
 
     KalmanFilter kalmanFilter = KalmanFilter();
 
@@ -127,15 +129,15 @@ int main(void) {
 
     int counter = 0;
     // Iterate over data and update Kalman filter
-    for (const auto & data : testData) {
+    for (const auto & [avData, avState] : testData) {
         ++counter;
         std::cout << "Writing line " << counter << std::endl;
 
-        std::tuple<float, float> estimatedAltitudeAndVelocity = kalmanFilter.UpdateAndGetAltitudeAndVelocity(data);
+        std::tuple<float, float> estimatedAltitudeAndVelocity = kalmanFilter.UpdateAndGetAltitudeAndVelocity(avData, avState);
         float estimatedAltitude = std::get<0>(estimatedAltitudeAndVelocity);
         float estimatedVelocity = std::get<1>(estimatedAltitudeAndVelocity);
 
-        outputFile << data.time << "," << estimatedVelocity << "," << estimatedAltitude << "\n";
+        outputFile << avData.time << "," << estimatedVelocity << "," << estimatedAltitude << "\n";
 
     }
     outputFile.close();

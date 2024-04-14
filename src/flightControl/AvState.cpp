@@ -6,24 +6,31 @@
 
 
     // constructor
-     State currentState;
+    // State currentState; // removed for kalman filter test
 
     AvState::AvState()
     {
         currentState = State::IDLE;
     }
+    /*
     // destructor
     AvState::~AvState()
     {
         currentState = State::IDLE;
-    }
+    }*/
     
     // this function allows to get the current state of the FSM
     State AvState::getCurrentState()
     {
         return currentState;
     }
+
+    // =========== only for Kalman Filter test ====================================================
+    void AvState::setCurrentState(State state) {
+        currentState = state;
+    }
     
+    /*
     std::string telemetry_set[] = {"calibrate", "check", "ready", "launch", "abort", "arme"};
     void sendError(){
         //print in console the "error"
@@ -253,7 +260,8 @@
             return "ERROR";
             break;
         }
+       
     }
-
+ */
 
     

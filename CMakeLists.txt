@@ -52,7 +52,7 @@ target_link_libraries(ADXL375_test ADXL375)
 ]]
 
 # Test for the Kalman filter
-add_executable(Kalman_test tests/Kalman_test.cpp src/flightControl/Kalman.cpp include/flightControl/Kalman.h)
+add_executable(Kalman_test tests/Kalman_test.cpp src/flightControl/Kalman.cpp include/flightControl/Kalman.h src/flightControl/AvState.cpp)
 target_include_directories(Kalman_test PRIVATE include)
 
 enable_testing()

@@ -16,7 +16,7 @@ class KalmanFilter {
 
     public:
         KalmanFilter();
-        std::tuple <float, float> UpdateAndGetAltitudeAndVelocity(AvData data);
+        std::tuple <float, float> UpdateAndGetAltitudeAndVelocity(AvData data, AvState av_state);
 
 };
 

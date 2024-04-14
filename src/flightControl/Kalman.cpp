@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <cmath> // for calculating pressure based on altitude (useful?)
 #include <iostream>
 #include <tuple>
 
@@ -7,6 +8,7 @@
 #include "flightControl/eigen-3.4.0/Eigen/Dense"
 #include "flightControl/eigen-3.4.0/unsupported/Eigen/MatrixFunctions"
 #include "flightControl/AvData.h"
+#include "flightControl/AvState.h"
 #include "flightControl/Kalman.h"
 
 // X_State_Vector : z, v, a, p0, k, h0
@@ -226,7 +228,8 @@ void kalman_update_acc(Kalman_Rocket_State * state, float a) {
 
 }
 
-#include <cmath>
+
+
 
 // Constants for the International Standard Atmosphere
 const float P0 = 101325.0f;  // Sea level standard atmospheric pressure, in Pascals
@@ -242,7 +245,7 @@ float pressure_to_altitude(float pressure) {
     return (1.0f - powf(pressure / P0, R * L / (g * M))) * T0 / L;
 }
 
-void kalman_handle_data(Kalman_Rocket_State * state, AvData data) {
+void kalman_handle_data(Kalman_Rocket_State * state, AvData data, AvState av_state) {
 
     /*
     // To handle
@@ -262,7 +265,8 @@ void kalman_handle_data(Kalman_Rocket_State * state, AvData data) {
    // Calculate the time elapsed since the last update in seconds
     float dt = (data.time - state->last_time) / 1000.0f; // Conversion from milliseconds to seconds
     //kalman_predict(state, dt);
-    if (dt > 0 && data.ignited) {
+
+    if (dt > 0 && (av_state.getCurrentState() == State::ASCENT || av_state.getCurrentState() == State::DESCENT)) {
         // If time has passed and the rocket is ignited, predict the next state
         kalman_predict(state, dt);
         state->last_time = data.time; // Update the last processed time
@@ -314,8 +318,8 @@ KalmanFilter::KalmanFilter() {
     }
 }
 
-std::tuple<float, float> KalmanFilter::UpdateAndGetAltitudeAndVelocity(AvData data) {
+std::tuple<float, float> KalmanFilter::UpdateAndGetAltitudeAndVelocity(AvData data, AvState av_state) {
 
-    kalman_handle_data(state, data);
+    kalman_handle_data(state, data, av_state);
     return std::make_tuple(state->X_hat(0,0), state->X_hat(1,0)); // returns the estimated altitude and velocity
 }
