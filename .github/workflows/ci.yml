@@ -28,7 +28,7 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
-        - name: Build the project
+      - name: Build the project
         run: |
           # Cross-compile the project (example)
           cd build
