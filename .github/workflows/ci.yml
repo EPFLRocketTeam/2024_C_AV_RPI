@@ -1,33 +1,23 @@
-name: Raspberry Pi CI
+name: CI
 
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - main  # adjust branch name as needed
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # or choose an appropriate runner
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Set up QEMU
+      - name: Set up Docker
         uses: docker/setup-qemu-action@v1
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+      - name: Pull Docker Image
+        run: docker pull stawiski/qemu-raspberrypi-3b:2023-05-03-raspios-bullseye-arm64
 
-      - name: Create and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile
-          push: false
-          tags: |
-            your_image_name:latest
-            your_image_name:${{ github.sha }}
+      - name: Run Docker Container
+        run: docker run -it --rm -p 2222:2222 stawiski/qemu-raspberrypi-3b:2023-05-03-raspios-bullseye-arm64
