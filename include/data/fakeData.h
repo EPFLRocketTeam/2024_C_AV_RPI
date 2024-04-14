@@ -11,21 +11,21 @@
 #include "fakeSensors.h"
 
 struct DataDump {
-    UPLink telecom_status;
+    UPLink telecom_status{};
     SensFiltered sensors_data;
 };
 
 class FakeData {
 public:
-    Data();
-    ~Data();
+    FakeData();
+    ~FakeData();
 
     bool update();
     DataDump dump() const;
 private:
     bool updated;
-    Telecom m_telecom;
-    Sensors m_sensors;
+    FakeTelecom m_telecom;
+    FakeSensors m_sensors;
 };
 
 

@@ -13,6 +13,11 @@ set(SOURCES
     src/flightControl/AvState.cpp
     tests/test_AvState.cpp
         include/data/fakeTelecom.h
+        src/data/fakeData.cpp
+        src/data/fakeSensors.cpp
+        src/data/fakeSensors.cpp
+        src/data/telecom.cpp
+        src/data/fakeTelecom.cpp
 )
 
 # Create the executable

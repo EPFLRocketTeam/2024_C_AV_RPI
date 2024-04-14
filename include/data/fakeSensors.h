@@ -4,6 +4,7 @@
 
 #ifndef FAKESENSORS_H
 #define FAKESENSORS_H
+#include <string>
 
 
 struct Vector3 {
@@ -27,21 +28,24 @@ struct SensFiltered {
     double    LOX_inj_pressure;
     double    fuel_inj_pressure;
     double    chamber_pressure;
+    double    altitude;
 
     SensFiltered();
 };
 
-class Sensors {
+class FakeSensors {
 public:
-    Sensors();
-    ~Sensors();
+    FakeSensors();
+    ~FakeSensors();
 
     void calibrate();
     bool update();
+    void set_data(std::string data);
 
     inline SensFiltered dump() const { return clean_data; }
 private:
     SensFiltered clean_data;
+
 
     // Read sensors status
     void update_status();

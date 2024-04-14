@@ -6,6 +6,7 @@
 #define FAKETELECOM_H
 
 #include <capsule.h>
+#include <string>
 #include <ERT_RF_Protocol_Interface/PacketDefinition.h>
 
 struct UPLink {
@@ -13,12 +14,12 @@ struct UPLink {
     uint8_t value;
 };
 
-class Telecom {
+class FakeTelecom {
 public:
-    Telecom();
-    ~Telecom();
+    FakeTelecom();
+    ~FakeTelecom();
 
-    void update();
+    void update(std::string data);
     UPLink get_cmd() const;
     void reset_cmd();
 private:

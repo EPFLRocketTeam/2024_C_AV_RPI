@@ -1,263 +1,255 @@
 #include "../../include/flightControl/AvState.h"
-#include "../../include/flightControl/AvData.h"
 #include <string.h>
-#include "../../include/flightControl/AvData.h"
 #include <list>
+#include <data/fakeSensors.h>
+
+#include "data/fakeTelecom.h"
 
 
 
-    // constructor
-     State currentState;
 
-    AvState::AvState()
-    {
-        currentState = State::IDLE;
-    }
-    // destructor
-    AvState::~AvState()
-    {
-        currentState = State::IDLE;
-    }
-    AvData data;
-    
-    // this function allows to get the current state of the FSM
-    State AvState::getCurrentState()
-    {
-        return currentState;
-    }
-    
-    std::string telemetry_set[] = {"calibrate", "check", "ready", "launch", "abort", "arme"};
-    void sendError(){
-        //print in console the "error"
-        std::cout << "Error" << std::endl;
-    }
-    bool error(){
-       
-        return false;
-    }
-    
-    State fromIdle(AvData data)
-    {
-        if ((data.telemetry == telemetry_set[0]   ))
-        {
-            return State::CALIBRATION;
-        }
-        {
-            return State::CALIBRATION;
-        }
-        return State::IDLE;
-    }
-    State fromLanded() { return State::LANDED; }
-    State fromDescent(AvData data)
-    {
-        if (data.velocity < 0)
-        {
-            return State::LANDED;
-        }
-        return State::DESCENT;
-    }
-    State fromAscent(AvData data)
-    {
-        if (data.velocity == 0)
-        {
-            return State::DESCENT;
-        }
-        return State::ASCENT;
-    }
+AvState::AvState(Thresholds thresholds)
 
-    State fromCalibration(AvData data)
-    {
-        if ((data.telemetry== telemetry_set[2]))
-        {
-            return State::READY;
-            // TODO: check errors
-        }
-        else if (data.pressure > 0.5)
-        {
-            return State::ARMED;
-        }
+{
+    this->currentState = State::IDLE;
+    //initialize the thresholds
+    this->thresholds = thresholds;
 
+}
+
+// destructor
+AvState::~AvState()
+{
+    currentState = State::IDLE;
+}
+
+
+// this function allows to get the current state of the FSM
+State AvState::getCurrentState()
+{
+    return currentState;
+}
+
+std::string telemetry_set[] = {"calibrate", "check", "ready", "launch", "abort", "arme"};
+
+void sendError()
+{
+    //print in console the "error"
+    std::cout << "Error" << std::endl;
+}
+
+bool error()
+{
+    return false;
+}
+
+
+State AvState::fromIdle(SensFiltered data, UPLink uplink)
+{
+    if ((uplink.id == CMD_ID::AV_CMD_CALIBRATE))
+    {
         return State::CALIBRATION;
     }
-    State fromErrorGround(AvData data)
+    return State::IDLE;
+}
+
+State AvState::fromLanded() { return State::LANDED; }
+
+State AvState::fromDescent(SensFiltered data, UPLink uplink)
+{
+    //norm of the speed vector
+    double speed = (data.speed.x * data.speed.x + data.speed.y * data.speed.y + data.speed.z * data.speed.z);
+    if (speed < 0)
     {
-        if (!error() && (data.telemetry== "check"))
-        {
-            return State::IDLE;
-        }
-        else
-        {
-            return State::ERRORGROUND;
-        }
+        return State::LANDED;
     }
-    State fromErrorFlight()
+    return State::DESCENT;
+}
+
+State AvState::fromAscent(SensFiltered data, UPLink uplink)
+{
+    if (data.speed.z <= 0)
+    {
+        return State::DESCENT;
+    }
+    return State::ASCENT;
+}
+
+State AvState::fromCalibration(SensFiltered data, UPLink uplink)
+{
+    if (error())
+    {
+        return State::ERRORGROUND;
+    }
+    else
+    {
+        switch (uplink.id)
+        {
+            case CMD_ID::AV_CMD_ABORT:
+                return State::ERRORGROUND;
+        case CMD_ID::AV_CMD_MANUAL_DEPLOY:
+            return State::MANUAL;
+        default: return State::CALIBRATION;
+        }
+
+    }
+
+
+}
+
+State AvState::fromErrorGround(SensFiltered data, UPLink uplink)
+{
+    if (uplink.id == CMD_ID::AV_CMD_RECOVER)
+    {
+        return State::IDLE;
+    }
+}
+
+
+
+
+State AvState::fromErrorFlight()
+{
+    return State::ERRORFLIGHT;
+}
+
+State AvState::fromThrustSequence(SensFiltered data, UPLink uplink)
+{
+    double speed = (data.speed.x * data.speed.x + data.speed.y * data.speed.y + data.speed.z * data.speed.z);
+    if (uplink.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-    State fromThrustSequence(AvData data)
+    else if (speed < thresholds.speed_zero)
     {
-        if ((data.telemetry== telemetry_set[4]))
-        {
-            return State::ERRORFLIGHT;
-        }
-        else if (data.ignited)
-        {
-            return State::ASCENT;
-        }
-        return State::THRUSTSEQUENCE;
+        return State::LANDED;
     }
-    State fromManual(AvData data)
     {
-        if (error())
-        {
-            return State::ERRORGROUND;
-        }
-        else if ((data.telemetry== telemetry_set[4]))
-        {
-            return State::ERRORGROUND;
-        }
-        else if ((data.telemetry== telemetry_set[5]))
-        {
-            return State::READY;
-        }
-        return State::MANUAL;
+        return State::ASCENT;
     }
-    State fromArmed(AvData data)
+    return State::THRUSTSEQUENCE;
+}
+
+State AvState::fromManual(SensFiltered data, UPLink uplink)
+{
+    if (error() || uplink.id == CMD_ID::AV_CMD_ABORT)
     {
-        if (error())
-        {
-            return State::ERRORGROUND;
-        }
-        else if ((data.telemetry== telemetry_set[4]))
-        {
-            return State::ERRORGROUND;
-        }
-        else if ((data.telemetry== telemetry_set[5]))
-        {
-            return State::READY;
-        }
-        else if (data.pressure > 0.5)
-        {
-            return State::ARMED;
-        }
-        else if (data.telemetry == telemetry_set[3])
-        {
-            return State::THRUSTSEQUENCE;
-        }
+        return State::ERRORGROUND;
+    }
+    else if (uplink.id == CMD_ID::AV_CMD_ARM && data.fuel_pressure > thresholds.pressure_wanted)
+    {
         return State::ARMED;
     }
-    State fromReady(AvData data)
+    return State::MANUAL;
+}
+
+State AvState::fromArmed(SensFiltered data, UPLink uplink)
+{
+    if (error())
     {
-        if (error())
+        return State::ERRORGROUND;
+    }else
+    {
+        switch (uplink.id)
         {
+        case CMD_ID::AV_CMD_IGNITION:
+            return State::THRUSTSEQUENCE;
+        case CMD_ID::AV_CMD_ABORT:
             return State::ERRORGROUND;
-        }
-        else if ((data.telemetry== telemetry_set[4]))
-        {
-            return State::ERRORGROUND;
-        }
-        else if ((data.telemetry== telemetry_set[5]))
-        {
-            return State::ARMED;
-        }
-        return State::READY;
-    }
-    State *possibleStates();
-    
- 
-   
-    bool pressurized(AvData data)
-    {
-        return data.pressure > 0.5;
-    }
-
-    void AvState::update()
-    {
-        data.update(telemetry_set[0]);
-        
-        switch (currentState)
-        {
-        case State::IDLE:
-            currentState = fromIdle(data);
-            break;
-        case State::LANDED:
-            currentState = fromLanded();
-
-        case State::DESCENT:
-            currentState = fromDescent(data);
-            break;
-        case State::ASCENT:
-            currentState = fromAscent(data);
-            break;
-        case State::CALIBRATION:
-            currentState = fromCalibration(data);
-            break;
-        case State::ERRORGROUND:
-            currentState = fromErrorGround(data);
-            break;
-        case State::ERRORFLIGHT:
-            currentState = fromErrorFlight();
-            break;
-        case State::THRUSTSEQUENCE:
-            currentState = fromThrustSequence(data);
-            break;
-        case State::MANUAL:
-            currentState = fromManual(data);
-            break;
-        case State::ARMED:
-            currentState = fromArmed(data);
-            break;
-        case State::READY:
-            currentState = fromReady(data);
-            break;
         default:
-            currentState = State::ERRORFLIGHT;
+            State::ARMED;
         }
     }
+}
 
-    std::string AvState::stateToString(State state)
+State* possibleStates();
+
+
+
+
+void AvState::update(SensFiltered data, UPLink uplink)
+
+{
+    switch (currentState)
     {
-        switch (state)
-        {
-        case State::IDLE:
-            return "IDLE";
-            break;
-        case State::LANDED:
+    case State::IDLE:
+        this->currentState = fromIdle(data, uplink);
+        break;
+    case State::LANDED:
+        currentState = fromLanded();
 
-            return "LANDED";
-            break;
-        case State::DESCENT:
-            return "DESCENT";
-            break;
-        case State::ASCENT:
-            return "ASCENT";
-            break;
-        case State::CALIBRATION:
-            return "CALIBRATION";
-            break;
-        case State::ERRORGROUND:
-            return "ERRORGROUND";
-            break;
-        case State::ERRORFLIGHT:
-            return "ERRORFLIGHT";
-            break;
-        case State::THRUSTSEQUENCE:
-            return "THRUSTSEQUENCE";
-            break;
-        case State::MANUAL:
-            return "MANUAL";
-            break;
-        case State::ARMED:
-            return "ARMED";
-            break;
-        case State::READY:
-            return "READY";
-            break;
-        default:
-            return "ERROR";
-            break;
-        }
+    case State::DESCENT:
+        currentState = fromDescent(data, uplink);
+        break;
+    case State::ASCENT:
+        currentState = fromAscent(data, uplink);
+        break;
+    case State::CALIBRATION:
+        currentState = fromCalibration(data, uplink);
+        break;
+    case State::ERRORGROUND:
+        currentState = fromErrorGround(data, uplink);
+        break;
+    case State::ERRORFLIGHT:
+        currentState = fromErrorFlight();
+        break;
+    case State::THRUSTSEQUENCE:
+        currentState = fromThrustSequence(data, uplink);
+        break;
+    case State::MANUAL:
+        currentState = fromManual(data, uplink);
+        break;
+    case State::ARMED:
+        currentState = fromArmed(data, uplink);
+        break;
+    default:
+        currentState = State::ERRORFLIGHT;
+    }
+}
+
+std::string AvState::stateToString(State state)
+{
+    switch (state)
+    {
+    case State::IDLE:
+        return "IDLE";
+        break;
+    case State::LANDED:
+
+        return "LANDED";
+        break;
+    case State::DESCENT:
+        return "DESCENT";
+        break;
+    case State::ASCENT:
+        return "ASCENT";
+        break;
+    case State::CALIBRATION:
+        return "CALIBRATION";
+        break;
+    case State::ERRORGROUND:
+        return "ERRORGROUND";
+        break;
+    case State::ERRORFLIGHT:
+        return "ERRORFLIGHT";
+        break;
+    case State::THRUSTSEQUENCE:
+        return "THRUSTSEQUENCE";
+        break;
+    case State::MANUAL:
+        return "MANUAL";
+        break;
+    case State::ARMED:
+        return "ARMED";
+        break;
+    case State::READY:
+        return "READY";
+        break;
+    default:
+        return "ERROR";
+        break;
     }
 
+}
 
-    
+
