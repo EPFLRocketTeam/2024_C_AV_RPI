@@ -36,6 +36,10 @@ jobs:
           cd build
           cmake ..
           make
+
+      - name: Run the tests
+        run: |
+            ls build
           
 
 
