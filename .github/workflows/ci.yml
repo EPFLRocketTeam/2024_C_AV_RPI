@@ -39,7 +39,9 @@ jobs:
 
       - name: Run the tests
         run: |
-            ls build
+            ./ADXL345_test
+            ./HMC5883L_test
+            ./ITG3200_test
           
 
 
