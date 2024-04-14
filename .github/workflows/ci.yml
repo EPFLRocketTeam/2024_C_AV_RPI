@@ -18,7 +18,6 @@ jobs:
 
       - name: Install pigpio library
         run: |
-          apt install python-setuptools python3-setuptools
           # Install pigpio library on the host machine (example)
           wget https://github.com/joan2937/pigpio/archive/master.zip
           unzip master.zip
