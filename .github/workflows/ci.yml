@@ -1,4 +1,4 @@
-name: Raspberry Pi Emulation CI
+name: Raspberry Pi CI
 
 on:
   push:
@@ -13,27 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up QEMU Docker container
-        run: docker run --rm -p 2222:2222 ptrsr/pi-ci start
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
 
-      - name: Wait for container to start
-        run: sleep 30
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: SSH into Raspberry Pi Emulation
-        uses: appleboy/ssh-action@master
-        with:
-          host: localhost
-          port: 2222
-          username: pi
-          password: raspberry
-          script: |
-            # Now you can run your compilation and testing commands here
-            # For example:
-            echo "Compiling and running tests on emulated Raspberry Pi..."
-            # Your compilation and testing commands go here
+      - name: Pull PI-CI Docker image
+        run: docker pull ptrsr/pi-ci
 
-      - name: Stop and remove QEMU Docker container
-        run: docker stop qemu_rpi && docker rm qemu_rpi
+      - name: Build and test
+        run: |
+          docker run --rm -v $PWD:/workspace ptrsr/pi-ci start
