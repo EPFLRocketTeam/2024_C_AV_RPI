@@ -39,7 +39,7 @@ jobs:
 
       - name: Run the tests
         run: |
-            ls build
+          ls build
           ./build/ADXL375_test
           ./build/BMI088_test
 
