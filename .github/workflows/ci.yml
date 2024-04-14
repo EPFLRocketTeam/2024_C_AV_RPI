@@ -16,6 +16,11 @@ jobs:
           # Install ARM cross-compilation toolchain (example)
           sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
+      
+
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
       - name: Install pigpio library
         run: |
           # Install pigpio library on the host machine (example)
@@ -24,9 +29,6 @@ jobs:
           cd pigpio-master
           make
           sudo make install
-
-      - name: Check out the repository
-        uses: actions/checkout@v2
 
       - name: Build the project
         run: |
