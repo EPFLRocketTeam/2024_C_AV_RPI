@@ -8,22 +8,45 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
-  build:
+  test_suite:
+    name: Run test suite
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [zero_raspbian, zero_raspios, zero_dietpi, zero2_64_raspios]
+        include:
+          - target: zero_raspbian
+            cpu: arm1176
+            cpu_info: cpuinfo/raspberrypi_zero_w
+            base_image: raspbian_lite:latest
+          - target: zero_raspios
+            cpu: arm1176
+            cpu_info: cpuinfo/raspberrypi_zero_w
+            base_image: raspios_lite:latest
+          - target: zero_dietpi
+            cpu: arm1176
+            cpu_info: cpuinfo/raspberrypi_zero_w
+            base_image: dietpi:rpi_armv6_bullseye
+          - target: zero2_64_raspios
+            cpu: cortex-a53
+            cpu_info: cpuinfo/raspberrypi_zero2_w_arm64
+            base_image: raspios_lite_arm64:latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: pguyot/arm-runner-action@v2
-        id: build_image
+      - name: Checkout pynab
+        uses: actions/checkout@v3
+
+      - name: Run test suite in chroot environment
+        uses: pguyot/arm-runner-action@v2
+        id: arm_runner_tests
         with:
-          base_image: raspios_lite:2022-04-04
+          image_additional_mb: 4096
+          base_image: ${{ matrix.base_image }}
+          cpu: ${{ matrix.cpu }}
+          cpu_info: ${{ matrix.cpu_info }}
+          copy_repository_path: /opt/pynab
+          optimize_image: no
           commands: |
-            commands to run test
-      - name: Build cmake project
-        run: |
-          cd build
-          cmake ..
-          make
-            
-            
+            pwd
+            ls
