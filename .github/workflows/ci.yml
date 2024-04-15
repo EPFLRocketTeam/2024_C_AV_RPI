@@ -8,49 +8,24 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
-  test_suite:
-    name: Run test suite
-    runs-on: ubuntu-latest
+  build_base_images:
     strategy:
       fail-fast: false
       matrix:
-        target: [raspberrypi_4b]
-        include:
-          - target: zero_raspbian
-            cpu: arm1176
-            cpu_info: cpuinfo/raspberrypi_zero_w
-            base_image: raspbian_lite:latest
-          - target: zero_raspios
-            cpu: arm1176
-            cpu_info: cpuinfo/raspberrypi_zero_w
-            base_image: raspios_lite:latest
-          - target: zero_dietpi
-            cpu: arm1176
-            cpu_info: cpuinfo/raspberrypi_zero_w
-            base_image: dietpi:rpi_armv6_bullseye
-          - target: zero2_64_raspios
-            cpu: cortex-a53
-            cpu_info: cpuinfo/raspberrypi_zero2_w_arm64
-            base_image: raspios_lite_arm64:latest
-    steps:
-      - name: Checkout pynab
-        uses: actions/checkout@v3
+        image:
 
-      - name: Run test suite in chroot environment
-        uses: pguyot/arm-runner-action@v2
-        id: arm_runner_tests
+          - raspi_4_bullseye:20230102
+          - raspi_4_bookworm:20230101
+          - raspi_4_bookworm:20230612
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./ # pguyot/arm-runner-action@HEAD
         with:
-          image_additional_mb: 4096
-          base_image: ${{ matrix.base_image }}
-          cpu: ${{ matrix.cpu }}
-          cpu_info: ${{ matrix.cpu_info }}
-          copy_repository_path: /opt/pynab
-          optimize_image: no
+          base_image: ${{ matrix.image }}
+          cpu: cortex-a7
           commands: |
-            pwd
-            ls
-            apt-get update
-            apt-get install -y python3 python3-pip
-            apt-get install -y make
-            apt-get install -y cmake
+            cat /etc/os-release
+            uname -a
