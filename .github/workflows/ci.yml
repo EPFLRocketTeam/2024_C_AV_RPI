@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [zero_raspbian, zero_raspios, zero_dietpi, zero2_64_raspios]
+        target: [raspi_4_bullseye:20230102,raspi_4_bookworm:20230101]
         include:
           - target: zero_raspbian
             cpu: arm1176
@@ -50,3 +50,7 @@ jobs:
           commands: |
             pwd
             ls
+            apt-get update
+            apt-get install -y python3 python3-pip
+            apt-get make
+            apt-get cmake
