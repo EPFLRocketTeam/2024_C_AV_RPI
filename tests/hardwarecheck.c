@@ -16,7 +16,7 @@ unsigned gpioHardwareRevision(void)
 
    if (rev) return rev;
 
-   filp = fopen ("./proc/cpuinfo", "r");
+   filp = fopen ("/proc/cpuinfo", "r");
 
 
    if (filp != NULL)
