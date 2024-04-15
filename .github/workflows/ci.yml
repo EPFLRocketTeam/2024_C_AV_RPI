@@ -34,3 +34,8 @@ jobs:
             
             ls
             
+            ./ADXL375_test
+            ./BMI088_test
+            ./BMP390_test
+            
+            
