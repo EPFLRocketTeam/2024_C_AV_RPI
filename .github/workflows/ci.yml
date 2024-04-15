@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [raspi_4_bullseye:20230102,raspi_4_bookworm:20230101]
+        target: [raspi_4b]
         include:
           - target: zero_raspbian
             cpu: arm1176
