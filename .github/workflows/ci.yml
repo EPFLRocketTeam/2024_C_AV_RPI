@@ -19,7 +19,11 @@ jobs:
         with:
           base_image: raspios_lite:2022-04-04
           commands: |
-            cd build
-            cmake ..
-            make
+            commands to run test
+      - name: Build cmake project
+        run: |
+          cd build
+          cmake ..
+          make
+            
             
