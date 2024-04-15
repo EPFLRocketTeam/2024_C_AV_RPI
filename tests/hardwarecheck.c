@@ -2,7 +2,7 @@
 // Created by marin on 15/04/2024.
 //
 
-#include <cstdio>
+#include <stdio.h>
 #include <strings.h>
 
 unsigned gpioHardwareRevision(void)
