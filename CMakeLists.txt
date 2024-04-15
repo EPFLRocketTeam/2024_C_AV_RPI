@@ -20,7 +20,6 @@ set(FAKE_SOURCES
         src/data/thresholds.cpp
         src/data/thresholds.cpp
         src/flightControl/AvState.cpp
-        tests/hardwarecheck.c
 )
 
 
