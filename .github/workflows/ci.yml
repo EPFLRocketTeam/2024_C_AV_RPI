@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -7,48 +8,18 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up cross-compilation toolchain
-        run: |
-          # Install ARM cross-compilation toolchain (example)
-          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-
-      
-
-      - name: Check out the repository
-        uses: actions/checkout@v2
-
-      - name: Install pigpio library
-        run: |
-          # Install pigpio library on the host machine (example)
-          wget https://github.com/joan2937/pigpio/archive/master.zip
-          unzip master.zip
-          cd pigpio-master
-          make
-          sudo make install
-
-      - name: Build the project
-        run: |
-          # Cross-compile the project (example)
-          cd build
-          cmake ..
-          make
-
-      - name: Run the tests
-        run: |
-          ls build
-          ./build/ADXL375_test
-          ./build/BMI088_test
-
-
-
-
-
-
-
-
-
-  
+      - uses: actions/checkout@v2
+      - uses: pguyot/arm-runner-action@v2
+        id: build_image
+        with:
+          base_image: raspios_lite:2022-04-04
+          commands: |
+            cd build
+            cmake ..
+            make
+            
