@@ -33,6 +33,7 @@ unsigned gpioHardwareRevision(void)
       }
       fclose(filp);
    }
+   printf("----> term = %c\n", term);
 
    printf("----> rev = %x\n", rev);
 
