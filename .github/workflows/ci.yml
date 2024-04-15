@@ -33,7 +33,7 @@ jobs:
             
            
             
-            gcc -o hardwarecheck ../tests/hardwarecheck.c 
+            gcc -o hardwarecheck ./tests/hardwarecheck.c 
             
             ./hardwarecheck 
                       
