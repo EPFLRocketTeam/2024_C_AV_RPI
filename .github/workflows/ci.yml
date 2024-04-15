@@ -10,22 +10,18 @@ on:
       - main
 
 jobs:
-  build_base_images:
-    strategy:
-      fail-fast: false
-      matrix:
-        image:
-
-          - raspi_4_bullseye:20230102
-          - raspi_4_bookworm:20230101
-          - raspi_4_bookworm:20230612
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./ # pguyot/arm-runner-action@HEAD
-        with:
-          base_image: ${{ matrix.image }}
-          cpu: cortex-a7
-          commands: |
-            cat /etc/os-release
-            uname -a
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Configure and Build
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+      - name: Run Test Executables
+        run: |
+          ls build
+          
