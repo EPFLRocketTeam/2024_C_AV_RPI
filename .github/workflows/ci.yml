@@ -30,6 +30,10 @@ jobs:
             sudo apt-get install -y make
             sudo apt-get install -y cmake
             sudo apt-get install -y pigpio
+            
+            # compile hardwarecheck.c
+            
+            gcc -o hardwarecheck ../tests/hardwarecheck.c 
            
             
             cd build
