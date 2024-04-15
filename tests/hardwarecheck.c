@@ -27,6 +27,7 @@ unsigned gpioHardwareRevision(void)
          {
             if (sscanf(buf+10, "%x%c", &rev, &term) == 2)
             {
+               printf("----> rev = %x\n", rev);
                if (term != '\n') rev = 0;
             }
          }
