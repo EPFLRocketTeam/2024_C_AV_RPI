@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <strings.h>
 
+
 unsigned gpioHardwareRevision(void)
 {
    static unsigned rev = 0;
@@ -38,6 +39,10 @@ unsigned gpioHardwareRevision(void)
 
 
    return rev;
+}
+int main() {
+   printf("Hardware revision: %x\n", gpioHardwareRevision());
+   return 0;
 }
 
 
