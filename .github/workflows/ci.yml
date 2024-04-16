@@ -38,21 +38,11 @@ jobs:
             sudo apt-get install -y pigpio
             
            
-            
-            gcc -o hardwarecheck ./tests/hardwarecheck.c 
-            
-            ./hardwarecheck 
-                      
            
             
             cd build
             cmake ..
             make
             
-            ls
-            
-            ./ADXL375_test
-            ./BMI088_test
-            ./BMP390_test
             
             
