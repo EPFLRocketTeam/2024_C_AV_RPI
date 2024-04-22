@@ -12,7 +12,7 @@
 #include "flightControl/Kalman.h"
 
 // X_State_Vector : z, v, a, p0, k, h0
-// altitude (m), velocity (m/s), acceleration (m/s^2), initial pressure (Pa), scala factor change altitude-pressure, 
+// altitude (m), velocity (m/s), acceleration (m/s²), initial pressure (Pa), scala factor change altitude-pressure, 
 // initial altitude (m)
 
 // Constants
@@ -104,6 +104,7 @@ void kalman_predict(Kalman_Rocket_State * state, float dt) {
     state->P_tilde << PHI*state->P_hat*PHI.transpose() + Q_w;
     */
 
+   /* MY LINEAR VERSION */
    // Define the state transition matrix F for the given system
     // Update F to include the effect of acceleration on velocity and altitude
     state->F << 1, dt, 0.5 * dt * dt, 0, 0, 0,  // Altitude updated with velocity and acceleration
@@ -123,12 +124,51 @@ void kalman_predict(Kalman_Rocket_State * state, float dt) {
     Q_expanded(2, 2) = state->Q(0, 0); // Assuming acceleration-related process noise in original Q
 
     // Predict the next state covariance matrix with expanded Q integrated
-    state->P_tilde = state->F * state->P_hat * state->F.transpose() + Q_expanded;
+    
+    //state->P_tilde = state->F * state->P_hat * state->F.transpose() + Q_expanded;
+    
+    state->P_tilde = state->F * state->P_hat * state->F.transpose() + state->G * state->Q * state->G.transpose();
+    
+
+    /* My extended kalman filter 
+    // Non-linear prediction of the next state
+    Eigen::Vector<float, 6> nonLinearPrediction;
+    nonLinearPrediction << state->X_hat(0) + state->X_hat(1) * dt + 0.5 * state->X_hat(2) * dt * dt, // Position
+                          state->X_hat(1) + state->X_hat(2) * dt,                                    // Velocity
+                          state->X_hat(2),                                                           // Acceleration (assumed constant here)
+                          state->X_hat(3),                                                           // p0 (constant)
+                          state->X_hat(4),                                                           // k (constant)
+                          state->X_hat(5);                                                           // h0 (constant)
+
+    state->X_tilde = nonLinearPrediction;
+
+    // Jacobian of the non-linear state transition function (Fj)
+    Eigen::Matrix<float, 6, 6> Fj = Eigen::Matrix<float, 6, 6>::Zero();
+    Fj << 1, dt, 0.5 * dt * dt, 0, 0, 0,   // Partial derivatives w.r.t z, v, a
+          0, 1, dt, 0, 0, 0,               // Partial derivatives w.r.t z, v, a
+          0, 0, 1, 0, 0, 0,                // Acceleration does not change
+          0, 0, 0, 1, 0, 0,                // p0 is constant
+          0, 0, 0, 0, 1, 0,                // k is constant
+          0, 0, 0, 0, 0, 1;                // h0 is constant
+
+    // Process noise matrix correctly sized and initialized
+    Eigen::Matrix<float, 6, 6> Q_expanded = Eigen::Matrix<float, 6, 6>::Zero();
+    Q_expanded(0, 0) = state->Q(0, 0);
+    Q_expanded(1, 1) = state->Q(0, 0);
+    Q_expanded(2, 2) = state->Q(0, 0);
+    Q_expanded(3, 3) = state->Q(1, 1);
+    Q_expanded(4, 4) = state->Q(2, 2);
+    Q_expanded(5, 5) = 0;  // Assuming minimal noise impact on initial altitude
+
+    // Update covariance using the Jacobian
+    state->P_tilde = Fj * state->P_hat * Fj.transpose() + Q_expanded;
+    */
+    
 }
 
 void kalman_update_baro(Kalman_Rocket_State * state, float p) {
 
-    /*
+    /* LEUR VERSION
     float h = state->X_tilde(0, 0);
     float p0 = state->X_tilde(3, 0);
     float k = state->X_tilde(4, 0);
@@ -152,26 +192,7 @@ void kalman_update_baro(Kalman_Rocket_State * state, float p) {
     state->P_hat << (Eigen::MatrixXf::Identity(6,6) - K*H)*state->P_tilde;
     */
 
-   /*
-   Eigen::Matrix<float, 1, 6> H;
-    H << 1, 0, 0, 0, 0, 0;  // Measurement matrix for altitude
-    float z_hat = p;  // Convert p to altitude if necessary
-    Eigen::Matrix<float, 1, 1> Y;
-    Y << z_hat - (H * state->X_tilde)(0, 0);
-
-    // Calculation of S should result in a 1x1 matrix
-    Eigen::Matrix<float, 1, 1> S = H * state->P_tilde * H.transpose() + state->R_baro;
-
-    // Kalman Gain calculation, K should be 6x1
-    Eigen::Matrix<float, 6, 1> K = state->P_tilde * H.transpose() * S.inverse();
-
-    // Update state estimate
-    state->X_hat += K * Y;
-
-    // Update error covariance matrix
-    state->P_hat -= K * H * state->P_tilde;
-    */
-
+   /* MY LINEAR VERSION */
    Eigen::Matrix<float, 1, 6> H;
     H << 1, 0, 0, 0, 0, 0;  // Measurement matrix for altitude
 
@@ -188,11 +209,15 @@ void kalman_update_baro(Kalman_Rocket_State * state, float p) {
     state->X_hat = state->X_tilde + K * Y;  // Update state estimate
 
     state->P_hat = (Eigen::Matrix<float, 6, 6>::Identity() - K * H) * state->P_tilde;  // Update error covariance matrix
+    
+
+    /* My extended kalman filter */
+    
 }
 
 void kalman_update_acc(Kalman_Rocket_State * state, float a) {
 
-    /*
+    /* LEUR VERSION
     Eigen::Matrix<float, 1, 6> H;
     H << 0.0, 0.0, 1.0, 0.0, 0.0, 0.0;
     
@@ -204,6 +229,7 @@ void kalman_update_acc(Kalman_Rocket_State * state, float a) {
     state->P_hat << (Eigen::MatrixXf::Identity(6,6) - K * H) * state->P_tilde;
     */
 
+   /* MY LINEAR VERSION */
    // H matrix maps the state vector's acceleration component to the measured acceleration.
     Eigen::Matrix<float, 1, 6> H;
     H << 0, 0, 1, 0, 0, 0;  // Only the acceleration affects the measurement directly.
@@ -225,7 +251,10 @@ void kalman_update_acc(Kalman_Rocket_State * state, float a) {
 
     // Update the estimate's covariance matrix, reflecting the reduced uncertainty.
     state->P_hat = (Eigen::Matrix<float, 6, 6>::Identity() - K * H) * state->P_tilde;
+    
 
+
+    /* My extended Kalman filter */
 }
 
 
@@ -262,6 +291,7 @@ void kalman_handle_data(Kalman_Rocket_State * state, AvData data, AvState av_sta
     kalman_update_acc(state, data.acceleration);
     */
 
+   /* MY LINEAR VERSION FOR KALMAN_TEST.CPP
    // Calculate the time elapsed since the last update in seconds
     float dt = (data.time - state->last_time) / 1000.0f; // Conversion from milliseconds to seconds
     //kalman_predict(state, dt);
@@ -269,7 +299,7 @@ void kalman_handle_data(Kalman_Rocket_State * state, AvData data, AvState av_sta
     if (dt > 0 && (av_state.getCurrentState() == State::ASCENT || av_state.getCurrentState() == State::DESCENT)) {
         // If time has passed and the rocket is ignited, predict the next state
         kalman_predict(state, dt);
-        state->last_time = data.time; // Update the last processed time
+        //state->last_time = data.time; // Update the last processed time
         
         // If accelerometer data is available, update acceleration
         kalman_update_acc(state, data.acceleration);
@@ -281,18 +311,40 @@ void kalman_handle_data(Kalman_Rocket_State * state, AvData data, AvState av_sta
         }
     }
     state->last_time = data.time;
+    */
+
+    /* MY LINEAR VERSION FOR NEW_KALMAN_TEST.CPP*/
+    float dt = (data.time - state->last_time);
+
+    if (dt > 0 && (av_state.getCurrentState() == State::ASCENT || av_state.getCurrentState() == State::DESCENT)) {
+        kalman_predict(state, dt);
+        kalman_update_acc(state, data.acceleration);
+        
+        if (data.pressure > 0) {
+            float altitude = pressure_to_altitude(data.pressure); // Convert pressure to altitude
+            kalman_update_baro(state, altitude); // Update Kalman Filter with the altitude
+        }
+    }
+    state->last_time = data.time;
+    
+
+    /* My extended Kalman filter */
+
 
 }
 
 Kalman_Rocket_State* kalman_entry() {
 
     // TO BE MODIFIED
+    /* WITH KALMAN_TEST
     static float p0 = 100500.710127303867f;
     static float alt0 = 165.0f;
+    */
 
-    //static uint8_t first_time = 10;
-    //static float p0 = 92000.0f;
-    //static float alt0 = 120.0f;
+   /* WITH NEW_KALMAN_TEST*/
+    static float p0 = 99498.05f;
+    static float alt0 = 0.0f;
+
 
     Kalman_Rocket_State * state = new Kalman_Rocket_State;
     

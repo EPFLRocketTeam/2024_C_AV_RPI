@@ -70,7 +70,7 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
         // time (convert from milliseconds to seconds and add base)
         if (std::getline(ss, value, ',') && isFloat(value)) {
             avData.time = (std::stof(value) + 2463759.0) / 1000.0;
-            if (avData.time >= 2465.04 && avData.time <= 7175.29) {
+            if (avData.time >= 2465.04 && avData.time <= 2926.1655/*7175.29*/) {
                 avState.setCurrentState(State::ASCENT);
             } else {
                 avState.setCurrentState(State::IDLE);
