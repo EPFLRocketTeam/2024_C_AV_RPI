@@ -5,7 +5,7 @@
 #include "sensors.h"
 
 struct DataDump {
-    UPLink telecom_status;
+    UpLink telecom_status;
     SensFiltered sensors_data;
 };
 

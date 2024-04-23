@@ -4,7 +4,7 @@
 #include <capsule.h>
 #include <ERT_RF_Protocol_Interface/PacketDefinition.h>
 
-struct UPLink {
+struct UpLink {
     CMD_ID id;
     uint8_t value;
 };
@@ -14,8 +14,9 @@ public:
     Telecom();
     ~Telecom();
 
+    void begin();
     void update();
-    UPLink get_cmd() const;
+    UpLink get_cmd() const;
     void reset_cmd();
 private:
     av_uplink_t last_packet;
