@@ -21,7 +21,7 @@ enum ParserState {
 template<typename T>
 class Capsule {
   public:
-    Capsule(void (*function)(uint8_t, uint8_t*, uint32_t), uint8_t PRAIn = PRA_DEFAULT, uint8_t PRBIn = PRB_DEFAULT):
+    Capsule(void (*function)(uint8_t, uint8_t*, uint16_t), uint8_t PRAIn = PRA_DEFAULT, uint8_t PRBIn = PRB_DEFAULT):
             PRA(PRAIn), 
             PRB(PRBIn), 
             currentState(PREAMBLE_A), 
@@ -29,7 +29,7 @@ class Capsule {
             functionCallBack(function), 
             classPtr(nullptr) 
     {}
-    Capsule(void (T::*function)(uint8_t, uint8_t*, uint32_t), T* tptrIn, uint8_t PRAIn = PRA_DEFAULT, uint8_t PRBIn = PRB_DEFAULT): 
+    Capsule(void (T::*function)(uint8_t, uint8_t*, uint16_t), T* tptrIn, uint8_t PRAIn = PRA_DEFAULT, uint8_t PRBIn = PRB_DEFAULT): 
             PRA(PRAIn), 
             PRB(PRBIn), 
             currentState(PREAMBLE_A), 
@@ -37,7 +37,7 @@ class Capsule {
             functionCallBackClass(function), 
             classPtr(tptrIn) 
     {}
-    uint32_t getCodedLen(uint32_t lenIn) { return lenIn + ADDITIONAL_BYTES; }
+    uint16_t getCodedLen(uint16_t lenIn) { return lenIn + ADDITIONAL_BYTES; }
     void decode(uint8_t dataIn) {
       switch (currentState) {
         case PREAMBLE_A:
@@ -51,7 +51,7 @@ class Capsule {
             if (dataIn == PRB) {
                 currentState = PACKET_ID;
                 packetId = 0x00;
-                for (uint32_t i(0); i < MAX_BUFFER_SIZE; i++) {
+                for (uint16_t i(0); i < MAX_BUFFER_SIZE; i++) {
                     buffer[i] = 0;
                 }
             } else {
@@ -67,7 +67,8 @@ class Capsule {
             //Serial.println("LENGTH");
             len = dataIn;
             lenCount = 0;
-            currentState = PAYLOAD;
+            // Skip PAYLOAD if len=0
+            currentState = (len > 0 ? PAYLOAD : CRC);
         break;
         case PAYLOAD:
             //Serial.println("PAYLOAD");
@@ -85,7 +86,7 @@ class Capsule {
         case CRC:
             //Serial.println("CRC");
             uint8_t checkSum = 0;
-            for (uint32_t i(0); i < len; i++) {
+            for (uint16_t i(0); i < len; i++) {
                 checkSum += buffer[i];
             }
             if (checkSum == dataIn) {
@@ -104,8 +105,8 @@ class Capsule {
         break;
       }
     }
-    uint8_t* encode(uint8_t packetId, uint8_t *packetIn, uint32_t lenIn) {
-      uint32_t lenOut = getCodedLen(lenIn);
+    uint8_t* encode(uint8_t packetId, uint8_t *packetIn, uint16_t lenIn) {
+      uint16_t lenOut = getCodedLen(lenIn);
       uint8_t* packetOut = new uint8_t[lenOut];
 
       packetOut[0] = PRA;
@@ -114,7 +115,7 @@ class Capsule {
       packetOut[3] = lenIn;
 
       uint8_t checkSum = 0;
-      for (uint32_t i(0); i < lenIn; i++) {
+      for (uint16_t i(0); i < lenIn; i++) {
           packetOut[i + 4] = packetIn[i];
           checkSum += packetIn[i];
       }
@@ -128,9 +129,9 @@ class Capsule {
     uint8_t packetId;
     uint8_t len;
     ParserState currentState;
-    uint32_t lenCount;
-    void (*functionCallBack)(uint8_t packetId, uint8_t* dataIn, uint32_t len);
-    void (T::*functionCallBackClass)(uint8_t packetId, uint8_t* dataIn, uint32_t len);
+    uint16_t lenCount;
+    void (*functionCallBack)(uint8_t packetId, uint8_t* dataIn, uint16_t len);
+    void (T::*functionCallBackClass)(uint8_t packetId, uint8_t* dataIn, uint16_t len);
     T* classPtr;
 };
 
