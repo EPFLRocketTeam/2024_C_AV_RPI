@@ -3,12 +3,19 @@
 // The class has a constructor and a destructor, as well as a number of functions that transition from one state to others possible states.
 
 #include <iostream>
+#include <list>
+#include "data/thresholds.h"
 #include <string>
+#include <data/fakeSensors.h>
+
 #include "AvData.h"
+
 
 #ifndef AVSTATE_H
 #define AVSTATE_H
 
+
+struct UPLink;
 
 enum class State
 {
@@ -25,6 +32,7 @@ enum class State
     READY
 };
 
+
 // Path: AV-Firehorn-Rpi/include/flightControl/AvState.h
 // Compare this snippet from AV-Firehorn-Rpi/src/flightControl/FSM.cpp:
 //     // this function allows to get the current state of the FSM
@@ -33,19 +41,38 @@ class AvState
 {
 public:
     // constructor
-    AvState();
+    explicit AvState(const Thresholds& thresholds);
     // destructor
     ~AvState();
 
     // this function allows to get the current state of the FSM
     State getCurrentState();
+
     
-    void update(AvData data);
-
-
+    void update(SensFiltered data, UPLink uplink);
     State *possibleStates();
-
     std::string stateToString(State state);
+
+
+
+private:
+    State fromIdle(SensFiltered data, UPLink uplink);
+    State fromDescent(SensFiltered data, UPLink uplink);
+    State fromAscent(SensFiltered data, UPLink uplink);
+    State fromCalibration(SensFiltered data, UPLink uplink);
+    State fromErrorGround(SensFiltered data, UPLink uplink);
+    State fromErrorFlight();
+    State fromThrustSequence(SensFiltered data, UPLink uplink);
+    State fromManual(SensFiltered data, UPLink uplink);
+    State fromArmed(SensFiltered data, UPLink uplink);
+
+    State fromLanded();
+    Thresholds thresholds;
+    State currentState;
+
+
+
+
 };
 
 #endif
