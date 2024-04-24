@@ -1,11 +1,18 @@
 #include <LoRa.h>
 #include <capsule.h>
 #include <LoopbackStream.h>
+#include <ERT_RF_Protocol_Interface/ParameterDefinition.h>
 #include "telecom.h"
 
-#define lora_uplink LoRa
+#define LORA_UPLINK_CS      8
+#define LORA_UPLINK_RST     25
+#define LORA_UPLINK_DI0     5
 
-constexpr unsigned long LORA_FREQUENCY(868e6);
+#define LORA_DOWNLINK_CS    7
+#define LORA_DOWNLINK_RST   24
+#define LORA_DOWNLINK_DI0   6
+
+#define lora_uplink LoRa
 
 namespace {
     LoRaClass lora_downlink;
@@ -23,22 +30,34 @@ Telecom::Telecom()
 {}
 
 void Telecom::begin() {
-    lora_uplink.setPins(/*UPLINK_SS_PIN, UPLINK_RST_PIN, UPLINK_DIO0_PIN*/);
-    if (!lora_uplink.begin(LORA_FREQUENCY, SPI0)) {
+    lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
+    if (!lora_uplink.begin(UPLINK_FREQUENCY, SPI0)) {
         std::cout << "LoRa uplink init failed!\n";
     }else {
         std::cout << "LoRa uplink init succeeded!\n";
     }
 
-    lora_downlink.setPins(/*DOWNLINK_SS_PIN, DOWNLINK_RST_PIN, DOWNLINK_DIO0_PIN*/);
-    if (!lora_uplink.begin(LORA_FREQUENCY, SPI1)) {
+    lora_uplink.setTxPower(UPLINK_POWER);
+    lora_uplink.setSignalBandwidth(UPLINK_BW);
+    lora_uplink.setSpreadingFactor(UPLINK_SF);
+    lora_uplink.setCodingRate4(UPLINK_CR);
+    lora_uplink.setPreambleLength(UPLINK_PREAMBLE_LEN);
+
+    lora_uplink.receive();
+    lora_uplink.onReceive(handle_uplink);
+
+    lora_downlink.setPins(LORA_DOWNLINK_CS, LORA_DOWNLINK_RST, LORA_DOWNLINK_DI0);
+    if (!lora_downlink.begin(AV_DOWNLINK_FREQUENCY, SPI1)) {
         std::cout << "LoRa downlink init failed!\n";
     }else {
         std::cout << "LoRa downlink init succeeded!\n";
     }
 
-    lora_uplink.receive();
-    lora_uplink.onReceive(handle_uplink);
+    lora_downlink.setTxPower(AV_DOWNLINK_POWER);
+    lora_downlink.setSignalBandwidth(AV_DOWNLINK_BW);
+    lora_downlink.setSpreadingFactor(AV_DOWNLINK_SF);
+    lora_downlink.setCodingRate4(AV_DOWNLINK_CR);
+    lora_downlink.setPreambleLength(AV_DOWNLINK_PREAMBLE_LEN);
 }
 
 void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint16_t len) {

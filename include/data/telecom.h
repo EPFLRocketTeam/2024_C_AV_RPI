@@ -2,7 +2,6 @@
 #define TELECOM_H
 
 #include <ERT_RF_Protocol_Interface/PacketDefinition.h>
-#include <LoRa.h>
 
 /**
  * @brief A struct made only for convenience. Holds exactly
