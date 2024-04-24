@@ -39,7 +39,7 @@ public:
     ~FakeSensors();
 
     void calibrate();
-    bool update();
+        bool update(std::string data);
     void set_data(std::string data);
 
     inline SensFiltered dump() const { return clean_data; }

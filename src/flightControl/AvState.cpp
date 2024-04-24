@@ -105,9 +105,6 @@ State AvState::fromErrorGround(SensFiltered data, UPLink uplink)
     }
 }
 
-
-
-
 State AvState::fromErrorFlight()
 {
     return State::ERRORFLIGHT;
@@ -177,7 +174,6 @@ void AvState::update(SensFiltered data, UPLink uplink)
         break;
     case State::LANDED:
         currentState = fromLanded();
-
     case State::DESCENT:
         currentState = fromDescent(data, uplink);
         break;

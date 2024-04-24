@@ -4,6 +4,7 @@
 
 #include "../include/data/fakeSensors.h"
 
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -18,10 +19,12 @@ void FakeSensors::calibrate()
 {
     clean_data = SensFiltered();
 }
-bool FakeSensors::update()
+bool FakeSensors::update(std::string data)
 {
+    set_data(data);
     return true;
 }
+
 
 SensFiltered::SensFiltered()
 {
@@ -54,53 +57,65 @@ SensFiltered::SensFiltered()
 SensFiltered parse_data(std::string data)
 {
     SensFiltered sens;
-    /*
-     * this is the format of the data:
-    * altitude(m),velocity(m/s),Time(ms),acceleration,pressure(Pa)
-    "165.0,0.0,-2463759.0," (0.1569064, 8.2768126, -5.687856999999999)",1005.710127303867"
-     */
 
-    //we want to extract the speed, acceleration,, altitude, and pressure
-    //we will use the comma as a delimiter
+    //time(s),posx(m),posy(m),posz(m),vx(m/s),vy(m/s),vz(m/s),accx(m/s^2),accy(m/s^2),accz(m/s^2),rotx(rad/s),roty(rad/s),rotz(rad/s),pression(Pa),flight_phase, order_id, order_value
+
     std::string delimiter = ",";
     size_t pos = 0;
     std::string token;
-    sens.altitude = std::stod(data.substr(0, data.find(delimiter)));
-    data.erase(0, data.find(delimiter) + delimiter.length());
+    std::string copy =std::move(data);
+    for (int i =0;i<14;i++)
+    {
+        pos = copy.find(delimiter);
 
-    sens.speed.x = 0;
-    sens.speed.y = 0;
-    sens.speed.z = std::stod(data.substr(0, data.find(delimiter)));
-    data.erase(0, data.find(delimiter) + delimiter.length());
 
-    data.erase(0, data.find(delimiter) + delimiter.length());
+       token = copy.substr(0, pos);
 
-    std::string accelString = data.substr(0, data.find(delimiter));
-    data.erase(0, data.find(delimiter) + delimiter.length());
-    //" (0.1569064, 8.2768126, -5.687856999999999)" this is the format of the acceleration
-    // remove the first and last characters
-    accelString = accelString.substr(2, accelString.size() - 3);
-    std::cout << "accelString: " << accelString << std::endl;
-    //we want to extract the x, y, and z components of the acceleration
-    //we will use the comma as a delimiter
-    std::string delimiter2 = ",";
+        switch (i)
+        {
+            case 3:
+                sens.altitude = std::stod(token);
+                break;
+            case 4:
+                sens.speed.x = std::stod(token);
+                break;
+            case 5:
+                sens.speed.y = std::stod(token);
+                break;
+            case 6:
+                sens.speed.z = std::stod(token);
+                break;
+            case 7:
+                sens.accel.x = std::stod(token);
+                break;
+            case 8:
+                sens.accel.y = std::stod(token);
+                break;
+            case 9:
+                sens.accel.z = std::stod(token);
+                break;
+            case 10:
+                sens.attitude.x = std::stod(token);
+                break;
+            case 11:
+                sens.attitude.y = std::stod(token);
+                break;
+            case 12:
+                sens.attitude.z = std::stod(token);
+                break;
+            case 13:
+                sens.baro = std::stod(token);
+                break;
+            default:
+                break;
+        }
+        copy = copy.erase(0,pos+1);
+    }
 
-    std::string token2;
-    token2 = accelString.substr(0, accelString.find(delimiter2));
-    sens.accel.x = std::stod(token2);
-    accelString.erase(0, accelString.find(delimiter2) + delimiter2.length());
-
-    sens.accel.y = std::stod(accelString.substr(0, accelString.find(delimiter2)));
-    accelString.erase(0, accelString.find(delimiter2) + delimiter2.length());
-
-    sens.accel.z = std::stod(accelString);
-
-    data.erase(0, data.find(delimiter) + delimiter.length());
-    sens.baro = std::stod(data);
     return sens;
 }
 
 void FakeSensors::set_data(std::string data)
 {
-    clean_data = parse_data(std::move(data));
+    clean_data = parse_data(data);
 }

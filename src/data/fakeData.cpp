@@ -16,7 +16,7 @@ FakeData::~FakeData()
 bool FakeData::update(const std::string& data)
 {
     m_telecom.update(data);
-    updated = m_sensors.update();
+    updated = m_sensors.update(data);
 
     return updated;
 }
