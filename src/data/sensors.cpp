@@ -1,4 +1,4 @@
-#include "../../include/data/sensors.h"
+#include "sensors.h"
 
 SensRaw::SensRaw()
 :   adxl{0, 0, 0},
@@ -12,9 +12,11 @@ SensRaw::SensRaw()
 {}
 
 SensFiltered::SensFiltered()
-:   speed{0, 0, 0},
+:   position{0, 0, 0},
+    speed{0, 0, 0},
     accel{0, 0, 0},
     attitude{0, 0, 0},
+    course(0),
     baro{0, 0},
     N2_pressure(0),
     fuel_pressure(0),
@@ -44,7 +46,6 @@ Sensors::~Sensors() {}
 void Sensors::calibrate() {
     adxl1.calibrate();
     adxl2.calibrate();
-    // Waiting for other calibrate fucntions ;)
 }
 
 bool Sensors::update() {

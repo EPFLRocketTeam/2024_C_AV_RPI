@@ -6,6 +6,7 @@
 
 struct DataDump {
     UplinkCmd telecom_status;
+    SensRaw sensors_raw;
     SensFiltered sensors_data;
 };
 
@@ -14,6 +15,7 @@ public:
     Data();
     ~Data();
 
+    void send();
     bool update();
     DataDump dump() const;
 private:
