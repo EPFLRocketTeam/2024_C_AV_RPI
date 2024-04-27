@@ -19,7 +19,7 @@ public:
     Telecom();
     ~Telecom() = default;
 
-    void begin();
+    bool begin();
     void send_packet(uint8_t packet_id, uint8_t* data, uint16_t len);
     void update();
     UplinkCmd get_cmd() const;
