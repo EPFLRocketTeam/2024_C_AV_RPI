@@ -8,8 +8,10 @@
 struct SensStatus {
     uint8_t     adxl_status;
     uint8_t     adxl_aux_status;
-    uint8_t     bmi_status;
-    uint8_t     bmi_aux_status;
+    uint8_t     bmi_accel_status;
+    uint8_t     bmi_aux_accel_status;
+    uint8_t     bmi_gyro_status;
+    uint8_t     bmi_aux_gyro_status;
     bmp3_status bmp_status;
     bmp3_status bmp_aux_status;
 };
