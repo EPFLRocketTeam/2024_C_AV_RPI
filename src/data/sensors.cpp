@@ -71,8 +71,10 @@ bool Sensors::update() {
 void Sensors::update_status() {
     status.adxl_status = adxl1.get_status();
     status.adxl_aux_status = adxl2.get_status();
-    status.bmi_status = bmi1.get_status();
-    status.bmi_aux_status = bmi2.get_status();
+    status.bmi_accel_status = bmi1.get_accel_status();
+    status.bmi_aux_accel_status = bmi2.get_accel_status();
+    status.bmi_gyro_status = bmi1.get_gyro_status();
+    status.bmi_aux_gyro_status = bmi2.get_gyro_status();
     status.bmp_status = bmp1.get_status();
     status.bmp_aux_status = bmp2.get_status();
 }
