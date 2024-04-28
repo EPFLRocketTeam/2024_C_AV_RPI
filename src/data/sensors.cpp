@@ -17,6 +17,7 @@ SensFiltered::SensFiltered()
     accel{0, 0, 0},
     attitude{0, 0, 0},
     course(0),
+    altitude(0),
     baro{0, 0},
     N2_pressure(0),
     fuel_pressure(0),

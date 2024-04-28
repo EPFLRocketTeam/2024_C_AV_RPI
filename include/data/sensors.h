@@ -39,12 +39,24 @@ struct GPSCoord {
     double alt;
 };
 
+struct GPSTime {
+    unsigned year;
+    unsigned month;
+    unsigned day;
+    unsigned hour;
+    unsigned minute;
+    unsigned second;
+    unsigned centisecond;
+};
+
 struct SensFiltered {
+    GPSTime   time;
     GPSCoord  position;
     Vector3   speed;
     Vector3   accel;
     Vector3   attitude;
     double    course;
+    double    altitude;
     bmp3_data baro;
     double    N2_pressure;
     double    fuel_pressure;
