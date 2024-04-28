@@ -1,6 +1,6 @@
 // Copyright (c) Sandeep Mistry. All rights reserved.
 // adapted to raspberry pi by Laurent Rioux Copyright (c) - march 2020. All rights reserved.
-// Revised by Cyprien Lacassagne to use the more recent pigpio library
+// Revised by Cyprien Lacassagne to use the more recent pigpio library.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "LoRa.h"
@@ -77,40 +77,6 @@
     #define ISR_PREFIX  
 #endif
 
-/////
-// It seems the msr/mrs instructions throw "illegal instruction" exceptions (SIGILL)
-/////
-/*
-__inline__ int INTERRUPTS_ENABLED(void) {
-    // Retreive the exception level
-    int el(0);
-    __asm volatile (
-      "mrs x0, s3_0_c4_c2_2 \n\t"
-      "lsr x0, x0, #2 \n\t"
-      "mov x0, %[el]"
-      : [el] "=r" (el));
-
-    printf("Exception level: %d \n", el);
-
-    int res(0);
-    __asm__ __volatile__("mrs %0, daif \n\t"
-        : "=r" (res));
-
-    return ((res >> 7) & 1) == 0;
-}
-
-__inline__ void ENABLE_INTERRUPTS(void) {
-    if (!INTERRUPTS_ENABLED()) {
-        __asm__ __volatile__("msr daifset, #2");
-    }
-}
-
-__inline__ void DISABLE_INTERRUPTS(void) {
-    if (INTERRUPTS_ENABLED()) {
-        __asm__ __volatile__("msr daifclr, #2");
-    }
-}
-*/
 
 LoRaClass::LoRaClass() :
     _spi_frequency(LORA_DEFAULT_SPI_FREQUENCY),
@@ -400,7 +366,8 @@ void LoRaClass::onReceive(void(*callback)(int)) {
     if ((callback) && (!_onTxDone)) {  //  create IRQ thread only if it is not already created by onTxDone
         gpioSetMode(_dio0, PI_INPUT);
 
-        if (gpioSetISRFunc(_dio0, RISING_EDGE, -1, LoRaClass::onDio0Rise) < 0) {
+        // We use AlertFunc because ISRFunc seemed not to work
+        if (gpioSetAlertFunc(_dio0, LoRaClass::onDio0Rise) < 0) {
             printf("Error initialising interrupt Pin: %d\n", _dio0);
         }
     }
@@ -412,7 +379,8 @@ void LoRaClass::onCadDone(void(*callback)(bool)) {
     if (callback) {
         gpioSetMode(_dio0, PI_INPUT);
 
-        if (gpioSetISRFunc(_dio0, RISING_EDGE, -1, LoRaClass::onDio0Rise) < 0) {
+        // We use AlertFunc because ISRFunc seemed not to work
+        if (gpioSetAlertFunc(_dio0, LoRaClass::onDio0Rise) < 0) {
             printf("Error initialising interrupt Pin: %d\n", _dio0);
         }
     }
@@ -424,9 +392,10 @@ void LoRaClass::onTxDone(void(*callback)()) {
     if ((callback) && (!_onReceive)) { // create IRQ Thread only if it is not already created by onReceive
         gpioSetMode(_dio0, PI_INPUT);
 
-        if (gpioSetISRFunc(_dio0, RISING_EDGE, -1, LoRaClass::onDio0Rise) < 0) {
+        // We use AlertFunc because ISRFunc seemed not to work
+        if (gpioSetAlertFunc(_dio0, LoRaClass::onDio0Rise) < 0) {
             printf("Error initialising interrupt Pin: %d\n", _dio0);
-        } 
+        }
     } 
 }
 
@@ -759,8 +728,11 @@ uint8_t LoRaClass::singleTransfer(uint8_t address, uint8_t value) {
     return response;
 }
 
-ISR_PREFIX void LoRaClass::onDio0Rise(int gpio, int level, uint32_t tick) {
-    LoRa.handleDio0Rise();
+void LoRaClass::onDio0Rise(int gpio, int level, uint32_t tick) {
+    // Detect a change to HIGH (rising edge)
+    if (level == 1) {
+        LoRa.handleDio0Rise();
+    }
 }
 
 LoRaClass LoRa;

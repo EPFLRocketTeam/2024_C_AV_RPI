@@ -35,10 +35,30 @@ struct Vector3 {
     double z;
 };
 
+struct GPSCoord {
+    double lat;
+    double lng;
+    double alt;
+};
+
+struct GPSTime {
+    unsigned year;
+    unsigned month;
+    unsigned day;
+    unsigned hour;
+    unsigned minute;
+    unsigned second;
+    unsigned centisecond;
+};
+
 struct SensFiltered {
+    GPSTime   time;
+    GPSCoord  position;
     Vector3   speed;
     Vector3   accel;
     Vector3   attitude;
+    double    course;
+    double    altitude;
     bmp3_data baro;
     double    N2_pressure;
     double    fuel_pressure;
@@ -62,7 +82,8 @@ public:
     void calibrate();
     bool update();
     inline SensStatus get_status() const { return status; }
-    inline SensFiltered dump() const { return clean_data; }
+    inline SensRaw get_raw() const { return raw_data; }
+    inline SensFiltered get_clean() const { return clean_data; }
 private:
     Adxl375 adxl1, adxl2;
     Bmi088 bmi1, bmi2;

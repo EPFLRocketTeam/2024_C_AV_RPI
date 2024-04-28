@@ -36,18 +36,11 @@ target_link_libraries(I2CInterface PRIVATE pigpio)
 # Build LoRa4Raspi library
 set(LORA_SOURCES
     LoRa4Raspi/src/LoRa.cpp
-    LoRa4Raspi/src/LoRa.h
     LoRa4Raspi/src/LoopbackStream.cpp
-    LoRa4Raspi/src/LoopbackStream.h
     LoRa4Raspi/src/Print.cpp
-    LoRa4Raspi/src/Print.h
-    LoRa4Raspi/src/Printable.h
     LoRa4Raspi/src/Stream.cpp
-    LoRa4Raspi/src/Stream.h
     LoRa4Raspi/src/WString.cpp
-    LoRa4Raspi/src/WString.h
     LoRa4Raspi/src/itoa.cpp
-    LoRa4Raspi/src/itoa.h
 )
 add_library(LoRa4Raspi ${LORA_SOURCES})
 target_include_directories(LoRa4Raspi PUBLIC LoRa4Raspi/src)
