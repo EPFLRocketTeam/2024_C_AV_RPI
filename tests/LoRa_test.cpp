@@ -8,20 +8,18 @@
 #include <LoRa.h>
 #include <pigpio.h>
 
-#define UPLINK_SS_PIN   LORA_DEFAULT_SPI_CE0
-#define UPLINK_RST_PIN  LORA_DEFAULT_RESET_PIN
-#define UPLINK_DIO0_PIN LORA_DEFAULT_DIO0_PIN
+#define LORA_BRAVO_SS_PIN     LORA_DEFAULT_SPI_CE0
+#define loRA_BRAVO_RST_PIN    LORA_DEFAULT_RESET_PIN
+#define LORA_BRAVO_DIO0_PIN   LORA_DEFAULT_DIO0_PIN
 
-#define GROUND_STATION_SS_PIN     LORA_DEFAULT_SPI_CE1
-#define GROUND_STATION_RST_PIN    24
-#define GROUND_STATION_DIO0_PIN   6
+#define LORA_ALPHA_SS_PIN     LORA_DEFAULT_SPI_CE1
+#define LORA_ALPHA_RST_PIN    24
+#define LORA_ALPHA_DIO0_PIN   6
 
 #define lora_bravo LoRa
 LoRaClass lora_alpha;
 
 constexpr unsigned long LORA_FREQUENCY(868e6);
-constexpr uint8_t GS_ADDRESS(0xBB);
-constexpr uint8_t UPLINK_ADDRESS(0xFF);
 
 void dump_registers();
 void alpha_send(String outgoing, int& count);
@@ -32,14 +30,14 @@ int main(void) {
 
     std::cout << "***RFM95 LoRa testbench***\n\n";
 
-    lora_alpha.setPins(GROUND_STATION_SS_PIN, GROUND_STATION_RST_PIN, GROUND_STATION_DIO0_PIN);
+    lora_alpha.setPins(LORA_ALPHA_SS_PIN, LORA_ALPHA_RST_PIN, LORA_ALPHA_DIO0_PIN);
     if (!lora_alpha.begin(LORA_FREQUENCY, SPI1)) {
         std::cout << "LoRa Alpha init failed!\n";
     }else {
         std::cout << "LoRa Alpha init succeeded!\n";
     }
 
-    lora_bravo.setPins(UPLINK_SS_PIN, UPLINK_RST_PIN, UPLINK_DIO0_PIN);
+    lora_bravo.setPins(LORA_BRAVO_SS_PIN, loRA_BRAVO_RST_PIN, LORA_BRAVO_DIO0_PIN);
     if (!lora_bravo.begin(LORA_FREQUENCY, SPI0)) {
         std::cout << "LoRa Bravo init failed!\n";
     }else {
