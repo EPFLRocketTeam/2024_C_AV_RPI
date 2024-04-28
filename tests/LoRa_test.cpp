@@ -37,7 +37,7 @@ int main(void) {
         std::cout << "LoRa Alpha init succeeded!\n";
     }
 
-    lora_bravo.setPins(LORA_BRAVO_SS_PIN, loRA_BRAVO_RST_PIN, LORA_BRAVO_DIO0_PIN);
+    lora_bravo.setPins(LORA_BRAVO_SS_PIN, LORA_BRAVO_RST_PIN, LORA_BRAVO_DIO0_PIN);
     if (!lora_bravo.begin(LORA_FREQUENCY, SPI0)) {
         std::cout << "LoRa Bravo init failed!\n";
     }else {
