@@ -1,6 +1,6 @@
 // Copyright (c) Sandeep Mistry. All rights reserved.
 // adapted to raspberry pi by Laurent Rioux Copyright (c) - mùarch 2020. All rights reserved.
-// Revised by Cyprien Lacassagne to use the more recent pigpio library
+// Revised by Cyprien Lacassagne to use the more recent pigpio library.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #ifndef LORA_H
@@ -24,13 +24,6 @@
 #define PA_OUTPUT_RFO_PIN          0
 #define PA_OUTPUT_PA_BOOST_PIN     1
 
-/*
- * inline functions to enable & disable interrupts
- * Updated for Aarch64 by Cyprien Lacassagne
- */
-// void ENABLE_INTERRUPTS(void);
-// void DISABLE_INTERRUPTS(void);
-// int INTERRUPTS_ENABLED(void);
 
 class LoRaClass : public iostream, public Print {
 public:
@@ -113,7 +106,10 @@ private:
     uint8_t singleTransfer(uint8_t address, uint8_t value);
     int _spiSettings(int spi);
 
-    // Custom callback to work with pigipo
+    /**
+     * @brief Custom callback to work with pigipo. This callback is called whenever
+     * the level of _dio0 pin changes.
+     */
     static void onDio0Rise(int gpio, int level, uint32_t tick);
 
 private: 
