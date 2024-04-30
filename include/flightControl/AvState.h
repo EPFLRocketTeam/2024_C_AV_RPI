@@ -28,8 +28,7 @@ enum class State
     ERRORFLIGHT,
     THRUSTSEQUENCE,
     MANUAL,
-    ARMED,
-    READY
+    ARMED
 };
 
 
@@ -41,25 +40,23 @@ class AvState
 {
 public:
     // constructor
-    explicit AvState(const Thresholds& thresholds);
+    explicit AvState(Thresholds thresholds);
     // destructor
     ~AvState();
 
     // this function allows to get the current state of the FSM
     State getCurrentState();
 
-    
-    void update(SensFiltered data, UPLink uplink);
-    State *possibleStates();
+
+    void update(SensFiltered data, UPLink uplink, bool status);
+    State* possibleStates();
     std::string stateToString(State state);
-
-
 
 private:
     State fromIdle(SensFiltered data, UPLink uplink);
     State fromDescent(SensFiltered data, UPLink uplink);
     State fromAscent(SensFiltered data, UPLink uplink);
-    State fromCalibration(SensFiltered data, UPLink uplink);
+    State fromCalibration(SensFiltered data, UPLink uplink, bool status);
     State fromErrorGround(SensFiltered data, UPLink uplink);
     State fromErrorFlight();
     State fromThrustSequence(SensFiltered data, UPLink uplink);
@@ -69,10 +66,6 @@ private:
     State fromLanded();
     Thresholds thresholds;
     State currentState;
-
-
-
-
 };
 
 #endif

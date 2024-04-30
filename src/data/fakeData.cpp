@@ -24,7 +24,13 @@ bool FakeData::update(const std::string& data)
 
 DataDump FakeData::dump() const
 {
-    return {m_telecom.get_cmd(), m_sensors.dump()};
+    return {m_telecom.get_cmd(), m_sensors.dump(), calibrated()};
+}
+
+bool FakeData::calibrated()
+{
+    SensStatus s = m_sensors.get_status();
+    return s.adxl_status && s.adxl_aux_status && s.bmi_status && s.bmi_aux_status;
 }
 
 // Path: src/data/fakeTelecom.cpp

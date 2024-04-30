@@ -4,9 +4,7 @@ import pandas as pd
 import time
 import sys
 
-
-df =pd.read_csv('./Test_AVTrainingData.csv')
-
+df = pd.read_csv('./Test_AVTrainingData.csv')
 
 
 def find_closest_row(df, arbitrary_timestamp):
@@ -15,7 +13,8 @@ def find_closest_row(df, arbitrary_timestamp):
     closest_row = df_sorted.iloc[closest_index]
     return closest_row
 
-def handle_client(client_socket, df,start_time=time.time()  ):
+
+def handle_client(client_socket, df, start_time=time.time()):
     data = client_socket.recv(1024)
     if data:
         arbitrary_timestamp = int(time.time() - start_time)
@@ -25,9 +24,9 @@ def handle_client(client_socket, df,start_time=time.time()  ):
         print(f"Sending response: {response}")
         client_socket.sendall(response.encode())
         client_socket.close()
-        
-    #client_socket.close()
-    
+
+    # client_socket.close()
+
 
 def start_server(host, port, df):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,14 +38,11 @@ def start_server(host, port, df):
     while True:
         print("Waiting for connection...")
         client_socket, client_address = server_socket.accept()
-        #new thread for each client
+        # new thread for each client
         client_socket.settimeout(1)
         client_thread = threading.Thread(target=handle_client, args=(client_socket, df, start_time))
         client_thread.start()
         print(f"Connection from {client_address} has been established!")
-    
-    
-        
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ void FakeTelecom::update(std::string data)
     // Parse the data
     //delimiters are ','
     //we start from the back of the string
-//we get the last 2 numbers
+    //we get the last 2 numbers
 
     std::string delimiter = ",";
     size_t pos;
@@ -40,30 +40,26 @@ void FakeTelecom::update(std::string data)
 
         switch (i)
         {
-            case 14:
-                //check if empty
-                    if (token.empty() && token == "nan"  )
-                    {
-                        last_packet.order_id = -1;
-                        new_cmd_received = false;
-                    }
-                    else
-                    {
-                        last_packet.order_id = std::stoi(token);
-                        new_cmd_received = true;
-                    }
-                break;
-            case 15:
-                last_packet.order_value = std::stoi(token);
-                break;
-            default:
-                break;
+        case 14:
+            //check if empty
+            if (token.empty() && token == "nan")
+            {
+                last_packet.order_id = -1;
+                new_cmd_received = false;
+            }
+            else
+            {
+                last_packet.order_id = std::stoi(token);
+                new_cmd_received = true;
+            }
+            break;
+        case 15:
+            last_packet.order_value = std::stoi(token);
+            break;
+        default:
+            break;
         }
-
-
-
     }
-
 }
 
 UPLink FakeTelecom::get_cmd() const
@@ -78,9 +74,6 @@ void FakeTelecom::reset_cmd()
 {
     last_packet = {0, 0};
 }
-
-
-
 
 
 // Path: src/data/fakeSensors.cpp

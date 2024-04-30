@@ -10,23 +10,17 @@ include_directories(include)
 
 # Define the source files
 set(FAKE_SOURCES
-
-        include/data/fakeTelecom.h
         src/data/fakeData.cpp
         src/data/fakeSensors.cpp
-        src/data/fakeSensors.cpp
         src/data/fakeTelecom.cpp
-        include/data/thresholds.h
-        src/data/thresholds.cpp
         src/data/thresholds.cpp
         src/flightControl/AvState.cpp
 )
 
-
-
-
 # Create the executable
 add_executable(flight_computer tests/basicTest_avState.cpp ${FAKE_SOURCES})
+
+add_executable(clientTest tests/test_AvState.cpp ${FAKE_SOURCES})
 
 add_library(ADXL375 src/sensor/adxl375.cpp include/sensor/adxl375.h)
 target_include_directories(ADXL375 PUBLIC include/sensor)
@@ -62,20 +56,20 @@ target_link_libraries(ADXL375_test ADXL375)
 enable_testing()
 
 # Defining tests
-add_test (
-    NAME BMP390_test
-    COMMAND $<TARGET_FILE:BMP390_test>
+add_test(
+        NAME BMP390_test
+        COMMAND $<TARGET_FILE:BMP390_test>
 )
 set_tests_properties(BMP390_test PROPERTIES TIMEOUT 5)
 
-add_test (
-    NAME BMI088_test
-    COMMAND $<TARGET_FILE:BMI088_test>
+add_test(
+        NAME BMI088_test
+        COMMAND $<TARGET_FILE:BMI088_test>
 )
 set_tests_properties(BMI088_test PROPERTIES TIMEOUT 5)
 
-add_test (
-    NAME ADXL375_test
-    COMMAND $<TARGET_FILE:ADXL375_test>
+add_test(
+        NAME ADXL375_test
+        COMMAND $<TARGET_FILE:ADXL375_test>
 )
 set_tests_properties(ADXL375_test PROPERTIES TIMEOUT 5)

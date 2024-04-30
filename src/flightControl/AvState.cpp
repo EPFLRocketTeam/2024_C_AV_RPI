@@ -6,15 +6,12 @@
 #include "data/fakeTelecom.h"
 
 
-
-
 AvState::AvState(const Thresholds& thresholds)
 
 {
     this->currentState = State::IDLE;
     //initialize the thresholds
     this->thresholds = thresholds;
-
 }
 
 // destructor
@@ -30,7 +27,6 @@ State AvState::getCurrentState()
     return currentState;
 }
 
-std::string telemetry_set[] = {"calibrate", "check", "ready", "launch", "abort", "arme"};
 
 void sendError()
 {
@@ -58,6 +54,10 @@ State AvState::fromLanded() { return State::LANDED; }
 State AvState::fromDescent(SensFiltered data, UPLink uplink)
 {
     //norm of the speed vector
+    if (uplink.id == CMD_ID::AV_CMD_ABORT || uplink.id == CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    {
+        return State::ERRORFLIGHT;
+    }
     double speed = (data.speed.x * data.speed.x + data.speed.y * data.speed.y + data.speed.z * data.speed.z);
     if (speed < 0)
     {
@@ -68,34 +68,34 @@ State AvState::fromDescent(SensFiltered data, UPLink uplink)
 
 State AvState::fromAscent(SensFiltered data, UPLink uplink)
 {
-    if (data.speed.z <= 0)
+    if (uplink.id == CMD_ID::AV_CMD_ABORT)
+    {
+        return State::ERRORFLIGHT;
+    }
+    else if (data.speed.z <= 0)
     {
         return State::DESCENT;
     }
     return State::ASCENT;
 }
 
-State AvState::fromCalibration(SensFiltered data, UPLink uplink)
+State AvState::fromCalibration(SensFiltered data, UPLink uplink, bool status)
 {
-    if (error())
+    if (error() || uplink.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
+        //check if the calibration is done
+    }
+    else if (status)
+    {
+        return State::MANUAL;
     }
     else
     {
-        switch (uplink.id)
-        {
-            case CMD_ID::AV_CMD_ABORT:
-                return State::ERRORGROUND;
-        case CMD_ID::AV_CMD_MANUAL_DEPLOY:
-            return State::MANUAL;
-        default: return State::CALIBRATION;
-        }
-
+        return State::CALIBRATION;
     }
-
-
 }
+
 
 State AvState::fromErrorGround(SensFiltered data, UPLink uplink)
 {
@@ -117,14 +117,14 @@ State AvState::fromThrustSequence(SensFiltered data, UPLink uplink)
     {
         return State::ERRORFLIGHT;
     }
-    else if (speed < thresholds.speed_zero)
-    {
-        return State::LANDED;
-    }
+    else if (data.ignited)
     {
         return State::ASCENT;
     }
-    return State::THRUSTSEQUENCE;
+    else
+    {
+        return State::THRUSTSEQUENCE;
+    }
 }
 
 State AvState::fromManual(SensFiltered data, UPLink uplink)
@@ -133,7 +133,19 @@ State AvState::fromManual(SensFiltered data, UPLink uplink)
     {
         return State::ERRORGROUND;
     }
-    else if (uplink.id == CMD_ID::AV_CMD_ARM && data.fuel_pressure > thresholds.pressure_wanted)
+    //TODO: recheck i threholds are the wanted ones
+    else if (uplink.id == CMD_ID::AV_CMD_ARM &&
+        data.fuel_pressure > thresholds.fuel_pressure_wanted &&
+        data.LOX_pressure > thresholds.lox_pressure_wanted &&
+        data.chamber_pressure > thresholds.chamber_pressure_wanted &&
+        data.engine_temperature > thresholds.engine_temp_zero &&
+        data.fuel_inj_pressure > thresholds.fuel_pressure_wanted &&
+        data.N2_pressure > thresholds.n2_pressure_zero &&
+        data.LOX_level > thresholds.lox_level_zero &&
+        data.fuel_level > thresholds.fuel_level_zero)
+    {
+        return State::ARMED;
+    }
     {
         return State::ARMED;
     }
@@ -145,12 +157,21 @@ State AvState::fromArmed(SensFiltered data, UPLink uplink)
     if (error())
     {
         return State::ERRORGROUND;
-    }else
+    }
+    else
     {
         switch (uplink.id)
         {
         case CMD_ID::AV_CMD_IGNITION:
-            return State::THRUSTSEQUENCE;
+            if (data.igniter_pressure >= thresholds.igniter_pressure_wanted &&
+                data.chamber_pressure >= thresholds.chamber_pressure_wanted )
+            {
+                return State::THRUSTSEQUENCE;
+
+            }else {
+                return State::ARMED;
+            }
+            break;
         case CMD_ID::AV_CMD_ABORT:
             return State::ERRORGROUND;
         default:
@@ -161,10 +182,7 @@ State AvState::fromArmed(SensFiltered data, UPLink uplink)
 
 State* possibleStates();
 
-
-
-
-void AvState::update(SensFiltered data, UPLink uplink)
+void AvState::update(SensFiltered data, UPLink uplink, bool status)
 
 {
     switch (currentState)
@@ -181,7 +199,7 @@ void AvState::update(SensFiltered data, UPLink uplink)
         currentState = fromAscent(data, uplink);
         break;
     case State::CALIBRATION:
-        currentState = fromCalibration(data, uplink);
+        currentState = fromCalibration(data, uplink, status);
         break;
     case State::ERRORGROUND:
         currentState = fromErrorGround(data, uplink);
@@ -211,7 +229,6 @@ std::string AvState::stateToString(State state)
         return "IDLE";
         break;
     case State::LANDED:
-
         return "LANDED";
         break;
     case State::DESCENT:
@@ -238,14 +255,10 @@ std::string AvState::stateToString(State state)
     case State::ARMED:
         return "ARMED";
         break;
-    case State::READY:
-        return "READY";
-        break;
     default:
         return "ERROR";
         break;
     }
-
 }
 
 

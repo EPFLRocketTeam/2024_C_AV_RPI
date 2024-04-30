@@ -48,6 +48,7 @@ struct SensFiltered {
     double    LOX_inj_pressure;
     double    fuel_inj_pressure;
     double    chamber_pressure;
+    bool ignited;
 
     SensFiltered();
 };

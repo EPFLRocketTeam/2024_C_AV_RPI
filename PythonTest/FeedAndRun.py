@@ -9,6 +9,7 @@ def get_data_from_csv():
         data = next(reader)  # Assuming the CSV file contains one row of data
     return ','.join(data)
 
+
 def main():
     while True:
         # Wait for a request from the C++ program
@@ -23,9 +24,11 @@ def main():
             # Add a condition to break the loop if needed
             # For instance, if all data from the CSV has been sent, you can break the loop
 
+
 if __name__ == "__main__":
     main()
 import subprocess
+
 
 # Function to read data from CSV
 def read_data_from_csv(filename):
@@ -36,11 +39,13 @@ def read_data_from_csv(filename):
             data.append(row)
     return data
 
+
 # Function to write data to CSV
 def write_data_to_csv(filename, data):
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
+
 
 # Main function
 if __name__ == "__main__":
@@ -68,4 +73,3 @@ if __name__ == "__main__":
         # For simplicity, let's just remove the first row
         input_data.pop(0)
         write_data_to_csv('input.csv', input_data)
-

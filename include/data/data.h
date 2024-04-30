@@ -7,6 +7,7 @@
 struct DataDump {
     UPLink telecom_status;
     SensFiltered sensors_data;
+    bool calibrated;
 };
 
 class Data {
@@ -16,7 +17,9 @@ public:
 
     bool update();
     DataDump dump() const;
+
 private:
+    bool calibrated() const;
     bool updated;
     Telecom m_telecom;
     Sensors m_sensors;
