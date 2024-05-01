@@ -56,8 +56,8 @@ int main()
         valread = read(sock, buffer, 1024);
         // print the response in blue
         std::cout << "\033[1;34m";
-
-        data.update(buffer);
+        data.set_data(buffer);
+        data.update();
         dump = data.dump();
 
         avState.update(dump.sensors_data, dump.telecom_status, dump.calibrated);

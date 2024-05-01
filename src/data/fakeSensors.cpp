@@ -1,77 +1,32 @@
 //
-// Created by marin on 13/04/2024.
+// Created by marin on 01/05/2024.
 //
 
 #include "../include/data/fakeSensors.h"
+#include "fakeSensors.h"
 
-#include <cstring>
-#include <iostream>
-#include <string>
-#include <utility>
 
-FakeSensors::FakeSensors()
+FakeSensors::FakeSensors() : Sensors()
 {
-    clean_data = SensFiltered();
-    status = SensStatus();
-    //init all status to 0
-    status.adxl_status = 0;
-    status.adxl_aux_status = 0;
-    status.bmi_status = 0;
-    status.bmi_aux_status = 0;
+    // call the parent constructor implicitly
+    // Sensors();
 }
 
 FakeSensors::~FakeSensors()
-= default;
-
-void FakeSensors::calibrate()
 {
-    clean_data = SensFiltered();
 }
 
-bool FakeSensors::update(std::string data)
+void FakeSensors::set_data(const std::string data)
 {
-    set_data(data);
+    SensFiltered sens = parse_data(data);
+}
+
+bool FakeSensors::update()
+{
     return true;
 }
 
-void FakeSensors::update_status()
-{
-    //set all to 1
-    status.adxl_status = 1;
-    status.adxl_aux_status = 1;
-    status.bmi_status = 1;
-    status.bmi_aux_status = 1;
-}
-
-SensFiltered::SensFiltered()
-{
-    speed.x = 0;
-    speed.y = 0;
-    speed.z = 0;
-
-    accel.x = 0;
-    accel.y = 0;
-    accel.z = 0;
-
-    attitude.x = 0;
-    attitude.y = 0;
-    attitude.z = 0;
-
-    baro = 0;
-    N2_pressure = 0;
-    fuel_pressure = 0;
-    LOX_pressure = 0;
-    fuel_level = 0;
-    LOX_level = 0;
-    engine_temperature = 0;
-    igniter_pressure = 0;
-    LOX_inj_pressure = 0;
-    fuel_inj_pressure = 0;
-    chamber_pressure = 0;
-    altitude = 0;
-}
-
-SensFiltered parse_data(std::string data)
+SensFiltered FakeSensors::parse_data(const std::string data)
 {
     SensFiltered sens;
 
@@ -121,7 +76,7 @@ SensFiltered parse_data(std::string data)
             sens.attitude.z = std::stod(token);
             break;
         case 13:
-            sens.baro = std::stod(token);
+            sens.baro = {std::stod(token),35};
             break;
         default:
             break;
@@ -133,7 +88,4 @@ SensFiltered parse_data(std::string data)
 }
 
 
-void FakeSensors::set_data(std::string data)
-{
-    clean_data = parse_data(data);
-}
+

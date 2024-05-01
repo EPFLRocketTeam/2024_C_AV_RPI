@@ -1,37 +1,23 @@
-//
-// Created by marin on 13/04/2024.
-//
 
-#ifndef FAKEDATA_H
-#define FAKEDATA_H
-
-
+#include "data.h"
 #include "fakeTelecom.h"
 #include "fakeSensors.h"
+#include <iostream>
+#include <string>
 
-struct DataDump
+class FakeData : public Data
 {
-    UPLink telecom_status{};
-    SensFiltered sensors_data;
-    bool calibrated;
-};
 
-class FakeData
-{
 public:
     FakeData();
     ~FakeData();
-
-    bool update(const std::string& data);
-
-    DataDump dump() const;
+    void set_data(const std::string data);
+    bool update() override;
 
 private:
-    bool calibrated() const;
-    bool updated;
+    DataDump m_data;
+    std::string m_raw;
     FakeTelecom m_telecom;
     FakeSensors m_sensors;
+
 };
-
-
-#endif //FAKEDATA_H

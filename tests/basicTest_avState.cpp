@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
     FakeData data;
 
-    data.update(test);
+    data.update();
     DataDump dump = data.dump();
 
     std::cout << "Altitude: " << dump.sensors_data.altitude << std::endl;

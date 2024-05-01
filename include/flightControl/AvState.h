@@ -6,9 +6,8 @@
 #include <list>
 #include "data/thresholds.h"
 #include <string>
-#include <data/fakeSensors.h>
+#include "data.h"
 
-#include "AvData.h"
 
 
 #ifndef AVSTATE_H
@@ -40,7 +39,7 @@ class AvState
 {
 public:
     // constructor
-    explicit AvState(Thresholds thresholds);
+    explicit AvState(const Thresholds& thresholds);
     // destructor
     ~AvState();
 

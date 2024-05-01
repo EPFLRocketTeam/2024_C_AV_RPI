@@ -4,27 +4,63 @@
 
 #include "data/thresholds.h"
 
-Thresholds::Thresholds(const double speed_zero, const double speed_max, const double altitude_max, const double acceleration_max, const double pressure_max, const double pressure_wanted, const double pressure_min)
-{
-    this->speed_zero = speed_zero;
-    this->speed_max = speed_max;
-    this->altitude_max = altitude_max;
-    this->acceleration_max = acceleration_max;
-    this->pressure_max = pressure_max;
-    this->pressure_wanted = pressure_wanted;
-    this->pressure_min = pressure_min;
-}
+Thresholds::Thresholds() : speed_zero(0),
+    altitude_max(0),
+    altitude_zero(0),
+    lox_pressure_wanted(0),
+    lox_pressure_zero(0),
+    fuel_pressure_wanted(0),
+    fuel_pressure_zero(0),
+    chamber_pressure_wanted(0),
+    chamber_pressure_zero(0),
+    injector_pressure_wanted_min(0),
+    injector_pressure_wanted_max(0),
+    engine_temp_zero(0),
+    engine_temp_wanted(0),
+    fuel_inj_zero(0),
+    lox_level_zero(0),
+    fuel_level_zero(0),
+    lox_level_full(0),
+    fuel_level_full(0),
+    n2_pressure_zero(0),
+    igniter_pressure_wanted(0) {}
 
-Thresholds::Thresholds()
-{
-    this->speed_zero = 0.0;
-    this->speed_max = 0.0;
-    this->altitude_max = 0.0;
-    this->acceleration_max = 0.0;
-    this->pressure_max = 0.0;
-    this->pressure_wanted = 0.0;
-    this->pressure_min = 0.0;
-}
-
-Thresholds::~Thresholds()
-= default;
+Thresholds::Thresholds(double speed_zero,
+    double altitude_max,
+    double altitude_zero,
+    double lox_pressure_wanted,
+    double lox_pressure_zero,
+    double fuel_pressure_wanted,
+    double fuel_pressure_zero,
+    double chamber_pressure_wanted,
+    double chamber_pressure_zero,
+    double injector_pressure_wanted_min,
+    double injector_pressure_wanted_max,
+    double engine_temp_zero,
+    double engine_temp_wanted,
+    double fuel_inj_zero,
+    double lox_level_zero,
+    double fuel_level_zero,
+    double lox_level_full,
+    double fuel_level_full,
+    double n2_pressure_zero,
+    double igniter_pressure_wanted) : speed_zero(speed_zero),
+    altitude_max(altitude_max),
+    altitude_zero(altitude_zero),
+    lox_pressure_wanted(lox_pressure_wanted),
+    lox_pressure_zero(lox_pressure_zero),
+    fuel_pressure_wanted(fuel_pressure_wanted),
+    fuel_pressure_zero(fuel_pressure_zero),
+    chamber_pressure_wanted(chamber_pressure_wanted),
+    chamber_pressure_zero(chamber_pressure_zero),
+    injector_pressure_wanted_min(injector_pressure_wanted_min),
+    injector_pressure_wanted_max(injector_pressure_wanted_max),
+    engine_temp_zero(engine_temp_zero),
+    engine_temp_wanted(engine_temp_wanted),
+    fuel_inj_zero(fuel_inj_zero),
+    lox_level_zero(lox_level_zero),
+    fuel_level_zero(fuel_level_zero),
+    lox_level_full(lox_level_full),
+    fuel_level_full(fuel_level_full),
+    n2_pressure_zero(n2_pressure_zero),
+    igniter_pressure_wanted(igniter_pressure_wanted) {}

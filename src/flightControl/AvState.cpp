@@ -1,4 +1,4 @@
-#include "../../include/flightControl/AvState.h"
+#include "AvState.h"
 #include <string.h>
 #include <list>
 #include <data/fakeSensors.h>
@@ -6,12 +6,9 @@
 #include "data/fakeTelecom.h"
 
 
-AvState::AvState(const Thresholds& thresholds)
-
+AvState::AvState(const Thresholds& thresholds) : thresholds(thresholds)
 {
     this->currentState = State::IDLE;
-    //initialize the thresholds
-    this->thresholds = thresholds;
 }
 
 // destructor
@@ -220,7 +217,6 @@ void AvState::update(SensFiltered data, UPLink uplink, bool status)
         currentState = State::ERRORFLIGHT;
     }
 }
-
 std::string AvState::stateToString(State state)
 {
     switch (state)

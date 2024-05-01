@@ -1,29 +1,24 @@
 //
-// Created by marin on 13/04/2024.
+// Created by marin on 30/04/2024.
 //
 
 #ifndef FAKETELECOM_H
 #define FAKETELECOM_H
 
-#include <capsule.h>
-#include <string>
-#include <ERT_RF_Protocol_Interface/PacketDefinition.h>
+#include "telecom.h"
 
-struct UPLink {
-    CMD_ID id;
-    uint8_t value;
-};
-
-class FakeTelecom {
+class FakeTelecom : public Telecom
+{
 public:
     FakeTelecom();
     ~FakeTelecom();
-
-    void update(std::string data);
-    UPLink get_cmd() const;
-    void reset_cmd();
-private:
-    av_uplink_t last_packet;
+    void set_update(std::string update);
+    virtual void update() override;
+    void set_cmd(CMD_ID id, uint8_t value);
+    private:
+     av_uplink_t last_packet;
     bool new_cmd_received;
+
 };
+
 #endif //FAKETELECOM_H

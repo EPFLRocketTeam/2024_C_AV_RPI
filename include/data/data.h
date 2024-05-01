@@ -15,7 +15,7 @@ public:
     Data();
     ~Data();
 
-    bool update();
+    virtual bool update();
     DataDump dump() const;
 
 private:

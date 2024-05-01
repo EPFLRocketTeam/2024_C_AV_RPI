@@ -1,37 +1,23 @@
 //
-// Created by marin on 13/04/2024.
+// Created by marin on 30/04/2024.
 //
 
 #include "../include/data/fakeData.h"
 
+FakeData::FakeData() : Data() {}
 
-FakeData::FakeData() : updated(false)
-{
+FakeData::~FakeData() {}
+
+void FakeData::set_data(const std::string data) {
+   this->m_sensors.set_data(data);
+   this->m_telecom.set_update(data);
 }
 
-FakeData::~FakeData()
-{
-}
-
-bool FakeData::update(const std::string& data)
-{
-    m_telecom.update(data);
-    updated = m_sensors.update(data);
-
+bool FakeData::update() {
+    m_telecom.update();
+    bool updated = m_sensors.update();
     return updated;
 }
 
 
-DataDump FakeData::dump() const
-{
-    return {m_telecom.get_cmd(), m_sensors.dump(), calibrated()};
-}
-
-bool FakeData::calibrated()
-{
-    SensStatus s = m_sensors.get_status();
-    return s.adxl_status && s.adxl_aux_status && s.bmi_status && s.bmi_aux_status;
-}
-
-// Path: src/data/fakeTelecom.cpp
 

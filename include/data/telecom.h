@@ -14,7 +14,7 @@ public:
     Telecom();
     ~Telecom();
 
-    void update();
+    virtual void update();
     UPLink get_cmd() const;
     void reset_cmd();
 private:
