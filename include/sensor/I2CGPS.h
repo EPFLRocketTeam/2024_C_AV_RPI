@@ -25,8 +25,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef GPS_I2C_h
-#define GPS_I2C_h
+#ifndef I2CGPS_h
+#define I2CGPS_h
 
 #include <stdint.h>
 #include <TinyGPS++.h>
@@ -70,7 +70,7 @@ public:
   std::string createMTKpacket(uint16_t packetType, std::string dataField);
   std::string calcCRCforMTK(std::string sentence); //XORs all bytes between $ and *
 
-  bool sendPGCMDpacket(std::string command);
+  void sendPGCMDpacket(std::string command);
   std::string createPGCMDpacket(uint16_t packetType, std::string dataField);
 };
 

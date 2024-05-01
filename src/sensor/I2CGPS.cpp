@@ -25,7 +25,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "GPS-I2C.h"
+#include "I2CGPS.h"
+#include "I2CInterface.h"
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
@@ -47,7 +48,7 @@ I2CGPS::~I2CGPS(){
   try {
     I2CInterface::getInstance().close(addr);
   } catch(const I2CInterfaceException& e) {
-    throw I2CGPSException(I2CGPS_E_COMM_FAIL);
+    std::cout << "Error during I2CGPS I2C deinitialization." << std::endl;
   }
 
   _head = 0; //Reset the location holder
@@ -60,7 +61,7 @@ I2CGPS::~I2CGPS(){
 void I2CGPS::check() {
   uint8_t tmp[MAX_PACKET_SIZE] = {0};
   try {
-    I2CInterface::getInstance().read(addr, 0x00, tmp, MAX_PACKET_SIZE);
+    I2CInterface::getInstance().readDevice(addr, tmp, MAX_PACKET_SIZE);
   } catch(const I2CInterfaceException& e) {
     throw I2CGPSException(I2CGPS_E_COMM_FAIL);
   }
@@ -126,7 +127,7 @@ void I2CGPS::sendMTKpacket(std::string command) {
     return;
   }
   try {
-    I2CInterface::getInstance().write(addr, 0x00, (uint8_t*)command.c_str(), command.length());
+    I2CInterface::getInstance().writeDevice(addr, (uint8_t*)command.c_str(), command.length());
   } catch(const I2CInterfaceException& e) {
     throw I2CGPSException(I2CGPS_E_COMM_FAIL);
   }
