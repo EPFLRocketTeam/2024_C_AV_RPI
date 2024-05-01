@@ -37,7 +37,9 @@ Sensors::Sensors()
     bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY),
     bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY),
     bmp1(BMP3_ADDR_I2C_PRIM),
-    bmp2(BMP3_ADDR_I2C_SEC) 
+    bmp2(BMP3_ADDR_I2C_SEC),
+    i2cgps(),
+    gps() 
 {
     update_status();
 }
@@ -66,7 +68,33 @@ bool Sensors::update() {
 
     // Call Kalmann filter API
     // Something like: clean_data = Kalmann(SensRaw raw_data); ?
-
+    
+    while (i2cgps.available()) {
+        gps.encode(i2cgps.read());
+    }
+    if (gps.time.isUpdated()) {
+        if (gps.date.isValid()) {
+            clean_data.time.year = static_cast<int>(gps.date.year());
+            clean_data.time.month = static_cast<int>(gps.date.month());
+            clean_data.time.day = static_cast<int>(gps.date.day());
+        }
+        if (gps.time.isValid()) {
+            clean_data.time.hour = static_cast<int>(gps.time.hour());
+            clean_data.time.minute = static_cast<int>(gps.time.minute());
+            clean_data.time.second = static_cast<int>(gps.time.second());
+            clean_data.time.centisecond = static_cast<int>(gps.time.centisecond());
+        }
+        if (gps.location.isValid()) {
+            clean_data.position.lat = gps.location.lat();
+            clean_data.position.lng = gps.location.lng();
+        }
+        if (gps.altitude.isValid()) {
+            clean_data.position.alt = gps.altitude.meters();
+        }
+        if (gps.course.isValid()) {
+            clean_data.course = gps.course.deg();
+        }
+    }
     return true;
 }
 
