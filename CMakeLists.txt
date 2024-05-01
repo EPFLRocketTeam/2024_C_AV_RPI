@@ -7,20 +7,20 @@ project(flight_computer VERSION 0.1 LANGUAGES C CXX)
 set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(include)
+include_directories(include/flightControl)
+include_directories(external)
 
 # Define the source files
 set(FAKE_SOURCES
-        src/data/fakeData.cpp
-        src/data/fakeSensors.cpp
-        src/data/fakeTelecom.cpp
         src/data/thresholds.cpp
         src/flightControl/AvState.cpp
 )
 
-# Create the executable
-add_executable(flight_computer tests/basicTest_avState.cpp ${FAKE_SOURCES})
 
-add_executable(clientTest tests/test_AvState.cpp ${FAKE_SOURCES})
+
+
+#add_executable(clientTest tests/test_AvState.cpp ${FAKE_SOURCES})
+
 
 add_library(ADXL375 src/sensor/adxl375.cpp include/sensor/adxl375.h)
 target_include_directories(ADXL375 PUBLIC include/sensor)
@@ -39,7 +39,21 @@ target_include_directories(I2CInterface PUBLIC include/I2CInterface)
 target_link_libraries(I2CInterface PRIVATE pigpio)
 
 
+
+
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb")
+
+# Create the executable
+
+# Add libraries and executables
+add_library(AvState src/flightControl/AvState.cpp)
+target_include_directories(AvState PUBLIC 
+        include/flightControl
+        include/sensor
+        include/I2CInterface
+        include/data
+)
+
 
 # Test for he BMP390 sensor
 add_executable(BMP390_test tests/BMP390_test.cpp)
