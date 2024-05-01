@@ -29,7 +29,6 @@
 #define I2CGPS_h
 
 #include <stdint.h>
-#include <TinyGPS++.h>
 #include <string>
 
 /**\name API error codes */
@@ -57,7 +56,6 @@ private:
   uint8_t _head; //Location of next available spot in the gpsData array. Limited to 255.
   uint8_t _tail; //Location of last spot read from gpsData array. Limited to 255.
   uint8_t gpsData[MAX_PACKET_SIZE] = {0}; //The place to store valid incoming gps data
-  TinyGPSPlus gps; //TinyGPS++ object to parse GPS data
 public:
   I2CGPS(uint8_t addr = I2CGPS_ADDR);
   ~I2CGPS();
