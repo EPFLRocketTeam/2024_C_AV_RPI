@@ -51,9 +51,33 @@ add_executable(ADXL375_test tests/ADXL375_test.cpp)
 target_link_libraries(ADXL375_test ADXL375)
 ]]
 
-# Test for the Kalman filter
-add_executable(Kalman_test tests/Kalman_test.cpp src/flightControl/Kalman.cpp include/flightControl/Kalman.h src/flightControl/AvState.cpp)
-target_include_directories(Kalman_test PRIVATE include)
+# ======================== ADDED BY ME ==============================
+
+#[[
+# Test for the Old Kalman filter
+add_executable(Old_Kalman_test tests/old_kalman_tests/Kalman_test.cpp src/flightControl/Kalman.cpp include/flightControl/Kalman.h src/flightControl/AvState.cpp)
+target_include_directories(Old_Kalman_test PRIVATE include)
+
+# Test for the Old new Kalman filter implementation
+add_executable(Old_Kalman_new_test tests/old_kalman_tests/Kalman_new_test.cpp src/flightControl/Kalman.cpp include/flightControl/Kalman.h src/flightControl/AvState.cpp)
+target_include_directories(Old_Kalman_new_test PRIVATE include)
+]]
+
+# Test for the Kalman_1 One_sensor No_gyro filter
+add_executable(Kalman1_onesensor_nogyro_test 
+                tests/Kalman1_onesensor_nogyro_test.cpp 
+                src/flightControl/Kalman.cpp 
+                include/flightControl/Kalman.h 
+                src/flightControl/AvState.cpp
+                src/data/data.cpp
+                src/data/sensors.cpp
+                #src/sensor/adxl375.cpp
+                #src/sensor/bmp3.cpp
+                #src/sensor/bmi08xa.cpp
+                )
+target_include_directories(Kalman1_onesensor_nogyro_test PRIVATE include)
+
+# ===================================================================
 
 enable_testing()
 
@@ -78,8 +102,27 @@ add_test (
 set_tests_properties(ADXL375_test PROPERTIES TIMEOUT 5)
 ]]
 
+# ======================== ADDED BY ME ==============================
+#[[
+# Old Kalman test
 add_test (
-    NAME Kalman_test
-    COMMAND $<TARGET_FILE:Kalman_test>
+    NAME Old_Kalman_test
+    COMMAND $<TARGET_FILE:Old_Kalman_test>
 )
-set_tests_properties(Kalman_test PROPERTIES TIMEOUT 1000)
+set_tests_properties(Old_Kalman_test PROPERTIES TIMEOUT 1000)
+
+# Old new Kalman filter implementation
+add_test (
+    NAME Old_Kalman_new_test
+    COMMAND $<TARGET_FILE:Old_Kalman_new_test>
+)
+set_tests_properties(Old_Kalman_new_test PROPERTIES TIMEOUT 1000)
+]]
+
+add_test (
+    NAME Kalman1_onesensor_nogyro_test
+    COMMAND $<TARGET_FILE:Kalman1_onesensor_nogyro_test>
+)
+set_tests_properties(Kalman1_onesensor_nogyro_test PROPERTIES TIMEOUT 1000)
+
+# ==================================================================

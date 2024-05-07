@@ -6,9 +6,9 @@
 #include <cmath> // for sqrt
 #include <tuple>
 
-#include "../include/flightControl/AvData.h"
-#include "../include/flightControl/AvState.h"
-#include "../include/flightControl/Kalman.h"
+#include "../../include/flightControl/AvData.h"
+#include "../../include/flightControl/AvState.h"
+#include "../../include/flightControl/Kalman.h"
 
 bool isFloat(const std::string & str) {
     try {
@@ -118,12 +118,12 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 int main(void) {
 
     // Load data from CSV file
-    std::vector<std::tuple<AvData, AvState>> testData = parseCSV("../tests/combined_data.csv");
+    std::vector<std::tuple<AvData, AvState>> testData = parseCSV("../tests/old_kalman_tests/combined_data.csv");
 
     KalmanFilter kalmanFilter = KalmanFilter();
 
     // Open a new CSV file for writing
-    std::ofstream outputFile("../tests/output_Kalman_test.csv");
+    std::ofstream outputFile("../tests/old_kalman_tests/output_Kalman_test.csv");
     // Write headers to the CSV file
     outputFile << "Time,Estimated Velocity,Estimated Altitude\n";
 

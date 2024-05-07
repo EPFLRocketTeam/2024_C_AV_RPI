@@ -1,8 +1,9 @@
 #ifndef KALMAN_H
 #define KALMAN_H
 
-#include "flightControl/AvData.h"
 #include "flightControl/eigen-3.4.0/Eigen/Dense"
+#include "../data/sensors.h"
+#include "../data/data.h"
 
 #include <tuple>
 
@@ -16,7 +17,7 @@ class KalmanFilter {
 
     public:
         KalmanFilter();
-        std::tuple <float, float> UpdateAndGetAltitudeAndVelocity(State, Data, AvState);
+        std::tuple <float, Vector3> UpdateAndGetAltitudeAndVelocity(Data data, AvState av_state);
 
 };
 
@@ -29,10 +30,7 @@ struct Kalman_Rocket_State_ {
     Eigen::Matrix<float, 9, 9> P_tilde; // Prediction
     Eigen::Matrix<float, 9, 9> P_hat; // Estimated covariance of the actual state
 
-    // State : z, v, a, p0, k, h0, wx, wy, wz
-    // (altitude, velocity, acceleration, initial pressure, scale factor change altitude-pressure, 
-    // initial altitude, angular velocity components)
-
+    // State : z, v, a, p0, k, h0 (altitude, velocity, acceleration, initial pressure, , initial altitude)
     Eigen::Matrix<float, 9, 1> X_tilde;
     Eigen::Matrix<float, 9, 1> X_hat;
 
@@ -43,16 +41,20 @@ struct Kalman_Rocket_State_ {
     Eigen::Matrix<float, 3, 3> R_gyro_bmi;
 
     // Process noise covariance matrix (which affects the system)
-    Eigen::Matrix<float, 6, 6> Q;
+    Eigen::Matrix<float, 3, 3> Q;
 
     // System Dynamics
     Eigen::Matrix<float, 9, 9> F; // represents the dynamics of the system ; how the system's state evolves from
                                   // one time step to the next in the absence of control inputs
 
-    Eigen::Matrix<float, 9, 6> G; // represents the effect of control inputs on the system dynamics, if any
+    Eigen::Matrix<float, 9, 3> G; // represents the effect of control inputs on the system dynamics, if any
 
     // Last time stamp
     uint32_t last_time;
+
+    // Last temperature
+    double last_temp_bmi;
+    double last_temp_bmi_aux;
 
 };
 

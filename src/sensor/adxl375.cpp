@@ -43,7 +43,7 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include "adxl375.h"		// ADXL375 definitions.
+#include "../include/sensor/adxl375.h"		// ADXL375 definitions.
 #include "i2c_wrappers.h"	// Communication definitions.
 #include <stdint.h>
 #include <stdio.h>
@@ -641,4 +641,13 @@ void Adxl375::calibrate() {
     offset.x = sum.x / samples;
 	offset.y = sum.y / samples;
 	offset.z = sum.z / samples;
+}
+
+// --- Added by me ---
+void Adxl375::set_value(adxl375_data value) {
+	data = value;
+}
+
+void Adxl375::set_status(uint8_t value) {
+	status = value;
 }

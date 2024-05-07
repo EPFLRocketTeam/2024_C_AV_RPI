@@ -569,6 +569,10 @@ public:
     void set_offset(adxl375_data offset_in);
     void set_scale(float scale_in);
     void calibrate();
+
+    // --- Added by me ---
+    void set_value(adxl375_data);
+    void set_status(uint8_t);
 } ;
 
 class Adxl375Exception : public std::exception {

@@ -1239,3 +1239,19 @@ bmi08_sensor_data_f Bmi088::get_gyro_data() {
     return gyro_data;
 }
 
+void Bmi088::set_accel_value(bmi08_sensor_data_f value) {
+    accel_data = value;
+}
+
+void Bmi088::set_accel_status(uint8_t value) {
+    status = value;
+}
+
+void Bmi088::set_gyro_value(bmi08_sensor_data_f value) {
+    gyro_data = value;
+}
+
+void Bmi088::set_gyro_status(uint8_t value) {
+    status = value;
+}
+

@@ -600,6 +600,10 @@ public:
     * BMP3_TEMP       : To read only temperature data
     * BMP3_PRESS      : To read only pressure data
     */
+
+   // --- Added by me ---
+   void set_value(bmp3_data);
+   void set_status(bmp3_status);
 } ;
 
 class Bmp390Exception : public std::runtime_error {

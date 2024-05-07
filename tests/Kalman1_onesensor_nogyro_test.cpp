@@ -6,9 +6,10 @@
 #include <cmath> // for sqrt
 #include <tuple>
 
-#include "../include/flightControl/AvData.h"
+#include "../include/data/data.h"
 #include "../include/flightControl/AvState.h"
 #include "../include/flightControl/Kalman.h"
+#include "../include/data/sensors.h"
 
 bool isFloat(const std::string & str) {
     try {
@@ -19,9 +20,9 @@ bool isFloat(const std::string & str) {
     }
 }
 
-std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
+std::vector<std::tuple<Data, AvState>> parseCSV(std::string filename) {
 
-    std::vector<std::tuple<AvData, AvState>> data;
+    std::vector<std::tuple<Data, AvState>> data;
 
     std::ifstream input{filename.c_str()};
     if (!input.is_open()) {
@@ -48,23 +49,40 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
         std::cout << "Line: " << lineNumber << std::endl;
 
         std::istringstream ss(line);
-        AvData avData;
+        Data avData;
         AvState avState;
+
+        //TODO: setting sensors status (adxl and temperature of bmp desactivated) (only use first sensor)
+        avData.set_adxl_status(0);
+        avData.set_adxl_aux_status(0);
+        avData.set_bmi_accel_status(BMI08_ACCEL_DATA_READY_INT);
+        avData.set_bmi_gyro_status(0); // gyro desactivated!
+        avData.set_bmi_aux_accel_status(0);
+        avData.set_bmi_aux_gyro_status(0);
+
+        bmp3_status bs = {{0,0,0}, {BMP3_CMD_RDY, BMP3_DRDY_PRESS, 0}, {0,0,0},0};
+        bmp3_status bs_aux = {{0,0,0}, {0,0,0}, {0,0,0},0};
+        avData.set_bmp_status(bs); //TODO: a revoir ici
+        avData.set_bmp_aux_status(bs_aux);
 
         // Read each comma-separated value
         std::string value;
 
         // time (s)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            avData.time = std::stof(value);
+            avData.set_time(std::stof(value));
         } else {
             std::cerr << "Error: Invalid time value on line " << lineNumber << "\n" << std::endl;
             break;
         }
 
+        float x = 0;
+        float y = 0;
+        float z = 0;
+
         // posx (m)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            x = std::stof(value);
         } else {
             std::cerr << "Error: Invalid posx value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -72,7 +90,7 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
         // posy (m)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            y = std::stof(value);
         } else {
             std::cerr << "Error: Invalid posy value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -80,15 +98,21 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
         // posz == altitude (m)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            avData.altitude = std::stof(value);
+            z = std::stof(value);
         } else {
             std::cerr << "Error: Invalid posz value on line " << lineNumber << value << "\n" << std::endl;
             break;
         }
 
+        avData.set_altitude(z);
+
+        float vx = 0;
+        float vy = 0;
+        float vz = 0;
+
         // vx (m/s)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            vx = std::stof(value);
         } else {
             std::cerr << "Error: Invalid vx value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -96,7 +120,7 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
         // vy (m/s)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            vy = std::stof(value);
         } else {
             std::cerr << "Error: Invalid vy value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -104,15 +128,21 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
         // vz (m/s)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            avData.velocity = std::stof(value);
+            vz = std::stof(value);
         } else {
             std::cerr << "Error: Invalid vz value on line " << lineNumber << "\n" << std::endl;
             break;
         }
 
+        avData.set_velocity({x,y,z});
+
+        float ax = 0;
+        float ay = 0;
+        float az = 0;
+
         // accx (m/s²)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            ax = std::stof(value);
         } else {
             std::cerr << "Error: Invalid accx value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -120,7 +150,7 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
         // accy (m/s²)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            ay = std::stof(value);
         } else {
             std::cerr << "Error: Invalid accy value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -128,15 +158,21 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
         // accz (m/s²)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            avData.acceleration = std::stof(value);
+            ay = std::stof(value);
         } else {
             std::cerr << "Error: Invalid accz value on line " << lineNumber << "\n" << std::endl;
             break;
         }
 
+        avData.set_bmi_accel({ax,ay,az});
+
+        float rotx = 0;
+        float roty = 0;
+        float rotz = 0;
+
         // rotx (rad/s)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            rotx = std::stof(value);
         } else {
             std::cerr << "Error: Invalid rotx value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -144,7 +180,7 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
         // roty (rad/s)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            roty = std::stof(value);
         } else {
             std::cerr << "Error: Invalid roty value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -152,15 +188,17 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 
         // rotz (rad/s)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            // nothing
+            rotz = std::stof(value);
         } else {
             std::cerr << "Error: Invalid rotz value on line " << lineNumber << "\n" << std::endl;
             break;
         }
 
+        avData.set_bmi_aux_gyro({rotx, roty, rotz});
+
         // pressure
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            avData.pressure = std::stof(value);
+            avData.set_bmp({0, std::stof(value)});
         } else {
             std::cerr << "Error: Invalid pressure value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -196,7 +234,7 @@ std::vector<std::tuple<AvData, AvState>> parseCSV(std::string filename) {
 int main(void) {
 
     // Load data from CSV file
-    std::vector<std::tuple<AvData, AvState>> testData = parseCSV("../tests/Test_AVTrainingData.csv");
+    std::vector<std::tuple<Data, AvState>> testData = parseCSV("../tests/Test_AVTrainingData.csv");
 
     KalmanFilter kalmanFilter = KalmanFilter();
 
@@ -207,15 +245,15 @@ int main(void) {
 
     int counter = 0;
     // Iterate over data and update Kalman filter
-    for (const auto & [avData, avState] : testData) {
+    for (auto & [avData, avState] : testData) {
         ++counter;
         std::cout << "Writing line " << counter << std::endl;
 
-        std::tuple<float, float> estimatedAltitudeAndVelocity = kalmanFilter.UpdateAndGetAltitudeAndVelocity(avData, avState);
+        std::tuple<float, Vector3> estimatedAltitudeAndVelocity = kalmanFilter.UpdateAndGetAltitudeAndVelocity(avData, avState);
         float estimatedAltitude = std::get<0>(estimatedAltitudeAndVelocity);
-        float estimatedVelocity = std::get<1>(estimatedAltitudeAndVelocity);
+        Vector3 estimatedVelocity = std::get<1>(estimatedAltitudeAndVelocity);
 
-        outputFile << avData.time << "," << estimatedVelocity << "," << estimatedAltitude << "\n";
+        outputFile << avData.get_time() << "," << estimatedVelocity.z << "," << estimatedAltitude << "\n";
 
     }
     outputFile.close();

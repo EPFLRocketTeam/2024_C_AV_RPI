@@ -40,7 +40,7 @@
 /*! @file bmp3.c
  * @brief Sensor driver for BMP3 sensor */
 
-#include "bmp3.h"
+#include "../include/sensor/bmp3.h"
 #include "i2c_wrappers.h"
 
 /***************** Static function declarations ******************************/
@@ -3055,5 +3055,15 @@ bmp3_data Bmp390::get_sensor_data(uint8_t sensor_comp) {
         throw Bmp390Exception(rslt);
     }
     return data;
+}
+
+// --- Added by me ---
+
+void Bmp390::set_value(bmp3_data value) {
+    data = value;
+}
+
+void Bmp390::set_status(bmp3_status value) {
+    status = value;
 }
 

@@ -57,7 +57,7 @@ extern "C" {
 /*********************************************************************/
 /*                          Header Files                             */
 /*********************************************************************/
-#include "bmi08.h"
+#include "../include/sensor/bmi08.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -333,6 +333,12 @@ public:
     uint8_t get_status();
     bmi08_sensor_data_f get_accel_data();
     bmi08_sensor_data_f get_gyro_data();
+
+    // --- Added by me ---
+    void set_accel_value(bmi08_sensor_data_f);
+    void set_accel_status(uint8_t);
+    void set_gyro_value(bmi08_sensor_data_f);
+    void set_gyro_status(uint8_t);
 } ;
 
 class Bmi088Exception : public std::runtime_error {
