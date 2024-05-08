@@ -17,7 +17,7 @@ class KalmanFilter {
 
     public:
         KalmanFilter();
-        std::tuple <float, Vector3> UpdateAndGetAltitudeAndVelocity(Data data, AvState av_state);
+        std::tuple <double, Vector3> UpdateAndGetAltitudeAndVelocity(Data data, AvState av_state);
 
 };
 
@@ -27,27 +27,27 @@ struct Kalman_Rocket_State_ {
     // tilde = prediction, hat = estimated
 
     // Covariance of state (Uncertainty associated with each element of X) => 6*6 matrices
-    Eigen::Matrix<float, 9, 9> P_tilde; // Prediction
-    Eigen::Matrix<float, 9, 9> P_hat; // Estimated covariance of the actual state
+    Eigen::Matrix<double, 9, 9> P_tilde; // Prediction
+    Eigen::Matrix<double, 9, 9> P_hat; // Estimated covariance of the actual state
 
     // State : z, v, a, p0, k, h0 (altitude, velocity, acceleration, initial pressure, , initial altitude)
-    Eigen::Matrix<float, 9, 1> X_tilde;
-    Eigen::Matrix<float, 9, 1> X_hat;
+    Eigen::Matrix<double, 9, 1> X_tilde;
+    Eigen::Matrix<double, 9, 1> X_hat;
 
     // Variances measurement
-    Eigen::Matrix<float, 1, 1> R_baro_bmp;
-    Eigen::Matrix<float, 1, 1> R_acc_adxl;
-    Eigen::Matrix<float, 1, 1> R_acc_bmi;
-    Eigen::Matrix<float, 3, 3> R_gyro_bmi;
+    Eigen::Matrix<double, 1, 1> R_baro_bmp;
+    Eigen::Matrix<double, 1, 1> R_acc_adxl;
+    Eigen::Matrix<double, 1, 1> R_acc_bmi;
+    Eigen::Matrix<double, 3, 3> R_gyro_bmi;
 
     // Process noise covariance matrix (which affects the system)
-    Eigen::Matrix<float, 3, 3> Q;
+    Eigen::Matrix<double, 3, 3> Q;
 
     // System Dynamics
-    Eigen::Matrix<float, 9, 9> F; // represents the dynamics of the system ; how the system's state evolves from
+    Eigen::Matrix<double, 9, 9> F; // represents the dynamics of the system ; how the system's state evolves from
                                   // one time step to the next in the absence of control inputs
 
-    Eigen::Matrix<float, 9, 3> G; // represents the effect of control inputs on the system dynamics, if any
+    Eigen::Matrix<double, 9, 3> G; // represents the effect of control inputs on the system dynamics, if any
 
     // Last time stamp
     uint32_t last_time;

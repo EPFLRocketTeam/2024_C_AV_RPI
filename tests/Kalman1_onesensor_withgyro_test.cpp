@@ -56,7 +56,7 @@ std::vector<std::tuple<Data, AvState>> parseCSV(std::string filename) {
         avData.set_adxl_status(0);
         avData.set_adxl_aux_status(0);
         avData.set_bmi_accel_status(BMI08_ACCEL_DATA_READY_INT);
-        avData.set_bmi_gyro_status(0); // gyro desactivated!
+        avData.set_bmi_gyro_status(BMI08_GYRO_DATA_READY_INT); // gyro activated!
         avData.set_bmi_aux_accel_status(0);
         avData.set_bmi_aux_gyro_status(0);
 
@@ -239,7 +239,7 @@ int main(void) {
     KalmanFilter kalmanFilter = KalmanFilter();
 
     // Open a new CSV file for writing
-    std::ofstream outputFile("../tests/output_Kalman1_onesensor_nogyro_test.csv");
+    std::ofstream outputFile("../tests/output_Kalman1_onesensor_withgyro_test.csv");
     // Write headers to the CSV file
     outputFile << "Time,Estimated Velocity,Estimated Altitude\n";
 
