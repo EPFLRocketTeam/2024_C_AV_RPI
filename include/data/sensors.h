@@ -4,6 +4,7 @@
 #include "adxl375.h"
 #include "bmi08x.h"
 #include "bmp3.h"
+#include <gmock/gmock.h>
 
 struct SensStatus
 {
@@ -59,17 +60,16 @@ struct SensFiltered
     SensFiltered();
 };
 
-class Sensors
-{
+class Sensors {
 public:
     Sensors();
     ~Sensors();
 
-    void calibrate();
+    virtual void calibrate();
     virtual bool update();
     inline SensStatus get_status() const { return status; }
-    inline SensFiltered dump() const { return clean_data; }
-
+    inline SensRaw get_raw() const { return raw_data; }
+    inline SensFiltered get_clean() const { return clean_data; }
 private:
     Adxl375 adxl1, adxl2;
     Bmi088 bmi1, bmi2;
@@ -79,7 +79,13 @@ private:
     SensFiltered clean_data;
 
     // Read sensors status
-    void update_status();
+    virtual void update_status();
+};
+
+class MockSensors : public Sensors {
+public:
+    MOCK_METHOD(void, calibrate, (), (override));
+    MOCK_METHOD(bool, update, (), (override));
 };
 
 #endif /* SENSORS_H */

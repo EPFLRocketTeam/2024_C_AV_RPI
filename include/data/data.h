@@ -15,15 +15,14 @@ public:
     Data();
     ~Data();
 
-    virtual bool update();
+    bool update();
     DataDump dump() const;
 
 private:
     bool calibrated() const;
     bool updated;
-    Telecom m_telecom;
-    Sensors m_sensors;
+    std::unique_ptr<Telecom> m_telecom;
+    std::unique_ptr<Sensors> m_sensors;
 };
-
 
 #endif /* DATA_H */
