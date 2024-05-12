@@ -158,7 +158,7 @@ std::vector<std::tuple<Data, AvState>> parseCSV(std::string filename) {
 
         // accz (m/s²)
         if (std::getline(ss, value, ',') && isFloat(value)) {
-            ay = std::stof(value);
+            az = std::stof(value);
         } else {
             std::cerr << "Error: Invalid accz value on line " << lineNumber << "\n" << std::endl;
             break;
@@ -241,7 +241,7 @@ int main(void) {
     // Open a new CSV file for writing
     std::ofstream outputFile("../tests/output_Kalman1_onesensor_withgyro_test.csv");
     // Write headers to the CSV file
-    outputFile << "Time,Estimated Velocity,Estimated Altitude\n";
+    outputFile << "Time,Estimated Velocity x,Estimated Velocity y,Estimated Velocity z,Estimated Altitude\n";
 
     int counter = 0;
     // Iterate over data and update Kalman filter
@@ -253,7 +253,7 @@ int main(void) {
         double estimatedAltitude = std::get<0>(estimatedAltitudeAndVelocity);
         Vector3 estimatedVelocity = std::get<1>(estimatedAltitudeAndVelocity);
 
-        outputFile << avData.get_time() << "," << estimatedVelocity.z << "," << estimatedAltitude << "\n";
+        outputFile << avData.get_time() << "," << estimatedVelocity.x << "," << estimatedVelocity.y << "," << estimatedVelocity.z << "," << estimatedAltitude << "\n";
 
     }
     outputFile.close();

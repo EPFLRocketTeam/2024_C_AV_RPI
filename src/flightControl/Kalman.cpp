@@ -11,9 +11,9 @@
 #include "data/sensors.h"
 #include "data/data.h"
 
-// State : z, v, a, p0, k, h0, wx, wy, wz
-// (altitude, velocity, acceleration, initial pressure, scale factor change altitude-pressure, 
-// initial altitude, angular velocity components)
+// State : z, vx, vy, vz, ax, ay, az, p0, k, h0, wx, wy, wz
+// (altitude, velocity on x, velocity on y, velocity on z, acceleration on x, acceleration on y, acceleration on z,
+// initial pressure, scale factor change altitude-pressure, initial altitude, angular velocity components)
 
 // Constants
 
@@ -35,7 +35,9 @@
 // Used to initialize Q
 // Helps KF to appropriately incorporate new acceleration data while balancing it 
 // with the existing state estimate and its uncertainty
-#define sigma_a     1.0 // for m/s²
+#define sigma_ax    1.0 // for m/s²
+#define sigma_ay    1.0 // for m/s²
+#define sigma_az    1.0 // for m/s²
 #define sigma_p0    0.1 // for Pa
 #define sigma_k     1e-9 // for 
 #define sigma_wx    1.0 // for rad/s // todo
@@ -46,8 +48,14 @@
 //   system model rather than by unmodeled process noise
 // - to adjust based on simulations
 #define sigma_z  1e-9
-#define sigma_v  1e-9
+#define sigma_vx 1e-9
+#define sigma_vy 1e-9
+#define sigma_vz 1e-9
 #define sigma_h0 1e-9
+
+// Consider modeling the process noise for angular velocities more dynamically, potentially 
+// updating your noise covariance matrix Q based on observed system behavior or using adaptive 
+// filtering techniques to better cope with non-linear dynamics and non-stationary noise.
 
 
 // alt0: reference altitude for the barometer 
@@ -57,36 +65,61 @@ void kalman_setup(Kalman_Rocket_State * state, double alt0, double p0, double wx
     std::cout << "In kalman_setup" << "\n" << std::endl;
     std::cout << "\n" << std::endl;
 
-    state->X_tilde << alt0, 0.0, 0.0, p0, -M/(R*T), alt0, wx0, wy0, wz0;
-    state->X_hat << state->X_tilde;    
+    state->X_tilde << alt0, 0, 0, 0, 0, 0, 0, p0, -M/(R*T), alt0, wx0, wy0, wz0;
+    state->X_hat << state->X_tilde;
 
-    state->P_tilde.diagonal() << 25.0, 0.25, 0.25, 25.0, 1e-12, 25.0, 1.0, 1.0, 1.0;
-    state->P_hat << state->P_tilde;    
+    //TODO: Determine best values
+    state->P_tilde.diagonal() << 25.0, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 25.0, 1e-12, 25.0, 1.0, 1.0, 1.0;
+    state->P_hat << state->P_tilde;  
 
     state->R_baro_bmp << powf(sigma_z_baro_bmp, 2.0);
-    state->R_acc_adxl << powf(sigma_z_acc_adxl, 2.0);
-    state->R_acc_bmi << powf(sigma_z_acc_bmi, 2.0);
+    state->R_acc_adxl.diagonal()<< powf(sigma_z_acc_adxl, 2.0), powf(sigma_z_acc_adxl, 2.0), powf(sigma_z_acc_adxl, 2.0);
+    state->R_acc_bmi.diagonal() << powf(sigma_z_acc_bmi, 2.0), powf(sigma_z_acc_bmi, 2.0), powf(sigma_z_acc_bmi, 2.0);
+    
     // TODO: Determine if noises are independent (if not, R_gyro is not diagonal)
     state->R_gyro_bmi.diagonal() << powf(sigma_z_gyro_x_bmi, 2.0), powf(sigma_z_gyro_y_bmi, 2.0), powf(sigma_z_gyro_z_bmi, 2.0);
 
-   
+   /*
    state->Q << powf(sigma_a, 2.0), 0, 0,  // Process noise for altitude, velocity, and acceleration
                 0, powf(sigma_p0, 2.0), 0,
                 0, 0, powf(sigma_k, 2.0);
+    */
+
+   state->Q.diagonal() << powf(sigma_z, 2.0f), 
+                            powf(sigma_vx, 2.0f), powf(sigma_vy, 2.0f), powf(sigma_vz, 2.0f),
+                            powf(sigma_ax, 2.0f), powf(sigma_ay, 2.0f), powf(sigma_az, 2.0f),
+                            powf(sigma_p0, 2.0f), powf(sigma_k, 2.0f), powf(sigma_h0, 2.0f),
+                            powf(sigma_wx, 2.0f), powf(sigma_wy, 2.0f), powf(sigma_wz, 2.0f);
 
     // will be overwritten?
-    state->F.setIdentity(9, 9);
+    state->F.setIdentity(13, 13);
     
-    state->G << 0,  0,  0, // Minimal direct noise impact on altitude
-                0,  0,  0, // Minimal direct noise impact on velocity
-                1,  0,  0, // Direct noise impact on acceleration
-                0,  1,  0, // Some noise impact on initial pressure (if modeled)
-                0,  0,  1, // Example: Some noise impact on other state variables
-                0,  0,  0, // Minimal direct noise impact on initial altitude (if modeled)
-                0, 0, 0,
-                0, 0, 0,
-                0, 0, 0;
+    /*
+    state->G << 0, 0, 0, 0, 0, 0, 0, 0, 0,  // Minimal direct noise impact on altitude
+                0, 0, 0, 0, 0, 0, 0, 0, 0,  // Minimal direct noise impact on velocity
+                1, 0, 0, 0, 0, 0, 0, 0, 0,  // Direct noise impact on acceleration
+                0, 1, 0, 0, 0, 0, 0, 0, 0,  // Some noise impact on initial pressure (if modeled)
+                0, 0, 1, 0, 0, 0, 0, 0, 0,  // Some noise impact on scale factor change
+                0, 0, 0, 1, 0, 0, 0, 0, 0,  // Minimal direct noise impact on initial altitude
+                0, 0, 0, 0, 0, 0, 1, 0, 0,  // Noise impact on wx
+                0, 0, 0, 0, 0, 0, 0, 1, 0,  // Noise impact on wy
+                0, 0, 0, 0, 0, 0, 0, 0, 1;  // Noise impact on wz
+    */
+    state->G << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, // acceleration noise directly affects acceleration
+                0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, // gyro noise affects angular velocities
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1;
                 //TODO: VERIFY!!!
+    //std::cout << "G done" << "\n" << std::endl;
 
     state->last_time = 0;
     state->last_temp_bmi = T; //TODO: Initialize correctly
@@ -100,23 +133,27 @@ void kalman_predict(Kalman_Rocket_State * state, double dt) {
    /* MY LINEAR VERSION */
    // Define the state transition matrix F for the given system
     // Update F to include the effect of acceleration on velocity and altitude
-    state->F << 1, dt, 0.5 * dt * dt, 0, 0, 0, 0, 0, 0, // altitude (z)
-                0, 1, dt, 0, 0, 0, 0, 0, 0,             // velocity (v)
-                0, 0, 1, 0, 0, 0, 0, 0, 0,              // acceleration (a)
-                0, 0, 0, 1, 0, 0, 0, 0, 0,              // initial pressure (p0)
-                0, 0, 0, 0, 1, 0, 0, 0, 0,              // scale factor change (k)
-                0, 0, 0, 0, 0, 1, 0, 0, 0,              // initial altitude (h0)
-                0, 0, 0, 0, 0, 0, 1, 0, 0,              // angular velocity (wx)
-                0, 0, 0, 0, 0, 0, 0, 1, 0,              // angular velocity (wy)
-                0, 0, 0, 0, 0, 0, 0, 0, 1;              // angular velocity (wz)
+    state->F << 1, 0, 0, dt, 0, 0, 0.5 * dt * dt, 0, 0, 0, 0, 0, 0,                            // altitude (z)
+                0, 1, 0, 0, dt, 0, 0, 0, 0, 0, 0, 0, 0,                                       // velocity (vx)
+                0, 0, 1, 0, 0, dt, 0, 0, 0, 0, 0, 0, 0,                                       // velocity (vy)
+                0, 0, 0, 1, 0, 0, dt, 0, 0, 0, 0, 0, 0,                                       // velocity (vz)
+                0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,                                       // acceleration (ax)
+                0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,                                       // acceleration (ay)
+                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,                                       // acceleration (az)
+                0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,                                       // initial pressure (p0)
+                0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,                                       // scale factor change (k)
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,                                       // initial altitude (h0)
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,                                       // angular velocity (wx)
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,                                       // angular velocity (wy)
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1;                                       // angular velocity (wz)
 
-    double wx = state->X_tilde(6);
-    double wy = state->X_tilde(7);
-    double wz = state->X_tilde(8);
+    double wx = state->X_tilde(10);
+    double wy = state->X_tilde(11);
+    double wz = state->X_tilde(12);
 
-    std::cout << "wx: " << wx << "\n" << std::endl;
-    std::cout << "wy: " << wy << "\n" << std::endl;
-    std::cout << "wz: " << wz << "\n" << std::endl;
+    //std::cout << "wx: " << wx << "\n" << std::endl;
+    ////std::cout << "wy: " << wy << "\n" << std::endl;
+    //std::cout << "wz: " << wz << "\n" << std::endl;
 
     // Simple rotation effect based on angular velocities
     Eigen::Matrix<double, 3, 3> rotation_effect;
@@ -124,17 +161,23 @@ void kalman_predict(Kalman_Rocket_State * state, double dt) {
                        wz * dt, 0, -wx * dt,
                        -wy * dt, wx * dt, 0;
 
-    std::cout << "rotation_effect: " << "\n" << std::endl;
-    std::cout << rotation_effect << "\n" << std::endl;
+    // std::cout << "rotation_effect: " << "\n" << std::endl;
+    // std::cout << rotation_effect << "\n" << std::endl;
 
     // Apply the rotation effect to the acceleration components in the state vector
-    Eigen::Matrix<double, 3, 1> temp_accel = state->X_tilde.block<3, 1>(2, 0) + rotation_effect * state->X_tilde.block<3, 1>(2, 0);
+    Eigen::Matrix<double, 3, 1> temp_accel = state->X_tilde.block<3, 1>(4, 0) + rotation_effect * state->X_tilde.block<3, 1>(4, 0);
+
+    std::cout << "X_tilde before:" << "\n" << std::endl;
+    std::cout << state->X_hat << "\n" << std::endl;
 
     // Update the acceleration in the state vector
-    state->X_tilde.block<3, 1>(2, 0) = temp_accel;
+    state->X_tilde.block<3, 1>(4, 0) = temp_accel;
 
     // Predict the next state vector
     state->X_tilde = state->F * state->X_hat;
+
+    std::cout << "X_tilde after:" << "\n" << std::endl;
+    std::cout << state->X_hat << "\n" << std::endl;
 
     state->P_tilde = state->F * state->P_hat * state->F.transpose() + state->G * state->Q * state->G.transpose();
     
@@ -155,7 +198,7 @@ double pressure_to_altitude(double pressure, double temperature) {
 
 void kalman_update_baro(Kalman_Rocket_State * state, double p, double temperature, Eigen::Matrix<double, 1, 1> R_baro) {
 
-   Eigen::Matrix<double, 1, 9> H; // Measurement matrix for altitude
+   Eigen::Matrix<double, 1, 13> H; // Measurement matrix for altitude
     H.setZero();
     H(0, 0) = 1;  // Altitude is directly measured
 
@@ -167,38 +210,52 @@ void kalman_update_baro(Kalman_Rocket_State * state, double p, double temperatur
 
     Eigen::Matrix<double, 1, 1> S = H * state->P_tilde * H.transpose() + R_baro;  // Residual covariance
 
-    Eigen::Matrix<double, 9, 1> K = state->P_tilde * H.transpose() * S.inverse();  // Kalman Gain
+    Eigen::Matrix<double, 13, 1> K = state->P_tilde * H.transpose() * S.inverse();  // Kalman Gain
 
     state->X_hat = state->X_tilde + K * Y;  // Update state estimate
 
-    state->P_hat = (Eigen::Matrix<double, 9, 9>::Identity() - K * H) * state->P_tilde;  // Update error covariance matrix
+    state->P_hat = (Eigen::Matrix<double, 13, 13>::Identity() - K * H) * state->P_tilde;  // Update error covariance matrix
 }
 
-void kalman_update_acc(Kalman_Rocket_State * state, double a, Eigen::Matrix<double, 1, 1> R_acc) {
+void kalman_update_acc(Kalman_Rocket_State * state, double ax, double ay, double az, Eigen::Matrix<double, 3, 3> R_acc) {
+
+    std::cout << "ax: " << ax << "\n" << std::endl;
+    std::cout << "ay: " << ay << "\n" << std::endl;
+    std::cout << "az: " << az << "\n" << std::endl;
 
    /* MY LINEAR VERSION */
    // H matrix maps the state vector's acceleration component to the measured acceleration
-    Eigen::Matrix<double, 1, 9> H;
+    Eigen::Matrix<double, 3, 13> H;
     H.setZero();
-    H(0, 2) = 1;  // Only the acceleration affects the measurement directly
+    H(0, 4) = 1;  // ax directly affects the state
+    H(1, 5) = 1;  // ay directly affects the state
+    H(2, 6) = 1;  // az directly affects the state
 
     // Y is the measurement residual: the difference between the measured acceleration
     // and the predicted acceleration from the state vector
-    Eigen::Matrix<double, 1, 1> Y;
-    Y << a - (H * state->X_tilde)(0, 0);  // (H * state->X_tilde)(0, 0) == state->X_tilde(2)
+    Eigen::Matrix<double, 3, 1> Y;
+    Y << ax - state->X_tilde(4),  // Residual for ax
+         ay - state->X_tilde(5),  // Residual for ay
+         az - state->X_tilde(6);  // Residual for az
 
     // S is the residual covariance, incorporating both the measurement noise and the
     // uncertainty of the predicted state as it relates to the measurement
-    Eigen::Matrix<double, 1, 1> S = H * state->P_tilde * H.transpose() + R_acc;
+    Eigen::Matrix<double, 3, 3> S = H * state->P_tilde * H.transpose() + R_acc;
 
     // K is the Kalman Gain, determining how much the measurement should influence the state update
-    Eigen::Matrix<double, 9, 1> K = state->P_tilde * H.transpose() * S.inverse();
+    Eigen::Matrix<double, 13, 3> K = state->P_tilde * H.transpose() * S.inverse();
+
+    std::cout << "X_hat before:" << "\n" << std::endl;
+    std::cout << state->X_hat << "\n" << std::endl;
 
     // Update the state estimate using the measurement residual, scaled by the Kalman gain
     state->X_hat = state->X_tilde + K * Y;
 
+    std::cout << "X_hat after:" << "\n" << std::endl;
+    std::cout << state->X_hat << "\n" << std::endl;
+
     // Update the estimate's covariance matrix, reflecting the reduced uncertainty
-    state->P_hat = (Eigen::Matrix<double, 9, 9>::Identity() - K * H) * state->P_tilde;
+    state->P_hat = (Eigen::Matrix<double, 13, 13>::Identity() - K * H) * state->P_tilde;
     
 }
 
@@ -206,11 +263,11 @@ void kalman_update_gyro(Kalman_Rocket_State * state, double wx, double wy, doubl
 
     //std::cout << "In kalman_update_gyro" << "\n" << std::endl;
 
-    Eigen::Matrix<double, 3, 9> H;  // Measurement matrix for angular velocities
+    Eigen::Matrix<double, 3, 13> H;  // Measurement matrix for angular velocities
     H.setZero();
-    H(0, 6) = 1;  // wx
-    H(1, 7) = 1;  // wy
-    H(2, 8) = 1;  // wz
+    H(0, 10) = 1;  // wx
+    H(1, 11) = 1;  // wy
+    H(2, 12) = 1;  // wz
 
     Eigen::Matrix<double, 3, 1> Z;  // Measurement matrix from the gyroscope
     Z << wx, wy, wz;
@@ -219,11 +276,11 @@ void kalman_update_gyro(Kalman_Rocket_State * state, double wx, double wy, doubl
 
     Eigen::Matrix<double, 3, 3> S = H * state->P_tilde * H.transpose() + R_gyro;  // Residual covariance
 
-    Eigen::Matrix<double, 9, 3> K = state->P_tilde * H.transpose() * S.inverse();  // Kalman Gain
+    Eigen::Matrix<double, 13, 3> K = state->P_tilde * H.transpose() * S.inverse();  // Kalman Gain
 
     state->X_hat = state->X_hat + K * Y;  // Update state estimate
 
-    state->P_hat = (Eigen::Matrix<double, 9, 9>::Identity() - K * H) * state->P_tilde;  // Update error covariance matrix
+    state->P_hat = (Eigen::Matrix<double, 13, 13>::Identity() - K * H) * state->P_tilde;  // Update error covariance matrix
 
 }
 
@@ -254,19 +311,19 @@ void kalman_handle_data(Kalman_Rocket_State * state, Data data, AvState av_state
         // Update accelerometer with z acceleration //TODO: Check that it is indeed z
         if (status.adxl_status & ADXL375_DATA_READY) { //in include/sensor/adxl375.h
             //std::cout << "adxl_status" << "\n" << std::endl;
-            kalman_update_acc(state, sens_raw.adxl.z, state->R_acc_adxl);
+            kalman_update_acc(state, sens_raw.adxl.x, sens_raw.adxl.y, sens_raw.adxl.z, state->R_acc_adxl);
         }
         if (status.adxl_aux_status & ADXL375_DATA_READY) {
             //std::cout << "adxl_aux_status" << "\n" << std::endl;
-            kalman_update_acc(state, sens_raw.adxl_aux.z, state->R_acc_adxl);
+            kalman_update_acc(state, sens_raw.adxl_aux.x, sens_raw.adxl_aux.y, sens_raw.adxl_aux.z, state->R_acc_adxl);
         }
         if (status.bmi_accel_status & BMI08_ACCEL_DATA_READY_INT) { // in include/sensor/bmi08_defs.h
             //std::cout << "bmi_accel_status" << "\n" << std::endl;
-            kalman_update_acc(state, sens_raw.bmi_accel.z, state->R_acc_bmi);
+            kalman_update_acc(state, sens_raw.bmi_accel.x, sens_raw.bmi_accel.y, sens_raw.bmi_accel.z, state->R_acc_bmi);
         }
         if (status.bmi_aux_accel_status & BMI08_ACCEL_DATA_READY_INT) {
             //std::cout << "bmi_aux_accel_status" << "\n" << std::endl;
-            kalman_update_acc(state, sens_raw.bmi_aux_accel.z, state->R_acc_bmi);
+            kalman_update_acc(state, sens_raw.bmi_aux_accel.x, sens_raw.bmi_aux_accel.y, sens_raw.bmi_aux_accel.z, state->R_acc_bmi);
         }
         
 
@@ -292,7 +349,7 @@ void kalman_handle_data(Kalman_Rocket_State * state, Data data, AvState av_state
             //std::cout << "bmp_aux_status.sensor.drdy_press" << "\n" << std::endl;
             kalman_update_baro(state, sens_raw.bmp_aux.pressure, state->last_temp_bmi_aux, state->R_baro_bmp);
         }
-        
+
 
         // Update gyroscope
         //TODO: S'assurer que c'est en rad/s
@@ -304,6 +361,8 @@ void kalman_handle_data(Kalman_Rocket_State * state, Data data, AvState av_state
             //std::cout << "bmi_aux_gyro_status" << "\n" << std::endl;
             kalman_update_gyro(state, sens_raw.bmi_aux_gyro.x, sens_raw.bmi_aux_gyro.y, sens_raw.bmi_aux_gyro.z, state->R_gyro_bmi);
         }
+        
+        
 
     }
     state->last_time = data.get_time();
@@ -358,6 +417,6 @@ KalmanFilter::KalmanFilter() {
 std::tuple<double, Vector3> KalmanFilter::UpdateAndGetAltitudeAndVelocity(Data data, AvState av_state) {
 
     kalman_handle_data(state, data, av_state);
-    Vector3 velocityVector = {0, 0, state->X_hat(1,0)};
+    Vector3 velocityVector = {state->X_hat(1,0), state->X_hat(2,0), state->X_hat(3,0)};
     return std::make_tuple(state->X_hat(0,0), velocityVector); // returns the estimated altitude and velocity
 }

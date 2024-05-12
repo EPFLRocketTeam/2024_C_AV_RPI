@@ -4,6 +4,7 @@
 #include "flightControl/eigen-3.4.0/Eigen/Dense"
 #include "../data/sensors.h"
 #include "../data/data.h"
+#include "AvState.h"
 
 #include <tuple>
 
@@ -27,27 +28,29 @@ struct Kalman_Rocket_State_ {
     // tilde = prediction, hat = estimated
 
     // Covariance of state (Uncertainty associated with each element of X) => 6*6 matrices
-    Eigen::Matrix<double, 9, 9> P_tilde; // Prediction
-    Eigen::Matrix<double, 9, 9> P_hat; // Estimated covariance of the actual state
+    Eigen::Matrix<double, 13, 13> P_tilde; // Prediction
+    Eigen::Matrix<double, 13, 13> P_hat; // Estimated covariance of the actual state
 
-    // State : z, v, a, p0, k, h0 (altitude, velocity, acceleration, initial pressure, , initial altitude)
-    Eigen::Matrix<double, 9, 1> X_tilde;
-    Eigen::Matrix<double, 9, 1> X_hat;
+    // State : z, vx, vy, vz, ax, ay, az, p0, k, h0, wx, wy, wz
+    // (altitude, velocity on x, velocity on y, velocity on z, acceleration on x, acceleration on y, acceleration on z,
+    // initial pressure, scale factor change altitude-pressure, initial altitude, angular velocity components)
+    Eigen::Matrix<double, 13, 1> X_tilde;
+    Eigen::Matrix<double, 13, 1> X_hat;
 
     // Variances measurement
     Eigen::Matrix<double, 1, 1> R_baro_bmp;
-    Eigen::Matrix<double, 1, 1> R_acc_adxl;
-    Eigen::Matrix<double, 1, 1> R_acc_bmi;
+    Eigen::Matrix<double, 3, 3> R_acc_adxl;
+    Eigen::Matrix<double, 3, 3> R_acc_bmi;
     Eigen::Matrix<double, 3, 3> R_gyro_bmi;
 
     // Process noise covariance matrix (which affects the system)
-    Eigen::Matrix<double, 3, 3> Q;
+    Eigen::Matrix<double, 13, 13> Q;
 
     // System Dynamics
-    Eigen::Matrix<double, 9, 9> F; // represents the dynamics of the system ; how the system's state evolves from
+    Eigen::Matrix<double, 13, 13> F; // represents the dynamics of the system ; how the system's state evolves from
                                   // one time step to the next in the absence of control inputs
 
-    Eigen::Matrix<double, 9, 3> G; // represents the effect of control inputs on the system dynamics, if any
+    Eigen::Matrix<double, 13, 13> G; // represents the effect of control inputs on the system dynamics, if any
 
     // Last time stamp
     uint32_t last_time;
