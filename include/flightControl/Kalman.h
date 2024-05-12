@@ -28,14 +28,14 @@ struct Kalman_Rocket_State_ {
     // tilde = prediction, hat = estimated
 
     // Covariance of state (Uncertainty associated with each element of X) => 6*6 matrices
-    Eigen::Matrix<double, 13, 13> P_tilde; // Prediction
-    Eigen::Matrix<double, 13, 13> P_hat; // Estimated covariance of the actual state
+    Eigen::Matrix<double, 10, 10> P_tilde; // Prediction
+    Eigen::Matrix<double, 10, 10> P_hat; // Estimated covariance of the actual state
 
     // State : z, vx, vy, vz, ax, ay, az, p0, k, h0, wx, wy, wz
     // (altitude, velocity on x, velocity on y, velocity on z, acceleration on x, acceleration on y, acceleration on z,
     // initial pressure, scale factor change altitude-pressure, initial altitude, angular velocity components)
-    Eigen::Matrix<double, 13, 1> X_tilde;
-    Eigen::Matrix<double, 13, 1> X_hat;
+    Eigen::Matrix<double, 10, 1> X_tilde;
+    Eigen::Matrix<double, 10, 1> X_hat;
 
     // Variances measurement
     Eigen::Matrix<double, 1, 1> R_baro_bmp;
@@ -44,13 +44,13 @@ struct Kalman_Rocket_State_ {
     Eigen::Matrix<double, 3, 3> R_gyro_bmi;
 
     // Process noise covariance matrix (which affects the system)
-    Eigen::Matrix<double, 13, 13> Q;
+    Eigen::Matrix<double, 10, 10> Q;
 
     // System Dynamics
-    Eigen::Matrix<double, 13, 13> F; // represents the dynamics of the system ; how the system's state evolves from
+    Eigen::Matrix<double, 10, 10> F; // represents the dynamics of the system ; how the system's state evolves from
                                   // one time step to the next in the absence of control inputs
 
-    Eigen::Matrix<double, 13, 13> G; // represents the effect of control inputs on the system dynamics, if any
+    Eigen::Matrix<double, 10, 10> G; // represents the effect of control inputs on the system dynamics, if any
 
     // Last time stamp
     uint32_t last_time;
