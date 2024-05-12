@@ -3,6 +3,8 @@
 
 #include <capsule.h>
 #include <ERT_RF_Protocol_Interface/PacketDefinition.h>
+#include <string>
+#include <gmock/gmock.h>
 
 struct UPLink {
     CMD_ID id;
@@ -12,14 +14,23 @@ struct UPLink {
 class Telecom {
 public:
     Telecom();
-    ~Telecom();
+    virtual ~Telecom() = default;
 
     virtual void update();
-    UPLink get_cmd() const;
-    void reset_cmd();
-private:
+    virtual UPLink get_cmd() const;
+    virtual void reset_cmd();
+protected:
     av_uplink_t last_packet;
     bool new_cmd_received;
 };
+
+class MockTelecom : public Telecom {
+public:
+    MOCK_METHOD(void, update, (), (override));
+    MOCK_METHOD(UPLink, get_cmd, (), (const, override));
+    MOCK_METHOD(void, reset_cmd, (), (override));
+};
+
+
 
 #endif /* TELECOM_H */
