@@ -1199,8 +1199,17 @@ Bmi088::~Bmi088() {
     }
 }
 
-uint8_t Bmi088::get_status() {
+uint8_t Bmi088::get_accel_status() {
     int8_t rslt = bmi08a_get_data_int_status(&status, &dev);
+    if (rslt != 0) {
+        throw Bmi088Exception("bmi08a_get_data_int_status failed with error: " + std::to_string(rslt));
+    }
+
+    return status;
+}
+
+uint8_t Bmi088::get_gyro_status() {
+    int8_t rslt = bmi08g_get_data_int_status(&status, &dev);
     if (rslt != 0) {
         throw Bmi088Exception("bmi08a_get_data_int_status failed with error: " + std::to_string(rslt));
     }

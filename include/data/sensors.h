@@ -4,12 +4,16 @@
 #include "adxl375.h"
 #include "bmi08x.h"
 #include "bmp3.h"
+#include "I2CGPS.h"
+#include "TinyGPS++.h"
 
 struct SensStatus {
     uint8_t     adxl_status;
     uint8_t     adxl_aux_status;
-    uint8_t     bmi_status;
-    uint8_t     bmi_aux_status;
+    uint8_t     bmi_accel_status;
+    uint8_t     bmi_aux_accel_status;
+    uint8_t     bmi_gyro_status;
+    uint8_t     bmi_aux_gyro_status;
     bmp3_status bmp_status;
     bmp3_status bmp_aux_status;
 };
@@ -86,6 +90,8 @@ private:
     Adxl375 adxl1, adxl2;
     Bmi088 bmi1, bmi2;
     Bmp390 bmp1, bmp2;
+    I2CGPS i2cgps;
+    TinyGPSPlus gps;
     SensStatus status;
     SensRaw raw_data;
     SensFiltered clean_data;

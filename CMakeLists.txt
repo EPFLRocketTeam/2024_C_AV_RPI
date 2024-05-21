@@ -33,6 +33,10 @@ add_library(I2CInterface src/I2CInterface/I2CInterface.cpp include/I2CInterface/
 target_include_directories(I2CInterface PUBLIC include/I2CInterface)
 target_link_libraries(I2CInterface PRIVATE pigpio)
 
+add_library(I2CGPS src/sensor/I2CGPS.cpp src/sensor/TinyGPS++.cpp include/sensor/I2CGPS.h include/sensor/TinyGPS++.h)
+target_include_directories(I2CGPS PUBLIC include/sensor)
+target_link_libraries(I2CGPS PRIVATE I2CInterface)
+
 # Build LoRa4Raspi library
 set(LORA_SOURCES
     LoRa4Raspi/src/LoRa.cpp
@@ -71,6 +75,10 @@ target_include_directories(Capsule_test
     PUBLIC .
 )
 
+# Test for the I2CGPS sensor
+add_executable(I2CGPS_test tests/I2CGPS_test.cpp)
+target_link_libraries(I2CGPS_test I2CGPS)
+
 enable_testing()
 
 # Defining tests
@@ -91,3 +99,9 @@ add_test (
     COMMAND $<TARGET_FILE:ADXL375_test>
 )
 set_tests_properties(ADXL375_test PROPERTIES TIMEOUT 5)
+
+add_test (
+    NAME I2CGPS_test
+    COMMAND $<TARGET_FILE:I2CGPS_test>
+)
+set_tests_properties(I2CGPS_test PROPERTIES TIMEOUT 5)

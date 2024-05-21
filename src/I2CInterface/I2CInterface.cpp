@@ -53,6 +53,20 @@ void I2CInterface::read(uint8_t addr, uint8_t reg_addr, uint8_t* data, uint32_t 
     }
 }
 
+void I2CInterface::readDevice(uint8_t addr, uint8_t* data, uint32_t len) {
+    int handle = handle_list[addr];
+    if (i2cReadDevice(handle, reinterpret_cast<char*>(data), len) <= 0) {
+        throw I2CInterfaceException("I2C read operation failed");
+    }
+}
+
+void I2CInterface::writeDevice(uint8_t addr, uint8_t* data, uint32_t len) {
+    int handle = handle_list[addr];
+    if (i2cWriteDevice(handle, (char*)(data), len) != 0) {
+        throw I2CInterfaceException("I2C write operation failed");
+    }
+}
+
 void* I2CInterface::get_intf_ptr(uint8_t addr) {
     if (i2c_addr_list[addr] == addr) {
         return &i2c_addr_list[addr];

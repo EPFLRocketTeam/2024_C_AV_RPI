@@ -30,6 +30,8 @@ public:
     void close(uint8_t addr);
     void write(uint8_t addr, uint8_t reg_addr, const uint8_t* data, uint32_t len);
     void read(uint8_t addr, uint8_t reg_addr, uint8_t* data, uint32_t len);
+    void readDevice(uint8_t addr, uint8_t* data, uint32_t len);
+    void writeDevice(uint8_t addr, uint8_t* data, uint32_t len);
     void* get_intf_ptr(uint8_t addr);
     I2CInterface(I2CInterface const&) = delete; // Prevent copying
     void operator=(I2CInterface const&) = delete; // Prevent assignment

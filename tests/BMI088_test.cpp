@@ -27,7 +27,7 @@ int main(void)
         << "Sample_Count, Acc_Raw_X, Acc_Raw_Y, Acc_Raw_Z, Acc_ms2_X, Acc_ms2_Y, Acc_ms2_Z\n";
 
     while (times_to_read < ITERATION) {
-        if (bmi1.get_status() & BMI08_ACCEL_DATA_READY_INT) {
+        if (bmi1.get_accel_status() & BMI08_ACCEL_DATA_READY_INT) {
             data = bmi1.get_accel_data();
 
             std::cout << "PRIMARY: " << times_to_read << ", " << data.x << ", " << data.y
@@ -39,7 +39,7 @@ int main(void)
         assert((-1 < data.y) and (data.y < 1));
         assert((8.81 < data.z) and (data.z < 10.81));
 
-        if (bmi2.get_status() & BMI08_ACCEL_DATA_READY_INT) {
+        if (bmi2.get_accel_status() & BMI08_ACCEL_DATA_READY_INT) {
             data = bmi2.get_accel_data();
 
             std::cout << "SECONDARY: " << times_to_read << ", " << data.x << ", " << data.y
@@ -63,7 +63,7 @@ int main(void)
         << "Sample_Count, Gyr_Raw_X, Gyr_Raw_Y, Gyr_Raw_Z, Gyr_DPS_X, Gyr_DPS_Y, Gyr_DPS_Z\n";
 
     while (times_to_read < ITERATION) {
-        if (bmi1.get_status() & BMI08_GYRO_DATA_READY_INT) {
+        if (bmi1.get_gyro_status() & BMI08_GYRO_DATA_READY_INT) {
             data = bmi1.get_gyro_data();
 
             std::cout << "PRIMARY: " << times_to_read << ", " << data.x << ", " << data.y
@@ -75,7 +75,7 @@ int main(void)
         assert((-5 < data.y) and (data.y < 5));
         assert((-5 < data.z) and (data.z < 5));
 
-        if (bmi2.get_status() & BMI08_GYRO_DATA_READY_INT) {
+        if (bmi2.get_gyro_status() & BMI08_GYRO_DATA_READY_INT) {
             data = bmi2.get_gyro_data();
 
             std::cout << "SECONDARY: " << times_to_read << ", " << data.x << ", " << data.y
