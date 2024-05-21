@@ -64,6 +64,13 @@ target_link_libraries(ADXL375_test ADXL375)
 add_executable(LoRa_test tests/LoRa_test.cpp)
 target_link_libraries(LoRa_test LoRa4Raspi)
 
+add_executable(Capsule_test tests/Capsule_test.cpp src/data/telecom.cpp)
+target_link_libraries(Capsule_test LoRa4Raspi)
+target_include_directories(Capsule_test
+    PUBLIC include/data
+    PUBLIC .
+)
+
 enable_testing()
 
 # Defining tests
