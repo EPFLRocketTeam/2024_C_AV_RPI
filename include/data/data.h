@@ -4,7 +4,7 @@
 #include "telecom.h"
 #include "sensors.h"
 
-struct DataDump {
+struct FlightData {
     UplinkCmd telecom_status;
     SensRaw sensors_raw;
     SensFiltered sensors_data;
@@ -17,7 +17,7 @@ public:
 
     void send();
     bool update();
-    DataDump dump() const;
+    FlightData get() const;
 private:
     bool updated;
     Telecom m_telecom;

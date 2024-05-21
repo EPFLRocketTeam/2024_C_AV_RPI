@@ -38,6 +38,6 @@ bool Data::update() {
     return updated;
 }
 
-DataDump Data::dump() const {
+FlightData Data::get() const {
     return {m_telecom.get_cmd(), m_sensors.get_raw(), m_sensors.get_clean()};
 }
