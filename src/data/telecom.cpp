@@ -44,6 +44,17 @@ bool Telecom::begin() {
     lora_uplink.setCodingRate4(UPLINK_CR);
     lora_uplink.setPreambleLength(UPLINK_PREAMBLE_LEN);
 
+#if (UPLINK_CRC)
+    LoRa.enableCrc();  // not necessary to work with miaou, even if miaou enbale it...:-|
+#else
+    LoRa.disableCrc();
+#endif
+#if (UPLINK_INVERSE_IQ)
+    LoRa.enableInvertIQ();
+#else
+    LoRa.disableInvertIQ();
+#endif
+
     // Set uplink radio as a continuous receiver
     lora_uplink.receive();
     lora_uplink.onReceive(handle_uplink);
@@ -61,6 +72,17 @@ bool Telecom::begin() {
     lora_downlink.setSpreadingFactor(AV_DOWNLINK_SF);
     lora_downlink.setCodingRate4(AV_DOWNLINK_CR);
     lora_downlink.setPreambleLength(AV_DOWNLINK_PREAMBLE_LEN);
+
+#if (AV_DOWNLINK_CRC)
+    LoRa.enableCrc();  // not necessary to work with miaou, even if miaou enbale it...:-|
+#else
+    LoRa.disableCrc();
+#endif
+#if (AV_DOWNLINK_INVERSE_IQ)
+    LoRa.enableInvertIQ();
+#else
+    LoRa.disableInvertIQ();
+#endif
 
     return true;
 }
