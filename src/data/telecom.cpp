@@ -106,11 +106,14 @@ void Telecom::handle_uplink(int packet_size) {
         return;
     }
 
-    std::cout << "packet received\n";
+    std::cout << "packet received:\n";
 
     for (int i(0); i < packet_size; ++i) {
-        uplink_buffer.write(lora_uplink.read());
+        int x(lora_uplink.read());
+        uplink_buffer.write(x);
+        std::cout << x << " ";
     }
+    std::cout << "\n";
 }
 
 void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint16_t len) {
@@ -119,8 +122,8 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint16_
             memcpy(&last_packet, data_in, len);
             new_cmd_received = true;
             std::cout << "Command received from GS!\n"
-                      << "ID: " << last_packet.order_id << "\n"
-                      << "Value: " << last_packet.order_value << "\n";
+                      << "ID: " << (int)last_packet.order_id << "\n"
+                      << "Value: " << (int)last_packet.order_value << "\n\n";
         break;
     }
 }
