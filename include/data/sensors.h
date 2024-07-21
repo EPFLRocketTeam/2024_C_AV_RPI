@@ -1,11 +1,13 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-#include "adxl375.h"
-#include "bmi08x.h"
-#include "bmp3.h"
-#include "I2CGPS.h"
-#include "TinyGPS++.h"
+#include <cstdint>
+#include "sensor/adxl375.h"
+#include "sensor/bmi08x.h"
+#include "sensor/bmp3.h"
+#include "sensor/I2CGPS.h"
+#include "sensor/TinyGPS++.h"
+#include "sensor/adxl375.h"
 
 struct SensStatus {
     uint8_t     adxl_status;
