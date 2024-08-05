@@ -5,8 +5,8 @@
  */
 
 #include <iostream>
-#include <LoRa.h>
-#include <pigpio.h>
+#include "LoRa.h"
+#include "pigpio.h"
 
 #define LORA_BRAVO_SS_PIN     LORA_DEFAULT_SPI_CE0
 #define LORA_BRAVO_RST_PIN    LORA_DEFAULT_RESET_PIN

@@ -1,4 +1,10 @@
 #include "sensors.h"
+#include "bmi08.h"
+#include "bmp3_defs.h"
+#include "adxl375.h"
+#include "TinyGPS++.h"
+#include "I2CGPS.h"
+
 
 SensRaw::SensRaw()
 :   adxl{0, 0, 0},
@@ -30,7 +36,7 @@ SensFiltered::SensFiltered()
     fuel_inj_pressure(0),
     chamber_pressure(0)
 {}
-
+//TODO Where to import te defs (2 sources) ?
 Sensors::Sensors() 
 :   adxl1(ADXL375_ADDR_I2C_PRIM),
     adxl2(ADXL375_ADDR_I2C_SEC),

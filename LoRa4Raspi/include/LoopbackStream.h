@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Stream.h>
+#include "Stream.h"
 
 /*
  * A LoopbackStream stores all data written in an internal buffer and returns it back when the stream is read.

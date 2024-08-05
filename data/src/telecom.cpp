@@ -1,8 +1,9 @@
 #include <LoRa.h>
-#include <capsule.h>
+#include "capsule.h"
 #include <LoopbackStream.h>
-#include <ERT_RF_Protocol_Interface/ParameterDefinition.h>
+#include <ParameterDefinition.h>
 #include "telecom.h"
+#include "PacketDefinition.h"
 
 #define LORA_UPLINK_CS      8
 #define LORA_UPLINK_RST     25

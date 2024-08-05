@@ -1,4 +1,5 @@
 #include "data.h"
+#include "PacketDefinition.h"
 
 Data::Data() {}
 

@@ -1,7 +1,7 @@
 #ifndef TELECOM_H
 #define TELECOM_H
 
-#include <capsule.h>
+#include "capsule.h"
 #include <ERT_RF_Protocol_Interface/PacketDefinition.h>
 
 /**

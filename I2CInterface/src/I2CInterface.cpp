@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "I2CInterface.h"
+#include "i2c_wrappers.h"
 
 void I2CInterface::initialize() {
     std::memset(handle_list, 0, sizeof(handle_list));
@@ -76,7 +77,6 @@ void* I2CInterface::get_intf_ptr(uint8_t addr) {
 }
 
 extern "C" {
-#include "i2c_wrappers.h" 
 
 int8_t i2c_open(uint8_t addr) {
     try {

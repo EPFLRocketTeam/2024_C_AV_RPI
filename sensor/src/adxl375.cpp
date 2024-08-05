@@ -43,8 +43,8 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
-#include "adxl375.h"		// ADXL375 definitions.
-#include "i2c_wrappers.h"	// Communication definitions.
+#include "include/adxl375.h"        // ADXL375 definitions.
+#include "include/i2c_wrappers.h"    // Communication definitions.
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
