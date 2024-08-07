@@ -14,7 +14,10 @@
 #ifndef AVSTATE_H
 #define AVSTATE_H
 
-class UPLink {
+struct UPLink {
+  uint8_t id;
+  uint32_t data; 
+}
 public:
     int id;
     int data;
