@@ -36,12 +36,13 @@
 *
 */
 #include <stdio.h>
+#include <stdint.h>
 
 /*! @file bmp3.c
  * @brief Sensor driver for BMP3 sensor */
 
-#include "include/bmp3.h"
-#include "include/i2c_wrappers.h"
+#include "bmp3.h"
+#include "i2c_wrappers.h"
 
 /***************** Static function declarations ******************************/
 

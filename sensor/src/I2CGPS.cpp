@@ -25,8 +25,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "include/I2CGPS.h"
-#include "include/I2CInterface.h"
+#include "I2CGPS.h"
+#include "I2CInterface.h"
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
