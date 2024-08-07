@@ -9,6 +9,8 @@ target_include_directories(ERT_RF_Protocol_Interface INTERFACE ERT_RF_Protocol_I
 # Set the build type to Debug
 set(CMAKE_BUILD_TYPE Debug)
 
+add_executable(main main.cpp)
+
 add_subdirectory(data)
 add_subdirectory(flightControl)
 add_subdirectory(I2CInterface)

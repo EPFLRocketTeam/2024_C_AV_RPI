@@ -14,18 +14,11 @@
 #ifndef AVSTATE_H
 #define AVSTATE_H
 
-struct UPLink {
-  uint8_t id;
-  uint32_t data; 
-}
-public:
-    int id;
-    int data;
-};
+
 
 enum class State
 {
-    IDLE,
+    INIT,
     LANDED,
     DESCENT,
     ASCENT,
@@ -54,20 +47,20 @@ public:
     State getCurrentState();
 
 
-    void update(SensFiltered data, UPLink uplink, bool status);
+    void update(DataDump data);
     State* possibleStates();
     std::string stateToString(State state);
 
 private:
-    State fromIdle(SensFiltered data, UPLink uplink);
-    State fromDescent(SensFiltered data, UPLink uplink);
-    State fromAscent(SensFiltered data, UPLink uplink);
-    State fromCalibration(SensFiltered data, UPLink uplink, bool status);
-    State fromErrorGround(SensFiltered data, UPLink uplink);
+    State fromInit(DataDump data);
+    State fromDescent(DataDump data);
+    State fromAscent(DataDump data);
+    State fromCalibration(DataDump data);
+    State fromErrorGround(DataDump data);
     State fromErrorFlight();
-    State fromThrustSequence(SensFiltered data, UPLink uplink);
-    State fromManual(SensFiltered data, UPLink uplink);
-    State fromArmed(SensFiltered data, UPLink uplink);
+    State fromThrustSequence(DataDump data);
+    State fromManual(DataDump data);
+    State fromArmed(DataDump data);
 
     State fromLanded();
     Thresholds thresholds;

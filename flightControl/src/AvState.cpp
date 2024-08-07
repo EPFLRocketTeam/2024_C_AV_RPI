@@ -3,18 +3,19 @@
 #include <list>
 #include <sensors.h>
 #include "telecom.h"
+#include "data.h"
 #include "PacketDefinition.h"
 
 
 AvState::AvState(const Thresholds& thresholds) : thresholds(thresholds)
 {
-    this->currentState = State::IDLE;
+    this->currentState = State::INIT;
 }
 
 // destructor
 AvState::~AvState()
 {
-    currentState = State::IDLE;
+    // nothing to do
 }
 
 
@@ -25,37 +26,32 @@ State AvState::getCurrentState()
 }
 
 
-void sendError()
-{
-    //print in console the "error"
-    std::cout << "Error" << std::endl;
-}
-
+//TODO not implemented, necessity to decide where errors come from
 bool error()
 {
     return false;
 }
 
 
-State AvState::fromIdle(SensFiltered data, UPLink uplink)
+State AvState::fromInit(DataDump data)
 {
-    if ((uplink.id == CMD_ID::AV_CMD_CALIBRATE))
+    if (data.telecom_status.id == CMD_ID::AV_CMD_CALIBRATE)
     {
         return State::CALIBRATION;
     }
-    return State::IDLE;
+    return State::INIT;
 }
 
 State AvState::fromLanded() { return State::LANDED; }
 
-State AvState::fromDescent(SensFiltered data, UPLink uplink)
+State AvState::fromDescent(DataDump data)
 {
     //norm of the speed vector
-    if (uplink.id == CMD_ID::AV_CMD_ABORT || uplink.id == CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    if (data.telecom_status.id == CMD_ID::AV_CMD_ABORT || data.telecom_status.id == CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
         return State::ERRORFLIGHT;
     }
-    double speed = (data.speed.x * data.speed.x + data.speed.y * data.speed.y + data.speed.z * data.speed.z);
+    double speed = (data.sensors_data.speed.x * data.sensors_data.speed.x + data.sensors_data.speed.y * data.sensors_data.speed.y + data.sensors_data.speed.z * data.sensors_data.speed.z);
     if (speed < 0)
     {
         return State::LANDED;
@@ -63,29 +59,25 @@ State AvState::fromDescent(SensFiltered data, UPLink uplink)
     return State::DESCENT;
 }
 
-State AvState::fromAscent(SensFiltered data, UPLink uplink)
+State AvState::fromAscent(DataDump data)
 {
-    if (uplink.id == CMD_ID::AV_CMD_ABORT)
+    if (data.telecom_status.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-    else if (data.speed.z <= 0)
+    else if (data.sensors_data.speed.z <= 0)
     {
         return State::DESCENT;
     }
     return State::ASCENT;
 }
 
-State AvState::fromCalibration(SensFiltered data, UPLink uplink, bool status)
+State AvState::fromCalibration(DataDump data)
 {
-    if (error() || uplink.id == CMD_ID::AV_CMD_ABORT)
+    if (error() || data.telecom_status.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
         //check if the calibration is done
-    }
-    else if (status)
-    {
-        return State::MANUAL;
     }
     else
     {
@@ -94,11 +86,11 @@ State AvState::fromCalibration(SensFiltered data, UPLink uplink, bool status)
 }
 
 
-State AvState::fromErrorGround(SensFiltered data, UPLink uplink)
+State AvState::fromErrorGround(DataDump data)
 {
-    if (uplink.id == CMD_ID::AV_CMD_RECOVER)
+    if (data.telecom_status.id == CMD_ID::AV_CMD_RECOVER)
     {
-        return State::IDLE;
+        return State::INIT;
     }
 }
 
@@ -107,14 +99,14 @@ State AvState::fromErrorFlight()
     return State::ERRORFLIGHT;
 }
 
-State AvState::fromThrustSequence(SensFiltered data, UPLink uplink)
+State AvState::fromThrustSequence(DataDump data)
 {
-    double speed = (data.speed.x * data.speed.x + data.speed.y * data.speed.y + data.speed.z * data.speed.z);
-    if (uplink.id == CMD_ID::AV_CMD_ABORT)
+    double speed = (data.sensors_data.speed.x * data.sensors_data.speed.x + data.sensors_data.speed.y * data.sensors_data.speed.y + data.sensors_data.speed.z * data.sensors_data.speed.z);
+    if (data.telecom_status.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-    else if (data.speed.z>0) //TODO we need a ignite bool var
+    else if (data.sensors_data.speed.z>0) //TODO we need a ignite bool var
                                 //given by the prop board
     {
         return State::ASCENT;
@@ -125,32 +117,23 @@ State AvState::fromThrustSequence(SensFiltered data, UPLink uplink)
     }
 }
 
-State AvState::fromManual(SensFiltered data, UPLink uplink)
+
+State AvState::fromManual(DataDump data)
 {
-    if (error() || uplink.id == CMD_ID::AV_CMD_ABORT)
+    if (error() || data.telecom_status.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
     }
+    //check all thresholds individually
         //TODO: recheck i threholds are the wanted ones
-    else if (uplink.id == CMD_ID::AV_CMD_ARM &&
-             data.fuel_pressure > thresholds.fuel_pressure_wanted &&
-             data.LOX_pressure > thresholds.lox_pressure_wanted &&
-             data.chamber_pressure > thresholds.chamber_pressure_wanted &&
-             data.engine_temperature > thresholds.engine_temp_zero &&
-             data.fuel_inj_pressure > thresholds.fuel_pressure_wanted &&
-             data.N2_pressure > thresholds.n2_pressure_zero &&
-             data.LOX_level > thresholds.lox_level_zero &&
-             data.fuel_level > thresholds.fuel_level_zero)
-    {
-        return State::ARMED;
-    }
+    else if (data.telecom_status.id == CMD_ID::AV_CMD_ARM)
     {
         return State::ARMED;
     }
     return State::MANUAL;
 }
 
-State AvState::fromArmed(SensFiltered data, UPLink uplink)
+State AvState::fromArmed(DataDump data)
 {
     if (error())
     {
@@ -158,14 +141,17 @@ State AvState::fromArmed(SensFiltered data, UPLink uplink)
     }
     else
     {
-        switch (uplink.id)
+        switch (data.telecom_status.id)
         {
             case CMD_ID::AV_CMD_IGNITION:
-                if (data.igniter_pressure >= thresholds.igniter_pressure_wanted &&
-                    data.chamber_pressure >= thresholds.chamber_pressure_wanted )
+                if (data.sensors_data.igniter_pressure >= thresholds.igniter_pressure_wanted)
                 {
-                    return State::THRUSTSEQUENCE;
-
+                    //possible log
+                    if(data.sensors_data.chamber_pressure >= thresholds.chamber_pressure_wanted ) {
+                        //possible log
+                        return State::THRUSTSEQUENCE;
+                    }
+                    return State::ARMED;
                 }else {
                     return State::ARMED;
                 }
@@ -180,39 +166,39 @@ State AvState::fromArmed(SensFiltered data, UPLink uplink)
 
 State* possibleStates();
 
-void AvState::update(SensFiltered data, UPLink uplink, bool status)
+void AvState::update(DataDump data)
 
 {
     switch (currentState)
     {
-        case State::IDLE:
-            this->currentState = fromIdle(data, uplink);
+        case State::INIT:
+            this->currentState = fromInit(data);
             break;
         case State::LANDED:
             currentState = fromLanded();
         case State::DESCENT:
-            currentState = fromDescent(data, uplink);
+            currentState = fromDescent(data);
             break;
         case State::ASCENT:
-            currentState = fromAscent(data, uplink);
+            currentState = fromAscent(data);
             break;
         case State::CALIBRATION:
-            currentState = fromCalibration(data, uplink, status);
+            currentState = fromCalibration(data);
             break;
         case State::ERRORGROUND:
-            currentState = fromErrorGround(data, uplink);
+            currentState = fromErrorGround(data);
             break;
         case State::ERRORFLIGHT:
             currentState = fromErrorFlight();
             break;
         case State::THRUSTSEQUENCE:
-            currentState = fromThrustSequence(data, uplink);
+            currentState = fromThrustSequence(data);
             break;
         case State::MANUAL:
-            currentState = fromManual(data, uplink);
+            currentState = fromManual(data);
             break;
         case State::ARMED:
-            currentState = fromArmed(data, uplink);
+            currentState = fromArmed(data);
             break;
         default:
             currentState = State::ERRORFLIGHT;
@@ -222,8 +208,8 @@ std::string AvState::stateToString(State state)
 {
     switch (state)
     {
-        case State::IDLE:
-            return "IDLE";
+        case State::INIT:
+            return "INIT";
             break;
         case State::LANDED:
             return "LANDED";

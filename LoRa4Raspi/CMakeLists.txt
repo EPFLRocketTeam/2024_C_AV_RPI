@@ -23,5 +23,3 @@ add_library(LoRa ${LORA_SOURCE})
 target_include_directories(LoRa PUBLIC include)
 
 
-
-
