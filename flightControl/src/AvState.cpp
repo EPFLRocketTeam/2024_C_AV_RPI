@@ -1,8 +1,5 @@
 #include "AvState.h"
-#include <string.h>
-#include <list>
-#include <sensors.h>
-#include "telecom.h"
+#include "sensors.h"
 #include "data.h"
 #include "PacketDefinition.h"
 
