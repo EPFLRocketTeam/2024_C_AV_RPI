@@ -1,9 +1,9 @@
 #include <LoRa.h>
-#include "capsule.h"
 #include <LoopbackStream.h>
+#include <PacketDefinition.h>
 #include <ParameterDefinition.h>
+#include "capsule.h"
 #include "telecom.h"
-#include "PacketDefinition.h"
 
 #define LORA_UPLINK_CS      8
 #define LORA_UPLINK_RST     25
@@ -45,6 +45,17 @@ bool Telecom::begin() {
     lora_uplink.setCodingRate4(UPLINK_CR);
     lora_uplink.setPreambleLength(UPLINK_PREAMBLE_LEN);
 
+#if (UPLINK_CRC)
+    lora_uplink.enableCrc();
+#else
+    lora_uplink.disableCrc();
+#endif
+#if (UPLINK_INVERSE_IQ)
+    lora_uplink.enableInvertIQ();
+#else
+    lora_uplink.disableInvertIQ();
+#endif
+
     // Set uplink radio as a continuous receiver
     lora_uplink.receive();
     lora_uplink.onReceive(handle_uplink);
@@ -62,6 +73,17 @@ bool Telecom::begin() {
     lora_downlink.setSpreadingFactor(AV_DOWNLINK_SF);
     lora_downlink.setCodingRate4(AV_DOWNLINK_CR);
     lora_downlink.setPreambleLength(AV_DOWNLINK_PREAMBLE_LEN);
+
+#if (UPLINK_CRC)
+    lora_downlink.enableCrc();
+#else
+    lora_downlink.disableCrc();
+#endif
+#if (UPLINK_INVERSE_IQ)
+    lora_downlink.enableInvertIQ();
+#else
+    lora_downlink.disableInvertIQ();
+#endif
 
     return true;
 }
@@ -120,8 +142,8 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint16_
             memcpy(&last_packet, data_in, len);
             new_cmd_received = true;
             std::cout << "Command received from GS!\n"
-                      << "ID: " << last_packet.order_id << "\n"
-                      << "Value: " << last_packet.order_value << "\n";
+                      << "ID: " << (int)last_packet.order_id << "\n"
+                      << "Value: " << (int)last_packet.order_value << "\n\n";
         break;
     }
 }
