@@ -4,7 +4,7 @@ target_link_libraries(ADXL375_test adxl375)
 
 set (BMI088_TEST src/BMI088_test.cpp)
 add_executable(BMI088_test ${BMI088_TEST})
-target_link_libraries(BMI088_test)
+target_link_libraries(BMI088_test bmi08a bmi08g bmi08xa bmp3)
 include_directories(../sensor/include)
 
 set (BMP390_TEST src/BMP390_test.cpp)

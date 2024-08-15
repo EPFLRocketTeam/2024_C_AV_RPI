@@ -1,0 +1,32 @@
+name: Trigger Tests
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger tests repository
+        id: trigger
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: your-username/tests-repo
+          event-type: run-tests
+          client-payload: |
+            {
+              "branch": "${{ github.head_ref }}",
+              "commit": "${{ github.sha }}"
+            }
+
+    
+      
