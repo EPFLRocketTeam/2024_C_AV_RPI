@@ -1,6 +1,5 @@
 set(ADXL375_SOURCE src/adxl375.cpp)
 add_library(adxl375 ${ADXL375_SOURCE})
-include_directories(../I2CInterface/include)
 target_link_libraries(adxl375 I2CInterface)
 target_include_directories(adxl375 PUBLIC include)
 
@@ -17,8 +16,7 @@ target_include_directories(bmi08g PUBLIC include)
 set(BMI08XA_SOURCE src/bmi08xa.cpp)
 add_library(bmi08xa ${BMI08XA_SOURCE})
 target_include_directories(bmi08xa PUBLIC include)
-target_link_libraries(bmi08xa I2CInterface)
-include_directories(../I2CInterface/include)
+target_link_libraries(bmi08xa PUBLIC I2CInterface bmi08a bmi08g )
 
 set(BMP3_SOURCE src/bmp3.cpp)
 add_library(bmp3 ${BMP3_SOURCE})
