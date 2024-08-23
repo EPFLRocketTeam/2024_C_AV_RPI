@@ -26,6 +26,7 @@ jobs:
             {
               "branch": "${{ github.head_ref }}",
               "commit": "${{ github.sha }}"
+              "repo": "${{ github.repository }}"
             }
 
     
