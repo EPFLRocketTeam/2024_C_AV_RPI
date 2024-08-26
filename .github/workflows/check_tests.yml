@@ -3,7 +3,7 @@ name: Check Tests
 on:
 
   repository_dispatch:
-    types: [ completed ]
+    types: [completed]
 
 
 jobs:
