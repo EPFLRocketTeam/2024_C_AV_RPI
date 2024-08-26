@@ -12,6 +12,6 @@
 int main(){
     Data data;
     Telecom telecom(data);
-
+    return 0;
 
 }
