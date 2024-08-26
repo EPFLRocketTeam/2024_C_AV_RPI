@@ -3,6 +3,7 @@
 
 #include "capsule.h"
 #include <PacketDefinition.h>
+#include "data.h"
 
 /**
  * @brief A struct made only for convenience. Holds exactly
@@ -16,9 +17,10 @@ struct UplinkCmd {
 
 class Telecom {
 public:
-    Telecom();
-    ~Telecom() = default;
+    Telecom(Data data);
 
+
+    ~Telecom() = default;
     bool begin();
     void send_packet(uint8_t packet_id, uint8_t* data, uint16_t len);
     void update();
@@ -33,6 +35,7 @@ public:
 private:
     Capsule<Telecom> capsule_uplink;
     Capsule<Telecom> capsule_downlink;
+    Data data;
 
     av_uplink_t last_packet;
     bool new_cmd_received;

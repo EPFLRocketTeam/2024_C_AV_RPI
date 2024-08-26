@@ -5,10 +5,9 @@ Data::Data() {}
 
 Data::~Data() {}
 
-void Data::send() {
+void Data::send(Telecom m_telecom) {
     const SensFiltered sens = goat.sensors_data;
     av_downlink_t packet;
-
     packet.gnss_lat = sens.position.lat;
     packet.gnss_lon = sens.position.lng;
     packet.gnss_alt = sens.position.alt;
@@ -34,5 +33,5 @@ void Data::send() {
 
 //TODO mybe have a more granular dump
 DataDump Data::dump() const {
-    return {m_telecom.get_cmd(), goat.sensors_raw, goat.sensors_data};
+    return goat;
 }

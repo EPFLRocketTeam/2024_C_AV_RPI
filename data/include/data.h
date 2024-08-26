@@ -90,16 +90,16 @@ public:
     Data();
     ~Data();
 
-    void send();
+    void send(Telecom m_telecom);
     bool update();
     DataDump dump() const;
     bool write_raw(SensRaw raw);
     bool write_filtered(SensFiltered filtered);
-
+    DataDump goat;
 private:
     bool updated;
-    DataDump goat;
-    Telecom m_telecom;
+
+
 };
 
 

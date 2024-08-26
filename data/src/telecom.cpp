@@ -23,12 +23,14 @@ namespace {
 }
 
 
-Telecom::Telecom() 
+Telecom::Telecom(Data data)
 :   new_cmd_received(false),
     last_packet{0, 0},
     capsule_uplink(&Telecom::handle_capsule_uplink, this),
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
-{}
+{
+    this->data = data;
+}
 
 bool Telecom::begin() {
     lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
@@ -144,6 +146,7 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint16_
             std::cout << "Command received from GS!\n"
                       << "ID: " << (int)last_packet.order_id << "\n"
                       << "Value: " << (int)last_packet.order_value << "\n\n";
+            this->data.goat.telecom_status = {last_packet.order_id, last_packet.order_value};
         break;
     }
 }
