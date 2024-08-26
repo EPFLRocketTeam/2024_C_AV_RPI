@@ -91,7 +91,7 @@ public:
     ~Data();
 
     void send(Telecom m_telecom);
-    bool update();
+
     DataDump dump() const;
     bool write_raw(SensRaw raw);
     bool write_filtered(SensFiltered filtered);
