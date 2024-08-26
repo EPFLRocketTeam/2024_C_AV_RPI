@@ -123,7 +123,8 @@ UplinkCmd Telecom::get_cmd() const {
 }
 
 void Telecom::reset_cmd() {
-    last_packet = {0, 0};
+    this->data.goat.telecom_status.id =0;
+    this->data.goat.telecom_status.value =0;
 }
 
 void Telecom::handle_uplink(int packet_size) {
@@ -146,8 +147,9 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint16_
             std::cout << "Command received from GS!\n"
                       << "ID: " << (int)last_packet.order_id << "\n"
                       << "Value: " << (int)last_packet.order_value << "\n\n";
-            this->data.goat.telecom_status = {last_packet.order_id, last_packet.order_value};
-        break;
+            this->data.goat.telecom_status.id = static_cast<CMD_ID>(last_packet.order_id);
+            this->data.goat.telecom_status.value = last_packet.order_value;
+            break;
     }
 }
 
