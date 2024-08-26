@@ -17,7 +17,7 @@ struct UplinkCmd {
 
 class Telecom {
 public:
-    Telecom(Data);
+    Telecom(Data data);
 
 
     ~Telecom() = default;

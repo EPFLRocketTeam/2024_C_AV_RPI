@@ -1,17 +1,29 @@
-//
-// Created by marin on 26.08.2024.
-//
-
 #include <iostream>
-#include <cassert>
 #include "data.h"
 #include "telecom.h"
-#include "PacketDefinition.h"
-#include "sensors.h"
 
-int main(){
+int main() {
+    // Create a Data object
     Data data;
-    Telecom telecom(data);
-    return 0;
 
+    // Create a Telecom object (if needed)
+    Telecom telecom(data);
+
+    // Update the data
+    bool success = data.update();
+    if (success) {
+        // Data updated successfully, you can now access the data using the dump() method
+        DataDump dump = data.dump();
+
+        // Use the data as needed
+        // ...
+
+        // Send the data using the Telecom object (if needed)
+        data.send(telecom);
+    } else {
+        // Failed to update data
+        // Handle the error as needed
+    }
+
+    return 0;
 }
