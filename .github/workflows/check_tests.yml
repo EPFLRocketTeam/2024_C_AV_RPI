@@ -1,9 +1,9 @@
 name: Check Tests
 
 on:
-  workflow_run:
-    repository_dispatch:
-      types: [ completed ]
+
+  repository_dispatch:
+    types: [ completed ]
 
 
 jobs:
