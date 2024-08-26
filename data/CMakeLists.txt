@@ -13,4 +13,4 @@ target_link_libraries(sensors adxl375 bmi08a bmi08g bmi08xa bmp3 I2CGPS TinyGPS+
 set(TELECOM_SOURCES src/telecom.cpp)
 add_library(telecom ${TELECOM_SOURCES})
 target_include_directories(telecom PUBLIC include)
-target_link_libraries(telecom ERT_RF_Protocol_Interface LoopbackStream LoRa)
+target_link_libraries(telecom ERT_RF_Protocol_Interface LoopbackStream LoRa data)

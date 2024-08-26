@@ -23,13 +23,13 @@ namespace {
 }
 
 
-Telecom::Telecom(Data& data)
+Telecom::Telecom(Data given_data)
 :   new_cmd_received(false),
     last_packet{0, 0},
     capsule_uplink(&Telecom::handle_capsule_uplink, this),
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
 {
-    this->data = data;
+    this->data = given_data;
 }
 
 bool Telecom::begin() {
