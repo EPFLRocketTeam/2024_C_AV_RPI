@@ -23,7 +23,7 @@ namespace {
 }
 
 
-Telecom::Telecom(Data data)
+Telecom::Telecom(Data& data)
 :   new_cmd_received(false),
     last_packet{0, 0},
     capsule_uplink(&Telecom::handle_capsule_uplink, this),
