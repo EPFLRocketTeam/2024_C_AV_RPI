@@ -2,9 +2,8 @@ name: Check Tests
 
 on:
   workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
+    repository_dispatch:
+      types: [ completed ]
 
 
 jobs:
