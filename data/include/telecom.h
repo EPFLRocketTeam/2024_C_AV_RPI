@@ -10,10 +10,7 @@
  * the same data than av_uplink_t, but the command ID is already
  * cast from uint8_t to CMD_ID to facilitate switch statements.
  */
-struct UplinkCmd {
-    CMD_ID id;
-    uint8_t value;
-};
+
 
 class Telecom {
 public:

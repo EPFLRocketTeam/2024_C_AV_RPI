@@ -1,13 +1,14 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include "telecom.h"
+
 #include <cstdint>
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "I2CGPS.h"
 #include "TinyGPS++.h"
 #include "adxl375.h"
+#include "PacketDefinition.h"
 
 
 struct SensStatus {
@@ -21,6 +22,11 @@ struct SensStatus {
     bmp3_status bmp_aux_status;
 };
 
+class Telecom;
+struct UplinkCmd {
+    CMD_ID id;
+    uint8_t value;
+};
 struct SensRaw {
     adxl375_data        adxl;
     adxl375_data        adxl_aux;
