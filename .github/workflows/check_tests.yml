@@ -2,7 +2,7 @@ name: Check Tests
 
 on:
   repository_dispatch:
-    types: completed
+    types: [completed]
 jobs:
   check-tests:
     runs-on: ubuntu-latest
