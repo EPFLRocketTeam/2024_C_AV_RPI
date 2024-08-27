@@ -21,5 +21,6 @@ target_include_directories(Stream PUBLIC include)
 set(LORA_SOURCE src/LoRa.cpp)
 add_library(LoRa ${LORA_SOURCE})
 target_include_directories(LoRa PUBLIC include)
+target_link_libraries(LoRa PUBLIC pigpio)
 
 
