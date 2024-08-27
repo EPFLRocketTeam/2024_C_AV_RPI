@@ -25,14 +25,22 @@ bool Sensors::update() {
     update_status();
 
     // Update raw sensors values and write them to the GOAT
-    Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &adxl1.get_data());
-    Data::get_instance().write(Data::NAV_SENSOR_ADXL2_DATA, &adxl2.get_data());
-    Data::get_instance().write(Data::NAV_SENSOR_BMI1_ACCEL_DATA, &bmi1.get_accel_data());
-    Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_DATA, &bmi1.get_gyro_data());
-    Data::get_instance().write(Data::NAV_SENSOR_BMI2_ACCEL_DATA, &bmi2.get_accel_data());
-    Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_DATA, &bmi2.get_gyro_data());
-    Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &bmp1.get_sensor_data());
-    Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &bmp2.get_sensor_data());
+    auto temp_adxl(adxl1.get_data());
+    Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &temp_adxl);
+    temp_adxl = adxl2.get_data();
+    Data::get_instance().write(Data::NAV_SENSOR_ADXL2_DATA, &temp_adxl);
+    auto temp_bmi(bmi1.get_accel_data());
+    Data::get_instance().write(Data::NAV_SENSOR_BMI1_ACCEL_DATA, &temp_bmi);
+    temp_bmi = bmi1.get_gyro_data();
+    Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_DATA, &temp_bmi);
+    temp_bmi = bmi2.get_accel_data();
+    Data::get_instance().write(Data::NAV_SENSOR_BMI2_ACCEL_DATA, &temp_bmi);
+    temp_bmi = bmi2.get_gyro_data();
+    Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_DATA, &temp_bmi);
+    auto temp_bmp(bmp1.get_sensor_data());
+    Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &temp_bmp);
+    temp_bmp = bmp2.get_sensor_data();
+    Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &temp_bmp);
 
     // TODO: Propulsion sensors acquisition
     
