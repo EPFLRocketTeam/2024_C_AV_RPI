@@ -101,6 +101,8 @@ void Sensors::update_status() {
     temp = bmi2.get_gyro_status();
     Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_STAT, &temp);
     
-    Data::get_instance().write(Data::NAV_SENSOR_BMP1_STAT, &bmp1.get_status());
-    Data::get_instance().write(Data::NAV_SENSOR_BMP2_STAT, &bmp2.get_status());
+    auto temp_bmp(bmp1.get_status());
+    Data::get_instance().write(Data::NAV_SENSOR_BMP1_STAT, &temp_bmp);
+    temp_bmp = bmp2.get_status();
+    Data::get_instance().write(Data::NAV_SENSOR_BMP2_STAT, &temp_bmp);
 }
