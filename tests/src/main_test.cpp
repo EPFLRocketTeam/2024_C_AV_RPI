@@ -1,16 +1,27 @@
 #include <iostream>
+#include <unistd.h>
 #include "data.h"
 #include "telecom.h"
 #include "sensors.h"
 
 int main() {
-    // Create a Data object
-    Data data;
+    // Create drivers
+    Sensors sensors;
+    Telecom telecom;
 
-    // Create a Telecom object (if needed)
-    Sensors sensors(data);
-    Telecom telecom(data);
+    telecom.begin();
+    telecom.send_telemetry();
 
+    sensors.update();
 
-    return 0;
+    usleep(500000);
+
+    telecom.send_telemetry();
+
+    sensors.calibrate();
+    sensors.update();
+
+    usleep(500000);
+
+    telecom.send_telemetry();
 }
