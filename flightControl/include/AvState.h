@@ -2,19 +2,14 @@
 // The AvState class is a finite state machine (FSM) that represents the state of the rocket.
 // The class has a constructor and a destructor, as well as a number of functions that transition from one state to others possible states.
 
-#include <iostream>
-#include <list>
-#include "thresholds.h"
-#include <string>
-#include "data.h"
-#include "PacketDefinition.h"
-
-
-
 #ifndef AVSTATE_H
 #define AVSTATE_H
 
-
+#include <iostream>
+#include <list>
+#include <string>
+#include "PacketDefinition.h"
+#include "thresholds.h"
 
 enum class State
 {
@@ -47,20 +42,20 @@ public:
     State getCurrentState();
 
 
-    void update(DataDump data);
+    void update();
     State* possibleStates();
     std::string stateToString(State state);
 
 private:
-    State fromInit(DataDump data);
-    State fromDescent(DataDump data);
-    State fromAscent(DataDump data);
-    State fromCalibration(DataDump data);
-    State fromErrorGround(DataDump data);
+    State fromInit();
+    State fromDescent();
+    State fromAscent();
+    State fromCalibration();
+    State fromErrorGround();
     State fromErrorFlight();
-    State fromThrustSequence(DataDump data);
-    State fromManual(DataDump data);
-    State fromArmed(DataDump data);
+    State fromThrustSequence();
+    State fromManual();
+    State fromArmed();
 
     State fromLanded();
     Thresholds thresholds;
