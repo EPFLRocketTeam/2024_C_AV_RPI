@@ -5,23 +5,14 @@
 #include <PacketDefinition.h>
 #include "data.h"
 
-/**
- * @brief A struct made only for convenience. Holds exactly
- * the same data than av_uplink_t, but the command ID is already
- * cast from uint8_t to CMD_ID to facilitate switch statements.
- */
-
-
 class Telecom {
 public:
-    Telecom(Data given_data);
-
-
+    Telecom();
     ~Telecom() = default;
+
     bool begin();
-    void send_packet(uint8_t packet_id, uint8_t* data, uint16_t len);
+    void send_telemetry();
     void update();
-    UplinkCmd get_cmd() const;
     void reset_cmd();
 
     static void handle_uplink(int packet_size);
@@ -30,9 +21,10 @@ public:
     void handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint16_t len);
 
 private:
+    void send_packet(uint8_t packet_id, uint8_t* data, uint16_t len);
+
     Capsule<Telecom> capsule_uplink;
     Capsule<Telecom> capsule_downlink;
-    Data data;
 
     av_uplink_t last_packet;
     bool new_cmd_received;
