@@ -37,11 +37,13 @@ jobs:
     steps:
       - name: Wait for workflow to complete
         run: |
+          sleep 80
           while true; do
             sleep 10
             STATUS=$(curl -s -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" \
               "https://api.github.com/repos/EPFLRocketTeam/C_AV_SIL/actions/runs?event=repository_dispatch&status=completed" | \
               jq -r '.workflow_runs[0].conclusion')
+            echo "Status: $STATUS"
             if [ "$STATUS" == "success" ]; then
               echo "Dispatched workflow succeeded"
               break
