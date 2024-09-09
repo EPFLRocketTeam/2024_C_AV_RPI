@@ -1,44 +1,201 @@
+// TODO: Data logging
+
 #include "data.h"
-#include "PacketDefinition.h"
 
-Data::Data() {}
+NavSensors::NavSensors()
+:   adxl{0, 0, 0},
+    adxl_aux{0, 0, 0},
+    bmi_accel{0, 0, 0},
+    bmi_gyro{0, 0, 0},
+    bmi_aux_accel{0, 0, 0},
+    bmi_aux_gyro{0, 0, 0},
+    bmp{0, 0},
+    bmp_aux{0, 0}
+{}
 
-Data::~Data() {}
+PropSensors::PropSensors()
+:   N2_pressure(0),
+    fuel_pressure(0),
+    LOX_pressure(0),
+    fuel_level(0),
+    LOX_level(0),
+    igniter_pressure(0),
+    LOX_inj_pressure(0),
+    fuel_inj_pressure(0),
+    chamber_pressure(0),
+    N2_temperature(0),
+    fuel_temperature(0),
+    LOX_temperature(0),
+    igniter_temperature(0),
+    fuel_inj_temperature(0),
+    fuel_inj_cooling_temperature(0),
+    LOX_inj_temperature(0),
+    chamber_temperature(0)
+{}
 
-void Data::send() {
-    const SensFiltered sens(m_sensors.get_clean());
-    av_downlink_t packet;
+NavigationData::NavigationData()
+:   time{0, 0, 0, 0, 0, 0, 0},
+    position{0, 0, 0},
+    speed{0, 0, 0},
+    accel{0, 0, 0},
+    attitude{0, 0, 0},
+    course(0),
+    altitude(0),
+    baro{0, 0}
+{}
 
-    packet.gnss_lat = sens.position.lat;
-    packet.gnss_lon = sens.position.lng;
-    packet.gnss_alt = sens.position.alt;
-    
-    // We don't use a 2nd GPS
-    packet.gnss_lat_r = 0.0f;
-    packet.gnss_lon_r = 0.0f;
-    packet.gnss_alt_r = 0.0f;
+// const void* Data::read(GoatReg reg) {
+//     // Big switch to read at the field given as argument
+//     // Cast the void ptr to the type of data located at the given field
+//     // Return the ptr, which can be later dereferenced by the caller.
+// }
 
-    packet.N2_pressure = sens.N2_pressure;
-    packet.fuel_pressure = sens.fuel_pressure;
-    packet.LOX_pressure = sens.LOX_pressure;
-    packet.fuel_level = sens.fuel_level;
-    packet.LOX_level = sens.LOX_level;
-    packet.engine_temp = sens.engine_temperature;
-    packet.igniter_pressure = sens.igniter_pressure;
-    packet.LOX_inj_pressure = sens.LOX_inj_pressure;
-    packet.fuel_inj_pressure = sens.fuel_inj_pressure;
-    packet.chamber_pressure = sens.chamber_pressure;
-
-    m_telecom.send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packet, av_downlink_size);
+void Data::write(GoatReg reg, void* data) {
+    // Big switch
+    // Cast the void ptr to the type of data located at the given field
+    // Write the data.
+    switch (reg) {
+        case TLM_CMD_ID:
+            telemetry_cmd.id = *reinterpret_cast<CMD_ID*>(data);
+            break;
+        case TLM_CMD_VALUE:
+            telemetry_cmd.value = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_ADXL1_STAT:
+            sensors_status.adxl_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_ADXL2_STAT:
+            sensors_status.adxl_aux_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMI1_ACCEL_STAT:
+            sensors_status.bmi_accel_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMI2_ACCEL_STAT:
+            sensors_status.bmi_aux_accel_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMI1_GYRO_STAT:
+            sensors_status.bmi_gyro_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMI2_GYRO_STAT:
+            sensors_status.bmi_aux_gyro_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP1_STAT:
+            sensors_status.bmp_status = *reinterpret_cast<bmp3_status*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT:
+            sensors_status.bmp_aux_status = *reinterpret_cast<bmp3_status*>(data);
+            break;
+        case NAV_SENSOR_ADXL1_DATA:
+            nav_sensors.adxl = *reinterpret_cast<adxl375_data*>(data);
+            break;
+        case NAV_SENSOR_ADXL2_DATA:
+            nav_sensors.adxl_aux = *reinterpret_cast<adxl375_data*>(data);
+            break;
+        case NAV_SENSOR_BMI1_ACCEL_DATA:
+            nav_sensors.bmi_accel = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+            break;
+        case NAV_SENSOR_BMI2_ACCEL_DATA:
+            nav_sensors.bmi_aux_accel = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+            break;
+        case NAV_SENSOR_BMI1_GYRO_DATA:
+            nav_sensors.bmi_gyro = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+            break;
+        case NAV_SENSOR_BMI2_GYRO_DATA:
+            nav_sensors.bmi_aux_gyro = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+            break;
+        case NAV_SENSOR_BMP1_DATA:
+            nav_sensors.bmp = *reinterpret_cast<bmp3_data*>(data);
+            break;
+        case NAV_SENSOR_BMP2_DATA:
+            nav_sensors.bmp_aux = *reinterpret_cast<bmp3_data*>(data);
+            break;
+        case PR_SENSOR_P_NCO:
+            prop_sensors.N2_pressure = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_P_ETA:
+            prop_sensors.fuel_pressure = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_P_OTA:
+            prop_sensors.LOX_pressure = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_P_CIG:
+            prop_sensors.igniter_pressure = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_P_EIN:
+            prop_sensors.fuel_inj_pressure = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_P_OIN:
+            prop_sensors.LOX_inj_pressure = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_P_CCC:
+            prop_sensors.chamber_pressure = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_L_ETA:
+            prop_sensors.fuel_level = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_L_OTA:
+            prop_sensors.LOX_level = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_T_NCO:
+            prop_sensors.N2_temperature = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_T_ETA:
+            prop_sensors.fuel_temperature = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_T_OTA:
+            prop_sensors.LOX_temperature = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_T_CIG:
+            prop_sensors.igniter_temperature = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_T_EIN:
+            prop_sensors.fuel_inj_temperature = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_T_EIN_CF:
+            prop_sensors.fuel_inj_cooling_temperature = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_T_OIN:
+            prop_sensors.LOX_inj_temperature = *reinterpret_cast<double*>(data);
+            break;
+        case PR_SENSOR_T_CCC:
+            prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_GNSS_TIME_YEAR:
+            nav.time.year = *reinterpret_cast<unsigned*>(data);
+            break;
+        case NAV_GNSS_TIME_MONTH:
+            nav.time.month = *reinterpret_cast<unsigned*>(data);
+            break;
+        case NAV_GNSS_TIME_DAY:
+            nav.time.day = *reinterpret_cast<unsigned*>(data);
+            break;
+        case NAV_GNSS_TIME_HOUR:
+            nav.time.hour = *reinterpret_cast<unsigned*>(data);
+            break;
+        case NAV_GNSS_TIME_MINUTE:
+            nav.time.minute = *reinterpret_cast<unsigned*>(data);
+            break;
+        case NAV_GNSS_TIME_SECOND:
+            nav.time.second = *reinterpret_cast<unsigned*>(data);
+            break;
+        case NAV_GNSS_TIME_CENTI:
+            nav.time.centisecond = *reinterpret_cast<unsigned*>(data);
+            break;
+        case NAV_GNSS_POS_LAT:
+            nav.position.lat = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_GNSS_POS_LNG:
+            nav.position.lng = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_GNSS_POS_ALT:
+            nav.position.alt = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_GNSS_COURSE:
+            nav.course = *reinterpret_cast<double*>(data);
+            break;
+    }
 }
 
-bool Data::update() {
-    m_telecom.update();
-    updated = m_sensors.update();
-
-    return updated;
-}
-
-DataDump Data::dump() const {
-    return {m_telecom.get_cmd(), m_sensors.get_raw(), m_sensors.get_clean()};
+DataDump Data::get() const {
+    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav};
 }

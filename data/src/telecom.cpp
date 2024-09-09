@@ -4,6 +4,7 @@
 #include <ParameterDefinition.h>
 #include "capsule.h"
 #include "telecom.h"
+#include "data.h"
 
 #define LORA_UPLINK_CS      8
 #define LORA_UPLINK_RST     25
@@ -23,7 +24,7 @@ namespace {
 }
 
 
-Telecom::Telecom() 
+Telecom::Telecom()
 :   new_cmd_received(false),
     last_packet{0, 0},
     capsule_uplink(&Telecom::handle_capsule_uplink, this),
@@ -88,20 +89,25 @@ bool Telecom::begin() {
     return true;
 }
 
-void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint16_t len) {
+void Telecom::send_telemetry() {
+    const DataDump data = Data::get_instance().get();
+
     av_downlink_t packet;
-    memcpy(&packet, data, len);
+    packet.gnss_lat = data.nav.position.lat;
+    packet.gnss_lon = data.nav.position.lng;
+    packet.gnss_alt = data.nav.position.alt;
+    packet.N2_pressure = data.prop.N2_pressure;
+    packet.fuel_pressure = data.prop.fuel_pressure;
+    packet.LOX_pressure = data.prop.LOX_pressure;
+    packet.fuel_level = data.prop.fuel_level;
+    packet.LOX_level = data.prop.LOX_level;
+    packet.engine_temp = data.prop.chamber_temperature;
+    packet.igniter_pressure = data.prop.igniter_pressure;
+    packet.LOX_inj_pressure = data.prop.LOX_inj_pressure;
+    packet.fuel_inj_pressure = data.prop.fuel_inj_pressure;
+    packet.chamber_pressure = data.prop.chamber_pressure;
 
-    uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));
-    size_t length(capsule_downlink.getCodedLen(len));
-
-    lora_downlink.beginPacket();
-    lora_downlink.write(coded_buffer, length);
-    lora_downlink.endPacket(true);
-
-    std::cout << "Sent packet of size " << length << "\n";
-
-    delete[] coded_buffer;
+    send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packet, av_downlink_size);
 }
 
 void Telecom::update() {
@@ -113,15 +119,7 @@ void Telecom::update() {
     }
 }
 
-UplinkCmd Telecom::get_cmd() const {
-    UplinkCmd cmd;
-    cmd.id = static_cast<CMD_ID>(last_packet.order_id);
-    cmd.value = last_packet.order_value;
-    return cmd;
-}
-
 void Telecom::reset_cmd() {
-    last_packet = {0, 0};
 }
 
 void Telecom::handle_uplink(int packet_size) {
@@ -141,10 +139,14 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint16_
         case CAPSULE_ID::GS_CMD:
             memcpy(&last_packet, data_in, len);
             new_cmd_received = true;
+
+            Data::get_instance().write(Data::TLM_CMD_ID, &last_packet.order_id);
+            Data::get_instance().write(Data::TLM_CMD_VALUE, &last_packet.order_value);
+
             std::cout << "Command received from GS!\n"
                       << "ID: " << (int)last_packet.order_id << "\n"
                       << "Value: " << (int)last_packet.order_value << "\n\n";
-        break;
+            break;
     }
 }
 
@@ -162,4 +164,15 @@ void Telecom::handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint1
         std::cerr << data_in[i];
     }
     std::cerr << "\n";
+}
+
+void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint16_t len) {
+    uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));
+    size_t length(capsule_downlink.getCodedLen(len));
+
+    lora_downlink.beginPacket();
+    lora_downlink.write(coded_buffer, length);
+    lora_downlink.endPacket(true);
+
+    delete[] coded_buffer;
 }
