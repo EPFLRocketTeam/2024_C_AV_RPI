@@ -2,12 +2,12 @@
 #define DATA_H
 
 #include <cstdint>
+#include "Protocol.h"
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "I2CGPS.h"
 #include "TinyGPS++.h"
 #include "adxl375.h"
-#include "PacketDefinition.h"
 
 /**
  * @brief A struct made only for convenience. Holds exactly
@@ -47,12 +47,12 @@ struct PropSensors {
     double    N2_pressure;
     double    fuel_pressure;
     double    LOX_pressure;
-    double    fuel_level;
-    double    LOX_level;
     double    igniter_pressure;
     double    LOX_inj_pressure;
     double    fuel_inj_pressure;
     double    chamber_pressure;
+    double    fuel_level;
+    double    LOX_level;
     double    N2_temperature;
     double    fuel_temperature;
     double    LOX_temperature;

@@ -2,7 +2,7 @@
 #define TELECOM_H
 
 #include "capsule.h"
-#include <PacketDefinition.h>
+#include "Protocol.h"
 #include "data.h"
 
 class Telecom {

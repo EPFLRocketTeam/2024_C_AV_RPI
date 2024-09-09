@@ -1,7 +1,6 @@
 #include <LoRa.h>
 #include <LoopbackStream.h>
-#include <PacketDefinition.h>
-#include <ParameterDefinition.h>
+#include "Protocol.h"
 #include "capsule.h"
 #include "telecom.h"
 #include "data.h"
@@ -96,16 +95,24 @@ void Telecom::send_telemetry() {
     packet.gnss_lat = data.nav.position.lat;
     packet.gnss_lon = data.nav.position.lng;
     packet.gnss_alt = data.nav.position.alt;
+
     packet.N2_pressure = data.prop.N2_pressure;
     packet.fuel_pressure = data.prop.fuel_pressure;
     packet.LOX_pressure = data.prop.LOX_pressure;
-    packet.fuel_level = data.prop.fuel_level;
-    packet.LOX_level = data.prop.LOX_level;
-    packet.engine_temp = data.prop.chamber_temperature;
     packet.igniter_pressure = data.prop.igniter_pressure;
     packet.LOX_inj_pressure = data.prop.LOX_inj_pressure;
     packet.fuel_inj_pressure = data.prop.fuel_inj_pressure;
     packet.chamber_pressure = data.prop.chamber_pressure;
+    packet.fuel_level = data.prop.fuel_level;
+    packet.LOX_level = data.prop.LOX_level;
+    packet.N2_temp = data.prop.N2_temperature;
+    packet.fuel_temp = data.prop.fuel_temperature;
+    packet.LOX_temp = data.prop.LOX_temperature;
+    packet.igniter_temp = data.prop.igniter_temperature;
+    packet.fuel_inj_temp = data.prop.fuel_inj_temperature;
+    packet.fuel_inj_cool_temp = data.prop.fuel_inj_cooling_temperature;
+    packet.LOX_inj_temp = data.prop.LOX_inj_temperature;
+    packet.engine_temp = data.prop.chamber_temperature;
 
     send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packet, av_downlink_size);
 }
