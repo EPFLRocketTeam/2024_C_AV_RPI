@@ -1,7 +1,6 @@
 #include "AvState.h"
 #include "sensors.h"
 #include "data.h"
-#include "PacketDefinition.h"
 
 
 AvState::AvState(const Thresholds& thresholds) : thresholds(thresholds)

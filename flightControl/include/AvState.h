@@ -8,7 +8,6 @@
 #include <iostream>
 #include <list>
 #include <string>
-#include "PacketDefinition.h"
 #include "thresholds.h"
 
 enum class State
