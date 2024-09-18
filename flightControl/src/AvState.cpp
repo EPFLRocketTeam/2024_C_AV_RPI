@@ -1,11 +1,13 @@
 #include "AvState.h"
 #include "sensors.h"
 #include "data.h"
+#include "Protocol.h"
 
 
-AvState::AvState(const Thresholds& thresholds) : thresholds(thresholds)
+AvState::AvState()
 {
     this->currentState = State::INIT;
+
 }
 
 // destructor
@@ -29,52 +31,51 @@ bool error()
 }
 
 
-State AvState::fromInit()
+State AvState::fromInit(DataDump dump)
 {
-    if (/*data.telecom_status.id ==*/ CMD_ID::AV_CMD_CALIBRATE)
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
     {
         return State::CALIBRATION;
     }
     return State::INIT;
 }
 
-State AvState::fromLanded() { 
+State AvState::fromLanded(DataDump dump) {
     return State::LANDED; 
 }
 
-State AvState::fromDescent()
+State AvState::fromDescent(DataDump dump)
 {
     //norm of the speed vector
-    if (/*data.telecom_status.id ==*/ CMD_ID::AV_CMD_ABORT || /*data.telecom_status.id ==*/ CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
         return State::ERRORFLIGHT;
     }
 
-    double speed; /*= (data.sensors_data.speed.x * data.sensors_data.speed.x + data.sensors_data.speed.y * data.sensors_data.speed.y + data.sensors_data.speed.z * data.sensors_data.speed.z)*/
-    
-    if (speed < 0)
+
+    if ( dump.nav.speed.z < SPEED_ZERO)
     {
         return State::LANDED;
     }
     return State::DESCENT;
 }
 
-State AvState::fromAscent()
+State AvState::fromAscent(DataDump dump)
 {
-    if (/*data.telecom_status.id ==*/ CMD_ID::AV_CMD_ABORT)
+    if ( dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-    else if (/*data.sensors_data.speed.z <=*/ 0)
+    else if ( dump.nav.accel.z < ACCEL_ZERO)
     {
         return State::DESCENT;
     }
     return State::ASCENT;
 }
 
-State AvState::fromCalibration()
+State AvState::fromCalibration(DataDump dump)
 {
-    if (error() || /*data.telecom_status.id ==*/ CMD_ID::AV_CMD_ABORT)
+    if (error() || dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
         //check if the calibration is done
@@ -86,28 +87,26 @@ State AvState::fromCalibration()
 }
 
 
-State AvState::fromErrorGround()
+State AvState::fromErrorGround(DataDump dump)
 {
-    if (/*data.telecom_status.id ==*/ CMD_ID::AV_CMD_RECOVER)
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_RECOVER)
     {
         return State::INIT;
     }
 }
 
-State AvState::fromErrorFlight()
+State AvState::fromErrorFlight(DataDump dump)
 {
     return State::ERRORFLIGHT;
 }
 
-State AvState::fromThrustSequence()
+State AvState::fromThrustSequence(DataDump dump)
 {
-    double speed; /*= (data.sensors_data.speed.x * data.sensors_data.speed.x + data.sensors_data.speed.y * data.sensors_data.speed.y + data.sensors_data.speed.z * data.sensors_data.speed.z)*/
-    if (/*data.telecom_status.id ==*/ CMD_ID::AV_CMD_ABORT)
+    if (dump.telemetry_cmd.id== CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-    else if (/*data.sensors_data.speed.z >*/ 0) //TODO we need a ignite bool var
-                                //given by the prop board
+    else if (dump.nav.speed.z > SPEED_ZERO)
     {
         return State::ASCENT;
     }
@@ -118,22 +117,22 @@ State AvState::fromThrustSequence()
 }
 
 
-State AvState::fromManual()
+State AvState::fromManual(DataDump dump)
 {
-    if (error() || /*data.telecom_status.id ==*/ CMD_ID::AV_CMD_ABORT)
+    if (error() || dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
     }
     //check all thresholds individually
         //TODO: recheck i threholds are the wanted ones
-    else if (/*data.telecom_status.id ==*/ CMD_ID::AV_CMD_ARM)
+    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
         return State::ARMED;
     }
     return State::MANUAL;
 }
 
-State AvState::fromArmed()
+State AvState::fromArmed(DataDump dump)
 {
     if (error())
     {
@@ -141,13 +140,13 @@ State AvState::fromArmed()
     }
     else
     {
-        switch (/*data.telecom_status.id*/0)
+        switch (dump.telemetry_cmd.id)
         {
             case CMD_ID::AV_CMD_IGNITION:
-                if (/*data.sensors_data.igniter_pressure >=*/ thresholds.igniter_pressure_wanted)
+                if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED)
                 {
                     //possible log
-                    if(/*data.sensors_data.chamber_pressure >=*/ thresholds.chamber_pressure_wanted ) {
+                    if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) {
                         //possible log
                         return State::THRUSTSEQUENCE;
                     }
@@ -159,45 +158,44 @@ State AvState::fromArmed()
             case CMD_ID::AV_CMD_ABORT:
                 return State::ERRORGROUND;
             default:
-                State::ARMED;
+                return State::ARMED;
         }
     }
 }
 
-State* AvState::possibleStates() {}
 
-void AvState::update()
+void AvState::update(DataDump dump)
 {
     switch (currentState)
     {
         case State::INIT:
-            this->currentState = fromInit();
+            this->currentState = fromInit(dump);
             break;
         case State::LANDED:
-            currentState = fromLanded();
+            currentState = fromLanded(dump);
         case State::DESCENT:
-            currentState = fromDescent();
+            currentState = fromDescent(dump);
             break;
         case State::ASCENT:
-            currentState = fromAscent();
+            currentState = fromAscent(dump);
             break;
         case State::CALIBRATION:
-            currentState = fromCalibration();
+            currentState = fromCalibration(dump);
             break;
         case State::ERRORGROUND:
-            currentState = fromErrorGround();
+            currentState = fromErrorGround(dump);
             break;
         case State::ERRORFLIGHT:
-            currentState = fromErrorFlight();
+            currentState = fromErrorFlight(dump);
             break;
         case State::THRUSTSEQUENCE:
-            currentState = fromThrustSequence();
+            currentState = fromThrustSequence(dump);
             break;
         case State::MANUAL:
-            currentState = fromManual();
+            currentState = fromManual(dump);
             break;
         case State::ARMED:
-            currentState = fromArmed();
+            currentState = fromArmed(dump);
             break;
         default:
             currentState = State::ERRORFLIGHT;

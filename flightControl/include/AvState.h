@@ -9,6 +9,7 @@
 #include <list>
 #include <string>
 #include "thresholds.h"
+#include "data.h"
 
 enum class State
 {
@@ -33,31 +34,26 @@ class AvState
 {
 public:
     // constructor
-    explicit AvState(const Thresholds& thresholds);
+    explicit AvState();
     // destructor
     ~AvState();
-
     // this function allows to get the current state of the FSM
     State getCurrentState();
-
-
-    void update();
+    void update(DataDump dump);
     State* possibleStates();
     std::string stateToString(State state);
 
 private:
-    State fromInit();
-    State fromDescent();
-    State fromAscent();
-    State fromCalibration();
-    State fromErrorGround();
-    State fromErrorFlight();
-    State fromThrustSequence();
-    State fromManual();
-    State fromArmed();
-
-    State fromLanded();
-    Thresholds thresholds;
+    State fromInit(DataDump dump);
+    State fromDescent(DataDump dump);
+    State fromAscent(DataDump dump);
+    State fromCalibration(DataDump dump);
+    State fromErrorGround(DataDump dump);
+    State fromErrorFlight(DataDump dump);
+    State fromThrustSequence(DataDump dump);
+    State fromManual(DataDump dump);
+    State fromArmed(DataDump dump);
+    State fromLanded(DataDump dump);
     State currentState;
 };
 

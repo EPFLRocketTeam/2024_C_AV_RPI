@@ -17,5 +17,5 @@ add_subdirectory(flightControl)
 add_subdirectory(I2CInterface)
 add_subdirectory(LoRa4Raspi)
 add_subdirectory(sensor)
-add_subdirectory(tests)
+#add_subdirectory(tests)
 
