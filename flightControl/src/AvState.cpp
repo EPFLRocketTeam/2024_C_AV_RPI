@@ -93,6 +93,7 @@ State AvState::fromErrorGround(DataDump dump)
     {
         return State::INIT;
     }
+    return  State::ERRORGROUND;
 }
 
 State AvState::fromErrorFlight(DataDump dump)
