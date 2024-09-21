@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
-#include <pigpio.h>
+#include "pigpio.h"
 
 // registers
 #define REG_FIFO                 0x00
