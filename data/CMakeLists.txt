@@ -13,4 +13,4 @@ target_link_libraries(sensors data ERT_RF_Protocol_Interface adxl375 bmi08a bmi0
 set(TELECOM_SOURCES src/telecom.cpp)
 add_library(telecom ${TELECOM_SOURCES})
 target_include_directories(telecom PUBLIC include)
-target_link_libraries(telecom data ERT_RF_Protocol_Interface LoopbackStream Print LoRa)
+target_link_libraries(telecom data ERT_RF_Protocol_Interface Capsule LoopbackStream Print LoRa)
