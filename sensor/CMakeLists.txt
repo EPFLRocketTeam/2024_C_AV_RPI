@@ -2,7 +2,7 @@ add_library(adxl375 src/adxl375.cpp)
 target_include_directories(adxl375 PUBLIC include)
 target_link_libraries(adxl375 I2CInterface)
 
-set(BMI08_SOURCES src/bmi09a.cpp
+set(BMI08_SOURCES src/bmi08a.cpp
                   src/bmi08g.cpp
                   src/bmi08xa.cpp)
 add_library(bmi08 ${BMI08_SOURCES})
