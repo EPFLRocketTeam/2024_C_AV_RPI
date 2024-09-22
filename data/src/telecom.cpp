@@ -141,7 +141,7 @@ void Telecom::handle_uplink(int packet_size) {
     }
 }
 
-void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint16_t len) {
+void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_t len) {
     switch (packet_id) {
         case CAPSULE_ID::GS_CMD:
             memcpy(&last_packet, data_in, len);
@@ -163,7 +163,7 @@ void Telecom::handle_downlink(int packet_size) {
     }
 }
 
-void Telecom::handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint16_t len) {
+void Telecom::handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint32_t len) {
     std::cerr << "Packet received unexpectedly on the downlink radio: \n"
               << "ID: " << packet_id << "\n"
               << "Data: ";
@@ -173,7 +173,7 @@ void Telecom::handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint1
     std::cerr << "\n";
 }
 
-void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint16_t len) {
+void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
     uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));
     size_t length(capsule_downlink.getCodedLen(len));
 
