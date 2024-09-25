@@ -25,6 +25,16 @@
 /*    occurs, it will be unlikely for the     */
 /*    both the entropy to go to log(166), and */
 /*    all numbers to stay <= 165)             */
+/*                                            */
+/*                                            */
+/* WARNING / TROUBLESHOOTING                  */
+/*                                            */
+/* In case you have an issue in the echo part */
+/* or in the random part, modify the arduino  */
+/* code to increase the delay as it might     */
+/* be the cause of the crash, and not the     */
+/* drivers fault.                             */
+/*                                            */
 /**********************************************/
 
 #include "I2CInterface.h"
@@ -301,7 +311,7 @@ void Handle_OnReceive (int numBytes) {
       break ;
   }
 
-  // TODO to modify depending on the board, can crash if too low
+  // WARNING to modify depending on the board, can crash if too low
   delayMicroseconds(350);
 }
 
