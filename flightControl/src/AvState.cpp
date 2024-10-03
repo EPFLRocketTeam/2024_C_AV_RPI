@@ -241,6 +241,3 @@ std::string AvState::stateToString(State state)
             break;
     }
 }
-
-
-
