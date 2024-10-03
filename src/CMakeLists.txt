@@ -34,7 +34,7 @@ set(FIREHORN_FC_SOURCES
 
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
-target_include_directories(flight_computer
+target_include_directories(flight_computer PUBLIC
     ${DATA_DIR}
     ${FLIGHT_CONTROL_DIR}
     ${I2C_INTERFACE_DIR}
