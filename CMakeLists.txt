@@ -19,5 +19,5 @@ add_executable(main main.cpp)
 
 add_subdirectory(src)
 add_subdirectory(LoRa4Raspi)
-# add_subdirectory(tests)
+add_subdirectory(tests)
 
