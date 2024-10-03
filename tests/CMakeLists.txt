@@ -1,17 +1,17 @@
 add_executable(adxl375_test ADXL375_test.cpp)
-target_link_libraries(ADXL375_test flight_computer)
+target_link_libraries(adxl375_test flight_computer)
 
-add_executable(BMP390_test BMI088_test.cpp)
-target_link_libraries(BMP390_test flight_computer)
+add_executable(bmp390_test BMI088_test.cpp)
+target_link_libraries(bmp390_test flight_computer)
 
-add_executable(AvState_test AvState_test.cpp)
-target_link_libraries(AvState_test flight_computer)
+add_executable(avstate_test AvState_test.cpp)
+target_link_libraries(avstate_test flight_computer)
 
-add_executable(LoRa_test LoRa_test.cpp)
-target_link_libraries(LoRa_test LoRa4Raspi)
+add_executable(lora_test LoRa_test.cpp)
+target_link_libraries(lora_test LoRa4Raspi)
 
-add_executable(BMI088_test BMP390_test.cpp)
-target_link_libraries(BMI088_test flight_computer)
+add_executable(bmi088_test BMP390_test.cpp)
+target_link_libraries(bmi088_test flight_computer)
 
 add_executable(gps_test I2CGPS_test.cpp)
 target_link_libraries(gps_test flight_computer)
