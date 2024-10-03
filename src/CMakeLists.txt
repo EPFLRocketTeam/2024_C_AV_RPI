@@ -30,6 +30,10 @@ set(FIREHORN_FC_SOURCES
     ${DRIVERS_DIR}/bmp3_defs.h
     ${DRIVERS_DIR}/bmp3.cpp
     ${DRIVERS_DIR}/bmp3.h
+    ${DRIVERS_DIR}/I2CGPS.cpp
+    ${DRIVERS_DIR}/I2CGPS.h
+    ${DRIVERS_DIR}/TinyGPS++.cpp
+    ${DRIVERS_DIR}/TinyGPS++.h
 )
 
 
