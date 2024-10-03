@@ -15,6 +15,6 @@ target_link_libraries(bmp3 I2CInterface)
 
 set(I2CPGS_SOURCE src/I2CGPS.cpp
                   src/TinyGPS++.cpp)
-add_library(I2CGPS ${I2CPGS_SOURCE})
-target_include_directories(I2CGPS PUBLIC include)
-target_link_libraries(I2CGPS I2CInterface)
+add_library(i2cgps ${I2CPGS_SOURCE})
+target_include_directories(i2cgps PUBLIC include)
+target_link_libraries(i2cgps I2CInterface)
