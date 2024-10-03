@@ -2,7 +2,7 @@
 #define DATA_H
 
 #include <cstdint>
-#include "Protocol.h"
+#include <Protocol.h>
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "I2CGPS.h"

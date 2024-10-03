@@ -34,10 +34,17 @@ set(FIREHORN_FC_SOURCES
 
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
+
 target_include_directories(flight_computer PUBLIC
     ${DATA_DIR}
     ${FLIGHT_CONTROL_DIR}
     ${I2C_INTERFACE_DIR}
     ${DRIVERS_DIR}
 )
-target_link_libraries(flight_computer PUBLIC ERT_RF_Protocol_Interface Capsule pigpio)
+
+target_link_libraries(flight_computer PUBLIC
+    ERT_RF_Protocol_Interface
+    Capsule
+    LoRa4Raspi
+    pigpio
+)
