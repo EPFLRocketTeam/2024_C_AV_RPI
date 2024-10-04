@@ -1,8 +1,8 @@
 #ifndef TELECOM_H
 #define TELECOM_H
 
-#include "capsule.h"
-#include "Protocol.h"
+#include <capsule.h>
+#include <Protocol.h>
 #include "data.h"
 
 class Telecom {

@@ -26,7 +26,7 @@
 */
 
 #include "I2CGPS.h"
-#include "I2CInterface.h"
+#include "i2c_interface.h"
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
