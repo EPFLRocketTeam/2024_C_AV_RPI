@@ -6,4 +6,6 @@ set(I2C_INTERFACE_SOURCES
 
 add_library(i2c_interface ${I2C_INTERFACE_SOURCES})
 
+target_include_directories(i2c_interface PUBLIC ${I2C_INTERFACE_DIR})
+
 target_link_libraries(i2c_interface PUBLIC pigpio)
