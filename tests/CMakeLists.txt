@@ -5,7 +5,7 @@ add_executable(avstate_test AvState_test.cpp)
 target_link_libraries(avstate_test flight_computer)
 
 add_executable(bmi088_test BMI088_test.cpp)
-target_link_libraries(bmi088_test bmià_)
+target_link_libraries(bmi088_test bmi08)
 
 add_executable(bmp390_test BMP390_test.cpp)
 target_link_libraries(bmp390_test bmp3)
