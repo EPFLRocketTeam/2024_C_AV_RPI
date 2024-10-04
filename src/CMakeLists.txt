@@ -1,7 +1,7 @@
-set(DATA_DIR data)
-set(FLIGHT_CONTROL_DIR flight_control)
-set(I2C_INTERFACE_DIR i2c_interface)
-set(DRIVERS_DIR sensor_drivers)
+set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
+set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
+set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
+set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
 
 add_subdirectory(${I2C_INTERFACE_DIR})
 add_subdirectory(${DRIVERS_DIR})

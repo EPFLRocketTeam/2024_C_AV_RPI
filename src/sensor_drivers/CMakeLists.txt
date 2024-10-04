@@ -2,6 +2,7 @@
 
 # ADXL375
 add_library(adxl375 adxl375.cpp adxl375.h)
+target_include_directories(adxl375 INTERFACE ${DRIVERS_DIR})
 target_link_libraries(adxl375 PRIVATE i2c_interface)
 
 # BMI08
@@ -14,6 +15,7 @@ set(BMI08_SOURCES
     bmi08xa.cpp
 )
 add_library(bmi08 ${BMI08_SOURCES})
+target_include_directories(bmi08 INTERFACE ${DRIVERS_DIR})
 target_link_libraries(bmi08 PRIVATE i2c_interface)
 
 # BMP3
@@ -23,6 +25,7 @@ set(BMP3_SOURCES
     bmp3.h
 )
 add_library(bmp3 ${BMP3_SOURCES})
+target_include_directories(bmp3 INTERFACE ${DRIVERS_DIR})
 target_link_libraries(bmp3 PRIVATE i2c_interface)
 
 # GPS
@@ -33,5 +36,6 @@ set(GPS_SOURCES
     TinyGPS++.h
 )
 add_library(gps ${GPS_SOURCES})
+target_include_directories(gps INTERFACE ${DRIVERS_DIR})
 target_link_libraries(gps PRIVATE i2c_interface)
 
