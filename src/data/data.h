@@ -5,8 +5,6 @@
 #include <Protocol.h>
 #include "bmi08x.h"
 #include "bmp3.h"
-#include "I2CGPS.h"
-#include "TinyGPS++.h"
 #include "adxl375.h"
 
 /**

@@ -3,6 +3,10 @@ set(FLIGHT_CONTROL_DIR flight_control)
 set(I2C_INTERFACE_DIR i2c_interface)
 set(DRIVERS_DIR sensor_drivers)
 
+add_subdirectory(${I2C_INTERFACE_DIR})
+add_subdirectory(${DRIVERS_DIR})
+
+
 set(FIREHORN_FC_SOURCES
     ${DATA_DIR}/data.cpp
     ${DATA_DIR}/data.h
@@ -14,28 +18,7 @@ set(FIREHORN_FC_SOURCES
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
-    
-    ${I2C_INTERFACE_DIR}/i2c_interface.cpp
-    ${I2C_INTERFACE_DIR}/i2c_interface.h
-    ${I2C_INTERFACE_DIR}/i2c_wrappers.h
-    
-    ${DRIVERS_DIR}/adxl375.cpp
-    ${DRIVERS_DIR}/adxl375.h
-    ${DRIVERS_DIR}/bmi08_defs.h
-    ${DRIVERS_DIR}/bmi08.h
-    ${DRIVERS_DIR}/bmi08a.cpp
-    ${DRIVERS_DIR}/bmi08g.cpp
-    ${DRIVERS_DIR}/bmi08x.h
-    ${DRIVERS_DIR}/bmi08xa.cpp
-    ${DRIVERS_DIR}/bmp3_defs.h
-    ${DRIVERS_DIR}/bmp3.cpp
-    ${DRIVERS_DIR}/bmp3.h
-    ${DRIVERS_DIR}/I2CGPS.cpp
-    ${DRIVERS_DIR}/I2CGPS.h
-    ${DRIVERS_DIR}/TinyGPS++.cpp
-    ${DRIVERS_DIR}/TinyGPS++.h
 )
-
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
@@ -50,5 +33,8 @@ target_link_libraries(flight_computer PUBLIC
     ERT_RF_Protocol_Interface
     Capsule
     LoRa4Raspi
-    pigpio
+    adxl375
+    bmi08
+    bmp3
+    gps
 )
