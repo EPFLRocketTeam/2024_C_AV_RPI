@@ -52,6 +52,13 @@
         "chrono": "cpp",
         "ratio": "cpp",
         "fstream": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "__config": "cpp",
+        "__hash_table": "cpp",
+        "__locale": "cpp",
+        "__split_buffer": "cpp",
+        "bitset": "cpp",
+        "ios": "cpp",
+        "locale": "cpp"
     }
 }
