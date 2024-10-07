@@ -79,35 +79,125 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_SENSOR_BMI2_GYRO_STAT:
             sensors_status.bmi_aux_gyro_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_BMP1_STAT:
-            sensors_status.bmp_status = *reinterpret_cast<bmp3_status*>(data);
+        case NAV_SENSOR_BMP1_STAT_INTR_FIFO_WM:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_BMP2_STAT:
-            sensors_status.bmp_aux_status = *reinterpret_cast<bmp3_status*>(data);
+        case NAV_SENSOR_BMP1_STAT_INTR_FIFO_FULL:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_ADXL1_DATA:
-            nav_sensors.adxl = *reinterpret_cast<adxl375_data*>(data);
+        case NAV_SENSOR_BMP1_STAT_INTR_DRDY:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_ADXL2_DATA:
-            nav_sensors.adxl_aux = *reinterpret_cast<adxl375_data*>(data);
+        case NAV_SENSOR_BMP1_STAT_SENS_PRESS:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_BMI1_ACCEL_DATA:
-            nav_sensors.bmi_accel = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+        case NAV_SENSOR_BMP1_STAT_SENS_TEMP:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_BMI2_ACCEL_DATA:
-            nav_sensors.bmi_aux_accel = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+        case NAV_SENSOR_BMP1_STAT_SENS_CMD:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_BMI1_GYRO_DATA:
-            nav_sensors.bmi_gyro = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+        case NAV_SENSOR_BMP1_STAT_ERR_FATAL:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_BMI2_GYRO_DATA:
-            nav_sensors.bmi_aux_gyro = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+        case NAV_SENSOR_BMP1_STAT_ERR_CMD:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_BMP1_DATA:
-            nav_sensors.bmp = *reinterpret_cast<bmp3_data*>(data);
+        case NAV_SENSOR_BMP1_STAT_ERR_CONF:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
             break;
-        case NAV_SENSOR_BMP2_DATA:
-            nav_sensors.bmp_aux = *reinterpret_cast<bmp3_data*>(data);
+        case NAV_SENSOR_BMP2_STAT_INTR_FIFO_WM:
+            sensors_status.mp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT_INTR_FIFO_FULL:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT_INTR_DRDY:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT_SENS_PRESS:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT_SENS_TEMP:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT_SENS_CMD:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT_ERR_FATAL:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT_ERR_CMD:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_BMP2_STAT_ERR_CONF:
+            sensors_status.bmp_status = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case NAV_SENSOR_ADXL1_DATA_X:
+            nav_sensors.adxl = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_ADXL1_DATA_Y:
+            nav_sensors.adxl = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_ADXL1_DATA_Z:
+            nav_sensors.adxl = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_ADXL2_DATA_X:
+            nav_sensors.adxl = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_ADXL2_DATA_Y:
+            nav_sensors.adxl = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_ADXL2_DATA_Z:
+            nav_sensors.adxl = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI1_ACCEL_DATA_X:
+            nav_sensors.bmi_accel = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI1_ACCEL_DATA_Y:
+            nav_sensors.bmi_accel = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI1_ACCEL_DATA_Z:
+            nav_sensors.bmi_accel = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI2_ACCEL_DATA_X:
+            nav_sensors.bmi_accel = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI2_ACCEL_DATA_Y:
+            nav_sensors.bmi_accel = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI2_ACCEL_DATA_Z:
+            nav_sensors.bmi_accel = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI1_GYRO_DATA_X:
+            nav_sensors.bmi_gyro = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI1_GYRO_DATA_Y:
+            nav_sensors.bmi_gyro = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI1_GYRO_DATA_Z:
+            nav_sensors.bmi_gyro = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI2_GYRO_DATA_X:
+            nav_sensors.bmi_gyro = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI2_GYRO_DATA_Y:
+            nav_sensors.bmi_gyro = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMI2_GYRO_DATA_Z:
+            nav_sensors.bmi_gyro = *reinterpret_cast<float*>(data);
+            break;
+        case NAV_SENSOR_BMP1_DATA_TEMP:
+            nav_sensors.bmp = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_SENSOR_BMP1_DATA_PRES:
+            nav_sensors.bmp = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_SENSOR_BMP2_DATA_TEMP:
+            nav_sensors.bmp = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_SENSOR_BMP2_DATA_PRES:
+            nav_sensors.bmp = *reinterpret_cast<double*>(data);
             break;
         case PR_SENSOR_P_NCO:
             prop_sensors.N2_pressure = *reinterpret_cast<double*>(data);
