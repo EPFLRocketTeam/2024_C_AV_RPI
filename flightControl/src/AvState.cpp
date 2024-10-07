@@ -46,15 +46,15 @@ State AvState::fromLanded(DataDump dump) {
 
 State AvState::fromDescent(DataDump dump)
 {
-    //norm of the speed vector
     // TODO: should the first condition in the following 'or' be removed ?
+    // TODO: should we add a if(error()) check ?
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id == CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
         return State::ERRORFLIGHT;
     }
 
     // TODO: shouldn't we also check that the vehicule is fully depressurized ?
-    if ( dump.nav.speed.z < SPEED_ZERO)
+    if (dump.nav.speed.z < SPEED_ZERO)
     {
         return State::LANDED;
     }
@@ -63,11 +63,11 @@ State AvState::fromDescent(DataDump dump)
 
 State AvState::fromAscent(DataDump dump)
 {
-    if ( dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
+    if (error() || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-    else if ( dump.nav.accel.z < ACCEL_ZERO)
+    else if (dump.nav.accel.z < ACCEL_ZERO)
     {
         return State::DESCENT;
     }
@@ -84,8 +84,11 @@ State AvState::fromCalibration(DataDump dump)
     {
         return State::INIT
     }
-    
-    else if (dump.sens) // TODO: add condition to check that all sensors are calibrated and ready for use
+    // If all the sensors are calibrated and ready for use we go to the Manual state
+    // TODO: check whether this is the right way to do 
+    else if (dump.stat.adxl_status && dump.stat.adxl_aux_status
+    && dump.stat.bmi_accel_status && dump.stat.bmi_aux_accel_status
+    && dump.stat.bmi_gyro_status && dump.stat.bmi_aux_gyro_status)
     {
         return State::MANUAL
     }
@@ -119,9 +122,8 @@ State AvState::fromThrustSequence(DataDump dump)
     {
         return State::ASCENT;
     }
-    // TODO: ensure that the following checks whether the pression is too low
-    // in the igniter or combustion chamber
-    else if (dump.sens)
+    // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
+    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED)
     {
         return State::ARMED
     }
@@ -136,13 +138,23 @@ State AvState::fromManual(DataDump dump)
         return State::ERRORGROUND;
     }
     //check all thresholds individually
-        //TODO: recheck i threholds are the wanted ones
+    //TODO: recheck i threholds are the wanted ones
     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
         return State::ARMED;
     }
     return State::MANUAL;
 }
+
+// TODO: check whether this function is more accurate than previous one
+// State AvState::fromManual(DataDump dump)
+// {
+//     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
+//     {
+//         return State::ARMED;
+//     }
+//     return State::MANUAL;
+// }
 
 State AvState::fromArmed(DataDump dump)
 {
@@ -178,20 +190,20 @@ State AvState::fromArmed(DataDump dump)
     }
 }
 
-// TODO: check whether this function is more accurate than previous one
+// // TODO: check whether this function is more accurate than previous one
 // State AvState::fromArmed(DataDump dump)
 // {
 //     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
 //     {
 //         return State::THRUSTSEQUENCE;
 //     }
-//     // TODO: check for those conditions : Sensor not detected, Radio signal lost
-//     else if () 
+//     // TODO: add safety checks (valves open, vents open, no pressure)
+//     // TODO: check whether the call to the error() function should be removed
+//     else if (error() || ) 
 //     {
 //         return State::ERRORGROUND
 //     }
-//     return State::ARMED;
-                
+//     return State::ARMED;           
 // }
 
 
