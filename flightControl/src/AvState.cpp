@@ -47,12 +47,13 @@ State AvState::fromLanded(DataDump dump) {
 State AvState::fromDescent(DataDump dump)
 {
     //norm of the speed vector
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    // TODO: should the first condition in the following 'or' be removed ?
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id == CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
         return State::ERRORFLIGHT;
     }
 
-
+    // TODO: shouldn't we also check that the vehicule is fully depressurized ?
     if ( dump.nav.speed.z < SPEED_ZERO)
     {
         return State::LANDED;
@@ -78,12 +79,17 @@ State AvState::fromCalibration(DataDump dump)
     if (error() || dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
-        //check if the calibration is done
     }
-    else
+    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_RECOVER)
     {
-        return State::CALIBRATION;
+        return State::INIT
     }
+    
+    else if (dump.sens) // TODO: add condition to check that all sensors are calibrated and ready for use
+    {
+        return State::MANUAL
+    }
+    return State::CALIBRATION;
 }
 
 
@@ -107,14 +113,19 @@ State AvState::fromThrustSequence(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
+    // TODO: ensure that the following checks that the engine is properly ignited
+    // and a liftoff has been detected
     else if (dump.nav.speed.z > SPEED_ZERO)
     {
         return State::ASCENT;
     }
-    else
+    // TODO: ensure that the following checks whether the pression is too low
+    // in the igniter or combustion chamber
+    else if (dump.sens)
     {
-        return State::THRUSTSEQUENCE;
+        return State::ARMED
     }
+    return State::THRUSTSEQUENCE;
 }
 
 
@@ -147,12 +158,15 @@ State AvState::fromArmed(DataDump dump)
                 if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED)
                 {
                     //possible log
-                    if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) {
+                    if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) 
+                    {
                         //possible log
                         return State::THRUSTSEQUENCE;
                     }
                     return State::ARMED;
-                }else {
+                } 
+                else 
+                {
                     return State::ARMED;
                 }
                 break;
@@ -163,6 +177,22 @@ State AvState::fromArmed(DataDump dump)
         }
     }
 }
+
+// TODO: check whether this function is more accurate than previous one
+// State AvState::fromArmed(DataDump dump)
+// {
+//     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
+//     {
+//         return State::THRUSTSEQUENCE;
+//     }
+//     // TODO: check for those conditions : Sensor not detected, Radio signal lost
+//     else if () 
+//     {
+//         return State::ERRORGROUND
+//     }
+//     return State::ARMED;
+                
+// }
 
 
 void AvState::update(DataDump dump)
