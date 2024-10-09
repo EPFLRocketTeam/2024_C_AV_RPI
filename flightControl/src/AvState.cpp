@@ -131,80 +131,80 @@ State AvState::fromThrustSequence(DataDump dump)
 }
 
 
-State AvState::fromManual(DataDump dump)
-{
-    if (error() || dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
-    {
-        return State::ERRORGROUND;
-    }
-    //check all thresholds individually
-    //TODO: recheck i threholds are the wanted ones
-    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
-    {
-        return State::ARMED;
-    }
-    return State::MANUAL;
-}
-
-// TODO: check whether this function is more accurate than previous one
 // State AvState::fromManual(DataDump dump)
 // {
-//     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
+//     if (error() || dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
+//     {
+//         return State::ERRORGROUND;
+//     }
+//     //check all thresholds individually
+//     //TODO: recheck if threholds are the wanted ones
+//     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
 //     {
 //         return State::ARMED;
 //     }
 //     return State::MANUAL;
 // }
 
-State AvState::fromArmed(DataDump dump)
+// TODO: check whether this function is more accurate than previous one
+State AvState::fromManual(DataDump dump)
 {
-    if (error())
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
-        return State::ERRORGROUND;
+        return State::ARMED;
     }
-    else
-    {
-        switch (dump.telemetry_cmd.id)
-        {
-            case CMD_ID::AV_CMD_IGNITION:
-                if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED)
-                {
-                    //possible log
-                    if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) 
-                    {
-                        //possible log
-                        return State::THRUSTSEQUENCE;
-                    }
-                    return State::ARMED;
-                } 
-                else 
-                {
-                    return State::ARMED;
-                }
-                break;
-            case CMD_ID::AV_CMD_ABORT:
-                return State::ERRORGROUND;
-            default:
-                return State::ARMED;
-        }
-    }
+    return State::MANUAL;
 }
 
-// // TODO: check whether this function is more accurate than previous one
 // State AvState::fromArmed(DataDump dump)
 // {
-//     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
+//     if (error())
 //     {
-//         return State::THRUSTSEQUENCE;
+//         return State::ERRORGROUND;
 //     }
-//     // TODO: add safety checks (valves open, vents open, no pressure)
-//     // TODO: check whether the call to the error() function should be removed
-//     else if (error() || ) 
+//     else
 //     {
-//         return State::ERRORGROUND
+//         switch (dump.telemetry_cmd.id)
+//         {
+//             case CMD_ID::AV_CMD_IGNITION:
+//                 if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED)
+//                 {
+//                     //possible log
+//                     if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) 
+//                     {
+//                         //possible log
+//                         return State::THRUSTSEQUENCE;
+//                     }
+//                     return State::ARMED;
+//                 } 
+//                 else 
+//                 {
+//                     return State::ARMED;
+//                 }
+//                 break;
+//             case CMD_ID::AV_CMD_ABORT:
+//                 return State::ERRORGROUND;
+//             default:
+//                 return State::ARMED;
+//         }
 //     }
-//     return State::ARMED;           
 // }
+
+// TODO: check whether this function is more accurate than previous one
+State AvState::fromArmed(DataDump dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
+    {
+        return State::THRUSTSEQUENCE;
+    }
+    // TODO: add safety checks (valves open, vents open, no pressure)
+    // TODO: check whether the call to the error() function should be removed
+    else if (error()) 
+    {
+        return State::ERRORGROUND
+    }
+    return State::ARMED;           
+}
 
 
 void AvState::update(DataDump dump)
