@@ -4,7 +4,7 @@
 #include <string.h>
 #include <cstring>
 
-#include "I2CInterface.h"
+#include "i2c_interface.h"
 #include "i2c_wrappers.h"
 
 void I2CInterface::initialize() {
