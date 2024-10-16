@@ -819,6 +819,10 @@ struct bmi08_sensor_data
 
     /*! Z-axis sensor data */
     int16_t z;
+
+    uint32_t norm_squared (){
+        return x*x + y*y + z*z;
+    }
 };
 
 /*!
@@ -834,6 +838,10 @@ struct bmi08_sensor_data_f
 
     /*! Z-axis sensor data */
     float z;
+
+    float norm_squared (){
+        return x*x + y*y + z*z;
+    }
 };
 
 /*!

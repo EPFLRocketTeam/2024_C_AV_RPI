@@ -1,5 +1,4 @@
 # Define individual libraries for each sensor
-
 # ADXL375
 add_library(adxl375 adxl375.cpp adxl375.h)
 target_include_directories(adxl375 INTERFACE ${DRIVERS_DIR})
