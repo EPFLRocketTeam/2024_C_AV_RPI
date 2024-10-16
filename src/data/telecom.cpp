@@ -1,7 +1,7 @@
 #include <LoRa.h>
 #include <LoopbackStream.h>
-#include "Protocol.h"
-#include "capsule.h"
+#include <Protocol.h>
+#include <capsule.h>
 #include "telecom.h"
 #include "data.h"
 
