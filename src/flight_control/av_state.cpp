@@ -2,6 +2,7 @@
 #include "av_state.h"
 #include "sensors.h"
 #include "data.h"
+#include "missing_sensors.h"
 
 
 AvState::AvState()
@@ -46,15 +47,13 @@ State AvState::fromLanded(DataDump dump) {
 
 State AvState::fromDescent(DataDump dump)
 {
-    // TODO: should the first condition in the following 'or' be removed ?
-    // TODO: should we add a if(error()) check ?
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id == CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
         return State::ERRORFLIGHT;
     }
 
-    // TODO: shouldn't we also check that the vehicule is fully depressurized ?
-    if (dump.nav.speed.z < SPEED_ZERO)
+    // If the vehicule is fully depressurized we go to the LANDED state
+    if (VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED)
     {
         return State::LANDED;
     }
@@ -118,7 +117,8 @@ State AvState::fromThrustSequence(DataDump dump)
     }
     // TODO: ensure that the following checks that the engine is properly ignited
     // and a liftoff has been detected
-    else if (dump.nav.speed.z > SPEED_ZERO)
+    // If the engine is properly ignited and a liftoff has been detected we go to the ASCENT state
+    else if (ENGINE_IGNITION == ENGINE_IGNITED || dump.nav.speed.z > SPEED_ZERO)
     {
         return State::ASCENT;
     }
@@ -130,23 +130,6 @@ State AvState::fromThrustSequence(DataDump dump)
     return State::THRUSTSEQUENCE;
 }
 
-
-// State AvState::fromManual(DataDump dump)
-// {
-//     if (error() || dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
-//     {
-//         return State::ERRORGROUND;
-//     }
-//     //check all thresholds individually
-//     //TODO: recheck if threholds are the wanted ones
-//     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
-//     {
-//         return State::ARMED;
-//     }
-//     return State::MANUAL;
-// }
-
-// TODO: check whether this function is more accurate than previous one
 State AvState::fromManual(DataDump dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
@@ -156,50 +139,15 @@ State AvState::fromManual(DataDump dump)
     return State::MANUAL;
 }
 
-// State AvState::fromArmed(DataDump dump)
-// {
-//     if (error())
-//     {
-//         return State::ERRORGROUND;
-//     }
-//     else
-//     {
-//         switch (dump.telemetry_cmd.id)
-//         {
-//             case CMD_ID::AV_CMD_IGNITION:
-//                 if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED)
-//                 {
-//                     //possible log
-//                     if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) 
-//                     {
-//                         //possible log
-//                         return State::THRUSTSEQUENCE;
-//                     }
-//                     return State::ARMED;
-//                 } 
-//                 else 
-//                 {
-//                     return State::ARMED;
-//                 }
-//                 break;
-//             case CMD_ID::AV_CMD_ABORT:
-//                 return State::ERRORGROUND;
-//             default:
-//                 return State::ARMED;
-//         }
-//     }
-// }
-
-// TODO: check whether this function is more accurate than previous one
 State AvState::fromArmed(DataDump dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
     {
         return State::THRUSTSEQUENCE;
     }
-    // TODO: add safety checks (valves open, vents open, no pressure)
     // TODO: check whether the call to the error() function should be removed
-    else if (error()) 
+    // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERROR_ON_GROUND state
+    else if (error() || VALVES = VALVES_OPEN || VENTS = VENTS_OPEN || VEHICULE_PRESSURE = VEHICULE_DEPRESSURIZED) 
     {
         return State::ERRORGROUND
     }
