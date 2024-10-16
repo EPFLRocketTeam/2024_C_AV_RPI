@@ -3,6 +3,7 @@
 #include "sensors.h"
 #include "data.h"
 #include "missing_sensors.h"
+#include "PacketDefinition_Firehorn.h" // TODO: remove
 
 
 AvState::AvState()
@@ -81,7 +82,7 @@ State AvState::fromCalibration(DataDump dump)
     }
     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_RECOVER)
     {
-        return State::INIT
+        return State::INIT;
     }
     // If all the sensors are calibrated and ready for use we go to the Manual state
     // TODO: check whether this is the right way to do 
@@ -89,7 +90,7 @@ State AvState::fromCalibration(DataDump dump)
     && dump.stat.bmi_accel_status && dump.stat.bmi_aux_accel_status
     && dump.stat.bmi_gyro_status && dump.stat.bmi_aux_gyro_status)
     {
-        return State::MANUAL
+        return State::MANUAL;
     }
     return State::CALIBRATION;
 }
@@ -125,7 +126,7 @@ State AvState::fromThrustSequence(DataDump dump)
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED)
     {
-        return State::ARMED
+        return State::ARMED;
     }
     return State::THRUSTSEQUENCE;
 }
@@ -147,9 +148,9 @@ State AvState::fromArmed(DataDump dump)
     }
     // TODO: check whether the call to the error() function should be removed
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERROR_ON_GROUND state
-    else if (error() || VALVES = VALVES_OPEN || VENTS = VENTS_OPEN || VEHICULE_PRESSURE = VEHICULE_DEPRESSURIZED) 
+    else if (error() || VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED) 
     {
-        return State::ERRORGROUND
+        return State::ERRORGROUND;
     }
     return State::ARMED;           
 }

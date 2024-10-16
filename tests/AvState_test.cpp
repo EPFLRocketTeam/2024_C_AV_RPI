@@ -1,5 +1,7 @@
 
 #include "av_state.h"
+#include <cassert>
+#include "PacketDefinition_Firehorn.h" // TODO: remove
 
 // Add more test cases as needed
 
@@ -31,5 +33,7 @@ int main(int argc, char** argv) {
     fsm.update(dump);
     assert(fsm.getCurrentState() == State::MANUAL);
     std::cout << "Sensors calibrated triggers CALIB -> MANUAL \n";
+
+    // MANUAL -> ARMED
     
 }
