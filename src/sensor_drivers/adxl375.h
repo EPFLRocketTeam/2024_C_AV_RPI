@@ -276,9 +276,6 @@ struct adxl375_data {
 	float x;
 	float y;
 	float z;
-    float norm_squared (){
-        return x*x + y*y + z*z;
-    }
 };
 
 /******************************************************************************/

@@ -10,6 +10,11 @@ target_link_libraries(bmi088_test bmi08)
 add_executable(bmp390_test BMP390_test.cpp)
 target_link_libraries(bmp390_test bmp3)
 
+
+add_executable(data_test data_test.cpp)
+target_link_libraries(data_test flight_computer)
+target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
+
 add_executable(gps_test I2CGPS_test.cpp)
 target_link_libraries(gps_test gps)
 

@@ -53,7 +53,10 @@ State AvState::fromDescent(DataDump dump)
         return State::ERRORFLIGHT;
     }
 
+    //TODO check when we can vent (not defined) 2nd stage RE
+
     // If the vehicule is immobile and fully depressurized we go to the LANDED state
+    //TODO loxpressur == zero same for fuel @cleo
     if (VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED && 
     dump.nav.speed.x == 0 && dump.nav.speed.y == 0 && dump.nav.speed.z == 0)
     {
@@ -64,6 +67,7 @@ State AvState::fromDescent(DataDump dump)
 
 State AvState::fromAscent(DataDump dump)
 {
+
     if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
@@ -75,14 +79,16 @@ State AvState::fromAscent(DataDump dump)
     }
     return State::ASCENT;
 }
+uint8_t check_status(DataDump dump){
+    //FIXME false way of checking status 
+    return dump.stat.adxl_status && dump.stat.adxl_aux_status && dump.stat.bmi_accel_status && dump.stat.bmi_aux_accel_status && dump.stat.bmi_gyro_status && dump.stat.bmi_aux_gyro_status;
+}
 
 State AvState::fromCalibration(DataDump dump)
 {
     // If the sensors are not detected or the radio signal is lost we go to the ERRORGROUND state
     // TODO: add the right checks
-    if (dump.stat.adxl_status && dump.stat.adxl_aux_status
-    && dump.stat.bmi_accel_status && dump.stat.bmi_aux_accel_status
-    && dump.stat.bmi_gyro_status && dump.stat.bmi_aux_gyro_status)
+    if (check_status(dump))
     {
         return State::ERRORGROUND;
     }
