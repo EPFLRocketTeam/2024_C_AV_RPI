@@ -34,7 +34,7 @@ bool error()
 
 
 State AvState::fromInit(DataDump dump)
-{
+{//potentiel sleep à discuter
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
     {
         return State::CALIBRATION;
@@ -43,22 +43,22 @@ State AvState::fromInit(DataDump dump)
 }
 
 State AvState::fromLanded(DataDump dump) {
+    //pot sleep
     return State::LANDED; 
 }
 
 State AvState::fromDescent(DataDump dump)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_MANUAL_DEPLOY || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-
     //TODO check when we can vent (not defined) 2nd stage RE
-
     // If the vehicule is immobile and fully depressurized we go to the LANDED state
-    //TODO loxpressur == zero same for fuel @cleo
+    //TODO loxpressur <= zero same for fuel @cleo
+    //TODO @cleo utilise nav.speed.norm()
     if (VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED && 
-    dump.nav.speed.x == 0 && dump.nav.speed.y == 0 && dump.nav.speed.z == 0)
+    dump.nav.speed.z ==0)
     {
         return State::LANDED;
     }
@@ -70,10 +70,12 @@ State AvState::fromAscent(DataDump dump)
 
     if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
+        //def comportement 
         return State::ERRORFLIGHT;
     }
-    // If the apogee is detected we move to the DESCENT state
-    else if (dump.nav.accel.z < ACCEL_ZERO)
+    // If the apogee is detected we move to the DESCENT state 
+    //Potentiellement mettre un compteur 
+    else if (dump.nav.speed.z < SPEED_ZERO)
     {
         return State::DESCENT;
     }
@@ -84,11 +86,12 @@ uint8_t check_status(DataDump dump){
     return dump.stat.adxl_status && dump.stat.adxl_aux_status && dump.stat.bmi_accel_status && dump.stat.bmi_aux_accel_status && dump.stat.bmi_gyro_status && dump.stat.bmi_aux_gyro_status;
 }
 
+
 State AvState::fromCalibration(DataDump dump)
 {
     // If the sensors are not detected or the radio signal is lost we go to the ERRORGROUND state
     // TODO: add the right checks
-    if (check_status(dump))
+    if (!check_status(dump))
     {
         return State::ERRORGROUND;
     }
@@ -97,10 +100,8 @@ State AvState::fromCalibration(DataDump dump)
         return State::INIT;
     }
     // If all the sensors are calibrated and ready for use we go to the MANUAL state
-    // TODO: check whether this is the right way to do 
-    else if (dump.stat.adxl_status && dump.stat.adxl_aux_status
-    && dump.stat.bmi_accel_status && dump.stat.bmi_aux_accel_status
-    && dump.stat.bmi_gyro_status && dump.stat.bmi_aux_gyro_status)
+    // TODO: check if calibration done (calibrate()) (when calibrate will return a bool )
+    else if (1)
     {
         return State::MANUAL;
     }
@@ -130,12 +131,15 @@ State AvState::fromThrustSequence(DataDump dump)
     }
     // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state 
     // TODO: ensure those are the right checks 
+    //replace ignited with new goat var @cleo
     else if (ENGINE_IGNITION == ENGINE_IGNITED || dump.nav.speed.z > SPEED_ZERO)
     {
         return State::LIFTOFF;
     }
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
-    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED)
+    // a bit agressive TODO: have  a counter or a sleep
+    //TODO: check FAILEDIGNIT
+    else if (0)
     {
         return State::ARMED;
     }
@@ -145,7 +149,7 @@ State AvState::fromThrustSequence(DataDump dump)
 State AvState::fromManual(DataDump dump)
 {
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
-    // TODO: ensure those are the right checks
+    // TODO: ensure those are the right checks @cleo same issues of lox pressur check
     if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED) 
     {
         return State::ERRORGROUND;
@@ -161,13 +165,15 @@ State AvState::fromArmed(DataDump dump)
 {
     // TODO: ensure those are the right checks
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
+    //@cleo vehiculepressur -> lox and fuel pressure
     if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED) 
     {
         return State::ERRORGROUND;
     }
-    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
-    {
-        return State::THRUSTSEQUENCE;
+    //TODO ok from DPR
+    else if (1){
+        //@cleo return ready state and add ready state
+        return State::ERRORGROUND;
     }
     return State::ARMED;        
 }
@@ -192,7 +198,7 @@ void AvState::update(DataDump dump)
     switch (currentState)
     {
         case State::INIT:
-            this->currentState = fromInit(dump);
+            currentState = fromInit(dump);
             break;
         case State::LANDED:
             currentState = fromLanded(dump);
@@ -221,7 +227,8 @@ void AvState::update(DataDump dump)
             currentState = fromArmed(dump);
             break;
         default:
-            currentState = State::ERRORFLIGHT;
+        //TODO log error into SD
+        break;
     }
 }
 std::string AvState::stateToString(State state)
