@@ -53,5 +53,23 @@
         "ratio": "cpp",
         "fstream": "cpp",
         "cinttypes": "cpp"
-    }
+    },
+    "gcovViewer.buildDirectories": [
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/LoRa4Raspi/CMakeFiles/LoRa4Raspi.dir/src",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/src/sensor_drivers/CMakeFiles/adxl375.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/tests/CMakeFiles/adxl375_test.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/tests/CMakeFiles/avstate_test.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/src/sensor_drivers/CMakeFiles/bmi08.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/tests/CMakeFiles/bmi088_test.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/src/sensor_drivers/CMakeFiles/bmp3.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/tests/CMakeFiles/bmp390_test.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/src/CMakeFiles/flight_computer.dir/data",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/src/CMakeFiles/flight_computer.dir/flight_control",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/src/sensor_drivers/CMakeFiles/gps.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/tests/CMakeFiles/gps_test.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/src/i2c_interface/CMakeFiles/i2c_interface.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/tests/CMakeFiles/lora_test.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/CMakeFiles/main.dir",
+        "/home/av/Documents/marin/2024_C_AV_RPI/build/tests/CMakeFiles/main_test.dir"
+    ]
 }

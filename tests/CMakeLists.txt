@@ -19,6 +19,8 @@ target_link_libraries(lora_test LoRa4Raspi)
 add_executable(main_test main_test.cpp)
 target_link_libraries(main_test flight_computer)
 
+
+
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})
 #target_include_directories(mock_sensor PUBLIC include)
