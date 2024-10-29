@@ -1,3 +1,7 @@
+# Enable testing
+enable_testing()
+
+
 add_executable(adxl375_test ADXL375_test.cpp)
 target_link_libraries(adxl375_test adxl375)
 
@@ -14,6 +18,8 @@ target_link_libraries(bmp390_test bmp3)
 add_executable(data_test data_test.cpp)
 target_link_libraries(data_test flight_computer)
 target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
+# Register the test with CTest
+add_test(NAME DataTest COMMAND data_test)
 
 add_executable(gps_test I2CGPS_test.cpp)
 target_link_libraries(gps_test gps)
