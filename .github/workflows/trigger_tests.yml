@@ -28,6 +28,7 @@ jobs:
           client-payload: |
             {
               "branch": "${{ github.head_ref }}",
+              "baseref" : "${{github.base_ref}}"
               "commit": "${{ github.sha }}",
               "repo": "${{ github.repository }}"
               "key": "${{github.event.pull_request.number}}"
