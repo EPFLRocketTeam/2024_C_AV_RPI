@@ -1,7 +1,6 @@
 # Enable testing
 enable_testing()
 
-
 add_executable(adxl375_test ADXL375_test.cpp)
 target_link_libraries(adxl375_test adxl375)
 
