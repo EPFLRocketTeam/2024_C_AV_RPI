@@ -53,8 +53,9 @@ State AvState::fromDescent(DataDump dump)
         return State::ERRORFLIGHT;
     }
 
-    // If the vehicule is fully depressurized we go to the LANDED state
-    if (VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED)
+    // If the vehicule is immobile and fully depressurized we go to the LANDED state
+    if (VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED && 
+    dump.nav.speed.x == 0 && dump.nav.speed.y == 0 && dump.nav.speed.z == 0)
     {
         return State::LANDED;
     }
@@ -63,10 +64,11 @@ State AvState::fromDescent(DataDump dump)
 
 State AvState::fromAscent(DataDump dump)
 {
-    if (error() || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
+    // If the apogee is detected we move to the DESCENT state
     else if (dump.nav.accel.z < ACCEL_ZERO)
     {
         return State::DESCENT;
@@ -76,7 +78,11 @@ State AvState::fromAscent(DataDump dump)
 
 State AvState::fromCalibration(DataDump dump)
 {
-    if (error() || dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
+    // If the sensors are not detected or the radio signal is lost we go to the ERRORGROUND state
+    // TODO: add the right checks
+    if (dump.stat.adxl_status && dump.stat.adxl_aux_status
+    && dump.stat.bmi_accel_status && dump.stat.bmi_aux_accel_status
+    && dump.stat.bmi_gyro_status && dump.stat.bmi_aux_gyro_status)
     {
         return State::ERRORGROUND;
     }
@@ -84,7 +90,7 @@ State AvState::fromCalibration(DataDump dump)
     {
         return State::INIT;
     }
-    // If all the sensors are calibrated and ready for use we go to the Manual state
+    // If all the sensors are calibrated and ready for use we go to the MANUAL state
     // TODO: check whether this is the right way to do 
     else if (dump.stat.adxl_status && dump.stat.adxl_aux_status
     && dump.stat.bmi_accel_status && dump.stat.bmi_aux_accel_status
@@ -116,12 +122,11 @@ State AvState::fromThrustSequence(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-    // TODO: ensure that the following checks that the engine is properly ignited
-    // and a liftoff has been detected
-    // If the engine is properly ignited and a liftoff has been detected we go to the ASCENT state
+    // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state 
+    // TODO: ensure those are the right checks 
     else if (ENGINE_IGNITION == ENGINE_IGNITED || dump.nav.speed.z > SPEED_ZERO)
     {
-        return State::ASCENT;
+        return State::LIFTOFF;
     }
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED)
@@ -133,7 +138,13 @@ State AvState::fromThrustSequence(DataDump dump)
 
 State AvState::fromManual(DataDump dump)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
+    // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
+    // TODO: ensure those are the right checks
+    if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED) 
+    {
+        return State::ERRORGROUND;
+    }
+    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
         return State::ARMED;
     }
@@ -142,19 +153,33 @@ State AvState::fromManual(DataDump dump)
 
 State AvState::fromArmed(DataDump dump)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
-    {
-        return State::THRUSTSEQUENCE;
-    }
-    // TODO: check whether the call to the error() function should be removed
-    // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERROR_ON_GROUND state
-    else if (error() || VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED) 
+    // TODO: ensure those are the right checks
+    // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
+    if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED) 
     {
         return State::ERRORGROUND;
     }
-    return State::ARMED;           
+    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
+    {
+        return State::THRUSTSEQUENCE;
+    }
+    return State::ARMED;        
 }
 
+State AvState::fromLiftoff(DataDump dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT) 
+    {
+        return State::ERRORFLIGHT;
+    }
+    // If the LV has cleared the minimum altitude threshold we go to the ASCENT state
+    else if (dump.nav.altitude > ALTITUDE_MIN_WANTED) 
+    {
+        return State::ASCENT;
+    }
+    return State::LIFTOFF;
+
+}
 
 void AvState::update(DataDump dump)
 {

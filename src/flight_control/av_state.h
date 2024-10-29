@@ -22,7 +22,8 @@ enum class State
     ERRORFLIGHT,
     THRUSTSEQUENCE,
     MANUAL,
-    ARMED
+    ARMED,
+    LIFTOFF
 };
 
 
@@ -54,6 +55,7 @@ private:
     State fromManual(DataDump dump);
     State fromArmed(DataDump dump);
     State fromLanded(DataDump dump);
+    State fromLiftoff(DataDump dump);
     State currentState;
 };
 
