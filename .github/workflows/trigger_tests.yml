@@ -30,6 +30,7 @@ jobs:
               "branch": "${{ github.head_ref }}",
               "commit": "${{ github.sha }}",
               "repo": "${{ github.repository }}"
+              "key": "${{github.event.pull_request.number}}"
             }
   checking:
     runs-on: ubuntu-latest
