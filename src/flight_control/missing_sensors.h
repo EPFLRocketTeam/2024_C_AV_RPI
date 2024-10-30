@@ -10,4 +10,6 @@
 #define VALVES 1
 #define VENTS 1
 
+#define PROP_OK 1
+
 #endif //MISSING_SENSORS_H

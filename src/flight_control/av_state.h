@@ -23,7 +23,8 @@ enum class State
     THRUSTSEQUENCE,
     MANUAL,
     ARMED,
-    LIFTOFF
+    LIFTOFF,
+    READY
 };
 
 
@@ -56,6 +57,7 @@ private:
     State fromArmed(DataDump dump);
     State fromLanded(DataDump dump);
     State fromLiftoff(DataDump dump);
+    State fromReady(DataDump dump);
     State currentState;
 };
 

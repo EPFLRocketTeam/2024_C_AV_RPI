@@ -55,10 +55,8 @@ State AvState::fromDescent(DataDump dump)
     }
     //TODO check when we can vent (not defined) 2nd stage RE
     // If the vehicule is immobile and fully depressurized we go to the LANDED state
-    //TODO loxpressur <= zero same for fuel @cleo
-    //TODO @cleo utilise nav.speed.norm()
-    if (VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED && 
-    dump.nav.speed.z ==0)
+    if (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0 &&
+    dump.nav.speed.norm() == 0)
     {
         return State::LANDED;
     }
@@ -132,7 +130,7 @@ State AvState::fromThrustSequence(DataDump dump)
     // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state 
     // TODO: ensure those are the right checks 
     //replace ignited with new goat var @cleo
-    else if (ENGINE_IGNITION == ENGINE_IGNITED || dump.nav.speed.z > SPEED_ZERO)
+    else if (ENGINE_IGNITION && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
     {
         return State::LIFTOFF;
     }
@@ -149,8 +147,8 @@ State AvState::fromThrustSequence(DataDump dump)
 State AvState::fromManual(DataDump dump)
 {
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
-    // TODO: ensure those are the right checks @cleo same issues of lox pressur check
-    if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED) 
+    // TODO: ensure those are the right checks
+    if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0)) 
     {
         return State::ERRORGROUND;
     }
@@ -165,15 +163,14 @@ State AvState::fromArmed(DataDump dump)
 {
     // TODO: ensure those are the right checks
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
-    //@cleo vehiculepressur -> lox and fuel pressure
-    if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || VEHICULE_PRESSURE == VEHICULE_DEPRESSURIZED) 
+    if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0)) 
     {
         return State::ERRORGROUND;
     }
-    //TODO ok from DPR
-    else if (1){
-        //@cleo return ready state and add ready state
-        return State::ERRORGROUND;
+    // TODO ok from DPR
+    else if (PROP_OK)
+    {
+        return State::READY;
     }
     return State::ARMED;        
 }
@@ -190,7 +187,15 @@ State AvState::fromLiftoff(DataDump dump)
         return State::ASCENT;
     }
     return State::LIFTOFF;
+}
 
+State AvState::fromReady(DataDump dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION) 
+    {
+        return State::THRUSTSEQUENCE;
+    }
+    return State::READY;
 }
 
 void AvState::update(DataDump dump)
