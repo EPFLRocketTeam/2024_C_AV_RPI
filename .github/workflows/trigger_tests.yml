@@ -103,7 +103,7 @@ jobs:
             xdg-open out/index.html
                       
             cd ../..
-            rm -rf 2024_C_AV_RPI
+            #rm -rf 2024_C_AV_RPI
             if [ "$failed" = true ]; then
               exit 1
             fi
