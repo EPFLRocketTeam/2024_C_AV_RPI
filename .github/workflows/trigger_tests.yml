@@ -73,6 +73,7 @@ jobs:
             ls
             cd ./UnitDir
             git clone git@github.com:EPFLRocketTeam/2024_C_AV_RPI.git
+            cd ./2024_C_AV_RPI
             git checkout ${{ github.head_ref }}
             git submodule update --init --recursive --remote
             mkdir build
@@ -85,6 +86,11 @@ jobs:
             ctest
             if [ $? -ne 0 ]; then
               failed=true
+            fi
+            cd ../..
+            rm -rf 2024_C_AV_RPI
+            if [ "$failed" = true ]; then
+              exit 1
             fi
             
             
