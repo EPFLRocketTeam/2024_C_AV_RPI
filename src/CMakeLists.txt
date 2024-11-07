@@ -44,18 +44,3 @@ target_link_libraries(flight_computer PUBLIC
     gps
 )
 
-# Enable testing if the option is set
-if(ENABLE_TESTING)
-#print in terminal that testing is enabled
-    message(STATUS "Testing is enabled")
-    enable_testing()
-    find_package(GTest REQUIRED)
-    include(GoogleTest)
-endif()
-
-# Enable coverage if the option is set
-if(ENABLE_COVERAGE)
-    message(STATUS "Coverage is enabled")
-    target_compile_options(flight_computer PUBLIC --coverage)
-    target_link_libraries(flight_computer PUBLIC --coverage)
-endif()
