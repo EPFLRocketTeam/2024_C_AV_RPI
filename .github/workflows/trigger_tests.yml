@@ -72,7 +72,7 @@ jobs:
             failed=false
             ls
             cd ./UnitDir
-            git clone
+            git clone git@github.com:EPFLRocketTeam/2024_C_AV_RPI.git
             git checkout ${{ github.head_ref }}
             git submodule update --init --recursive --remote
             mkdir build
