@@ -78,7 +78,7 @@ jobs:
             git submodule update --init --recursive --remote
             mkdir build
             cd build
-            cmake -DENABLE_TESTING=ON -DENABLE_COVERAGE=ON cmake ..
+            cmake -DENABLE_TESTING=ON -DENABLE_COVERAGE=ON ..
             make
             if [ $? -ne 0 ]; then
               failed=true
