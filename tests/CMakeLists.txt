@@ -41,8 +41,6 @@ target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
 add_test(NAME DataTest COMMAND data_test)
 
 
-
-
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})
 #target_include_directories(mock_sensor PUBLIC include)
