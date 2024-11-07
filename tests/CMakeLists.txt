@@ -1,3 +1,18 @@
+if(ENABLE_TESTING)
+#print in terminal that testing is enabled
+    message(STATUS "Testing is enabled")
+    enable_testing()
+    find_package(GTest REQUIRED)
+    include(GoogleTest)
+endif()
+
+# Enable coverage if the option is set
+if(ENABLE_COVERAGE)
+    message(STATUS "Coverage is enabled")
+    target_compile_options(flight_computer PUBLIC --coverage)
+    target_link_libraries(flight_computer PUBLIC --coverage)
+endif()
+
 add_executable(adxl375_test ADXL375_test.cpp)
 target_link_libraries(adxl375_test adxl375)
 
@@ -24,6 +39,7 @@ target_link_libraries(data_test flight_computer)
 target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
 # Register the test with CTest
 add_test(NAME DataTest COMMAND data_test)
+
 
 
 
