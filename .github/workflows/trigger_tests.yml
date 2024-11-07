@@ -84,10 +84,24 @@ jobs:
             if [ $? -ne 0 ]; then
               failed=true
             fi
-            ctest
+            ctest            
             if [ $? -ne 0 ]; then
               failed=true
             fi
+            
+            # Capture the coverage data
+            lcov --capture --directory . --output-file coverage.info
+            
+            # Filter out system and test files
+            lcov --remove coverage.info '/usr/*' --output-file coverage.info
+            lcov --remove coverage.info 'tests/*' --output-file coverage.info
+            
+            # Generate HTML report
+            genhtml coverage.info --output-directory out
+            
+            # Open the report in the default web browser
+            xdg-open out/index.html
+                      
             cd ../..
             rm -rf 2024_C_AV_RPI
             if [ "$failed" = true ]; then
