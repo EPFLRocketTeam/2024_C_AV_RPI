@@ -80,6 +80,7 @@ jobs:
             cd build
             cmake -DENABLE_TESTING=ON -DENABLE_COVERAGE=ON ..
             make
+            cd tests
             if [ $? -ne 0 ]; then
               failed=true
             fi
