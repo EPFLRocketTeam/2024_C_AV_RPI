@@ -54,8 +54,48 @@ jobs:
               exit 1
             fi
           done
+          
 
+  unit_tests:
+    runs-on: ubuntu-latest
+    needs: trigger
+    steps:
+      - name: compile and test on remote device
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SECRET_IP }}
+          username: ${{ secrets.SECRET_USER}}
+          password: ${{ secrets.SSH_PASS }}
+          port: ${{ secrets.SECRET_PORT }}
+          script: |
+            # Initialize a variable to indicate if any command failed
+            failed=false
+            ls
+            cd ./UnitDir
+            git clone
+            git checkout ${{ github.head_ref }}
+            git submodule update --init --recursive --remote
+            mkdir build
+            cd build
+            cmake -DENABLE_TESTING=ON -DENABLE_COVERAGE=ON ..
+            make
+            if [ $? -ne 0 ]; then
+              failed=true
+            fi
+            ctest
+            if [ $? -ne 0 ]; then
+              failed=true
+            fi
+            
+            
+            
   
 
     
       
+
+
+  
+
+            
+            

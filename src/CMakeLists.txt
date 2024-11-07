@@ -1,7 +1,12 @@
+
+option(ENABLE_TESTING "Enable testing" OFF)
+option(ENABLE_COVERAGE "Enable coverage" OFF)
+
 set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
 set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
 set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
+
 
 add_subdirectory(${I2C_INTERFACE_DIR})
 add_subdirectory(${DRIVERS_DIR})
@@ -38,3 +43,15 @@ target_link_libraries(flight_computer PUBLIC
     bmp3
     gps
 )
+
+# Enable testing if the option is set
+if(ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+# Enable coverage if the option is set
+if(ENABLE_COVERAGE)
+    target_compile_options(flight_computer PUBLIC --coverage)
+    target_link_libraries(flight_computer PUBLIC --coverage)
+endif()
