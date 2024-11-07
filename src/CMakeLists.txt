@@ -47,7 +47,8 @@ target_link_libraries(flight_computer PUBLIC
 # Enable testing if the option is set
 if(ENABLE_TESTING)
     enable_testing()
-    add_subdirectory(tests)
+    find_package(GTest REQUIRED)
+    include(GoogleTest)
 endif()
 
 # Enable coverage if the option is set

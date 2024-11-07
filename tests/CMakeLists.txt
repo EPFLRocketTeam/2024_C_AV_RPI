@@ -19,6 +19,12 @@ target_link_libraries(lora_test LoRa4Raspi)
 add_executable(main_test main_test.cpp)
 target_link_libraries(main_test flight_computer)
 
+add_executable(data_test data_test.cpp)
+target_link_libraries(data_test flight_computer)
+target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
+# Register the test with CTest
+add_test(NAME DataTest COMMAND data_test)
+
 
 
 #set(MOCK_SENSOR src/MockSensor.cpp)
