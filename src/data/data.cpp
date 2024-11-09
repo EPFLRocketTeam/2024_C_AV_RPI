@@ -193,7 +193,34 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_GNSS_COURSE:
             nav.course = *reinterpret_cast<double*>(data);
             break;
-            //TODO add Event and Valves
+
+        case EVENT_ARMED:
+            event.armed = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_IGNITION:
+            event.ignition = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_LIFTOFF:
+            event.liftoff = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_APOGEE:
+            event.apogee = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_DESCENT:
+            event.descent = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_FIRST_STAGE:
+            event.firstStage = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_SECOND_STAGE:
+            event.secondStage = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_RECOVERY_SENT:
+            event.recovery_sent = *reinterpret_cast<bool*>(data);
+            break;
+        case VALVES:
+            valves = *reinterpret_cast<Valves*>(data);
+            break;
     }
 }
 DataDump Data::get() const {

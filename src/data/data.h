@@ -196,8 +196,15 @@ public:
         NAV_GNSS_POS_ALT = 0x2D,
         NAV_GNSS_COURSE = 0x2E,
         //TODO deconstruct EVENT and VALVES
-        EVENT = 0x2F,
-        VALVES = 0x30,
+        EVENT_ARMED = 0x2F,
+        EVENT_IGNITION = 0x30,
+        EVENT_LIFTOFF = 0x31,
+        EVENT_APOGEE = 0x32,
+        EVENT_DESCENT = 0x33,
+        EVENT_FIRST_STAGE = 0x34,
+        EVENT_SECOND_STAGE = 0x35,
+        EVENT_RECOVERY_SENT = 0x36,
+        VALVES = 0x37
     };
 
     static inline Data& get_instance() {
