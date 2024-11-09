@@ -65,13 +65,11 @@ struct PropSensors {
 
 struct Event {
     bool   armed;
-    bool   ignition;
-    bool   liftoff;
-    bool   apogee;
-    bool   descent;
-    bool firstStage;
-    bool secondStage;
-    bool recovery_sent;
+    bool   ignited;
+    bool calibrated;
+    bool seperated;
+    bool chute_opened;
+    bool chute_unreefed;
 };
 
 struct Valves{
@@ -197,14 +195,12 @@ public:
         NAV_GNSS_COURSE = 0x2E,
         //TODO deconstruct EVENT and VALVES
         EVENT_ARMED = 0x2F,
-        EVENT_IGNITION = 0x30,
-        EVENT_LIFTOFF = 0x31,
-        EVENT_APOGEE = 0x32,
-        EVENT_DESCENT = 0x33,
-        EVENT_FIRST_STAGE = 0x34,
-        EVENT_SECOND_STAGE = 0x35,
-        EVENT_RECOVERY_SENT = 0x36,
-        VALVES = 0x37
+        EVENT_IGNITED = 0x30,
+        EVENT_CALIBRATED = 0x31,
+        EVENT_SEPERATED = 0x33,
+        EVENT_CHUTE_OPENED = 0x34,
+        EVENT_CHUTE_UNREEFED = 0x35,
+        VALVES = 0x36
     };
 
     static inline Data& get_instance() {

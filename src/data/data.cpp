@@ -197,26 +197,20 @@ void Data::write(GoatReg reg, void* data) {
         case EVENT_ARMED:
             event.armed = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_IGNITION:
-            event.ignition = *reinterpret_cast<bool*>(data);
+        case EVENT_IGNITED:
+            event.ignited = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_LIFTOFF:
-            event.liftoff = *reinterpret_cast<bool*>(data);
+        case EVENT_CALIBRATED:
+            event.calibrated = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_APOGEE:
-            event.apogee = *reinterpret_cast<bool*>(data);
+        case EVENT_SEPERATED:
+            event.seperated = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_DESCENT:
-            event.descent = *reinterpret_cast<bool*>(data);
+        case EVENT_CHUTE_OPENED:
+            event.chute_opened = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_FIRST_STAGE:
-            event.firstStage = *reinterpret_cast<bool*>(data);
-            break;
-        case EVENT_SECOND_STAGE:
-            event.secondStage = *reinterpret_cast<bool*>(data);
-            break;
-        case EVENT_RECOVERY_SENT:
-            event.recovery_sent = *reinterpret_cast<bool*>(data);
+        case EVENT_CHUTE_UNREEFED:
+            event.chute_unreefed = *reinterpret_cast<bool*>(data);
             break;
         case VALVES:
             valves = *reinterpret_cast<Valves*>(data);

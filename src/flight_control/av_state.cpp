@@ -129,7 +129,7 @@ State AvState::fromThrustSequence(DataDump dump)
     // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state 
     // TODO: ensure those are the right checks 
     //replace ignited with new goat var @cleo
-    else if (dump.event.ignition && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
+    else if (dump.event.ignited && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
     {
         return State::LIFTOFF;
     }
