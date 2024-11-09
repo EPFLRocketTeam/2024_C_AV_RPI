@@ -101,7 +101,11 @@ jobs:
             
             # Open the report in the default web browser
             xdg-open out/index.html
-                      
+            
+            source ~/.bashrc
+            /opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=${{secrets.TOKENMARIN}} -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.cfamily.compile-commands=../build/compile_commands.json -Dsonar.host.url=https://sonarcloud.io -Dsonar.scm.provider=git -Dsonar.scm.exclusions.disabled=true -Dsonar.cpp.gcov.reportPaths=../build/gcov.info -Dsonar.projectKey=EPFLRocketTeam_C_AV_SIL -Dsonar.organization=epflrocketteam-1
+            
+            
             cd ../..
             #rm -rf 2024_C_AV_RPI
             if [ "$failed" = true ]; then
