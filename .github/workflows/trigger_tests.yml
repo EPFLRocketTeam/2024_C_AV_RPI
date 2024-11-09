@@ -89,24 +89,13 @@ jobs:
               failed=true
             fi
             
-            # Capture the coverage data
-            lcov --capture --directory . --output-file coverage.info
-            
-            # Filter out system and test files
-            lcov --remove coverage.info '/usr/*' --output-file coverage.info
-            lcov --remove coverage.info 'tests/*' --output-file coverage.info
-            
-            # Generate HTML report
-            genhtml coverage.info --output-directory out
-            
-            # Open the report in the default web browser
-            xdg-open out/index.html
-            
+            find . -name "*.gcda" -exec gcov {} \;
+            cd ..
             source ~/.bashrc
-            /opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=${{secrets.TOKENMARIN}} -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.cfamily.compile-commands=../build/compile_commands.json -Dsonar.host.url=https://sonarcloud.io -Dsonar.scm.provider=git -Dsonar.scm.exclusions.disabled=true -Dsonar.cpp.gcov.reportPaths=../build/gcov.info -Dsonar.projectKey=EPFLRocketTeam_C_AV_SIL -Dsonar.organization=epflrocketteam-1
-            
-            
-            cd ../..
+            /opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=a25ce57e455d62a8212a6caa83741f8e4cf868fa -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.cfamily.compile-commands=build/compile_commands.json -Dsonar.host.url=https://sonarcloud.io -Dsonar.scm.provider=git -Dsonar.projectKey=epflrocketteam-1_2024_C_AV_RPI -Dsonar.organization=epflrocketteam-1 -Dsonar.projectBaseDir=/home/av/UnitDir/2024_C_AV_RPI -Dsonar.cfamily.gcov.reportsPath=build
+        
+        
+            cd ..
             #rm -rf 2024_C_AV_RPI
             if [ "$failed" = true ]; then
               exit 1
