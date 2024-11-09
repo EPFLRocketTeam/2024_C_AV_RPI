@@ -130,7 +130,7 @@ State AvState::fromThrustSequence(DataDump dump)
     // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state 
     // TODO: ensure those are the right checks 
     //replace ignited with new goat var @cleo
-    else if (ENGINE_IGNITION && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
+    else if (dump.event.ignition && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
     {
         return State::LIFTOFF;
     }
@@ -148,7 +148,7 @@ State AvState::fromManual(DataDump dump)
 {
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
     // TODO: ensure those are the right checks
-    if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0)) 
+    if ( !dump.valves.ValvesManual()|| (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0))
     {
         return State::ERRORGROUND;
     }
@@ -161,14 +161,15 @@ State AvState::fromManual(DataDump dump)
 
 State AvState::fromArmed(DataDump dump)
 {
-    // TODO: ensure those are the right checks
+
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
-    if (VALVES == VALVES_OPEN || VENTS == VENTS_OPEN || (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0)) 
+    //TODO: what valves are we checking
+    if ( !dump.valves.ValvesForIgnition()|| (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0))
     {
         return State::ERRORGROUND;
     }
-    // TODO ok from DPR
-    else if (PROP_OK)
+    // DPR writes into the GOAT that the vehicle is armed
+    else if (dump.event.armed)
     {
         return State::READY;
     }
@@ -231,6 +232,8 @@ void AvState::update(DataDump dump)
         case State::ARMED:
             currentState = fromArmed(dump);
             break;
+            case State::LIFTOFF:
+            currentState = fromLiftoff(dump);
         default:
         //TODO log error into SD
         break;

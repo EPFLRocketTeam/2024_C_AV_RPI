@@ -193,9 +193,18 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_GNSS_COURSE:
             nav.course = *reinterpret_cast<double*>(data);
             break;
+            //TODO add Event and Valves
     }
 }
-
 DataDump Data::get() const {
-    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav};
+    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves};
+}
+
+bool Valves::ValvesForIgnition() const {
+    //TODO:must change to fit real wanted state of valves
+    return valve1 && valve2 && vent3 && vent4;
+}
+
+bool Valves::ValvesManual() const {
+    return valve1 && valve2 && vent3 && vent4;
 }

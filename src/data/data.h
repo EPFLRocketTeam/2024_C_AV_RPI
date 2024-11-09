@@ -63,6 +63,28 @@ struct PropSensors {
     PropSensors();
 };
 
+struct Event {
+    bool   armed;
+    bool   ignition;
+    bool   liftoff;
+    bool   apogee;
+    bool   descent;
+    bool firstStage;
+    bool secondStage;
+    bool recovery_sent;
+};
+
+struct Valves{
+    bool valve1;
+    bool valve2;
+    bool vent3;
+    bool vent4;
+
+    bool ValvesForIgnition() const;
+    bool ValvesForAbort() const;
+    bool ValvesManual() const;
+};
+
 struct Vector3 {
     double x;
     double y;
@@ -105,6 +127,8 @@ struct DataDump {
     NavSensors sens;
     PropSensors prop;
     NavigationData nav;
+    Event event;
+    Valves valves;
 };
 
 /**
@@ -121,6 +145,7 @@ public:
         TLM_CMD_VALUE = 0x01,
 
         /* Navigation sensors status */
+        //TODO: sensors that have 3 32 bits values should be split into 3 registers?
         NAV_SENSOR_ADXL1_STAT = 0x02,
         NAV_SENSOR_ADXL2_STAT = 0x03,
         NAV_SENSOR_BMI1_ACCEL_STAT = 0x04,
@@ -169,7 +194,10 @@ public:
         NAV_GNSS_POS_LAT = 0x2B,
         NAV_GNSS_POS_LNG = 0x2C,
         NAV_GNSS_POS_ALT = 0x2D,
-        NAV_GNSS_COURSE = 0x2E
+        NAV_GNSS_COURSE = 0x2E,
+        //TODO deconstruct EVENT and VALVES
+        EVENT = 0x2F,
+        VALVES = 0x30,
     };
 
     static inline Data& get_instance() {
@@ -204,6 +232,8 @@ private:
     NavSensors nav_sensors;
     PropSensors prop_sensors;
     NavigationData nav;
+    Event event;
+    Valves valves;
 };
 
 #endif /* DATA_H */
