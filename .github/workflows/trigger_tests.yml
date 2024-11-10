@@ -89,6 +89,8 @@ jobs:
             fi
             
             find . -name "*.gcda" -exec gcov {} \;
+            pwd
+            ls
             cd ..
             source ~/.bashrc
             /opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=a25ce57e455d62a8212a6caa83741f8e4cf868fa -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.cfamily.compile-commands=build/compile_commands.json -Dsonar.host.url=https://sonarcloud.io -Dsonar.scm.provider=git -Dsonar.projectKey=epflrocketteam-1_2024_C_AV_RPI -Dsonar.organization=epflrocketteam-1 -Dsonar.projectBaseDir=/home/av/UnitDir/2024_C_AV_RPI -Dsonar.cfamily.gcov.reportsPath=build
