@@ -77,7 +77,7 @@ State AvState::fromCalibration(DataDump dump)
 {
     // If the sensors are not detected or the radio signal is lost we go to the ERRORGROUND state
     // TODO: add the right checks
-    if (!check_status(dump))
+    if (error())
     {
         return State::ERRORGROUND;
     }
@@ -124,7 +124,7 @@ State AvState::fromThrustSequence(DataDump dump)
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     // a bit agressive TODO: have  a counter or a sleep
     //TODO: check FAILEDIGNIT
-    else if (0)
+    else if (!dump.event.ignited)
     {
         return State::ARMED;
     }
