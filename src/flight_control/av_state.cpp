@@ -80,10 +80,14 @@ State AvState::fromCalibration(DataDump dump)
         return State::ERRORGROUND;
         //check if the calibration is done
     }
-    else
+    
+    else if(dump.stat.adxl_status == 1)
     {
-        return State::CALIBRATION;
+        return State::MANUAL;
+
     }
+        return State::CALIBRATION;
+    
 }
 
 
