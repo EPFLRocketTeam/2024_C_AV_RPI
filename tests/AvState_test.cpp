@@ -1,7 +1,8 @@
 
 #include "av_state.h"
 #include <cassert>
-#include "PacketDefinition_Firehorn.h" // TODO: remove
+
+
 
 // Add more test cases as needed
 
@@ -16,7 +17,6 @@ int main(int argc, char** argv) {
     fsm.update(dump);
     assert(fsm.getCurrentState() == State::INIT);
     std::cout << "Initial state is INIT \n";
-
     // Calibrate command should trigger INIT -> CALIBRATION
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_CALIBRATE;
     fsm.update(dump);
@@ -35,5 +35,5 @@ int main(int argc, char** argv) {
     std::cout << "Sensors calibrated triggers CALIB -> MANUAL \n";
 
     // MANUAL -> ARMED
-    
+
 }
