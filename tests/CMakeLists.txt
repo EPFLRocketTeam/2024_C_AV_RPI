@@ -5,6 +5,9 @@ target_link_libraries(adxl375_test adxl375)
 
 add_executable(avstate_test AvState_test.cpp)
 target_link_libraries(avstate_test flight_computer)
+target_include_directories(avstate_test PUBLIC ${CMAKE_SOURCE_DIR}/src/flight_control)
+# Register the test with CTest
+add_test(NAME AvStateTest COMMAND avstate_test)
 
 add_executable(bmi088_test BMI088_test.cpp)
 target_link_libraries(bmi088_test bmi08)
@@ -20,6 +23,7 @@ target_link_libraries(lora_test LoRa4Raspi)
 
 add_executable(main_test main_test.cpp)
 target_link_libraries(main_test flight_computer)
+
 
 add_executable(data_test data_test.cpp)
 target_link_libraries(data_test flight_computer)
