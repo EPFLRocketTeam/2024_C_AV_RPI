@@ -1,0 +1,205 @@
+        -:    0:Source:/home/av/UnitDir/2024_C_AV_RPI/src/data/data.cpp
+        -:    0:Graph:./build/src/CMakeFiles/flight_computer.dir/data/data.cpp.gcno
+        -:    0:Data:./build/src/CMakeFiles/flight_computer.dir/data/data.cpp.gcda
+        -:    0:Runs:3
+        -:    1:// TODO: Data logging
+        -:    2:
+        -:    3:#include "data.h"
+        -:    4:
+        3:    5:NavSensors::NavSensors()
+        3:    6::   adxl{0, 0, 0},
+        3:    7:    adxl_aux{0, 0, 0},
+        3:    8:    bmi_accel{0, 0, 0},
+        3:    9:    bmi_gyro{0, 0, 0},
+        3:   10:    bmi_aux_accel{0, 0, 0},
+        3:   11:    bmi_aux_gyro{0, 0, 0},
+        3:   12:    bmp{0, 0},
+        3:   13:    bmp_aux{0, 0}
+        3:   14:{}
+        -:   15:
+        3:   16:PropSensors::PropSensors()
+        3:   17::   N2_pressure(0),
+        3:   18:    fuel_pressure(0),
+        3:   19:    LOX_pressure(0),
+        3:   20:    fuel_level(0),
+        3:   21:    LOX_level(0),
+        3:   22:    igniter_pressure(0),
+        3:   23:    LOX_inj_pressure(0),
+        3:   24:    fuel_inj_pressure(0),
+        3:   25:    chamber_pressure(0),
+        3:   26:    N2_temperature(0),
+        3:   27:    fuel_temperature(0),
+        3:   28:    LOX_temperature(0),
+        3:   29:    igniter_temperature(0),
+        3:   30:    fuel_inj_temperature(0),
+        3:   31:    fuel_inj_cooling_temperature(0),
+        3:   32:    LOX_inj_temperature(0),
+        3:   33:    chamber_temperature(0)
+        3:   34:{}
+        -:   35:
+        3:   36:NavigationData::NavigationData()
+        3:   37::   time{0, 0, 0, 0, 0, 0, 0},
+        3:   38:    position{0, 0, 0},
+        3:   39:    speed{0, 0, 0},
+        3:   40:    accel{0, 0, 0},
+        3:   41:    attitude{0, 0, 0},
+        3:   42:    course(0),
+        3:   43:    altitude(0),
+        3:   44:    baro{0, 0}
+        3:   45:{}
+        -:   46:
+        -:   47:// const void* Data::read(GoatReg reg) {
+        -:   48://     // Big switch to read at the field given as argument
+        -:   49://     // Cast the void ptr to the type of data located at the given field
+        -:   50://     // Return the ptr, which can be later dereferenced by the caller.
+        -:   51:// }
+        -:   52:
+       12:   53:void Data::write(GoatReg reg, void* data) {
+        -:   54:    // Big switch
+        -:   55:    // Cast the void ptr to the type of data located at the given field
+        -:   56:    // Write the data.
+       12:   57:    switch (reg) {
+        3:   58:        case TLM_CMD_ID:
+        3:   59:            telemetry_cmd.id = *reinterpret_cast<CMD_ID*>(data);
+        3:   60:            break;
+        3:   61:        case TLM_CMD_VALUE:
+        3:   62:            telemetry_cmd.value = *reinterpret_cast<uint8_t*>(data);
+        3:   63:            break;
+        3:   64:        case NAV_SENSOR_ADXL1_STAT:
+        3:   65:            sensors_status.adxl_status = *reinterpret_cast<uint8_t*>(data);
+        3:   66:            break;
+        3:   67:        case NAV_SENSOR_ADXL2_STAT:
+        3:   68:            sensors_status.adxl_aux_status = *reinterpret_cast<uint8_t*>(data);
+        3:   69:            break;
+    #####:   70:        case NAV_SENSOR_BMI1_ACCEL_STAT:
+    #####:   71:            sensors_status.bmi_accel_status = *reinterpret_cast<uint8_t*>(data);
+    #####:   72:            break;
+    #####:   73:        case NAV_SENSOR_BMI2_ACCEL_STAT:
+    #####:   74:            sensors_status.bmi_aux_accel_status = *reinterpret_cast<uint8_t*>(data);
+    #####:   75:            break;
+    #####:   76:        case NAV_SENSOR_BMI1_GYRO_STAT:
+    #####:   77:            sensors_status.bmi_gyro_status = *reinterpret_cast<uint8_t*>(data);
+    #####:   78:            break;
+    #####:   79:        case NAV_SENSOR_BMI2_GYRO_STAT:
+    #####:   80:            sensors_status.bmi_aux_gyro_status = *reinterpret_cast<uint8_t*>(data);
+    #####:   81:            break;
+    #####:   82:        case NAV_SENSOR_BMP1_STAT:
+    #####:   83:            sensors_status.bmp_status = *reinterpret_cast<bmp3_status*>(data);
+    #####:   84:            break;
+    #####:   85:        case NAV_SENSOR_BMP2_STAT:
+    #####:   86:            sensors_status.bmp_aux_status = *reinterpret_cast<bmp3_status*>(data);
+    #####:   87:            break;
+    #####:   88:        case NAV_SENSOR_ADXL1_DATA:
+    #####:   89:            nav_sensors.adxl = *reinterpret_cast<adxl375_data*>(data);
+    #####:   90:            break;
+    #####:   91:        case NAV_SENSOR_ADXL2_DATA:
+    #####:   92:            nav_sensors.adxl_aux = *reinterpret_cast<adxl375_data*>(data);
+    #####:   93:            break;
+    #####:   94:        case NAV_SENSOR_BMI1_ACCEL_DATA:
+    #####:   95:            nav_sensors.bmi_accel = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+    #####:   96:            break;
+    #####:   97:        case NAV_SENSOR_BMI2_ACCEL_DATA:
+    #####:   98:            nav_sensors.bmi_aux_accel = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+    #####:   99:            break;
+    #####:  100:        case NAV_SENSOR_BMI1_GYRO_DATA:
+    #####:  101:            nav_sensors.bmi_gyro = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+    #####:  102:            break;
+    #####:  103:        case NAV_SENSOR_BMI2_GYRO_DATA:
+    #####:  104:            nav_sensors.bmi_aux_gyro = *reinterpret_cast<bmi08_sensor_data_f*>(data);
+    #####:  105:            break;
+    #####:  106:        case NAV_SENSOR_BMP1_DATA:
+    #####:  107:            nav_sensors.bmp = *reinterpret_cast<bmp3_data*>(data);
+    #####:  108:            break;
+    #####:  109:        case NAV_SENSOR_BMP2_DATA:
+    #####:  110:            nav_sensors.bmp_aux = *reinterpret_cast<bmp3_data*>(data);
+    #####:  111:            break;
+    #####:  112:        case PR_SENSOR_P_NCO:
+    #####:  113:            prop_sensors.N2_pressure = *reinterpret_cast<double*>(data);
+    #####:  114:            break;
+    #####:  115:        case PR_SENSOR_P_ETA:
+    #####:  116:            prop_sensors.fuel_pressure = *reinterpret_cast<double*>(data);
+    #####:  117:            break;
+    #####:  118:        case PR_SENSOR_P_OTA:
+    #####:  119:            prop_sensors.LOX_pressure = *reinterpret_cast<double*>(data);
+    #####:  120:            break;
+    #####:  121:        case PR_SENSOR_P_CIG:
+    #####:  122:            prop_sensors.igniter_pressure = *reinterpret_cast<double*>(data);
+    #####:  123:            break;
+    #####:  124:        case PR_SENSOR_P_EIN:
+    #####:  125:            prop_sensors.fuel_inj_pressure = *reinterpret_cast<double*>(data);
+    #####:  126:            break;
+    #####:  127:        case PR_SENSOR_P_OIN:
+    #####:  128:            prop_sensors.LOX_inj_pressure = *reinterpret_cast<double*>(data);
+    #####:  129:            break;
+    #####:  130:        case PR_SENSOR_P_CCC:
+    #####:  131:            prop_sensors.chamber_pressure = *reinterpret_cast<double*>(data);
+    #####:  132:            break;
+    #####:  133:        case PR_SENSOR_L_ETA:
+    #####:  134:            prop_sensors.fuel_level = *reinterpret_cast<double*>(data);
+    #####:  135:            break;
+    #####:  136:        case PR_SENSOR_L_OTA:
+    #####:  137:            prop_sensors.LOX_level = *reinterpret_cast<double*>(data);
+    #####:  138:            break;
+    #####:  139:        case PR_SENSOR_T_NCO:
+    #####:  140:            prop_sensors.N2_temperature = *reinterpret_cast<double*>(data);
+    #####:  141:            break;
+    #####:  142:        case PR_SENSOR_T_ETA:
+    #####:  143:            prop_sensors.fuel_temperature = *reinterpret_cast<double*>(data);
+    #####:  144:            break;
+    #####:  145:        case PR_SENSOR_T_OTA:
+    #####:  146:            prop_sensors.LOX_temperature = *reinterpret_cast<double*>(data);
+    #####:  147:            break;
+    #####:  148:        case PR_SENSOR_T_CIG:
+    #####:  149:            prop_sensors.igniter_temperature = *reinterpret_cast<double*>(data);
+    #####:  150:            break;
+    #####:  151:        case PR_SENSOR_T_EIN:
+    #####:  152:            prop_sensors.fuel_inj_temperature = *reinterpret_cast<double*>(data);
+    #####:  153:            break;
+    #####:  154:        case PR_SENSOR_T_EIN_CF:
+    #####:  155:            prop_sensors.fuel_inj_cooling_temperature = *reinterpret_cast<double*>(data);
+    #####:  156:            break;
+    #####:  157:        case PR_SENSOR_T_OIN:
+    #####:  158:            prop_sensors.LOX_inj_temperature = *reinterpret_cast<double*>(data);
+    #####:  159:            break;
+    #####:  160:        case PR_SENSOR_T_CCC:
+    #####:  161:            prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
+    #####:  162:            break;
+    #####:  163:        case NAV_GNSS_TIME_YEAR:
+    #####:  164:            nav.time.year = *reinterpret_cast<unsigned*>(data);
+    #####:  165:            break;
+    #####:  166:        case NAV_GNSS_TIME_MONTH:
+    #####:  167:            nav.time.month = *reinterpret_cast<unsigned*>(data);
+    #####:  168:            break;
+    #####:  169:        case NAV_GNSS_TIME_DAY:
+    #####:  170:            nav.time.day = *reinterpret_cast<unsigned*>(data);
+    #####:  171:            break;
+    #####:  172:        case NAV_GNSS_TIME_HOUR:
+    #####:  173:            nav.time.hour = *reinterpret_cast<unsigned*>(data);
+    #####:  174:            break;
+    #####:  175:        case NAV_GNSS_TIME_MINUTE:
+    #####:  176:            nav.time.minute = *reinterpret_cast<unsigned*>(data);
+    #####:  177:            break;
+    #####:  178:        case NAV_GNSS_TIME_SECOND:
+    #####:  179:            nav.time.second = *reinterpret_cast<unsigned*>(data);
+    #####:  180:            break;
+    #####:  181:        case NAV_GNSS_TIME_CENTI:
+    #####:  182:            nav.time.centisecond = *reinterpret_cast<unsigned*>(data);
+    #####:  183:            break;
+    #####:  184:        case NAV_GNSS_POS_LAT:
+    #####:  185:            nav.position.lat = *reinterpret_cast<double*>(data);
+    #####:  186:            break;
+    #####:  187:        case NAV_GNSS_POS_LNG:
+    #####:  188:            nav.position.lng = *reinterpret_cast<double*>(data);
+    #####:  189:            break;
+    #####:  190:        case NAV_GNSS_POS_ALT:
+    #####:  191:            nav.position.alt = *reinterpret_cast<double*>(data);
+    #####:  192:            break;
+    #####:  193:        case NAV_GNSS_COURSE:
+    #####:  194:            nav.course = *reinterpret_cast<double*>(data);
+    #####:  195:            break;
+        -:  196:    }
+       12:  197:}
+        -:  198:
+       12:  199:DataDump Data::get() const {
+       12:  200:    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav};
+        -:  201:}
