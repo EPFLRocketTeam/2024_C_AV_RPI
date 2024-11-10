@@ -6,7 +6,7 @@
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "adxl375.h"
-#include "av_state.h"
+
 
 
 /**
@@ -240,7 +240,7 @@ private:
     NavigationData nav;
     Event event;
     Valves valves;
-    State current_state;
+    uint current_state;
 
 };
 
