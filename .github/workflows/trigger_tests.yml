@@ -91,11 +91,11 @@ jobs:
             find . -name "*.gcda" -exec gcov {} \;
             source ~/.bashrc
             cd ..
-            /opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=a25ce57e455d62a8212a6caa83741f8e4cf868fa -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.cfamily.compile-commands=build/compile_commands.json -Dsonar.host.url=https://sonarcloud.io -Dsonar.scm.provider=git -Dsonar.projectKey=epflrocketteam-1_2024_C_AV_RPI -Dsonar.organization=epflrocketteam-1 -Dsonar.projectBaseDir=/home/av/UnitDir/2024_C_AV_RPI -Dsonar.cfamily.gcov.reportsPath=build -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.head_ref }} -Dsonar.pullrequest.base=${{ github.base_ref }}
+            /opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=${{ secrets.SONAR_TOKEN }} -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.cfamily.compile-commands=build/compile_commands.json -Dsonar.host.url=https://sonarcloud.io -Dsonar.scm.provider=git -Dsonar.projectKey=epflrocketteam-1_2024_C_AV_RPI -Dsonar.organization=epflrocketteam-1 -Dsonar.projectBaseDir=/home/av/UnitDir/2024_C_AV_RPI -Dsonar.cfamily.gcov.reportsPath=build -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.head_ref }} -Dsonar.pullrequest.base=${{ github.base_ref }}
         
         
             cd ..
-            #rm -rf 2024_C_AV_RPI
+            rm -rf 2024_C_AV_RPI
             if [ "$failed" = true ]; then
               exit 1
             fi
