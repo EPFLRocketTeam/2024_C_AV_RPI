@@ -215,6 +215,9 @@ void Data::write(GoatReg reg, void* data) {
         case VALVES:
             valves = *reinterpret_cast<Valves*>(data);
             break;
+            case CURRENT_STATE:
+            current_state = *reinterpret_cast<State*>(data);
+            break;
     }
 }
 DataDump Data::get() const {

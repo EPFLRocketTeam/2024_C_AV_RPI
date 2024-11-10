@@ -6,6 +6,8 @@
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "adxl375.h"
+#include "av_state.h"
+
 
 /**
  * @brief A struct made only for convenience. Holds exactly
@@ -200,7 +202,8 @@ public:
         EVENT_SEPERATED = 0x33,
         EVENT_CHUTE_OPENED = 0x34,
         EVENT_CHUTE_UNREEFED = 0x35,
-        VALVES = 0x36
+        VALVES = 0x36,
+        CURRENT_STATE = 0x37
     };
 
     static inline Data& get_instance() {
@@ -237,6 +240,8 @@ private:
     NavigationData nav;
     Event event;
     Valves valves;
+    State current_state;
+
 };
 
 #endif /* DATA_H */
