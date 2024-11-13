@@ -220,6 +220,11 @@ void AvState::update(DataDump dump)
         case State::DESCENT:
             currentState = fromDescent(dump);
             break;
+            case State::READY:
+            currentState = fromReady(dump);
+            break;
+            case State::LIFTOFF:
+            currentState = fromLiftoff(dump);
         case State::ASCENT:
             currentState = fromAscent(dump);
             break;
@@ -240,12 +245,6 @@ void AvState::update(DataDump dump)
             break;
         case State::ARMED:
             currentState = fromArmed(dump);
-            break;
-        case State::READY:
-            currentState = fromReady(dump);
-            break;
-        case State::LIFTOFF:
-            currentState = fromLiftoff(dump);
             break;
         default:
             currentState = State::ERRORFLIGHT;

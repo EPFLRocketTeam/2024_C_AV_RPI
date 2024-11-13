@@ -14,17 +14,20 @@
 enum class State
 {
     INIT,
-    LANDED,
-    DESCENT,
-    ASCENT,
     CALIBRATION,
-    ERRORGROUND,
-    ERRORFLIGHT,
-    THRUSTSEQUENCE,
     MANUAL,
     ARMED,
     READY,
-    LIFTOFF
+    LIFTOFF,
+    ERRORGROUND,
+    THRUSTSEQUENCE,
+    ASCENT,
+    LANDED,
+    DESCENT,
+    ERRORFLIGHT
+
+
+
 };
 
 
@@ -56,10 +59,9 @@ private:
     State fromManual(DataDump dump);
     State fromArmed(DataDump dump);
     State fromLanded(DataDump dump);
-    State fromReady(DataDump dump);
     State fromLiftoff(DataDump dump);
+    State fromReady(DataDump dump);
     State currentState;
 };
 
 #endif
-

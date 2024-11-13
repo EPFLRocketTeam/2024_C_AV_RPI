@@ -203,7 +203,7 @@ public:
         EVENT_CHUTE_OPENED = 0x34,
         EVENT_CHUTE_UNREEFED = 0x35,
         VALVES = 0x36,
-        CURRENT_STATE = 0x37
+        AV_STATE = 0x37
     };
 
     static inline Data& get_instance() {
@@ -240,7 +240,7 @@ private:
     NavigationData nav;
     Event event;
     Valves valves;
-    uint current_state;
+    uint8_t av_state;
 
 };
 
