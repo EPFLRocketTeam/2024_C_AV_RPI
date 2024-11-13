@@ -51,9 +51,7 @@ State AvState::fromDescent(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-
-
-    if ( dump.nav.speed.z < SPEED_ZERO)
+    else if ( dump.nav.speed.z < SPEED_ZERO)
     {
         return State::LANDED;
     }
@@ -116,15 +114,14 @@ State AvState::fromThrustSequence(DataDump dump)
     }
     // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
     // TODO: ensure those are the right checks
-    //replace ignited with new goat var @cleo
-    else if (dump.event.ignited && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
+    else if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
     {
         return State::LIFTOFF;
     }
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     // a bit agressive TODO: have  a counter or a sleep
     //TODO: check FAILEDIGNIT
-    else if (!dump.event.ignited)
+    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED)
     {
         return State::ARMED;
     }
@@ -134,15 +131,9 @@ State AvState::fromThrustSequence(DataDump dump)
 
 State AvState::fromManual(DataDump dump)
 {
-    // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
-    // TODO: ensure those are the right checks
-    if ( !dump.valves.ValvesManual()|| (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0))
-    {
-        return State::ERRORGROUND;
-    }
     //check all thresholds individually
-        //TODO: recheck i threholds are the wanted ones
-    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
+    //TODO: recheck if threholds are the wanted ones
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
         return State::ARMED;
     }
@@ -178,8 +169,44 @@ State AvState::fromArmed(DataDump dump)
                 return State::ARMED;
         }
     }
+    // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
+    // TODO: ensure those are the right checks
+    if (!dump.valves.ValvesManual()|| (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0))
+    {
+        return State::ERRORGROUND;
+    }
+    // If the propulsion is OK we go to the READY state
+    // TODO: ensure those are the right checks
+    else if (dump.prop.fuel_pressure >= FUEL_PRESSURE_WANTED && dump.prop.LOX_pressure >= LOX_PRESSURE_WANTED) 
+    {
+        return State::READY;
+    }
+    return State::ARMED;
 }
 
+State AvState::fromReady(DataDump dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
+    {
+        return State::THRUSTSEQUENCE;
+    }
+    return State::READY;
+}
+
+State AvState::fromLiftoff(DataDump dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
+    {
+        return State::ERRORFLIGHT;
+    }
+    // If the altitude threashold is cleared we go to the ASCENT state
+    // TODO: ensure those are the right checks
+    else if (dump.nav.altitude > ALTITUDE_THRESHOLD)
+    {
+        return State::ASCENT;
+    }
+    return State::LIFTOFF;
+}
 
 void AvState::update(DataDump dump)
 {
@@ -213,6 +240,12 @@ void AvState::update(DataDump dump)
             break;
         case State::ARMED:
             currentState = fromArmed(dump);
+            break;
+        case State::READY:
+            currentState = fromReady(dump);
+            break;
+        case State::LIFTOFF:
+            currentState = fromLiftoff(dump);
             break;
         default:
             currentState = State::ERRORFLIGHT;
@@ -251,6 +284,12 @@ std::string AvState::stateToString(State state)
             break;
         case State::ARMED:
             return "ARMED";
+            break;
+        case State::READY:
+            return "READY";
+            break;
+        case State::LIFTOFF:
+            return "LIFTOFF";
             break;
         default:
             return "ERROR";
