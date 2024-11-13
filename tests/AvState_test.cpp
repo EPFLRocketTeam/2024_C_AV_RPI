@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     fsm.update(dump);
     assert(fsm.getCurrentState() == State::ASCENT);
     std::cout << "Altitude threshold triggers LIFTOFF -> ASCENT\n";
-
+    
     // Simulate ASCENT -> DESCENT
     dump.nav.accel.z = ACCEL_ZERO - 1;
     fsm.update(dump);

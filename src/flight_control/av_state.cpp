@@ -66,6 +66,8 @@ State AvState::fromAscent(DataDump dump)
     }
     else if ( dump.nav.accel.z < ACCEL_ZERO)
     {
+    
+
         return State::DESCENT;
     }
     return State::ASCENT;
@@ -195,6 +197,7 @@ State AvState::fromReady(DataDump dump)
 
 State AvState::fromLiftoff(DataDump dump)
 {
+
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
@@ -225,6 +228,7 @@ void AvState::update(DataDump dump)
             break;
             case State::LIFTOFF:
             currentState = fromLiftoff(dump);
+            break;
         case State::ASCENT:
             currentState = fromAscent(dump);
             break;
