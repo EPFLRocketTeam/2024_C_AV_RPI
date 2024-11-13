@@ -49,6 +49,7 @@
 
 #include <stdexcept>
 #include <string>
+#include "bmi08_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -315,7 +316,7 @@ int8_t bmi08_i2c_deinit(uint8_t acc_dev_add, uint8_t gyro_dev_add);
 }
 #endif
 
-class Bmi088 {
+class Bmi088 : Bmi088_Interface {
 private:
     uint8_t accel_addr;
     uint8_t gyro_addr;

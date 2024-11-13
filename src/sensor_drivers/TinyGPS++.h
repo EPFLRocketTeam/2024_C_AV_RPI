@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits.h>
 #include <cmath>
 #include <chrono>
+#include "TinyGPS++_inteface.h"
 
 #define _GPS_VERSION "1.0.3" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
@@ -218,7 +219,7 @@ private:
    TinyGPSCustom *next;
 };
 
-class TinyGPSPlus
+class TinyGPSPlus : public TinyGPSPlus_Interface
 {
 public:
   TinyGPSPlus();

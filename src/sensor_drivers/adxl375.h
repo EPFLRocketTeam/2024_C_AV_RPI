@@ -47,6 +47,7 @@
 #include <stddef.h>
 #include <exception>
 #include <string>
+#include "adxl375_interface.h"
 
 /*! CPP guard */
 #ifdef __cplusplus
@@ -553,7 +554,7 @@ int8_t adxl375_i2c_deinit(uint8_t addr);
 }
 #endif /* End of CPP guard */
 
-class Adxl375 {
+class Adxl375 : public Adxl375_Interface {
 private:
 	uint8_t addr;
 	adxl375_dev dev;

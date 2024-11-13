@@ -45,6 +45,7 @@
 
 /* Header includes */
 #include "bmp3_defs.h"
+#include "bmp3_interface.h"
 #include <stdexcept>
 #include <string>
 
@@ -578,7 +579,7 @@ int8_t bmp3_i2c_deinit(uint8_t addr);
 }
 #endif /* End of CPP guard */
 
-class Bmp390 {
+class Bmp390 : public Bmp3_Interface {
 private:
     uint8_t addr;
 

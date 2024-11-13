@@ -30,6 +30,7 @@
 
 #include <stdint.h>
 #include <string>
+#include "I2CGPS_interface.h"
 
 /**\name API error codes */
 #define I2CGPS_E_NULL_PTR                         INT8_C(-1)
@@ -49,7 +50,7 @@
 #define I2C_SPEED_STANDARD        100000
 #define I2C_SPEED_FAST            400000
 
-class I2CGPS {
+class I2CGPS : public I2CGPS_Interface{
 private:
   uint8_t addr; //I2C address of the GPS module
 
