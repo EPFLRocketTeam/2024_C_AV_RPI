@@ -43,4 +43,10 @@ private:
     void update_status();
 };
 
+struct timeCode {
+    int second;
+    int nanosecond;
+};
+
+
 #endif /* SENSORS_H */

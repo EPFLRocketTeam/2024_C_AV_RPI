@@ -21,6 +21,8 @@ void Sensors::calibrate() {
     adxl2.calibrate();
 }
 
+
+
 bool Sensors::update() {
     update_status();
 
