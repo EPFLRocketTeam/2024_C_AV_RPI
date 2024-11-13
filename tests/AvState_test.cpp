@@ -1,19 +1,6 @@
 
 #include "av_state.h"
-
-
-
-// Add more test cases as needed
-
-int main(int argc, char** argv) {
-
-    
-}
-
-#include "av_state.h"
 #include <cassert>
-
-
 
 // Add more test cases as needed
 
@@ -68,28 +55,23 @@ int main(int argc, char** argv) {
     assert(fsm.getCurrentState() == State::LIFTOFF);
     std::cout << "Engine ignition triggers THRUSTSEQUENCE -> LIFTOFF\n";
 
-    // // Simulate LIFTOFF -> ASCENT
-    // dump.nav.altitude += 100; // Rocket ascending
-    // dump.nav.speed.z += 10;
-    // fsm.update(dump);
-    // assert(fsm.getCurrentState() == State::ASCENT);
-    // std::cout << "Ascent dynamics trigger LIFTOFF -> ASCENT\n";
+    // Simulate LIFTOFF -> ASCENT
+    dump.nav.altitude = ALTITUDE_THRESHOLD + 1;
+    fsm.update(dump);
+    assert(fsm.getCurrentState() == State::ASCENT);
+    std::cout << "Altitude threshold triggers LIFTOFF -> ASCENT\n";
 
-    // // Simulate ASCENT -> DESCENT
-    // dump.nav.accel.z = ACCEL_ZERO - 1; // Simulate rocket reaching apogee
-    // fsm.update(dump);
-    // assert(fsm.getCurrentState() == State::DESCENT);
-    // std::cout << "Negative acceleration triggers ASCENT -> DESCENT\n";
+    // Simulate ASCENT -> DESCENT
+    dump.nav.accel.z = ACCEL_ZERO - 1;
+    fsm.update(dump);
+    assert(fsm.getCurrentState() == State::DESCENT);
+    std::cout << "Negative acceleration triggers ASCENT -> DESCENT\n";
 
-    // // Simulate DESCENT -> LANDED
-    // dump.nav.speed.z = SPEED_ZERO - 1; // Simulate landing dynamics
-    // fsm.update(dump);
-    // assert(fsm.getCurrentState() == State::LANDED);
-    // std::cout << "Zero speed triggers DESCENT -> LANDED\n";
-
-    // // Final check
-    // std::cout << "FSM successfully completed a full cycle from INIT to LANDED.\n";
+    // Simulate DESCENT -> LANDED
+    dump.nav.speed.z = SPEED_ZERO - 1;
+    fsm.update(dump);
+    assert(fsm.getCurrentState() == State::LANDED);
+    std::cout << "Low speed triggers DESCENT -> LANDED\n";
 
     return 0;
-}
-
+} 
