@@ -17,8 +17,9 @@
 #include "TinyGPS++.h"
 #include "adxl375.h"
 #include "data.h"
+#include "../DriverInterface.h"
 
-class Sensors {
+class Sensors : public DriverInterface {
 public:
     Sensors();
     ~Sensors();

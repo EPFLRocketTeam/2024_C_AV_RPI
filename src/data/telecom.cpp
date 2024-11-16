@@ -88,6 +88,22 @@ bool Telecom::begin() {
     return true;
 }
 
+//implement policy()
+//TODO: this is an example
+
+void Telecom::policy() {
+    if (new_cmd_received) {
+        new_cmd_received = false;
+        switch (last_packet.order_id) {
+            case CMD_ID::AV_CMD_ABORT:
+                reset_cmd();
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void Telecom::send_telemetry() {
     const DataDump data = Data::get_instance().get();
 
