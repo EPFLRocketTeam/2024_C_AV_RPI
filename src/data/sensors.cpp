@@ -21,7 +21,9 @@ void Sensors::calibrate() {
     adxl2.calibrate();
 }
 
-
+double Vector3::norm() const {
+    return std::sqrt(x * x + y * y + z * z);
+}
 
 bool Sensors::update() {
     update_status();

@@ -3,7 +3,6 @@ option(ENABLE_TESTING "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable coverage" OFF)
 
 set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
-set(ACTION_DIR ${CMAKE_CURRENT_SOURCE_DIR}/action)
 set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
 set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
 set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
@@ -24,12 +23,6 @@ set(FIREHORN_FC_SOURCES
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
-
-    ${ACTION_DIR}/MIXER.cpp
-    ${ACTION_DIR}/MIXER.h
-    ${ACTION_DIR}/OUTPUT.cpp
-    ${ACTION_DIR}/OUTPUT.h
-
 
 )
 
