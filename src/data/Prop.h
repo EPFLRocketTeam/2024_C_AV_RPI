@@ -15,6 +15,13 @@ public:
     ~Prop() = default;
 
     void checkPolicy(DataDump dump) override;
+private:
+    void handleErrorFlight(DataDump dump);
+    void killIgnitor();
+    void killEngine();
+    void ventLOX();
+    void ventFuel();
+    void ventN2();
 };
 
 

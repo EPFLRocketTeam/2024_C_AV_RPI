@@ -216,7 +216,7 @@ void Data::write(GoatReg reg, void* data) {
             valves = *reinterpret_cast<Valves*>(data);
             break;
             case AV_STATE:
-            av_state = *reinterpret_cast<uint8_t*>(data);
+            av_state = *reinterpret_cast<State*>(data);
             break;
     }
 }

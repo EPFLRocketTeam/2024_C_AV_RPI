@@ -6,6 +6,7 @@
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "adxl375.h"
+#include "../flight_control/States_def.h"
 
 
 
@@ -129,7 +130,7 @@ struct DataDump {
     NavigationData nav;
     Event event;
     Valves valves;
-    uint8_t av_state;
+    State av_state;
 };
 
 /**
@@ -241,7 +242,7 @@ private:
     NavigationData nav;
     Event event;
     Valves valves;
-    uint8_t av_state;
+    State av_state;
 
 };
 

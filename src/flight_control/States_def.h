@@ -1,0 +1,27 @@
+//
+// Created by marin on 17.11.2024.
+//
+
+#ifndef FLIGHT_COMPUTER_STATES_DEF_H
+#define FLIGHT_COMPUTER_STATES_DEF_H
+
+enum class State
+{
+    INIT,
+    CALIBRATION,
+    MANUAL,
+    ARMED,
+    READY,
+    LIFTOFF,
+    ERRORGROUND,
+    THRUSTSEQUENCE,
+    ASCENT,
+    LANDED,
+    DESCENT,
+    ERRORFLIGHT
+
+
+
+};
+
+#endif //FLIGHT_COMPUTER_STATES_DEF_H

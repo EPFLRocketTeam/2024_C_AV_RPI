@@ -10,25 +10,9 @@
 #include <string>
 #include "thresholds.h"
 #include "data.h"
-
-enum class State
-{
-    INIT,
-    CALIBRATION,
-    MANUAL,
-    ARMED,
-    READY,
-    LIFTOFF,
-    ERRORGROUND,
-    THRUSTSEQUENCE,
-    ASCENT,
-    LANDED,
-    DESCENT,
-    ERRORFLIGHT
+#include "States_def.h"
 
 
-
-};
 
 
 // Path: AV-Firehorn-Rpi/include/flightControl/AvState.h
