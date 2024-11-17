@@ -83,7 +83,7 @@ jobs:
             if [ $? -ne 0 ]; then
               failed=true
             fi
-            ctest            
+            ctest --output-on-failure   
             if [ $? -ne 0 ]; then
               failed=true
             fi

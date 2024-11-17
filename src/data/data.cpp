@@ -193,9 +193,42 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_GNSS_COURSE:
             nav.course = *reinterpret_cast<double*>(data);
             break;
+
+        case EVENT_ARMED:
+            event.armed = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_IGNITED:
+            event.ignited = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_CALIBRATED:
+            event.calibrated = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_SEPERATED:
+            event.seperated = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_CHUTE_OPENED:
+            event.chute_opened = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_CHUTE_UNREEFED:
+            event.chute_unreefed = *reinterpret_cast<bool*>(data);
+            break;
+        case VALVES:
+            valves = *reinterpret_cast<Valves*>(data);
+            break;
+            case AV_STATE:
+            av_state = *reinterpret_cast<uint8_t*>(data);
+            break;
     }
 }
-
 DataDump Data::get() const {
-    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav};
+    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state};
+}
+
+bool Valves::ValvesForIgnition() const {
+    //TODO:must change to fit real wanted state of valves
+    return valve1 && valve2 && vent3 && vent4;
+}
+
+bool Valves::ValvesManual() const {
+    return valve1 && valve2 && vent3 && vent4;
 }

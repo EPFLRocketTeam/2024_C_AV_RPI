@@ -1,4 +1,7 @@
 #New CMake build file for FireHorn
+# Enable testing
+enable_testing()
+
 cmake_minimum_required(VERSION 3.22.1)
 
 project(flight_computer VERSION 0.1 LANGUAGES C CXX)
