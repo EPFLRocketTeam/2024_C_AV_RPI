@@ -129,6 +129,7 @@ struct DataDump {
     NavigationData nav;
     Event event;
     Valves valves;
+    uint8_t av_state;
 };
 
 /**

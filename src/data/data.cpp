@@ -221,7 +221,7 @@ void Data::write(GoatReg reg, void* data) {
     }
 }
 DataDump Data::get() const {
-    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves};
+    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state};
 }
 
 bool Valves::ValvesForIgnition() const {
