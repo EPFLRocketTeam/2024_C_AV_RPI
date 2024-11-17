@@ -110,3 +110,5 @@ void Sensors::update_status() {
     temp_bmp = bmp2.get_status();
     Data::get_instance().write(Data::NAV_SENSOR_BMP2_STAT, &temp_bmp);
 }
+
+

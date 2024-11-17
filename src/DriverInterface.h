@@ -4,10 +4,11 @@
 
 #ifndef FLIGHT_COMPUTER_DRIVERINTERFACE_H
 #define FLIGHT_COMPUTER_DRIVERINTERFACE_H
+#include "data.h"
 
 class DriverInterface {
 public :
-    virtual void policy() =0;
+    virtual void checkPolicy(DataDump dump) =0;
 };
 
 #endif //FLIGHT_COMPUTER_DRIVERINTERFACE_H
