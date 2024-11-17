@@ -39,8 +39,6 @@ void Prop::handleErrorFlight(DataDump dump) {
     if (dump.prop.N2_pressure > N2_PRESSURE_ZERO) {
         ventN2();
     }
-
-
 }
 
 void killIgnitor() {
