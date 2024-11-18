@@ -7,6 +7,8 @@
 #include "bmp3.h"
 #include "adxl375.h"
 
+
+
 /**
  * @brief A struct made only for convenience. Holds exactly
  * the same data than av_uplink_t, but the command ID is already
@@ -63,10 +65,31 @@ struct PropSensors {
     PropSensors();
 };
 
+struct Event {
+    bool   armed;
+    bool   ignited;
+    bool calibrated;
+    bool seperated;
+    bool chute_opened;
+    bool chute_unreefed;
+};
+
+struct Valves{
+    bool valve1;
+    bool valve2;
+    bool vent3;
+    bool vent4;
+
+    bool ValvesForIgnition() const;
+    bool ValvesForAbort() const;
+    bool ValvesManual() const;
+};
+
 struct Vector3 {
     double x;
     double y;
     double z;
+    double norm() const;
 };
 
 struct GPSCoord {
@@ -104,6 +127,9 @@ struct DataDump {
     NavSensors sens;
     PropSensors prop;
     NavigationData nav;
+    Event event;
+    Valves valves;
+    uint8_t av_state;
 };
 
 /**
@@ -120,6 +146,7 @@ public:
         TLM_CMD_VALUE = 0x01,
 
         /* Navigation sensors status */
+        //TODO: sensors that have 3 32 bits values should be split into 3 registers?
         NAV_SENSOR_ADXL1_STAT = 0x02,
         NAV_SENSOR_ADXL2_STAT = 0x03,
         NAV_SENSOR_BMI1_ACCEL_STAT = 0x04,
@@ -168,7 +195,16 @@ public:
         NAV_GNSS_POS_LAT = 0x2B,
         NAV_GNSS_POS_LNG = 0x2C,
         NAV_GNSS_POS_ALT = 0x2D,
-        NAV_GNSS_COURSE = 0x2E
+        NAV_GNSS_COURSE = 0x2E,
+        //TODO deconstruct EVENT and VALVES
+        EVENT_ARMED = 0x2F,
+        EVENT_IGNITED = 0x30,
+        EVENT_CALIBRATED = 0x31,
+        EVENT_SEPERATED = 0x33,
+        EVENT_CHUTE_OPENED = 0x34,
+        EVENT_CHUTE_UNREEFED = 0x35,
+        VALVES = 0x36,
+        AV_STATE = 0x37
     };
 
     static inline Data& get_instance() {
@@ -203,6 +239,10 @@ private:
     NavSensors nav_sensors;
     PropSensors prop_sensors;
     NavigationData nav;
+    Event event;
+    Valves valves;
+    uint8_t av_state;
+
 };
 
 #endif /* DATA_H */

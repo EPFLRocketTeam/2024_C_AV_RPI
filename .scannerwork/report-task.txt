@@ -1,0 +1,7 @@
+organization=epflrocketteam-1
+projectKey=epflrocketteam-1_2024_C_AV_RPI
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.57543
+dashboardUrl=https://sonarcloud.io/dashboard?id=epflrocketteam-1_2024_C_AV_RPI
+ceTaskId=AZMWA-CC-r7zqjJOR_Dj
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZMWA-CC-r7zqjJOR_Dj
