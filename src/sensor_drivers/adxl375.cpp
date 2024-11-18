@@ -576,7 +576,7 @@ Adxl375::Adxl375(uint8_t addr) : addr(addr) {
 	}
 }
 
-Adxl375::~Adxl375() {
+Adxl375::~Adxl375() noexcept {
 	int8_t rslt = adxl375_i2c_deinit(addr);
 	if (rslt != ADXL375_OK) {
 		printf("Error during ADXL375 I2C deinitialization: %d\n", rslt);

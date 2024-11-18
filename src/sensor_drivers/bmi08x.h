@@ -330,11 +330,11 @@ private:
 
 public:    
     Bmi088(uint8_t accel_addr, uint8_t gyro_addr);
-    ~Bmi088();
-    uint8_t get_accel_status();
-    uint8_t get_gyro_status();
-    bmi08_sensor_data_f get_accel_data();
-    bmi08_sensor_data_f get_gyro_data();
+    ~Bmi088() override;
+    uint8_t get_accel_status() override;
+    uint8_t get_gyro_status() override;
+    bmi08_sensor_data_f get_accel_data() override;
+    bmi08_sensor_data_f get_gyro_data() override;
 } ;
 
 class Bmi088Exception : public std::runtime_error {

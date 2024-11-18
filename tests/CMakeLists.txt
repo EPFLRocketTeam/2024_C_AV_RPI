@@ -1,5 +1,3 @@
-
-
 add_executable(adxl375_test ADXL375_test.cpp)
 target_link_libraries(adxl375_test adxl375)
 
@@ -30,6 +28,19 @@ target_link_libraries(data_test flight_computer)
 target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
 # Register the test with CTest
 add_test(NAME DataTest COMMAND data_test)
+
+# Define ADXL375 Test Executable
+add_executable(adxl375_test_mock adxl375_test_mock.cpp)
+target_include_directories(adxl375_test_mock
+    PRIVATE ${DRIVERS_DIR}
+    PRIVATE ${GTEST_INCLUDE_DIRS}
+)
+target_link_libraries(adxl375_test_mock
+    PRIVATE adxl375
+    PRIVATE GTest::GTest
+    PRIVATE GTest::Main
+    PRIVATE GTest::gmock
+)
 
 
 #set(MOCK_SENSOR src/MockSensor.cpp)

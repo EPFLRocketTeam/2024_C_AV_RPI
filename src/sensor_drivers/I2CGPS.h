@@ -59,18 +59,18 @@ private:
   uint8_t gpsData[MAX_PACKET_SIZE] = {0}; //The place to store valid incoming gps data
 public:
   I2CGPS(uint8_t addr = I2CGPS_ADDR);
-  ~I2CGPS();
+  ~I2CGPS() override;
 
-  void check(); //Checks module for new data
-  uint8_t available(); //Returns available number of bytes. Will call check() if zero is available.
-  uint8_t read(); //Returns the next available byte
+  void check() override; //Checks module for new data
+  uint8_t available() override; //Returns available number of bytes. Will call check() if zero is available.
+  uint8_t read() override; //Returns the next available byte
 
-  void sendMTKpacket(std::string command);
-  std::string createMTKpacket(uint16_t packetType, std::string dataField);
-  std::string calcCRCforMTK(std::string sentence); //XORs all bytes between $ and *
+  void sendMTKpacket(std::string command) override;
+  std::string createMTKpacket(uint16_t packetType, std::string dataField) override;
+  std::string calcCRCforMTK(std::string sentence) override; //XORs all bytes between $ and *
 
-  void sendPGCMDpacket(std::string command);
-  std::string createPGCMDpacket(uint16_t packetType, std::string dataField);
+  void sendPGCMDpacket(std::string command) override;
+  std::string createPGCMDpacket(uint16_t packetType, std::string dataField) override;
 };
 
 class I2CGPSException : public std::exception {
