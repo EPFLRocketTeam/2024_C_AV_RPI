@@ -73,6 +73,7 @@ struct Event {
     bool seperated;
     bool chute_opened;
     bool chute_unreefed;
+    bool command_updated;
 };
 
 struct Valves{
