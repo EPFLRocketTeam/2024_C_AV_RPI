@@ -21,6 +21,7 @@ void Sensors::calibrate() {
     adxl2.calibrate();
 }
 
+//TODO: move to data.h as inline function
 double Vector3::norm() const {
     return std::sqrt(x * x + y * y + z * z);
 }
