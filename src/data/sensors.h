@@ -18,13 +18,20 @@
 #include "adxl375.h"
 #include "data.h"
 
-class Sensors {
+class Sensors_Interface {
+public:
+    virtual ~Sensors_Interface() = default;
+    virtual void calibrate() = 0;
+    virtual bool update() = 0;
+};
+
+class Sensors : public Sensors_Interface {
 public:
     Sensors();
-    ~Sensors();
+    ~Sensors() override;
 
-    void calibrate();
-    bool update();
+    void calibrate() override;
+    bool update() override;
     // inline SensStatus get_status() const { return status; }
     // inline SensRaw get_raw() const { return raw_data; }
     // inline SensFiltered get_clean() const { return clean_data; }

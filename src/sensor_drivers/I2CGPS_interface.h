@@ -1,3 +1,5 @@
+#ifndef I2CGPS_INTERFACE_H
+#define I2CGPS_INTERFACE_H
 #include <stdint.h>
 #include <string>
 
@@ -14,3 +16,4 @@ class I2CGPS_Interface {
     virtual void sendPGCMDpacket(std::string command) = 0;
     virtual std::string createPGCMDpacket(uint16_t packetType, std::string dataField) = 0;
 };
+#endif //I2CGPS_INTERFACE_H

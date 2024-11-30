@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits.h>
 #include <cmath>
 #include <chrono>
-#include "TinyGPS++_inteface.h"
+#include "TinyGPS++_interface.h"
 
 #define _GPS_VERSION "1.0.3" // software version of this library
 #define _GPS_MPH_PER_KNOT 1.15077945
@@ -223,7 +223,7 @@ class TinyGPSPlus : public TinyGPSPlus_Interface
 {
 public:
   TinyGPSPlus();
-  bool encode(char c); // process one character received from GPS
+  bool encode(char c)override; // process one character received from GPS
   TinyGPSPlus &operator << (char c) {encode(c); return *this;}
 
   TinyGPSLocation location;
@@ -235,7 +235,7 @@ public:
   TinyGPSInteger satellites;
   TinyGPSHDOP hdop;
 
-  static const char *libraryVersion() { return _GPS_VERSION; }
+  static const char *libraryVersion() { return _GPS_VERSION; } 
 
   static double distanceBetween(double lat1, double long1, double lat2, double long2);
   static double courseTo(double lat1, double long1, double lat2, double long2);
@@ -244,10 +244,10 @@ public:
   static int32_t parseDecimal(const char *term);
   static void parseDegrees(const char *term, RawDegrees &deg);
 
-  uint32_t charsProcessed()   const { return encodedCharCount; }
-  uint32_t sentencesWithFix() const { return sentencesWithFixCount; }
-  uint32_t failedChecksum()   const { return failedChecksumCount; }
-  uint32_t passedChecksum()   const { return passedChecksumCount; }
+  uint32_t charsProcessed()   const override{ return encodedCharCount; }
+  uint32_t sentencesWithFix() const override{ return sentencesWithFixCount; }
+  uint32_t failedChecksum()   const override{ return failedChecksumCount; }
+  uint32_t passedChecksum()   const override{ return passedChecksumCount; }
 
 private:
   enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_OTHER};
