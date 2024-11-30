@@ -78,7 +78,8 @@
         "set": "cpp",
         "span": "cpp",
         "unordered_set": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "cassert": "cpp"
     },
     "gcovViewer.buildDirectories": [
         "/home/av/Documents/marin/2024_C_AV_RPI/build/LoRa4Raspi/CMakeFiles/LoRa4Raspi.dir/src",
