@@ -40,7 +40,7 @@ target_link_libraries(adxl375_test_mock
     PRIVATE GTest::gmock
 )
 
-add_library(mock_sensor MockSensor.cpp MockSensor.h)
+add_library(mock_sensor MockSensor.h)
 target_include_directories(mock_sensor PUBLIC  ${DATA_DIR} ${DRIVERS_DIR}
 )
 target_link_libraries(mock_sensor PRIVATE GTest::GTest GTest::Main GTest::gmock

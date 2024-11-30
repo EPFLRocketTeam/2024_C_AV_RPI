@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include <iostream>
 #include <unistd.h>
-#include "MockSensor.cpp"
+#include "MockSensor.h"
 
 
 using ::testing::Return;
