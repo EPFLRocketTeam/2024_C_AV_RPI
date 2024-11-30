@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc libadxl375.a CMakeFiles/adxl375.dir/adxl375.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib libadxl375.a

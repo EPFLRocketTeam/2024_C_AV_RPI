@@ -16,5 +16,13 @@ class MockTinyGPSPlus : public TinyGPSPlus_Interface {
         TinyGPSAltitude altitude;
         TinyGPSInteger satellites;
         TinyGPSHDOP hdop;
+        const TinyGPSLocation &getLocation() const override { return location; }
+        const TinyGPSDate &getDate() const override { return date; }
+        const TinyGPSTime &getTime() const override { return time; }
+        const TinyGPSSpeed &getSpeed() const override { return speed; }
+        const TinyGPSCourse &getCourse() const override { return course; }
+        const TinyGPSAltitude &getAltitude() const override { return altitude; }
+        const TinyGPSInteger &getSatellites() const override { return satellites; }
+        const TinyGPSHDOP &getHDOP() const override { return hdop; }
         
 };

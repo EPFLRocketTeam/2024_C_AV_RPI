@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc libbmi08.a CMakeFiles/bmi08.dir/bmi08a.o CMakeFiles/bmi08.dir/bmi08g.o CMakeFiles/bmi08.dir/bmi08xa.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib libbmi08.a

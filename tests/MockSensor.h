@@ -15,12 +15,12 @@
 #include "TinyGPS++_gmock.h"
 #include "sensors.h"
 
-class MockSensors : public Sensors_Interface {
+class MockSensors  {
 public:
     MockSensors();
-    ~MockSensors() override;
-    void calibrate() override;
-    bool update() override;
+    ~MockSensors() ;
+    void calibrate() ;
+    bool update() ;
     MockAdxl375 adxl1, adxl2;
     MockBMI08 bmi1, bmi2;
     MockBMP3 bmp1, bmp2;

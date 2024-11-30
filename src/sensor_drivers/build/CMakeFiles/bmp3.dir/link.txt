@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc libbmp3.a CMakeFiles/bmp3.dir/bmp3.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib libbmp3.a

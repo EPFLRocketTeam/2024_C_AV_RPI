@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc libgps.a CMakeFiles/gps.dir/I2CGPS.o CMakeFiles/gps.dir/TinyGPS++.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib libgps.a

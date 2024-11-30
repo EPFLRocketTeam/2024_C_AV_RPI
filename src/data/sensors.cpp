@@ -1,17 +1,20 @@
 #include "sensors.h"
 #include "data.h"
-
-Sensors::Sensors()
-:   adxl1(ADXL375_ADDR_I2C_PRIM),
-    adxl2(ADXL375_ADDR_I2C_SEC),
-    bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY),
-    bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY),
-    bmp1(BMP3_ADDR_I2C_PRIM),
-    bmp2(BMP3_ADDR_I2C_SEC),
-    i2cgps(),
-    gps()
+#include <iostream>
+Sensors::Sensors(Adxl375_Interface& adxl1_ref, Adxl375_Interface& adxl2_ref,
+                 Bmi088_Interface& bmi1_ref, Bmi088_Interface& bmi2_ref,
+                 Bmp3_Interface& bmp1_ref, Bmp3_Interface& bmp2_ref,
+                 I2CGPS_Interface& i2cgps_ref, TinyGPSPlus_Interface& gps_ref)
+    : adxl1(adxl1_ref),
+      adxl2(adxl2_ref),
+      bmi1(bmi1_ref),
+      bmi2(bmi2_ref),
+      bmp1(bmp1_ref),
+      bmp2(bmp2_ref),
+      i2cgps(i2cgps_ref),
+      gps(gps_ref)
 {
-    update_status();
+    //update_status();
 }
 
 Sensors::~Sensors() {}
@@ -51,7 +54,7 @@ bool Sensors::update() {
     while (i2cgps.available()) {
         gps.encode(i2cgps.read());
     }
-    if (gps.time.isUpdated()) {
+    if (gps.getTime().isUpdated()) {
         if (gps.date.isValid()) {
             unsigned temp(gps.date.year());
             Data::get_instance().write(Data::NAV_GNSS_TIME_YEAR, &temp);
@@ -104,7 +107,6 @@ void Sensors::update_status() {
     Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_STAT, &temp);
     temp = bmi2.get_gyro_status();
     Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_STAT, &temp);
-    
     auto temp_bmp(bmp1.get_status());
     Data::get_instance().write(Data::NAV_SENSOR_BMP1_STAT, &temp_bmp);
     temp_bmp = bmp2.get_status();

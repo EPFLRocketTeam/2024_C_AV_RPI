@@ -1,0 +1,7 @@
+/Users/amaurygeorge/Desktop/RocketTeam/2024_C_AV_RPI/src/sensor_drivers/build/CMakeFiles/adxl375.dir
+/Users/amaurygeorge/Desktop/RocketTeam/2024_C_AV_RPI/src/sensor_drivers/build/CMakeFiles/bmi08.dir
+/Users/amaurygeorge/Desktop/RocketTeam/2024_C_AV_RPI/src/sensor_drivers/build/CMakeFiles/bmp3.dir
+/Users/amaurygeorge/Desktop/RocketTeam/2024_C_AV_RPI/src/sensor_drivers/build/CMakeFiles/gps.dir
+/Users/amaurygeorge/Desktop/RocketTeam/2024_C_AV_RPI/src/sensor_drivers/build/CMakeFiles/adxl375_test.dir
+/Users/amaurygeorge/Desktop/RocketTeam/2024_C_AV_RPI/src/sensor_drivers/build/CMakeFiles/edit_cache.dir
+/Users/amaurygeorge/Desktop/RocketTeam/2024_C_AV_RPI/src/sensor_drivers/build/CMakeFiles/rebuild_cache.dir
