@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "adxl375.h"
+#include "adxl375_gmock.h"
 
 /************************************************************************/
 /*********                     Macros                              ******/
@@ -23,7 +24,7 @@
 
 int main(void) {
     int loop = 0;
-    Adxl375 adxl1(ADXL375_ADDR_I2C_PRIM), adxl2(ADXL375_ADDR_I2C_SEC);    
+    MockAdxl375 adxl1(ADXL375_ADDR_I2C_PRIM), adxl2(ADXL375_ADDR_I2C_SEC);    
     adxl375_data data;
     std::cout << "Calibrating..." << std::endl;
     adxl1.calibrate();

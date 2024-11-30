@@ -273,11 +273,7 @@ struct adxl375_dev {
 /*!
  * @brief adxl375 data structure
  */
-struct adxl375_data {
-	float x;
-	float y;
-	float z;
-};
+
 
 /******************************************************************************/
 /************************ Functions Declarations ******************************/
@@ -564,12 +560,12 @@ private:
 	uint8_t status = 0;
 public:
     Adxl375(uint8_t addr);
-	~Adxl375();
-    uint8_t get_status();
-    adxl375_data get_data();
-    void set_offset(adxl375_data offset_in);
-    void set_scale(float scale_in);
-    void calibrate();
+	~Adxl375() noexcept override;
+    uint8_t get_status()override;
+    adxl375_data get_data() override;
+    void set_offset(adxl375_data offset_in) override;
+    void set_scale(float scale_in) override;
+    void calibrate() override;
 } ;
 
 class Adxl375Exception : public std::exception {

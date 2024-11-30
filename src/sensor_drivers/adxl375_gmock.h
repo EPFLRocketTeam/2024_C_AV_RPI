@@ -7,13 +7,14 @@
 
 class MockAdxl375 : public Adxl375_Interface {
 public:
-    MOCK_METHOD(int8_t, init, (uint8_t addr), (override));
-    MOCK_METHOD(int8_t, deinit, (), (override));
+    MockAdxl375(uint8_t addr) : address(addr) {}
     MOCK_METHOD(uint8_t, get_status, (), (override));
     MOCK_METHOD(adxl375_data, get_data, (), (override));
-    MOCK_METHOD(void, set_offset, (const adxl375_data& offset), (override));
+    MOCK_METHOD(void, set_offset, (adxl375_data offset), (override));
     MOCK_METHOD(void, set_scale, (float scale), (override));
     MOCK_METHOD(void, calibrate, (), (override));
+private:
+    uint8_t address;
 };
 
 #endif // ADXL375_MOCK_H
