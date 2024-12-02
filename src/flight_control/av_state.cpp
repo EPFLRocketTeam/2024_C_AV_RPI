@@ -51,7 +51,7 @@ State AvState::fromDescent(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-    else if ( dump.nav.speed.z < SPEED_ZERO)
+    else if ( dump.nav.speed.z < SPEED_ZERO && dump.prop.chamber_pressure < CHAMBER_PRESSURE_ZERO)
     {
         return State::LANDED;
     }
@@ -66,8 +66,6 @@ State AvState::fromAscent(DataDump dump)
     }
     else if ( dump.nav.accel.z < ACCEL_ZERO)
     {
-    
-
         return State::DESCENT;
     }
     return State::ASCENT;
@@ -114,19 +112,22 @@ State AvState::fromThrustSequence(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-    // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
-    // TODO: ensure those are the right checks
-    else if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
-    {
-        return State::LIFTOFF;
-    }
+
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     // a bit agressive TODO: have  a counter or a sleep
     //TODO: check FAILEDIGNIT
-    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED)
+    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED || dump.prop.fuel_inj_pressure < INJECTOR_PRESSURE_WANTED_MIN )
     {
         return State::ARMED;
     }
+
+    // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
+    // TODO: ensure those are the right checks
+    else if (dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
+    {
+        return State::LIFTOFF;
+    }
+
     return State::THRUSTSEQUENCE;
 }
 
