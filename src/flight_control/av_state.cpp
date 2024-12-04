@@ -190,17 +190,17 @@ void AvState::update(DataDump dump)
     switch (currentState)
     {
         case State::INIT:
-            this->currentState = fromInit(dump);
+            currentState = fromInit(dump);
             break;
         case State::LANDED:
             currentState = fromLanded(dump);
         case State::DESCENT:
             currentState = fromDescent(dump);
             break;
-            case State::READY:
+        case State::READY:
             currentState = fromReady(dump);
             break;
-            case State::LIFTOFF:
+        case State::LIFTOFF:
             currentState = fromLiftoff(dump);
             break;
         case State::ASCENT:
