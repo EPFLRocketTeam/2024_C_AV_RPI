@@ -8,8 +8,11 @@
             std::cerr << "Assertion failed: Expected state: " << fsm.stateToString(expectedState)            \
                       << ", but got state: " << fsm.stateToString(fsm.getCurrentState()) << std::endl;\
             assert(fsm.getCurrentState() == expectedState);                                      \
-        }                                                                                  \
-    } while (0)
+        }                                          \
+        else {                                                                                \
+            std::cout << "Current state is " << fsm.stateToString(fsm.getCurrentState()) << std::endl; \
+        }                                        \
+    } while (0) 
 
 // ================== Transition functions ==================
 
@@ -201,15 +204,15 @@ void errorOnGroundFromArmed() {
 
     initToCalibration(fsm, dump);
     calibrationToManual(fsm, dump);
-    assert(fsm.getCurrentState() == State::MANUAL);
+    assert_s(State::MANUAL, fsm);
     std::cout << "CALIBRATION -> MANUAL: OK\n";
 
     manualToArmed(fsm, dump);
-    assert(fsm.getCurrentState() == State::ARMED);
+    assert_s(State::ARMED, fsm);
     std::cout << "MANUAL -> ARMED: OK\n";
 
     armedToErrorGround(fsm, dump);
-    assert(fsm.getCurrentState() == State::ERRORGROUND);
+    assert_s(State::ERRORGROUND, fsm);
     std::cout << "ARMED -> ERRORGROUND: Error is triggered as expected\n";
 
     return;
@@ -246,7 +249,7 @@ void errorInFlightFromThrustSequence() {
     armedToReady(fsm, dump);
     readyToThrustSequence(fsm, dump);
     thrustSequenceToErrorFlight(fsm, dump);
-    assert(fsm.getCurrentState() == State::ERRORFLIGHT);
+    assert_s(State::ERRORFLIGHT, fsm);
     std::cout << "THRUSTSEQUENCE -> ERRORFLIGHT: Error is triggered as expected\n";
 
     return;
@@ -267,7 +270,7 @@ void errorInFlightFromLiftoff() {
     readyToThrustSequence(fsm, dump);
     thrustSequenceToLiftoff(fsm, dump);
     liftoffToErrorFlight(fsm, dump);
-    assert(fsm.getCurrentState() == State::ERRORFLIGHT);
+    assert_s(State::ERRORFLIGHT, fsm);
     std::cout << "LIFTOFF -> ERRORFLIGHT: Error is triggered as expected\n";
 
     return;
@@ -289,7 +292,7 @@ void errorInFlightFromAscent() {
     thrustSequenceToLiftoff(fsm, dump);
     liftoffToAscent(fsm, dump);
     ascentToErrorFlight(fsm, dump);
-    assert(fsm.getCurrentState() == State::ERRORFLIGHT);
+    assert_s(State::ERRORFLIGHT, fsm);
     std::cout << "ASCENT -> ERRORFLIGHT: Error is triggered as expected\n";
 
     return;
@@ -312,7 +315,7 @@ void errorInFlightFromDescent() {
     liftoffToAscent(fsm, dump);
     ascentToDescent(fsm, dump);
     descentToErrorFlight(fsm, dump);
-    assert(fsm.getCurrentState() == State::ERRORFLIGHT);
+    assert_s(State::ERRORFLIGHT, fsm);
     std::cout << "DESCENT -> ERRORFLIGHT: Error is triggered as expected\n";
 
     return;
@@ -332,23 +335,23 @@ int main(int argc, char** argv) {
 
     // We test that all transitions are working as expected in the case of a flight without errors
     flightWithoutError();
-    std::cout << "Flight without error: OK\n";
+    std::cout << "Flight without error: OK\n"<<std::endl;
 
     // We test that the ERRORGROUND state can be triggered from the ARMED state
     errorOnGroundFromArmed();
-    std::cout << "Error on ground from ARMED: OK\n";
+    std::cout << "Error on ground from ARMED: OK\n"<<std::endl;
 
     // We test that the ERRORFLIGHT state can be triggered from the THRUSTSEQUENCE state
     errorInFlightFromThrustSequence();
-    std::cout << "Error in flight from THRUSTSEQUENCE: OK\n";
+    std::cout << "Error in flight from THRUSTSEQUENCE: OK\n"<<std::endl;
 
     // We test that the ERRORFLIGHT state can be triggered from the LIFTOFF state
     errorInFlightFromLiftoff();
-    std::cout << "Error in flight from LIFTOFF: OK\n";
+    std::cout << "Error in flight from LIFTOFF: OK\n"<<std::endl;
 
     // We test that the ERRORFLIGHT state can be triggered from the ASCENT state
     errorInFlightFromAscent();
-    std::cout << "Error in flight from ASCENT: OK\n";
+    std::cout << "Error in flight from ASCENT: OK\n"<<std::endl;
 
     return 0;
 } 
