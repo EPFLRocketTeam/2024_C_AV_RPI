@@ -95,6 +95,9 @@ void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
     dump.event.ignited = true;
     dump.nav.speed.z = SPEED_ZERO + 1;
     dump.nav.altitude = ALTITUDE_ZERO + 1;
+    dump.prop.igniter_pressure = IGNITER_PRESSURE_WANTED + 1;
+    dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED + 1;
+    dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN + 1;
     fsm.update(dump);
 }
 
@@ -132,6 +135,7 @@ void descentToErrorFlight(AvState &fsm, DataDump &dump) {
 // Function to trigger the DESCENT -> LANDED transition
 void descentToLanded(AvState &fsm, DataDump &dump) {
     dump.nav.speed.z = SPEED_ZERO - 1;
+    dump.prop.chamber_pressure = CHAMBER_PRESSURE_ZERO - 1;
     fsm.update(dump);
 }
 
