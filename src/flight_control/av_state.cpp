@@ -60,11 +60,11 @@ State AvState::fromDescent(DataDump dump)
 
 State AvState::fromAscent(DataDump dump)
 {
-    if ( dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-    else if ( dump.nav.accel.z < ACCEL_ZERO)
+    else if (dump.nav.accel.z < ACCEL_ZERO)
     {
         return State::DESCENT;
     }
@@ -116,7 +116,7 @@ State AvState::fromThrustSequence(DataDump dump)
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     // a bit agressive TODO: have  a counter or a sleep
     //TODO: check FAILEDIGNIT
-    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED || dump.prop.fuel_inj_pressure < INJECTOR_PRESSURE_WANTED_MIN )
+    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED || dump.prop.fuel_inj_pressure < INJECTOR_PRESSURE_WANTED_MIN)
     {
         return State::ARMED;
     }
