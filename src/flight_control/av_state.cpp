@@ -145,33 +145,6 @@ State AvState::fromManual(DataDump dump)
 
 State AvState::fromArmed(DataDump dump)
 {
-    if (error())
-    {
-        return State::ERRORGROUND;
-    }
-    else
-    {
-        switch (dump.telemetry_cmd.id)
-        {
-            case CMD_ID::AV_CMD_IGNITION:
-                if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED)
-                {
-                    //possible log
-                    if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) {
-                        //possible log
-                        return State::THRUSTSEQUENCE;
-                    }
-                    return State::ARMED;
-                }else {
-                    return State::ARMED;
-                }
-                break;
-            case CMD_ID::AV_CMD_ABORT:
-                return State::ERRORGROUND;
-            default:
-                return State::ARMED;
-        }
-    }
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
     // TODO: ensure those are the right checks
     if (!dump.valves.ValvesManual()|| (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0))
