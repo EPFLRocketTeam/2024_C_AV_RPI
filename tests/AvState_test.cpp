@@ -14,19 +14,19 @@
 // ================== Transition functions ==================
 
 // Function to trigger the INIT -> CALIBRATION transition
-void initToCalibration(AvState fsm, DataDump dump) {
+void initToCalibration(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_CALIBRATE;
     fsm.update(dump);
 }
 
 // Function to trigger the ERRORGROUND -> INIT transition
-void errorGroundToInit(AvState fsm, DataDump dump) {
+void errorGroundToInit(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_RECOVER;
     fsm.update(dump);
 }
 
 // Function to trigger the CALIBRATION -> MANUAL transition
-void calibrationToManual(AvState fsm, DataDump dump) {
+void calibrationToManual(AvState &fsm, DataDump &dump) {
     dump.event.calibrated = true;
     fsm.update(dump);
 }
@@ -38,13 +38,13 @@ void calibrationToManual(AvState fsm, DataDump dump) {
 // }
 
 // Function to trigger the CALIBRATION -> INIT transition
-void calibrationToInit(AvState fsm, DataDump dump) {
+void calibrationToInit(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_RECOVER;
     fsm.update(dump);
 }
 
 // Function to trigger the MANUAL -> ARMED transition
-void manualToArmed(AvState fsm, DataDump dump) {
+void manualToArmed(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ARM;
     dump.valves.valve1 = 1; 
     dump.valves.valve2 = 1; 
@@ -57,27 +57,27 @@ void manualToArmed(AvState fsm, DataDump dump) {
 
 // Function to trigger the ARMED -> ERRORGROUND transition
 // TODO: add another way to trigger this transition using the safety checks function failing
-void armedToErrorGround(AvState fsm, DataDump dump) {
+void armedToErrorGround(AvState &fsm, DataDump &dump) {
     dump.prop.fuel_pressure = 0;
     dump.prop.LOX_pressure = 0;
     fsm.update(dump);
 }
 
 // Function to trigger the ARMED -> READY transition
-void armedToReady(AvState fsm, DataDump dump) {
+void armedToReady(AvState &fsm, DataDump &dump) {
     dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED;
     dump.prop.LOX_pressure = LOX_PRESSURE_WANTED;
     fsm.update(dump);
 }
 
 // Function to trigger the READY -> THRUSTSEQUENCE transition
-void readyToThrustSequence(AvState fsm, DataDump dump) {
+void readyToThrustSequence(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_IGNITION;
     fsm.update(dump);
 }
 
 // Function to trigger the THRUSTSEQUENCE -> ARMED transition
-void thrustSequenceToArmed(AvState fsm, DataDump dump) {
+void thrustSequenceToArmed(AvState &fsm, DataDump &dump) {
     dump.prop.igniter_pressure = IGNITER_PRESSURE_WANTED - 1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED - 1;
     dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN - 1;
@@ -85,13 +85,13 @@ void thrustSequenceToArmed(AvState fsm, DataDump dump) {
 }
 
 // Function to trigger the THRUSTSEQUENCE -> ERRORFLIGHT transition
-void thrustSequenceToErrorFlight(AvState fsm, DataDump dump) {
+void thrustSequenceToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
 }
 
 // Function to trigger the THRUSTSEQUENCE -> LIFTOFF transition
-void thrustSequenceToLiftoff(AvState fsm, DataDump dump) {
+void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
     dump.event.ignited = true;
     dump.nav.speed.z = SPEED_ZERO + 1;
     dump.nav.altitude = ALTITUDE_ZERO + 1;
@@ -99,38 +99,38 @@ void thrustSequenceToLiftoff(AvState fsm, DataDump dump) {
 }
 
 // Function to trigger the LIFTOFF -> ERRORFLIGHT transition
-void liftoffToErrorFlight(AvState fsm, DataDump dump) {
+void liftoffToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
 }
 
 // Function to trigger the LIFTOFF -> ASCENT transition
-void liftoffToAscent(AvState fsm, DataDump dump) {
+void liftoffToAscent(AvState &fsm, DataDump &dump) {
     dump.nav.altitude = ALTITUDE_THRESHOLD + 1;
     fsm.update(dump);
 }
 
 // Function to trigger the ASCENT -> ERRORFLIGHT transition
-void ascentToErrorFlight(AvState fsm, DataDump dump) {
+void ascentToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
 }
 
 // Function to trigger the ASCENT -> DESCENT transition
-void ascentToDescent(AvState fsm, DataDump dump) {
+void ascentToDescent(AvState &fsm, DataDump &dump) {
     dump.nav.accel.z = ACCEL_ZERO - 1;
     fsm.update(dump);
 }
 
 // Function to trigger the DESCENT -> ERRORFLIGHT transition
-void descentToErrorFlight(AvState fsm, DataDump dump) {
+void descentToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     dump.telemetry_cmd.id =  CMD_ID::AV_CMD_MANUAL_DEPLOY;
     fsm.update(dump);
 }
 
 // Function to trigger the DESCENT -> LANDED transition
-void descentToLanded(AvState fsm, DataDump dump) {
+void descentToLanded(AvState &fsm, DataDump &dump) {
     dump.nav.speed.z = SPEED_ZERO - 1;
     fsm.update(dump);
 }
