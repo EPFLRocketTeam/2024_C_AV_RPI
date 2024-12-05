@@ -53,8 +53,6 @@ void manualToArmed(AvState &fsm, DataDump &dump) {
     dump.valves.valve2 = 1; 
     dump.valves.vent3 = 1; 
     dump.valves.vent4 = 1; 
-    dump.prop.fuel_pressure = 1.0;
-    dump.prop.LOX_pressure = 1.0;
     fsm.update(dump);
 }
 
@@ -124,7 +122,7 @@ void ascentToErrorFlight(AvState &fsm, DataDump &dump) {
 
 // Function to trigger the ASCENT -> DESCENT transition
 void ascentToDescent(AvState &fsm, DataDump &dump) {
-    dump.nav.accel.z = ACCEL_ZERO - 1;
+    dump.nav.speed.z = SPEED_ZERO - 1;
     fsm.update(dump);
 }
 
@@ -142,6 +140,13 @@ void descentToLanded(AvState &fsm, DataDump &dump) {
     fsm.update(dump);
 }
 
+// Verify that the state has not changed when nothing changes
+void sameState(AvState &fsm, DataDump &dump) {
+    State previous_state = fsm.getCurrentState();
+    fsm.update(dump);
+    assert_s(previous_state, fsm);
+}
+
 // ================== Test functions ==================
 
 // Function to test where there are no errors during the flight
@@ -154,22 +159,28 @@ void flightWithoutError() {
 
     assert_s(State::INIT, fsm);
     std::cout << "Initial state is INIT\n";
+    sameState(fsm, dump);
 
     initToCalibration(fsm, dump);
     assert_s(State::CALIBRATION, fsm);
     std::cout << "INIT -> CALIBRATION: OK\n";
+    sameState(fsm, dump);
 
     calibrationToManual(fsm, dump);
     assert_s(State::MANUAL, fsm);
     std::cout << "CALIBRATION -> MANUAL: OK\n";
+    sameState(fsm, dump);
 
     manualToArmed(fsm, dump);
     assert_s(State::ARMED, fsm);
     std::cout << "MANUAL -> ARMED: OK\n";
+    //TODO check this
+    //sameState(fsm, dump);
 
     armedToReady(fsm, dump);
     assert_s(State::READY, fsm);
     std::cout << "ARMED -> READY: OK\n";
+    sameState(fsm, dump);
 
     readyToThrustSequence(fsm, dump);
     assert_s(State::THRUSTSEQUENCE, fsm);
@@ -178,18 +189,22 @@ void flightWithoutError() {
     thrustSequenceToLiftoff(fsm, dump);
     assert_s(State::LIFTOFF, fsm);
     std::cout << "THRUSTSEQUENCE -> LIFTOFF: OK\n";
+    sameState(fsm, dump);
 
     liftoffToAscent(fsm, dump);
     assert_s(State::ASCENT, fsm);
     std::cout << "LIFTOFF -> ASCENT: OK\n";
-    
+    sameState(fsm, dump);
+
     ascentToDescent(fsm, dump);
     assert_s(State::DESCENT, fsm);
     std::cout << "ASCENT -> DESCENT: OK\n";
+    sameState(fsm, dump);
 
     descentToLanded(fsm, dump);
     assert_s(State::LANDED, fsm);
     std::cout << "DESCENT -> LANDED: OK\n";
+    sameState(fsm, dump);
 
     return;
 }

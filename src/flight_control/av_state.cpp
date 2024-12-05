@@ -65,7 +65,7 @@ State AvState::fromAscent(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-    else if (dump.nav.accel.z < ACCEL_ZERO)
+    else if (dump.nav.speed.z < SPEED_ZERO)
     {
         return State::DESCENT;
     }
