@@ -44,6 +44,15 @@ NavigationData::NavigationData()
     baro{0, 0}
 {}
 
+Event::Event()
+:   armed(false),
+    ignited(false),
+    calibrated(false),
+    seperated(false),
+    chute_opened(false),
+    chute_unreefed(false)
+{}
+
 // const void* Data::read(GoatReg reg) {
 //     // Big switch to read at the field given as argument
 //     // Cast the void ptr to the type of data located at the given field

@@ -166,6 +166,12 @@ void flightWithoutError() {
     std::cout << "INIT -> CALIBRATION: OK\n";
     sameState(fsm, dump);
 
+    calibrationToInit(fsm, dump);
+    assert_s(State::INIT, fsm);
+    std::cout << "CALIBRATION -> INIT: OK\n";
+    sameState(fsm, dump);
+    initToCalibration(fsm, dump);
+
     calibrationToManual(fsm, dump);
     assert_s(State::MANUAL, fsm);
     std::cout << "CALIBRATION -> MANUAL: OK\n";
@@ -221,15 +227,24 @@ void errorOnGroundFromArmed() {
     calibrationToManual(fsm, dump);
     assert_s(State::MANUAL, fsm);
     std::cout << "CALIBRATION -> MANUAL: OK\n";
+    sameState(fsm, dump);
 
     manualToArmed(fsm, dump);
     assert_s(State::ARMED, fsm);
     std::cout << "MANUAL -> ARMED: OK\n";
-
+    //TODO check this
+    //sameState(fsm, dump);
+    
     armedToErrorGround(fsm, dump);
     assert_s(State::ERRORGROUND, fsm);
     std::cout << "ARMED -> ERRORGROUND: Error is triggered as expected\n";
+    sameState(fsm, dump);
 
+    errorGroundToInit(fsm, dump);
+    assert_s(State::INIT, fsm);
+    std::cout << "ERRORGROUND -> INIT: OK\n";
+    sameState(fsm, dump);
+    
     return;
 }
 
@@ -368,5 +383,10 @@ int main(int argc, char** argv) {
     errorInFlightFromAscent();
     std::cout << "Error in flight from ASCENT: OK\n"<<std::endl;
 
+    errorInFlightFromDescent();
+    std::cout << "Error in flight from DESCENT: OK\n"<<std::endl;
+    
+    
     return 0;
+
 } 
