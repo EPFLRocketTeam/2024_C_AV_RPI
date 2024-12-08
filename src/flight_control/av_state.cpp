@@ -37,11 +37,11 @@ State AvState::fromInit(DataDump dump)
     {
         return State::CALIBRATION;
     }
-    return State::INIT;
+    return this->currentState;
 }
 
 State AvState::fromLanded(DataDump dump) {
-    return State::LANDED; 
+    return this->currentState;
 }
 
 State AvState::fromDescent(DataDump dump)
@@ -51,26 +51,25 @@ State AvState::fromDescent(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-    else if ( dump.nav.speed.z < SPEED_ZERO)
+    //TODO injection/igniter pressure 0 
+    else if ( dump.nav.speed.z < SPEED_ZERO && dump.prop.chamber_pressure < CHAMBER_PRESSURE_ZERO)
     {
         return State::LANDED;
     }
-    return State::DESCENT;
+    return this->currentState;
 }
 
 State AvState::fromAscent(DataDump dump)
 {
-    if ( dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
-    else if ( dump.nav.accel.z < ACCEL_ZERO)
+    else if (dump.nav.speed.z < SPEED_ZERO)
     {
-    
-
         return State::DESCENT;
     }
-    return State::ASCENT;
+    return this->currentState;
 }
 
 State AvState::fromCalibration(DataDump dump)
@@ -90,7 +89,7 @@ State AvState::fromCalibration(DataDump dump)
     {
         return State::MANUAL;
     }
-    return State::CALIBRATION;
+    return this->currentState;
 }
 
 
@@ -100,12 +99,12 @@ State AvState::fromErrorGround(DataDump dump)
     {
         return State::INIT;
     }
-    return  State::ERRORGROUND;
+    return  this->currentState;
 }
 
 State AvState::fromErrorFlight(DataDump dump)
 {
-    return State::ERRORFLIGHT;
+    return this->currentState;
 }
 
 State AvState::fromThrustSequence(DataDump dump)
@@ -114,20 +113,23 @@ State AvState::fromThrustSequence(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-    // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
-    // TODO: ensure those are the right checks
-    else if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
-    {
-        return State::LIFTOFF;
-    }
+
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     // a bit agressive TODO: have  a counter or a sleep
     //TODO: check FAILEDIGNIT
-    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED)
+    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED || dump.prop.fuel_inj_pressure < INJECTOR_PRESSURE_WANTED_MIN)
     {
         return State::ARMED;
     }
-    return State::THRUSTSEQUENCE;
+
+    // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
+    // TODO: ensure those are the right checks
+    else if (dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
+    {
+        return State::LIFTOFF;
+    }
+
+    return this->currentState;
 }
 
 
@@ -144,33 +146,6 @@ State AvState::fromManual(DataDump dump)
 
 State AvState::fromArmed(DataDump dump)
 {
-    if (error())
-    {
-        return State::ERRORGROUND;
-    }
-    else
-    {
-        switch (dump.telemetry_cmd.id)
-        {
-            case CMD_ID::AV_CMD_IGNITION:
-                if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED)
-                {
-                    //possible log
-                    if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) {
-                        //possible log
-                        return State::THRUSTSEQUENCE;
-                    }
-                    return State::ARMED;
-                }else {
-                    return State::ARMED;
-                }
-                break;
-            case CMD_ID::AV_CMD_ABORT:
-                return State::ERRORGROUND;
-            default:
-                return State::ARMED;
-        }
-    }
     // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
     // TODO: ensure those are the right checks
     if (!dump.valves.ValvesManual()|| (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0))
@@ -179,11 +154,11 @@ State AvState::fromArmed(DataDump dump)
     }
     // If the propulsion is OK we go to the READY state
     // TODO: ensure those are the right checks
-    else if (dump.prop.fuel_pressure >= FUEL_PRESSURE_WANTED && dump.prop.LOX_pressure >= LOX_PRESSURE_WANTED) 
+    else if (dump.event.armed)
     {
         return State::READY;
     }
-    return State::ARMED;
+    return this->currentState;
 }
 
 State AvState::fromReady(DataDump dump)
@@ -192,7 +167,7 @@ State AvState::fromReady(DataDump dump)
     {
         return State::THRUSTSEQUENCE;
     }
-    return State::READY;
+    return this->currentState;
 }
 
 State AvState::fromLiftoff(DataDump dump)
@@ -208,7 +183,7 @@ State AvState::fromLiftoff(DataDump dump)
     {
         return State::ASCENT;
     }
-    return State::LIFTOFF;
+    return this->currentState;
 }
 
 void AvState::update(DataDump dump)
@@ -216,17 +191,17 @@ void AvState::update(DataDump dump)
     switch (currentState)
     {
         case State::INIT:
-            this->currentState = fromInit(dump);
+            currentState = fromInit(dump);
             break;
         case State::LANDED:
             currentState = fromLanded(dump);
         case State::DESCENT:
             currentState = fromDescent(dump);
             break;
-            case State::READY:
+        case State::READY:
             currentState = fromReady(dump);
             break;
-            case State::LIFTOFF:
+        case State::LIFTOFF:
             currentState = fromLiftoff(dump);
             break;
         case State::ASCENT:
