@@ -37,11 +37,11 @@ State AvState::fromInit(DataDump dump)
     {
         return State::CALIBRATION;
     }
-    return State::INIT;
+    return this->currentState;
 }
 
 State AvState::fromLanded(DataDump dump) {
-    return State::LANDED; 
+    return this->currentState;
 }
 
 State AvState::fromDescent(DataDump dump)
@@ -56,7 +56,7 @@ State AvState::fromDescent(DataDump dump)
     {
         return State::LANDED;
     }
-    return State::DESCENT;
+    return this->currentState;
 }
 
 State AvState::fromAscent(DataDump dump)
@@ -69,7 +69,7 @@ State AvState::fromAscent(DataDump dump)
     {
         return State::DESCENT;
     }
-    return State::ASCENT;
+    return this->currentState;
 }
 
 State AvState::fromCalibration(DataDump dump)
@@ -89,7 +89,7 @@ State AvState::fromCalibration(DataDump dump)
     {
         return State::MANUAL;
     }
-    return State::CALIBRATION;
+    return this->currentState;
 }
 
 
@@ -99,12 +99,12 @@ State AvState::fromErrorGround(DataDump dump)
     {
         return State::INIT;
     }
-    return  State::ERRORGROUND;
+    return  this->currentState;
 }
 
 State AvState::fromErrorFlight(DataDump dump)
 {
-    return State::ERRORFLIGHT;
+    return this->currentState;
 }
 
 State AvState::fromThrustSequence(DataDump dump)
@@ -129,7 +129,7 @@ State AvState::fromThrustSequence(DataDump dump)
         return State::LIFTOFF;
     }
 
-    return State::THRUSTSEQUENCE;
+    return this->currentState;
 }
 
 
@@ -154,11 +154,11 @@ State AvState::fromArmed(DataDump dump)
     }
     // If the propulsion is OK we go to the READY state
     // TODO: ensure those are the right checks
-    else if (dump.prop.fuel_pressure >= FUEL_PRESSURE_WANTED && dump.prop.LOX_pressure >= LOX_PRESSURE_WANTED) 
+    else if (dump.event.armed)
     {
         return State::READY;
     }
-    return State::ARMED;
+    return this->currentState;
 }
 
 State AvState::fromReady(DataDump dump)
@@ -167,7 +167,7 @@ State AvState::fromReady(DataDump dump)
     {
         return State::THRUSTSEQUENCE;
     }
-    return State::READY;
+    return this->currentState;
 }
 
 State AvState::fromLiftoff(DataDump dump)
@@ -183,7 +183,7 @@ State AvState::fromLiftoff(DataDump dump)
     {
         return State::ASCENT;
     }
-    return State::LIFTOFF;
+    return this->currentState;
 }
 
 void AvState::update(DataDump dump)
