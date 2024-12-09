@@ -123,7 +123,7 @@ void ascentToErrorFlight(AvState &fsm, DataDump &dump) {
 
 // Function to trigger the ASCENT -> DESCENT transition
 void ascentToDescent(AvState &fsm, DataDump &dump) {
-    dump.nav.speed.z = SPEED_ZERO - 1;
+    dump.nav.speed.z = SPEED_ZERO * 0.1;
     fsm.update(dump);
 }
 
@@ -136,7 +136,9 @@ void descentToErrorFlight(AvState &fsm, DataDump &dump) {
 
 // Function to trigger the DESCENT -> LANDED transition
 void descentToLanded(AvState &fsm, DataDump &dump) {
-    dump.nav.speed.z = SPEED_ZERO - 1;
+    dump.nav.speed.z = SPEED_ZERO * 0.1;
+    dump.nav.speed.x = SPEED_ZERO * 0.1;
+    dump.nav.speed.y = SPEED_ZERO * 0.1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_ZERO - 1;
     fsm.update(dump);
 }
