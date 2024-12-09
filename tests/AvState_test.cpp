@@ -66,6 +66,7 @@ void armedToErrorGround(AvState &fsm, DataDump &dump) {
 
 // Function to trigger the ARMED -> READY transition
 void armedToReady(AvState &fsm, DataDump &dump) {
+    dump.event.armed = true;
     dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED;
     dump.prop.LOX_pressure = LOX_PRESSURE_WANTED;
     fsm.update(dump);
