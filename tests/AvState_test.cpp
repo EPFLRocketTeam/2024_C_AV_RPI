@@ -16,34 +16,52 @@
 
 // ================== Transition functions ==================
 
+// Verify that the state has not changed when nothing changes
+void sameState(AvState &fsm, DataDump &dump) {
+    State previous_state = fsm.getCurrentState();
+    fsm.update(dump);
+    assert_s(previous_state, fsm);
+    std::cout << "State remains the same\n";
+}
+
 // Function to trigger the INIT -> CALIBRATION transition
 void initToCalibration(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_CALIBRATE;
     fsm.update(dump);
+    assert_s(State::CALIBRATION, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the ERRORGROUND -> INIT transition
 void errorGroundToInit(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_RECOVER;
     fsm.update(dump);
+    assert_s(State::INIT, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the CALIBRATION -> MANUAL transition
 void calibrationToManual(AvState &fsm, DataDump &dump) {
     dump.event.calibrated = true;
     fsm.update(dump);
+    assert_s(State::MANUAL, fsm);
+    sameState(fsm, dump);
 }
 
 // TODO: implement the error() function in av_state.cpp
 // // Function to trigger the CALIBRATION -> ERRORGROUND transition
 // void calibrationToErrorGround(AvState fsm, DataDump dump) {
 //     fsm.update(dump);
+//     assert_s(State::ERRORGROUND, fsm);
+//     sameState(fsm, dump);
 // }
 
 // Function to trigger the CALIBRATION -> INIT transition
 void calibrationToInit(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_RECOVER;
     fsm.update(dump);
+    assert_s(State::INIT, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the MANUAL -> ARMED transition
@@ -54,6 +72,8 @@ void manualToArmed(AvState &fsm, DataDump &dump) {
     dump.valves.vent3 = 1; 
     dump.valves.vent4 = 1; 
     fsm.update(dump);
+    assert_s(State::ARMED, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the ARMED -> ERRORGROUND transition
@@ -62,6 +82,8 @@ void armedToErrorGround(AvState &fsm, DataDump &dump) {
     dump.prop.fuel_pressure = 0;
     dump.prop.LOX_pressure = 0;
     fsm.update(dump);
+    assert_s(State::ERRORGROUND, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the ARMED -> READY transition
@@ -70,12 +92,16 @@ void armedToReady(AvState &fsm, DataDump &dump) {
     dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED;
     dump.prop.LOX_pressure = LOX_PRESSURE_WANTED;
     fsm.update(dump);
+    assert_s(State::READY, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the READY -> THRUSTSEQUENCE transition
 void readyToThrustSequence(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_IGNITION;
     fsm.update(dump);
+    assert_s(State::THRUSTSEQUENCE, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the THRUSTSEQUENCE -> ARMED transition
@@ -84,12 +110,16 @@ void thrustSequenceToArmed(AvState &fsm, DataDump &dump) {
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED - 1;
     dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN - 1;
     fsm.update(dump);
+    assert_s(State::ARMED, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the THRUSTSEQUENCE -> ERRORFLIGHT transition
 void thrustSequenceToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
+    assert_s(State::ERRORFLIGHT, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the THRUSTSEQUENCE -> LIFTOFF transition
@@ -101,30 +131,40 @@ void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED + 1;
     dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN + 1;
     fsm.update(dump);
+    assert_s(State::LIFTOFF, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the LIFTOFF -> ERRORFLIGHT transition
 void liftoffToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
+    assert_s(State::ERRORFLIGHT, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the LIFTOFF -> ASCENT transition
 void liftoffToAscent(AvState &fsm, DataDump &dump) {
     dump.nav.altitude = ALTITUDE_THRESHOLD + 1;
     fsm.update(dump);
+    assert_s(State::ASCENT, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the ASCENT -> ERRORFLIGHT transition
 void ascentToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
+    assert_s(State::ERRORFLIGHT, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the ASCENT -> DESCENT transition
 void ascentToDescent(AvState &fsm, DataDump &dump) {
     dump.nav.speed.z = SPEED_ZERO * 0.1;
     fsm.update(dump);
+    assert_s(State::DESCENT, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the DESCENT -> ERRORFLIGHT transition
@@ -132,6 +172,8 @@ void descentToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     dump.telemetry_cmd.id =  CMD_ID::AV_CMD_MANUAL_DEPLOY;
     fsm.update(dump);
+    assert_s(State::ERRORFLIGHT, fsm);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the DESCENT -> LANDED transition
@@ -141,14 +183,10 @@ void descentToLanded(AvState &fsm, DataDump &dump) {
     dump.nav.speed.y = SPEED_ZERO * 0.1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_ZERO - 1;
     fsm.update(dump);
+    assert_s(State::LANDED, fsm);
+    sameState(fsm, dump);
 }
 
-// Verify that the state has not changed when nothing changes
-void sameState(AvState &fsm, DataDump &dump) {
-    State previous_state = fsm.getCurrentState();
-    fsm.update(dump);
-    assert_s(previous_state, fsm);
-}
 
 // ================== Test functions ==================
 
@@ -161,60 +199,16 @@ void flightWithoutError() {
     DataDump dump;
 
     assert_s(State::INIT, fsm);
-    std::cout << "Initial state is INIT\n";
-    sameState(fsm, dump);
-
     initToCalibration(fsm, dump);
-    assert_s(State::CALIBRATION, fsm);
-    std::cout << "INIT -> CALIBRATION: OK\n";
-    sameState(fsm, dump);
-
-    calibrationToInit(fsm, dump);
-    assert_s(State::INIT, fsm);
-    std::cout << "CALIBRATION -> INIT: OK\n";
-    sameState(fsm, dump);
-    initToCalibration(fsm, dump);
-
     calibrationToManual(fsm, dump);
-    assert_s(State::MANUAL, fsm);
-    std::cout << "CALIBRATION -> MANUAL: OK\n";
-    sameState(fsm, dump);
-
     manualToArmed(fsm, dump);
-    assert_s(State::ARMED, fsm);
-    std::cout << "MANUAL -> ARMED: OK\n";
-    //TODO check this
-    //sameState(fsm, dump);
-
     armedToReady(fsm, dump);
-    assert_s(State::READY, fsm);
-    std::cout << "ARMED -> READY: OK\n";
-    sameState(fsm, dump);
-
     readyToThrustSequence(fsm, dump);
-    assert_s(State::THRUSTSEQUENCE, fsm);
-    std::cout << "READY -> THRUSTSEQUENCE: OK\n";
-
     thrustSequenceToLiftoff(fsm, dump);
-    assert_s(State::LIFTOFF, fsm);
-    std::cout << "THRUSTSEQUENCE -> LIFTOFF: OK\n";
-    sameState(fsm, dump);
-
     liftoffToAscent(fsm, dump);
-    assert_s(State::ASCENT, fsm);
-    std::cout << "LIFTOFF -> ASCENT: OK\n";
-    sameState(fsm, dump);
-
     ascentToDescent(fsm, dump);
-    assert_s(State::DESCENT, fsm);
-    std::cout << "ASCENT -> DESCENT: OK\n";
-    sameState(fsm, dump);
-
     descentToLanded(fsm, dump);
-    assert_s(State::LANDED, fsm);
-    std::cout << "DESCENT -> LANDED: OK\n";
-    sameState(fsm, dump);
-
+    
     return;
 }
 
@@ -226,27 +220,12 @@ void errorOnGroundFromArmed() {
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
 
+    assert_s(State::INIT, fsm);
     initToCalibration(fsm, dump);
     calibrationToManual(fsm, dump);
-    assert_s(State::MANUAL, fsm);
-    std::cout << "CALIBRATION -> MANUAL: OK\n";
     sameState(fsm, dump);
-
     manualToArmed(fsm, dump);
-    assert_s(State::ARMED, fsm);
-    std::cout << "MANUAL -> ARMED: OK\n";
-    //TODO check this
-    //sameState(fsm, dump);
-    
     armedToErrorGround(fsm, dump);
-    assert_s(State::ERRORGROUND, fsm);
-    std::cout << "ARMED -> ERRORGROUND: Error is triggered as expected\n";
-    sameState(fsm, dump);
-
-    errorGroundToInit(fsm, dump);
-    assert_s(State::INIT, fsm);
-    std::cout << "ERRORGROUND -> INIT: OK\n";
-    sameState(fsm, dump);
     
     return;
 }
@@ -260,10 +239,9 @@ void errorOnGroundFromArmed() {
 //     // Initialize a DataDump object to simulate different inputs
 //     DataDump dump;
 
+//     assert_s(State::INIT, fsm);
 //     initToCalibration(fsm, dump);
 //     calibrationToErrorGround(fsm, dump);
-//     assert(fsm.getCurrentState() == State::ERRORGROUND);
-//     std::cout << "CALIBRATION -> ERRORGROUND: Error is triggered as expected\n";
 
 //     return;
 // }
@@ -276,14 +254,13 @@ void errorInFlightFromThrustSequence() {
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
 
+    assert_s(State::INIT, fsm);
     initToCalibration(fsm, dump);
     calibrationToManual(fsm, dump);
     manualToArmed(fsm, dump);
     armedToReady(fsm, dump);
     readyToThrustSequence(fsm, dump);
     thrustSequenceToErrorFlight(fsm, dump);
-    assert_s(State::ERRORFLIGHT, fsm);
-    std::cout << "THRUSTSEQUENCE -> ERRORFLIGHT: Error is triggered as expected\n";
 
     return;
 }
@@ -296,6 +273,7 @@ void errorInFlightFromLiftoff() {
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
 
+    assert_s(State::INIT, fsm);
     initToCalibration(fsm, dump);
     calibrationToManual(fsm, dump);
     manualToArmed(fsm, dump);
@@ -303,9 +281,7 @@ void errorInFlightFromLiftoff() {
     readyToThrustSequence(fsm, dump);
     thrustSequenceToLiftoff(fsm, dump);
     liftoffToErrorFlight(fsm, dump);
-    assert_s(State::ERRORFLIGHT, fsm);
-    std::cout << "LIFTOFF -> ERRORFLIGHT: Error is triggered as expected\n";
-
+    
     return;
 }
 
@@ -317,6 +293,7 @@ void errorInFlightFromAscent() {
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
 
+    assert_s(State::INIT, fsm);
     initToCalibration(fsm, dump);
     calibrationToManual(fsm, dump);
     manualToArmed(fsm, dump);
@@ -325,9 +302,7 @@ void errorInFlightFromAscent() {
     thrustSequenceToLiftoff(fsm, dump);
     liftoffToAscent(fsm, dump);
     ascentToErrorFlight(fsm, dump);
-    assert_s(State::ERRORFLIGHT, fsm);
-    std::cout << "ASCENT -> ERRORFLIGHT: Error is triggered as expected\n";
-
+    
     return;
 }
 
@@ -339,6 +314,7 @@ void errorInFlightFromDescent() {
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
 
+    assert_s(State::INIT, fsm);
     initToCalibration(fsm, dump);
     calibrationToManual(fsm, dump);
     manualToArmed(fsm, dump);
@@ -348,9 +324,86 @@ void errorInFlightFromDescent() {
     liftoffToAscent(fsm, dump);
     ascentToDescent(fsm, dump);
     descentToErrorFlight(fsm, dump);
-    assert_s(State::ERRORFLIGHT, fsm);
-    std::cout << "DESCENT -> ERRORFLIGHT: Error is triggered as expected\n";
 
+    return;
+}
+
+// Function to test whether when the pressure is too low the transition from THRUSTSEQUENCE to ARMED is triggered
+void pressureTooLow() {
+    // Instantiate AvState
+    AvState fsm;
+
+    // Initialize a DataDump object to simulate different inputs
+    DataDump dump;
+
+    assert_s(State::INIT, fsm);
+    initToCalibration(fsm, dump);
+    calibrationToManual(fsm, dump);
+    manualToArmed(fsm, dump);
+    armedToReady(fsm, dump);
+    readyToThrustSequence(fsm, dump);
+    thrustSequenceToArmed(fsm, dump);
+    
+    return;
+}
+
+// Function to test whether recovering from an error on the ground works
+void recoverFromErrorGround() {
+    // Instantiate AvState
+    AvState fsm;
+
+    // Initialize a DataDump object to simulate different inputs
+    DataDump dump;
+
+    assert_s(State::INIT, fsm);
+    initToCalibration(fsm, dump);
+    calibrationToManual(fsm, dump);
+    manualToArmed(fsm, dump);
+    armedToErrorGround(fsm, dump);
+    errorGroundToInit(fsm, dump);
+    
+    return;
+}
+
+// Function to test whether recovering from calibration works
+void recoverFromCalibration() {
+    // Instantiate AvState
+    AvState fsm;
+
+    // Initialize a DataDump object to simulate different inputs
+    DataDump dump;
+
+    assert_s(State::INIT, fsm);
+    initToCalibration(fsm, dump);
+    calibrationToInit(fsm, dump);
+    
+    return;
+}
+
+// Function to test whether after recovering from an error on ground we can go through the normal flight process
+void recoverFromErrorGroundAndFly() {
+    // Instantiate AvState
+    AvState fsm;
+
+    // Initialize a DataDump object to simulate different inputs
+    DataDump dump;
+
+    assert_s(State::INIT, fsm);
+    initToCalibration(fsm, dump);
+    calibrationToManual(fsm, dump);
+    manualToArmed(fsm, dump);
+    armedToErrorGround(fsm, dump);
+    errorGroundToInit(fsm, dump);
+    initToCalibration(fsm, dump);
+    calibrationToManual(fsm, dump);
+    manualToArmed(fsm, dump);
+    armedToReady(fsm, dump);
+    readyToThrustSequence(fsm, dump);
+    thrustSequenceToLiftoff(fsm, dump);
+    liftoffToAscent(fsm, dump);
+    ascentToDescent(fsm, dump);
+    descentToLanded(fsm, dump);
+    
     return;
 }
 
@@ -360,12 +413,6 @@ void errorInFlightFromDescent() {
 // Add more test cases as needed
 
 int main(int argc, char** argv) {
-    // Instantiate AvState
-    // AvState fsm;
-
-    // Initialize a DataDump object to simulate different inputs
-    // DataDump dump;
-
     // We test that all transitions are working as expected in the case of a flight without errors
     flightWithoutError();
     std::cout << "Flight without error: OK\n"<<std::endl;
@@ -386,8 +433,13 @@ int main(int argc, char** argv) {
     errorInFlightFromAscent();
     std::cout << "Error in flight from ASCENT: OK\n"<<std::endl;
 
+    // We test that the ERRORFLIGHT state can be triggered from the DESCENT state
     errorInFlightFromDescent();
     std::cout << "Error in flight from DESCENT: OK\n"<<std::endl;
+
+    // We test that when the pressure is too low in the THRUSTSEQUENCE state we go back to the ARMED state
+    pressureTooLow();
+    std::cout << "Pressure too low in THRUSTSEQUENCE: OK\n"<<std::endl;
     
     
     return 0;
