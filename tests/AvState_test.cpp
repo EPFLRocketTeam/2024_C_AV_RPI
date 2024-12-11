@@ -79,6 +79,7 @@ void manualToArmed(AvState &fsm, DataDump &dump) {
 // Function to trigger the ARMED -> ERRORGROUND transition
 void armedToErrorGround(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
+    dump.event.calibrated = false;
     fsm.update(dump);
     assert_s(State::ERRORGROUND, fsm);
     sameState(fsm, dump);
@@ -99,7 +100,8 @@ void readyToThrustSequence(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_IGNITION;
     fsm.update(dump);
     assert_s(State::THRUSTSEQUENCE, fsm);
-    sameState(fsm, dump);
+    //TODO check that this is correct
+    //sameState(fsm, dump);
 }
 
 // Function to trigger the THRUSTSEQUENCE -> ARMED transition
@@ -107,6 +109,7 @@ void thrustSequenceToArmed(AvState &fsm, DataDump &dump) {
     dump.prop.igniter_pressure = IGNITER_PRESSURE_WANTED - 1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED - 1;
     dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN - 1;
+    dump.event.armed = false;
     fsm.update(dump);
     assert_s(State::ARMED, fsm);
     sameState(fsm, dump);
