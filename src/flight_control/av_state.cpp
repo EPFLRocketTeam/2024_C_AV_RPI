@@ -147,9 +147,7 @@ State AvState::fromManual(DataDump dump)
 
 State AvState::fromArmed(DataDump dump)
 {
-    // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
-    if (!dump.valves.ValvesManual()|| (dump.prop.fuel_pressure <= 0 || dump.prop.LOX_pressure <= 0))
-    // TODO: ensure those are the right checks
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
     }

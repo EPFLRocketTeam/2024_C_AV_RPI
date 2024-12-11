@@ -77,10 +77,8 @@ void manualToArmed(AvState &fsm, DataDump &dump) {
 }
 
 // Function to trigger the ARMED -> ERRORGROUND transition
-// TODO: add another way to trigger this transition using the safety checks function failing
 void armedToErrorGround(AvState &fsm, DataDump &dump) {
-    dump.prop.fuel_pressure = 0;
-    dump.prop.LOX_pressure = 0;
+    dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
     assert_s(State::ERRORGROUND, fsm);
     sameState(fsm, dump);
@@ -421,6 +419,11 @@ int main(int argc, char** argv) {
     errorOnGroundFromArmed();
     std::cout << "Error on ground from ARMED: OK\n"<<std::endl;
 
+    // TODO: add later on
+    // // We test that the ERRORGROUND state can be triggered from the CALIBRATION state
+    // errorOnGroundFromCalibration();
+    // std::cout << "Error on ground from CALIBRATION: OK\n"<<std::endl;
+
     // We test that the ERRORFLIGHT state can be triggered from the THRUSTSEQUENCE state
     errorInFlightFromThrustSequence();
     std::cout << "Error in flight from THRUSTSEQUENCE: OK\n"<<std::endl;
@@ -440,7 +443,18 @@ int main(int argc, char** argv) {
     // We test that when the pressure is too low in the THRUSTSEQUENCE state we go back to the ARMED state
     pressureTooLow();
     std::cout << "Pressure too low in THRUSTSEQUENCE: OK\n"<<std::endl;
+
+    // We test that we can recover from an error on the ground
+    recoverFromErrorGround();
+    std::cout << "Recover from error on ground: OK\n"<<std::endl;
+
+    // We test that we can recover from calibration
+    recoverFromCalibration();
+    std::cout << "Recover from calibration: OK\n"<<std::endl;
     
+    // We test that we can recover from an error on the ground and go through the normal flight process
+    recoverFromErrorGroundAndFly();
+    std::cout << "Recover from error on ground and fly: OK\n"<<std::endl;
     
     return 0;
 
