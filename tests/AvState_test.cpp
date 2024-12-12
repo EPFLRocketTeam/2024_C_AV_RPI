@@ -50,11 +50,12 @@ void calibrationToManual(AvState &fsm, DataDump &dump) {
 
 // TODO: implement the error() function in av_state.cpp
 // // Function to trigger the CALIBRATION -> ERRORGROUND transition
-// void calibrationToErrorGround(AvState fsm, DataDump dump) {
-//     fsm.update(dump);
-//     assert_s(State::ERRORGROUND, fsm);
-//     sameState(fsm, dump);
-// }
+void calibrationToErrorGround(AvState fsm, DataDump dump) {
+    dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
+    fsm.update(dump);
+    assert_s(State::ERRORGROUND, fsm);
+    sameState(fsm, dump);
+}
 
 // Function to trigger the CALIBRATION -> INIT transition
 void calibrationToInit(AvState &fsm, DataDump &dump) {
@@ -101,14 +102,12 @@ void readyToThrustSequence(AvState &fsm, DataDump &dump) {
     fsm.update(dump);
     assert_s(State::THRUSTSEQUENCE, fsm);
     //TODO check that this is correct
-    //sameState(fsm, dump);
+    sameState(fsm, dump);
 }
 
 // Function to trigger the THRUSTSEQUENCE -> ARMED transition
 void thrustSequenceToArmed(AvState &fsm, DataDump &dump) {
-    dump.prop.igniter_pressure = IGNITER_PRESSURE_WANTED - 1;
-    dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED - 1;
-    dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN - 1;
+    dump.event.ignition_failed = true;
     dump.event.armed = false;
     fsm.update(dump);
     assert_s(State::ARMED, fsm);
@@ -232,20 +231,17 @@ void errorOnGroundFromArmed() {
 }
 
 // TODO: add later on
-// // Function to test if the ERRORGROUND state is triggered from the CALIBRATION state
-// void errorOnGroundFromCalibration() {
-//     // Instantiate AvState
-//     AvState fsm;
-
-//     // Initialize a DataDump object to simulate different inputs
-//     DataDump dump;
-
-//     assert_s(State::INIT, fsm);
-//     initToCalibration(fsm, dump);
-//     calibrationToErrorGround(fsm, dump);
-
-//     return;
-// }
+// Function to test if the ERRORGROUND state is triggered from the CALIBRATION state
+void errorOnGroundFromCalibration() {
+    // Instantiate AvState
+    AvState fsm;
+    // Initialize a DataDump object to simulate different inputs
+    DataDump dump;
+    assert_s(State::INIT, fsm);
+    initToCalibration(fsm, dump);
+    calibrationToErrorGround(fsm, dump);
+    return;
+}
 
 // Function to test if the ERRORFLIGHT state is triggered from the THRUSTSEQUENCE state
 void errorInFlightFromThrustSequence() {
@@ -422,10 +418,9 @@ int main(int argc, char** argv) {
     errorOnGroundFromArmed();
     std::cout << "Error on ground from ARMED: OK\n"<<std::endl;
 
-    // TODO: add later on
-    // // We test that the ERRORGROUND state can be triggered from the CALIBRATION state
-    // errorOnGroundFromCalibration();
-    // std::cout << "Error on ground from CALIBRATION: OK\n"<<std::endl;
+    // We test that the ERRORGROUND state can be triggered from the CALIBRATION state
+    errorOnGroundFromCalibration();
+    std::cout << "Error on ground from CALIBRATION: OK\n"<<std::endl;
 
     // We test that the ERRORFLIGHT state can be triggered from the THRUSTSEQUENCE state
     errorInFlightFromThrustSequence();

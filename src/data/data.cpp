@@ -50,7 +50,8 @@ Event::Event()
     calibrated(false),
     seperated(false),
     chute_opened(false),
-    chute_unreefed(false)
+    chute_unreefed(false),
+    ignition_failed(false)
 {}
 
 // const void* Data::read(GoatReg reg) {

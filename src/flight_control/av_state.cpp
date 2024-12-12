@@ -24,11 +24,11 @@ State AvState::getCurrentState()
 }
 
 
-//TODO not implemented, necessity to decide where errors come from
-bool error()
+//TODO Check if we need this function
+/*bool error()
 {
     return false;
-}
+}*/
 
 
 State AvState::fromInit(DataDump dump)
@@ -46,14 +46,13 @@ State AvState::fromLanded(DataDump dump) {
 
 State AvState::fromDescent(DataDump dump)
 {
-    //norm of the speed vector
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
         return State::ERRORFLIGHT;
     }
     //TODO injection/igniter pressure 0 
     
-    else if ( dump.nav.speed.y < SPEED_ZERO && dump.prop.chamber_pressure < CHAMBER_PRESSURE_ZERO)
+    else if ( dump.nav.speed.norm() < SPEED_ZERO && dump.prop.chamber_pressure < CHAMBER_PRESSURE_ZERO)
     {
         return State::LANDED;
     }
@@ -77,7 +76,7 @@ State AvState::fromCalibration(DataDump dump)
 {
     // If the sensors are not detected or the radio signal is lost we go to the ERRORGROUND state
     // TODO: add the right checks
-    if (error())
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
     }
@@ -118,7 +117,7 @@ State AvState::fromThrustSequence(DataDump dump)
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     // a bit agressive TODO: have  a counter or a sleep
     //TODO: check FAILEDIGNIT
-    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED || dump.prop.fuel_inj_pressure < INJECTOR_PRESSURE_WANTED_MIN)
+    else if (dump.event.ignition_failed == true)
     {
         return State::ARMED;
     }
