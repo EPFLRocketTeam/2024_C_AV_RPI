@@ -88,7 +88,7 @@ void armedToErrorGround(AvState &fsm, DataDump &dump) {
 
 // Function to trigger the ARMED -> READY transition
 void armedToReady(AvState &fsm, DataDump &dump) {
-    dump.event.armed = true;
+    dump.event.dpr_ok = true;
     dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED;
     dump.prop.LOX_pressure = LOX_PRESSURE_WANTED;
     fsm.update(dump);
@@ -108,7 +108,7 @@ void readyToThrustSequence(AvState &fsm, DataDump &dump) {
 // Function to trigger the THRUSTSEQUENCE -> ARMED transition
 void thrustSequenceToArmed(AvState &fsm, DataDump &dump) {
     dump.event.ignition_failed = true;
-    dump.event.armed = false;
+    dump.event.dpr_ok = false;
     fsm.update(dump);
     assert_s(State::ARMED, fsm);
     sameState(fsm, dump);

@@ -46,7 +46,7 @@ NavigationData::NavigationData()
 {}
 
 Event::Event()
-:   armed{false},
+:   dpr_ok{false},
     ignited{false},
     calibrated{false},
     seperated{false},
@@ -206,7 +206,7 @@ void Data::write(GoatReg reg, void* data) {
             break;
 
         case EVENT_ARMED:
-            event.armed = *reinterpret_cast<bool*>(data);
+            event.dpr_ok = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_IGNITED:
             event.ignited = *reinterpret_cast<bool*>(data);
