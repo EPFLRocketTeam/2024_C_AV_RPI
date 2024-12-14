@@ -66,7 +66,7 @@ struct PropSensors {
 };
 
 struct Event {
-    bool   armed;
+    bool   dpr_ok;
     bool   ignited;
     bool calibrated;
     bool seperated;

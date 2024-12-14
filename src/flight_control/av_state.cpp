@@ -10,25 +10,18 @@ AvState::AvState()
 
 }
 
-// destructor
+// Destructor
 AvState::~AvState()
 {
-    // nothing to do
+    // Nothing to do
 }
 
 
-// this function allows to get the current state of the FSM
+// This function allows to get the current state of the FSM
 State AvState::getCurrentState()
 {
     return currentState;
 }
-
-
-//TODO Check if we need this function
-/*bool error()
-{
-    return false;
-}*/
 
 
 State AvState::fromInit(DataDump dump)
@@ -51,7 +44,6 @@ State AvState::fromDescent(DataDump dump)
         return State::ERRORFLIGHT;
     }
     //TODO injection/igniter pressure 0 
-    
     else if (dump.nav.speed.norm() < SPEED_ZERO && dump.depressurised())
     {
         return State::LANDED;
@@ -74,8 +66,6 @@ State AvState::fromAscent(DataDump dump)
 
 State AvState::fromCalibration(DataDump dump)
 {
-    // If the sensors are not detected or the radio signal is lost we go to the ERRORGROUND state
-    // TODO: add the right checks
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
@@ -113,7 +103,6 @@ State AvState::fromThrustSequence(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-
     // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
     // a bit agressive TODO: have  a counter or a sleep
     //TODO: check FAILEDIGNIT
@@ -121,9 +110,7 @@ State AvState::fromThrustSequence(DataDump dump)
     {
         return State::ARMED;
     }
-
     // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
-    // TODO: ensure those are the right checks
     else if (dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
     {
         return State::LIFTOFF;
@@ -135,8 +122,6 @@ State AvState::fromThrustSequence(DataDump dump)
 
 State AvState::fromManual(DataDump dump)
 {
-    //check all thresholds individually
-    //TODO: recheck if threholds are the wanted ones
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
         return State::ARMED;
@@ -151,8 +136,7 @@ State AvState::fromArmed(DataDump dump)
         return State::ERRORGROUND;
     }
     // If the propulsion is OK we go to the READY state
-    // TODO: ensure those are the right checks
-    else if (dump.event.armed)
+    else if (dump.event.dpr_ok)
     {
         return State::READY;
     }
@@ -176,7 +160,6 @@ State AvState::fromLiftoff(DataDump dump)
         return State::ERRORFLIGHT;
     }
     // If the altitude threashold is cleared we go to the ASCENT state
-    // TODO: ensure those are the right checks
     else if (dump.nav.altitude > ALTITUDE_THRESHOLD)
     {
         return State::ASCENT;
