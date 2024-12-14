@@ -1,6 +1,7 @@
 // TODO: Data logging
 
 #include "data.h"
+#include "thresholds.h"
 
 NavSensors::NavSensors()
 :   adxl{0, 0, 0},
@@ -45,12 +46,13 @@ NavigationData::NavigationData()
 {}
 
 Event::Event()
-:   armed(false),
-    ignited(false),
-    calibrated(false),
-    seperated(false),
-    chute_opened(false),
-    chute_unreefed(false)
+:   armed{false},
+    ignited{false},
+    calibrated{false},
+    seperated{false},
+    chute_opened{false},
+    chute_unreefed{false},
+    ignition_failed{false}
 {}
 
 // const void* Data::read(GoatReg reg) {
@@ -231,6 +233,15 @@ void Data::write(GoatReg reg, void* data) {
 }
 DataDump Data::get() const {
     return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state};
+}
+
+bool Data::depressurised(PropSensors const& prop_sensors) const {
+    return prop_sensors.N2_pressure < N2_PRESSURE_ZERO
+        && prop_sensors.fuel_pressure < FUEL_PRESSURE_ZERO
+        && prop_sensors.LOX_pressure < LOX_PRESSURE_ZERO
+        && prop_sensors.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
+        && prop_sensors.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
+        && prop_sensors.chamber_pressure < CHAMBER_PRESSURE_ZERO;
 }
 
 bool Valves::ValvesForIgnition() const {
