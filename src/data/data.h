@@ -133,6 +133,7 @@ struct DataDump {
     Event event;
     Valves valves;
     uint8_t av_state;
+    bool depressurised() const;
 };
 
 /**
@@ -231,7 +232,6 @@ public:
 
     DataDump get() const;
 
-    bool depressurised(PropSensors const& prop_sensors) const;
     Data(Data const&) = delete; // Prevents copying
     void operator=(Data const&) = delete; // Prevents assignment
 private:

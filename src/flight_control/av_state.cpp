@@ -52,7 +52,7 @@ State AvState::fromDescent(DataDump dump)
     }
     //TODO injection/igniter pressure 0 
     
-    else if (dump.nav.speed.norm() < SPEED_ZERO && Data::get_instance().depressurised(dump.prop))
+    else if (dump.nav.speed.norm() < SPEED_ZERO && dump.depressurised())
     {
         return State::LANDED;
     }

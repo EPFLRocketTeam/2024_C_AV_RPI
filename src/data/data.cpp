@@ -235,13 +235,13 @@ DataDump Data::get() const {
     return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state};
 }
 
-bool Data::depressurised(PropSensors const& prop_sensors) const {
-    return prop_sensors.N2_pressure < N2_PRESSURE_ZERO
-        && prop_sensors.fuel_pressure < FUEL_PRESSURE_ZERO
-        && prop_sensors.LOX_pressure < LOX_PRESSURE_ZERO
-        && prop_sensors.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && prop_sensors.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && prop_sensors.chamber_pressure < CHAMBER_PRESSURE_ZERO;
+bool DataDump::depressurised() const {
+    return this->prop.N2_pressure < N2_PRESSURE_ZERO
+        && this->prop.fuel_pressure < FUEL_PRESSURE_ZERO
+        && this->prop.LOX_pressure < LOX_PRESSURE_ZERO
+        && this->prop.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
+        && this->prop.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
+        && this->prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
 }
 
 bool Valves::ValvesForIgnition() const {
