@@ -231,6 +231,7 @@ public:
 
     DataDump get() const;
 
+    bool depressurised(PropSensors const& prop_sensors) const;
     Data(Data const&) = delete; // Prevents copying
     void operator=(Data const&) = delete; // Prevents assignment
 private:

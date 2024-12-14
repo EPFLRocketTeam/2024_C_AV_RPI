@@ -130,6 +130,10 @@ void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
     dump.prop.igniter_pressure = IGNITER_PRESSURE_WANTED + 1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED + 1;
     dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN + 1;
+    dump.prop.LOX_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN + 1;
+    dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED + 1;
+    dump.prop.LOX_pressure = LOX_PRESSURE_WANTED + 1;
+    dump.prop.N2_pressure = N2_PRESSURE_ZERO + 1;
     fsm.update(dump);
     assert_s(State::LIFTOFF, fsm);
     sameState(fsm, dump);
@@ -182,6 +186,12 @@ void descentToLanded(AvState &fsm, DataDump &dump) {
     dump.nav.speed.x = SPEED_ZERO * 0.1;
     dump.nav.speed.y = SPEED_ZERO * 0.1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_ZERO - 1;
+    dump.prop.fuel_pressure = FUEL_PRESSURE_ZERO - 1;
+    dump.prop.LOX_pressure = LOX_PRESSURE_ZERO - 1;
+    dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_ZERO - 1;
+    dump.prop.LOX_inj_pressure = INJECTOR_PRESSURE_ZERO - 1;
+    dump.prop.N2_pressure = N2_PRESSURE_ZERO - 1;
+    dump.prop.igniter_pressure = IGNITER_PRESSURE_ZERO - 1;
     fsm.update(dump);
     assert_s(State::LANDED, fsm);
     sameState(fsm, dump);
