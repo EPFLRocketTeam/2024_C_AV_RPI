@@ -125,7 +125,8 @@ void thrustSequenceToErrorFlight(AvState &fsm, DataDump &dump) {
 // Function to trigger the THRUSTSEQUENCE -> LIFTOFF transition
 void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
     dump.event.ignited = true;
-    dump.nav.speed.z = SPEED_ZERO + 1;
+    dump.nav.speed.z = SPEED_MIN_ASCENT + 1;
+    dump.nav.accel.z = ACCEL_ZERO + 1;
     dump.nav.altitude = ALTITUDE_ZERO + 1;
     dump.prop.igniter_pressure = IGNITER_PRESSURE_WANTED + 1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED + 1;

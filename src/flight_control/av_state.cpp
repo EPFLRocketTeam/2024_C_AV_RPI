@@ -15,15 +15,13 @@ AvState::~AvState()
     // Nothing to do
 }
 
-
 // This function allows to get the current state of the FSM
 State AvState::getCurrentState()
 {
     return currentState;
 }
 
-
-State AvState::fromInit(DataDump dump)
+State AvState::fromInit(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
     {
@@ -32,37 +30,7 @@ State AvState::fromInit(DataDump dump)
     return currentState;
 }
 
-State AvState::fromLanded(DataDump dump) {
-    return currentState;
-}
-
-State AvState::fromDescent(DataDump dump)
-{
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
-    {
-        return State::ERRORFLIGHT;
-    }
-    else if (dump.nav.speed.norm() <= SPEED_ZERO && dump.depressurised())
-    {
-        return State::LANDED;
-    }
-    return this->currentState;
-}
-
-State AvState::fromAscent(DataDump dump)
-{
-    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
-    {
-        return State::ERRORFLIGHT;
-    }
-    else if (dump.nav.speed.z < SPEED_ZERO)
-    {
-        return State::DESCENT;
-    }
-    return this->currentState;
-}
-
-State AvState::fromCalibration(DataDump dump)
+State AvState::fromCalibration(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
@@ -77,26 +45,42 @@ State AvState::fromCalibration(DataDump dump)
     {
         return State::MANUAL;
     }
-    return this->currentState;
-}
-
-
-State AvState::fromErrorGround(DataDump dump)
-{
-    //TODO: add pressure verification
-    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_RECOVER)
-    {
-        return State::INIT;
-    }
-    return  currentState;
-}
-
-State AvState::fromErrorFlight(DataDump dump)
-{
     return currentState;
 }
 
-State AvState::fromThrustSequence(DataDump dump)
+State AvState::fromManual(DataDump const &dump)
+{ //abort possible here
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
+    {
+        return State::ARMED;
+    }
+    return currentState;
+}
+
+State AvState::fromArmed(DataDump const &dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
+    {
+        return State::ERRORGROUND;
+    }
+    // If the propulsion is OK we go to the READY state
+    else if (dump.event.dpr_ok)
+    {
+        return State::READY;
+    }
+    return currentState;
+}
+
+State AvState::fromReady(DataDump const &dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
+    {
+        return State::THRUSTSEQUENCE;
+    }
+    return currentState;
+}
+
+State AvState::fromThrustSequence(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id== CMD_ID::AV_CMD_ABORT)
     {
@@ -115,55 +99,66 @@ State AvState::fromThrustSequence(DataDump dump)
     return currentState;
 }
 
-
-State AvState::fromManual(DataDump dump)
-{ //abort possible here
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
-    {
-        return State::ARMED;
-    }
-    return currentState;
-}
-
-State AvState::fromArmed(DataDump dump)
-{
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
-    {
-        return State::ERRORGROUND;
-    }
-    // If the propulsion is OK we go to the READY state
-    else if (dump.event.dpr_ok)
-    {
-        return State::READY;
-    }
-    return currentState;
-}
-
-State AvState::fromReady(DataDump dump)
-{
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
-    {
-        return State::THRUSTSEQUENCE;
-    }
-    return this->currentState;
-}
-
-State AvState::fromLiftoff(DataDump dump)
+State AvState::fromLiftoff(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
     // If the altitude threashold is cleared we go to the ASCENT state
-    //TODO: min speed acent not zero
-    else if (dump.nav.altitude > ALTITUDE_THRESHOLD && dump.nav.speed.z >= SPEED_ZERO)
+    else if (dump.nav.altitude > ALTITUDE_THRESHOLD && dump.nav.speed.z >= SPEED_MIN_ASCENT && dump.nav.accel.z > ACCEL_ZERO)
     {
         return State::ASCENT;
     }
     return currentState;
 }
 
-void AvState::update(DataDump dump)
+State AvState::fromAscent(DataDump const &dump)
+{
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    {
+        return State::ERRORFLIGHT;
+    }
+    else if (dump.nav.speed.z < SPEED_ZERO)
+    {
+        return State::DESCENT;
+    }
+    return currentState;
+}
+
+State AvState::fromDescent(DataDump const &dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    {
+        return State::ERRORFLIGHT;
+    }
+    else if (dump.nav.speed.norm() <= SPEED_ZERO && dump.depressurised())
+    {
+        return State::LANDED;
+    }
+    return currentState;
+}
+
+State AvState::fromLanded(DataDump const &dump) {
+    return currentState;
+}
+
+State AvState::fromErrorGround(DataDump const &dump)
+{
+    //TODO: add pressure verification
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_RECOVER && dump.depressurised())
+    {
+        return State::INIT;
+    }
+    return  currentState;
+}
+
+State AvState::fromErrorFlight(DataDump const &dump)
+{
+    return currentState;
+}
+
+void AvState::update(DataDump &dump)
 {
     switch (currentState)
     {
