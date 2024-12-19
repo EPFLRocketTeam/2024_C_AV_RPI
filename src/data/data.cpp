@@ -1,6 +1,7 @@
 // TODO: Data logging
 
 #include "data.h"
+#include "thresholds.h"
 
 NavSensors::NavSensors()
 :   adxl{0, 0, 0},
@@ -42,6 +43,16 @@ NavigationData::NavigationData()
     course(0),
     altitude(0),
     baro{0, 0}
+{}
+
+Event::Event()
+:   dpr_ok{false},
+    ignited{false},
+    calibrated{false},
+    seperated{false},
+    chute_opened{false},
+    chute_unreefed{false},
+    ignition_failed{false}
 {}
 
 // const void* Data::read(GoatReg reg) {
@@ -195,7 +206,7 @@ void Data::write(GoatReg reg, void* data) {
             break;
 
         case EVENT_ARMED:
-            event.armed = *reinterpret_cast<bool*>(data);
+            event.dpr_ok = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_IGNITED:
             event.ignited = *reinterpret_cast<bool*>(data);
@@ -222,6 +233,15 @@ void Data::write(GoatReg reg, void* data) {
 }
 DataDump Data::get() const {
     return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state};
+}
+
+bool DataDump::depressurised() const {
+    return this->prop.N2_pressure < N2_PRESSURE_ZERO
+        && this->prop.fuel_pressure < FUEL_PRESSURE_ZERO
+        && this->prop.LOX_pressure < LOX_PRESSURE_ZERO
+        && this->prop.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
+        && this->prop.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
+        && this->prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
 }
 
 bool Valves::ValvesForIgnition() const {

@@ -16,11 +16,17 @@ Sensors::Sensors()
 
 Sensors::~Sensors() {}
 
+//TODO: must return bool to written into goat.event
 void Sensors::calibrate() {
+    //must have counter ro return an error if too much
+    //Redo calibration
     adxl1.calibrate();
     adxl2.calibrate();
 }
 
+
+
+//TODO: move to data.h as inline function
 double Vector3::norm() const {
     return std::sqrt(x * x + y * y + z * z);
 }
