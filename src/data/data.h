@@ -72,6 +72,7 @@ struct Event {
     bool seperated;
     bool chute_opened;
     bool chute_unreefed;
+    //armed state this resets to 0
     bool ignition_failed;
     
     Event();
@@ -114,7 +115,9 @@ struct GPSTime {
 struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
+    //referentiel earth
     Vector3   speed;
+    //ref of accel TBD !!!!
     Vector3   accel;
     Vector3   attitude;
     double    course;

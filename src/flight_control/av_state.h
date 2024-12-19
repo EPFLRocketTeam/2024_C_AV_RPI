@@ -45,10 +45,10 @@ public:
     // this function allows to get the current state of the FSM
     State getCurrentState();
     void update(DataDump dump);
-    State* possibleStates();
     std::string stateToString(State state);
 
 private:
+    //TODO: Always use const ref
     State fromInit(DataDump dump);
     State fromDescent(DataDump dump);
     State fromAscent(DataDump dump);

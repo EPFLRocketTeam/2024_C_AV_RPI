@@ -7,7 +7,6 @@
 AvState::AvState()
 {
     this->currentState = State::INIT;
-
 }
 
 // Destructor
@@ -30,11 +29,11 @@ State AvState::fromInit(DataDump dump)
     {
         return State::CALIBRATION;
     }
-    return this->currentState;
+    return currentState;
 }
 
 State AvState::fromLanded(DataDump dump) {
-    return this->currentState;
+    return currentState;
 }
 
 State AvState::fromDescent(DataDump dump)
@@ -43,8 +42,7 @@ State AvState::fromDescent(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-    //TODO injection/igniter pressure 0 
-    else if (dump.nav.speed.norm() < SPEED_ZERO && dump.depressurised())
+    else if (dump.nav.speed.norm() <= SPEED_ZERO && dump.depressurised())
     {
         return State::LANDED;
     }
@@ -53,7 +51,7 @@ State AvState::fromDescent(DataDump dump)
 
 State AvState::fromAscent(DataDump dump)
 {
-    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
         return State::ERRORFLIGHT;
     }
@@ -85,16 +83,17 @@ State AvState::fromCalibration(DataDump dump)
 
 State AvState::fromErrorGround(DataDump dump)
 {
+    //TODO: add pressure verification
     if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_RECOVER)
     {
         return State::INIT;
     }
-    return  this->currentState;
+    return  currentState;
 }
 
 State AvState::fromErrorFlight(DataDump dump)
 {
-    return this->currentState;
+    return currentState;
 }
 
 State AvState::fromThrustSequence(DataDump dump)
@@ -103,30 +102,27 @@ State AvState::fromThrustSequence(DataDump dump)
     {
         return State::ERRORFLIGHT;
     }
-    // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
-    // a bit agressive TODO: have  a counter or a sleep
-    //TODO: check FAILEDIGNIT
-    else if (dump.event.ignition_failed == true)
+    else if (dump.event.ignition_failed)
     {
         return State::ARMED;
     }
     // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
-    else if (dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
+    else if (dump.nav.accel.z > ACCEL_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
     {
         return State::LIFTOFF;
     }
 
-    return this->currentState;
+    return currentState;
 }
 
 
 State AvState::fromManual(DataDump dump)
-{
+{ //abort possible here
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
         return State::ARMED;
     }
-    return State::MANUAL;
+    return currentState;
 }
 
 State AvState::fromArmed(DataDump dump)
@@ -140,7 +136,7 @@ State AvState::fromArmed(DataDump dump)
     {
         return State::READY;
     }
-    return this->currentState;
+    return currentState;
 }
 
 State AvState::fromReady(DataDump dump)
@@ -154,17 +150,17 @@ State AvState::fromReady(DataDump dump)
 
 State AvState::fromLiftoff(DataDump dump)
 {
-
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
     // If the altitude threashold is cleared we go to the ASCENT state
-    else if (dump.nav.altitude > ALTITUDE_THRESHOLD)
+    //TODO: min speed acent not zero
+    else if (dump.nav.altitude > ALTITUDE_THRESHOLD && dump.nav.speed.z >= SPEED_ZERO)
     {
         return State::ASCENT;
     }
-    return this->currentState;
+    return currentState;
 }
 
 void AvState::update(DataDump dump)
@@ -176,6 +172,7 @@ void AvState::update(DataDump dump)
             break;
         case State::LANDED:
             currentState = fromLanded(dump);
+            break;
         case State::DESCENT:
             currentState = fromDescent(dump);
             break;
