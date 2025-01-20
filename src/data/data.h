@@ -74,7 +74,11 @@ struct Event {
     bool chute_unreefed;
     //armed state this resets to 0
     bool ignition_failed;
-    
+
+    // will have to be discussed in interface meeting w/ prop
+    // transition b/w ARMED and ERRORGROUND states
+    bool catastrophic_failure;
+
     Event();
 };
 

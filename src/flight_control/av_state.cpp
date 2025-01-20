@@ -49,8 +49,12 @@ State AvState::fromCalibration(DataDump const &dump)
 }
 
 State AvState::fromManual(DataDump const &dump)
-{ //abort possible here
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT) 
+    {
+        return State::ERRORGROUND;
+    }
+    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
         return State::ARMED;
     }
@@ -59,7 +63,7 @@ State AvState::fromManual(DataDump const &dump)
 
 State AvState::fromArmed(DataDump const &dump)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.event.catastrophic_failure)
     {
         return State::ERRORGROUND;
     }
@@ -95,7 +99,6 @@ State AvState::fromThrustSequence(DataDump const &dump)
     {
         return State::LIFTOFF;
     }
-
     return currentState;
 }
 
