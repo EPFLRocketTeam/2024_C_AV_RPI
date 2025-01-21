@@ -25,9 +25,6 @@ enum class State
     LANDED,
     DESCENT,
     ERRORFLIGHT
-
-
-
 };
 
 
@@ -44,23 +41,22 @@ public:
     ~AvState();
     // this function allows to get the current state of the FSM
     State getCurrentState();
-    void update(DataDump dump);
-    State* possibleStates();
+    void update(DataDump &dump);
     std::string stateToString(State state);
 
 private:
-    State fromInit(DataDump dump);
-    State fromDescent(DataDump dump);
-    State fromAscent(DataDump dump);
-    State fromCalibration(DataDump dump);
-    State fromErrorGround(DataDump dump);
-    State fromErrorFlight(DataDump dump);
-    State fromThrustSequence(DataDump dump);
-    State fromManual(DataDump dump);
-    State fromArmed(DataDump dump);
-    State fromLanded(DataDump dump);
-    State fromLiftoff(DataDump dump);
-    State fromReady(DataDump dump);
+    State fromInit(DataDump const &dump);
+    State fromDescent(DataDump const &dump);
+    State fromAscent(DataDump const &dump);
+    State fromCalibration(DataDump const &dump);
+    State fromErrorGround(DataDump const &dump);
+    State fromErrorFlight(DataDump const &dump);
+    State fromThrustSequence(DataDump const &dump);
+    State fromManual(DataDump const &dump);
+    State fromArmed(DataDump const &dump);
+    State fromLanded(DataDump const &dump);
+    State fromLiftoff(DataDump const &dump);
+    State fromReady(DataDump const &dump);
     State currentState;
 };
 

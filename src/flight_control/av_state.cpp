@@ -7,77 +7,32 @@
 AvState::AvState()
 {
     this->currentState = State::INIT;
-
 }
 
-// destructor
+// Destructor
 AvState::~AvState()
 {
-    // nothing to do
+    // Nothing to do
 }
 
-
-// this function allows to get the current state of the FSM
+// This function allows to get the current state of the FSM
 State AvState::getCurrentState()
 {
     return currentState;
 }
 
-
-//TODO not implemented, necessity to decide where errors come from
-bool error()
-{
-    return false;
-}
-
-
-State AvState::fromInit(DataDump dump)
+State AvState::fromInit(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
     {
         return State::CALIBRATION;
     }
-    return State::INIT;
+    return currentState;
 }
 
-State AvState::fromLanded(DataDump dump) {
-    return State::LANDED; 
-}
-
-State AvState::fromDescent(DataDump dump)
+State AvState::fromCalibration(DataDump const &dump)
 {
-    //norm of the speed vector
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
-    {
-        return State::ERRORFLIGHT;
-    }
-    else if ( dump.nav.speed.z < SPEED_ZERO)
-    {
-        return State::LANDED;
-    }
-    return State::DESCENT;
-}
-
-State AvState::fromAscent(DataDump dump)
-{
-    if ( dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
-    {
-        return State::ERRORFLIGHT;
-    }
-    else if ( dump.nav.accel.z < ACCEL_ZERO)
-    {
-    
-
-        return State::DESCENT;
-    }
-    return State::ASCENT;
-}
-
-State AvState::fromCalibration(DataDump dump)
-{
-    // If the sensors are not detected or the radio signal is lost we go to the ERRORGROUND state
-    // TODO: add the right checks
-    if (error())
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORGROUND;
     }
@@ -90,143 +45,139 @@ State AvState::fromCalibration(DataDump dump)
     {
         return State::MANUAL;
     }
-    return State::CALIBRATION;
+    return currentState;
 }
 
-
-State AvState::fromErrorGround(DataDump dump)
+State AvState::fromManual(DataDump const &dump)
 {
-    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_RECOVER)
-    {
-        return State::INIT;
-    }
-    return  State::ERRORGROUND;
-}
-
-State AvState::fromErrorFlight(DataDump dump)
-{
-    return State::ERRORFLIGHT;
-}
-
-State AvState::fromThrustSequence(DataDump dump)
-{
-    if (dump.telemetry_cmd.id== CMD_ID::AV_CMD_ABORT)
-    {
-        return State::ERRORFLIGHT;
-    }
-    // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
-    // TODO: ensure those are the right checks
-    else if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED && dump.nav.speed.z > SPEED_ZERO && dump.nav.altitude > ALTITUDE_ZERO)
-    {
-        return State::LIFTOFF;
-    }
-    // If the pression is too low in the igniter or combustion chamber we go to the ARMED state
-    // a bit agressive TODO: have  a counter or a sleep
-    //TODO: check FAILEDIGNIT
-    else if (dump.prop.igniter_pressure < IGNITER_PRESSURE_WANTED || dump.prop.chamber_pressure < CHAMBER_PRESSURE_WANTED)
-    {
-        return State::ARMED;
-    }
-    return State::THRUSTSEQUENCE;
-}
-
-
-State AvState::fromManual(DataDump dump)
-{
-    //check all thresholds individually
-    //TODO: recheck if threholds are the wanted ones
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
-    {
-        return State::ARMED;
-    }
-    return State::MANUAL;
-}
-
-State AvState::fromArmed(DataDump dump)
-{
-    if (error())
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT) 
     {
         return State::ERRORGROUND;
     }
-    else
+    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
-        switch (dump.telemetry_cmd.id)
-        {
-            case CMD_ID::AV_CMD_IGNITION:
-                if (dump.prop.fuel_inj_pressure >= IGNITER_PRESSURE_WANTED)
-                {
-                    //possible log
-                    if( dump.prop.chamber_pressure >= CHAMBER_PRESSURE_WANTED ) {
-                        //possible log
-                        return State::THRUSTSEQUENCE;
-                    }
-                    return State::ARMED;
-                }else {
-                    return State::ARMED;
-                }
-                break;
-            case CMD_ID::AV_CMD_ABORT:
-                return State::ERRORGROUND;
-            default:
-                return State::ARMED;
-        }
+        return State::ARMED;
     }
-    // If the safety checks (valves open, vents open, no pressure) are failed we go to the ERRORGROUND state
-    // TODO: ensure those are the right checks
-    if (!dump.valves.ValvesManual()|| (dump.prop.fuel_pressure <= 0 && dump.prop.LOX_pressure <= 0))
+    return currentState;
+}
+
+State AvState::fromArmed(DataDump const &dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.event.catastrophic_failure)
     {
         return State::ERRORGROUND;
     }
     // If the propulsion is OK we go to the READY state
-    // TODO: ensure those are the right checks
-    else if (dump.prop.fuel_pressure >= FUEL_PRESSURE_WANTED && dump.prop.LOX_pressure >= LOX_PRESSURE_WANTED) 
+    else if (dump.event.dpr_ok)
     {
         return State::READY;
     }
-    return State::ARMED;
+    return currentState;
 }
 
-State AvState::fromReady(DataDump dump)
+State AvState::fromReady(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
     {
         return State::THRUSTSEQUENCE;
     }
-    return State::READY;
+    return currentState;
 }
 
-State AvState::fromLiftoff(DataDump dump)
+State AvState::fromThrustSequence(DataDump const &dump)
 {
+    if (dump.telemetry_cmd.id== CMD_ID::AV_CMD_ABORT)
+    {
+        return State::ERRORFLIGHT;
+    }
+    else if (dump.event.ignition_failed)
+    {
+        return State::ARMED;
+    }
+    // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
+    else if (dump.nav.accel.z > ACCEL_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
+    {
+        return State::LIFTOFF;
+    }
+    return currentState;
+}
 
+State AvState::fromLiftoff(DataDump const &dump)
+{
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         return State::ERRORFLIGHT;
     }
     // If the altitude threashold is cleared we go to the ASCENT state
-    // TODO: ensure those are the right checks
-    else if (dump.nav.altitude > ALTITUDE_THRESHOLD)
+    else if (dump.nav.altitude > ALTITUDE_THRESHOLD && dump.nav.speed.z >= SPEED_MIN_ASCENT && dump.nav.accel.z > ACCEL_ZERO)
     {
         return State::ASCENT;
     }
-    return State::LIFTOFF;
+    return currentState;
 }
 
-void AvState::update(DataDump dump)
+State AvState::fromAscent(DataDump const &dump)
+{
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    {
+        return State::ERRORFLIGHT;
+    }
+    else if (dump.nav.speed.z < SPEED_ZERO)
+    {
+        return State::DESCENT;
+    }
+    return currentState;
+}
+
+State AvState::fromDescent(DataDump const &dump)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    {
+        return State::ERRORFLIGHT;
+    }
+    else if (dump.nav.speed.norm() <= SPEED_ZERO && dump.depressurised())
+    {
+        return State::LANDED;
+    }
+    return currentState;
+}
+
+State AvState::fromLanded(DataDump const &dump) {
+    return currentState;
+}
+
+State AvState::fromErrorGround(DataDump const &dump)
+{
+    //TODO: add pressure verification
+    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_RECOVER && dump.depressurised())
+    {
+        return State::INIT;
+    }
+    return  currentState;
+}
+
+State AvState::fromErrorFlight(DataDump const &dump)
+{
+    return currentState;
+}
+
+void AvState::update(DataDump &dump)
 {
     switch (currentState)
     {
         case State::INIT:
-            this->currentState = fromInit(dump);
+            currentState = fromInit(dump);
             break;
         case State::LANDED:
             currentState = fromLanded(dump);
+            break;
         case State::DESCENT:
             currentState = fromDescent(dump);
             break;
-            case State::READY:
+        case State::READY:
             currentState = fromReady(dump);
             break;
-            case State::LIFTOFF:
+        case State::LIFTOFF:
             currentState = fromLiftoff(dump);
             break;
         case State::ASCENT:

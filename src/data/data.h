@@ -66,12 +66,21 @@ struct PropSensors {
 };
 
 struct Event {
-    bool   armed;
+    bool   dpr_ok;
     bool   ignited;
     bool calibrated;
     bool seperated;
     bool chute_opened;
     bool chute_unreefed;
+    //armed state this resets to 0
+    bool ignition_failed;
+
+    // will have to be discussed in interface meeting w/ prop
+    // transition b/w ARMED and ERRORGROUND states
+    // each tank should be checked for catastrophic failure
+    bool catastrophic_failure;
+
+    Event();
 };
 
 struct Valves{
@@ -89,7 +98,10 @@ struct Vector3 {
     double x;
     double y;
     double z;
-    double norm() const;
+    
+    inline double norm() const {
+        return std::sqrt(x * x + y * y + z * z);
+    }
 };
 
 struct GPSCoord {
@@ -111,7 +123,9 @@ struct GPSTime {
 struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
+    //referentiel earth
     Vector3   speed;
+    //ref of accel TBD !!!!
     Vector3   accel;
     Vector3   attitude;
     double    course;
@@ -130,6 +144,7 @@ struct DataDump {
     Event event;
     Valves valves;
     uint8_t av_state;
+    bool depressurised() const;
 };
 
 /**
