@@ -77,6 +77,7 @@ struct Event {
 
     // will have to be discussed in interface meeting w/ prop
     // transition b/w ARMED and ERRORGROUND states
+    // each tank should be checked for catastrophic failure
     bool catastrophic_failure;
 
     Event();

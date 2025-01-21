@@ -25,9 +25,6 @@ enum class State
     LANDED,
     DESCENT,
     ERRORFLIGHT
-
-
-
 };
 
 
