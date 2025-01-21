@@ -224,6 +224,10 @@ public:
         return instance;
     }
 
+    inline double Vector3::norm() const {
+        return std::sqrt(x * x + y * y + z * z);
+    }
+
     // /**
     //  * @brief Reads specific data from the GOAT.
     //  * @param reg (most likely an enum, acts like a register), specifies what data is to be read.
