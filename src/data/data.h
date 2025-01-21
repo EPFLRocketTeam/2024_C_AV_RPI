@@ -98,7 +98,10 @@ struct Vector3 {
     double x;
     double y;
     double z;
-    double norm() const;
+    
+    inline double norm() const {
+        return std::sqrt(x * x + y * y + z * z);
+    }
 };
 
 struct GPSCoord {
@@ -222,10 +225,6 @@ public:
     static inline Data& get_instance() {
         static Data instance;
         return instance;
-    }
-
-    inline double Vector3::norm() const {
-        return std::sqrt(x * x + y * y + z * z);
     }
 
     // /**
