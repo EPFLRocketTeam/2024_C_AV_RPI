@@ -17,7 +17,7 @@ Datalogger::Datalogger(std::string path, DataDump &dump):path(path),csvFile(path
     // Write the header row (adjust column names as needed)
     csvFile << "telemetry_cmd_id,telemetry_cmd_value,"
             << "adxl_status,adxl_aux_status,bmi_accel_status,bmi_aux_accel_status,"
-            << "bmi_gyro_status,bmi_aux_gyro_status,bmp_status,bmp_aux_status,"
+            << "bmi_gyro_status,bmi_aux_gyro_status,bmp_status_err_conf,bmp_status_err_cmd,bmp_status_err_fatal,bmp_status_sensor_cmd_rdy,bmp_status_sensor_drdy_press,bmp_status_sensor_drdy_temp,bmp_aux_status_err_conf,bmp_aux_status_err_cmd,bmp_aux_status_err_fatal,bmp_aux_status_sensor_cmd_rdy,bmp_aux_status_sensor_drdy_press,bmp_aux_status_sensor_drdy_temp,"
             << "adxl_x,adxl_y,adxl_z,"
             << "adxl_aux_x,adxl_aux_y,adxl_aux_z,"
             << "bmi_accel_x,bmi_accel_y,bmi_accel_z,"
@@ -105,8 +105,7 @@ std::string Datalogger::conv(const DataDump &dump) {
         << static_cast<int>(dump.stat.bmi_accel_status) << ","
         << static_cast<int>(dump.stat.bmi_aux_accel_status) << ","
         << static_cast<int>(dump.stat.bmi_gyro_status) << ","
-        << static_cast<int>(dump.stat.bmi_aux_gyro_status) << ","
-        << static_cast<int>(dump.stat.bmp_status.err.cmd) << ",";
+        << static_cast<int>(dump.stat.bmi_aux_gyro_status) << ",";
         bmp3StatusToCSV(dump.stat.bmp_status,oss);
         bmp3StatusToCSV(dump.stat.bmp_aux_status,oss);
 

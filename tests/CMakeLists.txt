@@ -32,6 +32,13 @@ target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
 add_test(NAME DataTest COMMAND data_test)
 
 
+add_executable(datalog_test dataLog_test.cpp)
+target_link_libraries(datalog_test flight_computer)
+target_include_directories(datalog_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
+# Register the test with CTest
+add_test(NAME DataTestLog COMMAND datalog_test)
+
+
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})
 #target_include_directories(mock_sensor PUBLIC include)
