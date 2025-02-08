@@ -19,6 +19,8 @@ set(FIREHORN_FC_SOURCES
     ${DATA_DIR}/sensors.h
     ${DATA_DIR}/telecom.cpp
     ${DATA_DIR}/telecom.h
+    ${DATA_DIR}/datalogger.cpp
+    ${DATA_DIR}/datalogger.h
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
