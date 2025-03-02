@@ -2,6 +2,7 @@
 #define H_DRIVER_H
 
 #include "data.h"
+#include "av_state.h"
 
 class HDriver {
 public:
