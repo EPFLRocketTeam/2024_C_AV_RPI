@@ -30,6 +30,13 @@ Telecom::Telecom()
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
 {}
 
+void Telecom::check_policy(Data::GoatReg reg, const DataDump& dump) {
+    // Everytime a new command is received we write to the goat
+    // We also send the command everytime
+
+    // TODO: Implement the logic for the telecom driver
+}
+
 bool Telecom::begin() {
     lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
     if (!lora_uplink.begin(UPLINK_FREQUENCY, SPI0)) {
