@@ -7,8 +7,6 @@
 #include "bmp3.h"
 #include "adxl375.h"
 
-
-
 /**
  * @brief A struct made only for convenience. Holds exactly
  * the same data than av_uplink_t, but the command ID is already
@@ -143,7 +141,7 @@ struct DataDump {
     NavigationData nav;
     Event event;
     Valves valves;
-    uint8_t av_state;
+    State av_state;
     bool depressurised() const;
 };
 
@@ -256,7 +254,7 @@ private:
     NavigationData nav;
     Event event;
     Valves valves;
-    uint8_t av_state;
+    State av_state;
 
 };
 
