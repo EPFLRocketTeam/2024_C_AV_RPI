@@ -58,18 +58,12 @@ void PR_board::check_policy(Data::GoatReg reg, const DataDump& dump) {
             break;
         case State::ERRORGROUND:
             handleErrorGround(dump);
-            // TODO: check whether it should be the following instead
-            // listenToValves(dump);
             break;
         case State::DESCENT:
             handleDescent(dump);
-            // TODO: check whether it should be the following instead
-            // pressureChecks(dump);
             break;
         case State::MANUAL:
             processManualMode(dump);
-            // TODO: check whether it should be the following instead
-            // listenToValves(dump);
             break;
         case State::ERRORFLIGHT:
             handleErrorFlight(dump);
@@ -79,8 +73,6 @@ void PR_board::check_policy(Data::GoatReg reg, const DataDump& dump) {
             break;
         case State::READY:
             processReadyState(dump);
-            // TODO: check whether it should be the following instead
-            // ignition(dump); // fixme: should ignite event be here?
             break;
         case State::THRUSTSEQUENCE:
             // TODO: Implement thrust sequence logic
@@ -119,7 +111,7 @@ void PR_board::processManualMode(const DataDump& dump) {
 }
 
 // message groupe av pour les fonctions 
-// interface av pr
+// si pas de reponse, message groupe interface av pr
 void PR_board::handleErrorFlight(const DataDump& dump) {
     // Handle in-flight errors
 }

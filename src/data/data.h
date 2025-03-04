@@ -6,8 +6,22 @@
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "adxl375.h"
-#include "av_state.h"
-#include "PacketDefinition_Firehorn.h"
+
+enum class State
+{
+    INIT,
+    CALIBRATION,
+    MANUAL,
+    ARMED,
+    READY,
+    LIFTOFF,
+    ERRORGROUND,
+    THRUSTSEQUENCE,
+    ASCENT,
+    LANDED,
+    DESCENT,
+    ERRORFLIGHT
+};
 
 /**
  * @brief A struct made only for convenience. Holds exactly
@@ -72,6 +86,7 @@ struct Event {
     bool seperated;
     bool chute_opened;
     bool chute_unreefed;
+    bool command_updated;
     //armed state this resets to 0
     bool ignition_failed;
 

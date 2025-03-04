@@ -31,10 +31,16 @@ Telecom::Telecom()
 {}
 
 void Telecom::check_policy(Data::GoatReg reg, const DataDump& dump) {
-    // Everytime a new command is received we write to the goat
-    // We also send the command everytime
-
-    // TODO: Implement the logic for the telecom driver
+    if (new_cmd_received) {
+        new_cmd_received = false;
+        switch (last_packet.order_id) {
+            case CMD_ID::AV_CMD_ABORT:
+                reset_cmd();
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 bool Telecom::begin() {
