@@ -6,6 +6,8 @@
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "adxl375.h"
+#include "av_state.h"
+#include "PacketDefinition_Firehorn.h"
 
 /**
  * @brief A struct made only for convenience. Holds exactly

@@ -5,10 +5,6 @@
 // TODO: coté hardware, voir i2_interface.h
 // if adress missing put a fix me and set the adress to 0x00 in the meantime 
 
-
-// todo: remove interface folder
-// telecom and sensors to the h_drivers folder 
-
 // Enumeration for the command of the PR board
 enum class PRBCommand {
     // Write Commands
