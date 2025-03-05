@@ -4,6 +4,7 @@
 #include <capsule.h>
 #include "telecom.h"
 #include "data.h"
+#include "h_driver.h"
 
 #define LORA_UPLINK_CS      8
 #define LORA_UPLINK_RST     25
@@ -29,6 +30,19 @@ Telecom::Telecom()
     capsule_uplink(&Telecom::handle_capsule_uplink, this),
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
 {}
+
+void Telecom::check_policy(Data::GoatReg reg, const DataDump& dump) {
+    if (new_cmd_received) {
+        new_cmd_received = false;
+        switch (last_packet.order_id) {
+            case CMD_ID::AV_CMD_ABORT:
+                reset_cmd();
+                break;
+            default:
+                break;
+        }
+    }
+}
 
 bool Telecom::begin() {
     lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
