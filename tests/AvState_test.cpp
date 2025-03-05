@@ -1,20 +1,20 @@
 
-// #include "av_state.h"
-// #include <cassert>
+#include "av_state.h"
+#include <cassert>
 
-// #define assert_s(expectedState,fsm)                                                           \
-//     do {                                                                                   \
-//         if ((fsm.getCurrentState()) != (expectedState)) {                                            \
-//             std::cerr << "Assertion failed: Expected state: " << fsm.stateToString(expectedState)            \
-//                       << ", but got state: " << fsm.stateToString(fsm.getCurrentState()) << std::endl;\
-//             assert(fsm.getCurrentState() == expectedState);                                      \
-//         }                                          \
-//         else {                                                                                \
-//             std::cout << "Current state is " << fsm.stateToString(fsm.getCurrentState()) << std::endl; \
-//         }                                        \
-//     } while (0) 
+#define assert_s(expectedState,fsm)                                                           \
+    do {                                                                                   \
+        if ((fsm.getCurrentState()) != (expectedState)) {                                            \
+            std::cerr << "Assertion failed: Expected state: " << fsm.stateToString(expectedState)            \
+                      << ", but got state: " << fsm.stateToString(fsm.getCurrentState()) << std::endl;\
+            assert(fsm.getCurrentState() == expectedState);                                      \
+        }                                          \
+        else {                                                                                \
+            std::cout << "Current state is " << fsm.stateToString(fsm.getCurrentState()) << std::endl; \
+        }                                        \
+    } while (0) 
 
-// // ================== Transition functions ==================
+// ================== Transition functions ==================
 
 // // Verify that the state has not changed when nothing changes
 // void sameState(AvState &fsm, DataDump &dump) {
@@ -468,3 +468,7 @@
 //     return 0;
 
 // } 
+
+int main(int argc, char** argv) {
+    return 0;
+}
