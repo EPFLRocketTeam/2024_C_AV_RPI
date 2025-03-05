@@ -4,6 +4,7 @@
 #include <capsule.h>
 #include "telecom.h"
 #include "data.h"
+#include "h_driver.h"
 
 #define LORA_UPLINK_CS      8
 #define LORA_UPLINK_RST     25

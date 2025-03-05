@@ -17,6 +17,7 @@
 #include "TinyGPS++.h"
 #include "adxl375.h"
 #include "data.h"
+#include "h_driver.h"
 
 class Sensors : public HDriver {
 public:
