@@ -5,10 +5,12 @@
 #include <Protocol.h>
 #include "data.h"
 
-class Telecom {
+class Telecom : public HDriver {
 public:
     Telecom();
     ~Telecom() = default;
+
+    void check_policy(Data::GoatReg reg, const DataDump& dump) override;
 
     bool begin();
     void send_telemetry();

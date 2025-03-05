@@ -18,10 +18,12 @@
 #include "adxl375.h"
 #include "data.h"
 
-class Sensors {
+class Sensors : public HDriver {
 public:
     Sensors();
     ~Sensors();
+
+    void check_policy(Data::GoatReg reg, const DataDump& dump) override;
 
     void calibrate();
     bool update();
