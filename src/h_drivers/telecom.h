@@ -4,6 +4,7 @@
 #include <capsule.h>
 #include <Protocol.h>
 #include "data.h"
+#include "h_driver.h"
 
 class Telecom : public HDriver {
 public:

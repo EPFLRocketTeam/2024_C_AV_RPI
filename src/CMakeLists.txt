@@ -4,9 +4,9 @@ option(ENABLE_COVERAGE "Enable coverage" OFF)
 
 set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
+set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
 set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
 set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
-set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
 
 
 add_subdirectory(${I2C_INTERFACE_DIR})
@@ -30,6 +30,7 @@ add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
     ${DATA_DIR}
+    ${H_DRIVERS_DIR}
     ${FLIGHT_CONTROL_DIR}
     ${I2C_INTERFACE_DIR}
     ${DRIVERS_DIR}

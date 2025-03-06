@@ -1,8 +1,8 @@
 #include <iostream>
 #include <unistd.h>
 #include "data.h"
-#include "telecom.h"
 #include "sensors.h"
+#include "telecom.h"
 
 int main() {
     // Create drivers
