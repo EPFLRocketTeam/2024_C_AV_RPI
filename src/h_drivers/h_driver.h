@@ -5,11 +5,12 @@
 #include "av_state.h"
 
 class HDriver {
-public:
-    HDriver();
-    virtual ~HDriver() = default;
-
-    virtual void check_policy(Data::GoatReg reg, const DataDump& dump);   
+    public:
+        HDriver() = default;
+        virtual ~HDriver() = default;
+    
+        virtual void check_policy(Data::GoatReg reg, const DataDump& dump) = 0; // Pure virtual
 };
+    
 
 #endif /* H_DRIVER_H */
