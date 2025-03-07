@@ -65,6 +65,7 @@ jobs:
           host: ${{ secrets.SECRET_IP }}
           username: ${{ secrets.SECRET_USER}}
           password: ${{ secrets.SSH_PASS }}
+          key: ${{ secrets.RPI_PRIVATE_KEY }}
           port: ${{ secrets.SECRET_PORT }}
           script: |
             # Initialize a variable to indicate if any command failed
