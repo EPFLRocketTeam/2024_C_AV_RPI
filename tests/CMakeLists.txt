@@ -14,6 +14,7 @@ target_link_libraries(bmi088_test bmi08)
 
 add_executable(data_logger_test DataLogger_test.cpp)
 target_link_libraries(data_logger_test flight_computer)
+add_test(NAME DataLoggerTest COMMAND data_logger_test)
 
 add_executable(bmp390_test BMP390_test.cpp)
 target_link_libraries(bmp390_test bmp3)
