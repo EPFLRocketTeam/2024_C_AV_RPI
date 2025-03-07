@@ -7,8 +7,12 @@
 
 int main (void) {
     DataDump dump;
-    DataLogger logger(LOG_FILE);
-    logger.conv(dump);
+    {
+        DataLogger logger(LOG_FILE);
+        logger.conv(dump);
+    }
+
+    char* expects = (char*) (&dump);
 
     FILE* file = fopen( LOG_FILE, "rb" );
 
@@ -21,5 +25,5 @@ int main (void) {
     assert(read_size == SIZE - 1);
 
     for (int i = 0; i + 1 < SIZE; i ++)
-        assert(buffer[i] == 0);
+        assert(buffer[i] == expects[i]);
 }
