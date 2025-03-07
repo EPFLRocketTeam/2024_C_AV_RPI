@@ -1,6 +1,7 @@
 
 #include "av_state.h"
 #include <cassert>
+#include <string.h>
 
 #define assert_s(expectedState,fsm)                                                           \
     do {                                                                                   \
@@ -208,6 +209,7 @@ void flightWithoutError() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+    memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
@@ -231,6 +233,7 @@ void errorOnGroundFromArmed() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
@@ -250,6 +253,7 @@ void errorOnGroundFromCalibration() {
     AvState fsm;
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+memset(&dump, 0, sizeof(dump));
     assert_s(State::INIT, fsm);
     initToCalibration(fsm, dump);
     calibrationToErrorGround(fsm, dump);
@@ -263,6 +267,7 @@ void errorInFlightFromThrustSequence() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
@@ -283,6 +288,7 @@ void errorInFlightFromLiftoff() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
@@ -304,6 +310,7 @@ void errorInFlightFromAscent() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
@@ -326,6 +333,7 @@ void errorInFlightFromDescent() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
@@ -349,7 +357,7 @@ void pressureTooLow() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
-    dump.av_state = State::INIT;
+memset(&dump, 0, sizeof(dump));
 
     assert_s(State::INIT, fsm);
     initToCalibration(fsm, dump);
@@ -369,6 +377,7 @@ void recoverFromErrorGround() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
@@ -388,6 +397,7 @@ void recoverFromCalibration() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
@@ -404,6 +414,7 @@ void recoverFromErrorGroundAndFly() {
 
     // Initialize a DataDump object to simulate different inputs
     DataDump dump;
+    memset(&dump, 0, sizeof(dump));
     dump.av_state = State::INIT;
 
     assert_s(State::INIT, fsm);
