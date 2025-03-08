@@ -8,19 +8,20 @@
  */
 
 uint8_t DPR_Driver::init () {
-    uint8_t suc = i2c_open(DPR_ADDRESS);
-    if (suc != 0) return DPR_FAIL_I2C_OPEN;
+    if (i2c_open(DPR_ADDRESS) != 0)
+        return DPR_FAIL_I2C_OPEN;
 
-    suc = get_intf_ptr(DPR_ADDRESS, &this->intf_ptr);
-    if (suc != 0) return DPR_FAIL_I2C_OPEN;
+    if (get_intf_ptr(DPR_ADDRESS, &this->intf_ptr) != 0)
+        return DPR_FAIL_I2C_OPEN;
 
     return 0;
 }
 uint8_t DPR_Driver::close () {
-    if (this->intf_ptr == nullptr) return 0;
+    if (this->intf_ptr == nullptr)
+        return 0;
 
-    uint8_t suc = i2c_close( DPR_ADDRESS );
-    if (suc != 0) return DPR_FAIL_I2C_CLOSE;
+    if (i2c_close( DPR_ADDRESS ) != 0)
+        return DPR_FAIL_I2C_CLOSE;
 
     this->intf_ptr = 0;
     return 0;
@@ -31,18 +32,20 @@ uint8_t DPR_Driver::close () {
  */
 
 uint8_t DPR_Driver::read_reg (uint8_t reg_addr, uint8_t* reg_data, uint32_t len) {
-    if (this->intf_ptr == nullptr) return DPR_FAIL_I2C_NOT_OPEN;
+    if (this->intf_ptr == nullptr)
+        return DPR_FAIL_I2C_NOT_OPEN;
 
-    uint8_t suc = i2c_read( reg_addr, reg_data, len, this->intf_ptr );
-    if (suc != 0) return DPR_FAIL_I2C_READ;
+    if (i2c_read( reg_addr, reg_data, len, this->intf_ptr ) != 0)
+        return DPR_FAIL_I2C_READ;
 
     return 0;
 }
-uint8_t DPR_Driver::write_reg (uint8_t reg_addr, uint8_t* reg_data, uint32_t len) {
-    if (this->intf_ptr == nullptr) return DPR_FAIL_I2C_NOT_OPEN;
+uint8_t DPR_Driver::write_reg (uint8_t reg_addr, const uint8_t* reg_data, uint32_t len) {
+    if (this->intf_ptr == nullptr)
+        return DPR_FAIL_I2C_NOT_OPEN;
 
-    uint8_t suc = i2c_write( reg_addr, reg_data, len, this->intf_ptr );
-    if (suc != 0) return DPR_FAIL_I2C_WRITE;
+    if (i2c_write( reg_addr, reg_data, len, this->intf_ptr ) != 0)
+        return DPR_FAIL_I2C_WRITE;
 
     return 0;
 }
@@ -67,15 +70,9 @@ void DPR_Driver::check_policy(Data::GoatReg reg, const DataDump& dump) {
 }
 
 void DPR_Driver::processManualMode(const DataDump& dump) {
-    if (dump.event.command_updated) {
-        switch (dump.telemetry_cmd.id) {
-            case CMD_ID::AV_CMD_ABORT:
-                abort();
-                break;
-            default:
-                break;
-        }
-    }
+    if (dump.event.command_updated
+     && dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT) 
+        abort();
 }
 
 void DPR_Driver::wakeUp () {

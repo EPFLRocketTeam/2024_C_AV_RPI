@@ -42,7 +42,7 @@ private:
     void *intf_ptr = nullptr;
 
     uint8_t  read_reg (uint8_t reg_addr, uint8_t* reg_data, uint32_t len);
-    uint8_t write_reg (uint8_t reg_addr, uint8_t* reg_data, uint32_t len);
+    uint8_t write_reg (uint8_t reg_addr, const uint8_t* reg_data, uint32_t len);
 
     void processManualMode(const DataDump& dump);
 
