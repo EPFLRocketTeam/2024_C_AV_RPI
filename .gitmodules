@@ -6,5 +6,5 @@
 	path = 2024_C_AV-GS_CAPSULE
 	url = https://github.com/EPFLRocketTeam/2024_C_AV-GS_CAPSULE
 [submodule "src/h_drivers/2024_C_AV_INTRANET"]
-	path = src/h_drivers/2024_C_AV_INTRANET
+	path = 2024_C_AV_INTRANET
 	url = git@github.com:EPFLRocketTeam/2024_C_AV_INTRANET.git
