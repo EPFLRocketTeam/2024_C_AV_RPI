@@ -22,7 +22,6 @@
 #define TMP1075_H
 
 #include <stdint.h> // uint16_t, etc.
-#include "i2c_wrappers.h"
 
 namespace TMP1075
 {

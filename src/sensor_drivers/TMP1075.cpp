@@ -19,6 +19,7 @@
 # ##### END GPL LICENSE BLOCK #####
 */
 #include "TMP1075.h"
+#include "i2c_wrappers.h"
 
 namespace TMP1075
 {

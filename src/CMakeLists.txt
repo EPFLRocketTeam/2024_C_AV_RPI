@@ -44,4 +44,6 @@ target_link_libraries(flight_computer PUBLIC
     bmi08
     bmp3
     gps
+    tmp1075
 )
+
