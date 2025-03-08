@@ -24,6 +24,8 @@ target_link_libraries(lora_test LoRa4Raspi)
 add_executable(main_test main_test.cpp)
 target_link_libraries(main_test flight_computer)
 
+add_executable(ina228_test INA228_test.cpp)
+target_link_libraries(ina228_test ina228)
 
 add_executable(data_test data_test.cpp)
 target_link_libraries(data_test flight_computer)
