@@ -10,7 +10,7 @@ Sensors::Sensors()
     bmp2(BMP3_ADDR_I2C_SEC),
     i2cgps(),
     gps(),
-    ina(INA228_DEFAULT_ADDRESS)
+    ina()
 {
     update_status();
 }
