@@ -1,6 +1,7 @@
 #include "PR_board.h"
 #include "data.h"
 #include "av_state.h"
+#include <iostream>
 
 // TODO: coté hardware, voir i2_interface.h
 // if adress missing put a fix me and set the adress to 0x00 in the meantime 
@@ -78,7 +79,7 @@ void PR_board::processManualMode(const DataDump& dump) {
             case CMD_ID::AV_CMD_ABORT:
                 executeAbort();  // <-- FIXED: Replaced incorrect constructor call
                 break;
-            case CMD_ID::AV_CMD_DEPLOY_RECOVERY:
+            case CMD_ID::AV_CMD_MANUAL_DEPLOY:
                 deployRecoverySystem();
                 break;
             default:
@@ -90,7 +91,7 @@ void PR_board::processManualMode(const DataDump& dump) {
 // message groupe av pour les fonctions 
 // si pas de reponse, message groupe interface av pr
 void PR_board::handleErrorFlight(const DataDump& dump) {
-    // Handle in-flight errors
+    // Handle in-flight error
 }
 
 void PR_board::processReadyState(const DataDump& dump) {

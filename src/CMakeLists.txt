@@ -35,6 +35,7 @@ target_include_directories(flight_computer PUBLIC
     ${FLIGHT_CONTROL_DIR}
     ${I2C_INTERFACE_DIR}
     ${DRIVERS_DIR}
+    ${H_DRIVERS_DIR}
 )
 
 target_link_libraries(flight_computer PUBLIC
