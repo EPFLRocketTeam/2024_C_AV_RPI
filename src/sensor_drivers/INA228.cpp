@@ -12,6 +12,7 @@
 
 #include "INA228.h"
 
+#include "i2c_wrappers.h"
 //      REGISTERS                   ADDRESS    BITS  RW
 #define INA228_CONFIG 0x00        //  16   RW
 #define INA228_ADC_CONFIG 0x01    //  16   RW

@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <math.h>
 
-#include "i2c_wrappers.h"
 
 #define INA228_LIB_VERSION (F("0.2.0"))
 #define INA228_DEFAULT_ADDRESS (0x40)//TODO: change this to the correct address
