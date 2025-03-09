@@ -16,10 +16,11 @@ Sensors::Sensors()
 
 Sensors::~Sensors() {}
 
-void Sensors::check_policy(Data::GoatReg reg,const DataDump& dump) {
+void Sensors::check_policy(Data::GoatReg reg, const DataDump& dump) {
     // Everytime a new command is received we write to the goat
 
     // TODO: Implement the logic for the sensors driver
+    return;
 }
 
 //TODO: must return bool to written into goat.event

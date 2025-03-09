@@ -11,4 +11,5 @@ public:
     virtual void check_policy(Data::GoatReg reg, const DataDump& dump) = 0;
 };
 
+
 #endif /* H_DRIVER_H */

@@ -1,6 +1,7 @@
 #include <Protocol.h>
 #include "av_state.h"
 #include "data.h"
+#include <iostream>
 
 
 AvState::AvState()
@@ -64,6 +65,8 @@ State AvState::fromArmed(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.event.catastrophic_failure)
     {
+        // print error
+        std::cerr << "Catastrophic failure detected" << dump.event.catastrophic_failure << " " << (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT ? "true" : "false") << std::endl;
         return State::ERRORGROUND;
     }
     // If the propulsion is OK we go to the READY state

@@ -16,26 +16,27 @@ add_subdirectory(${DRIVERS_DIR})
 set(FIREHORN_FC_SOURCES
     ${DATA_DIR}/data.cpp
     ${DATA_DIR}/data.h
+    ${DATA_DIR}/logger.cpp
+    ${DATA_DIR}/logger.h
     ${H_DRIVERS_DIR}/h_driver.h
     ${H_DRIVERS_DIR}/sensors.cpp
     ${H_DRIVERS_DIR}/sensors.h
     ${H_DRIVERS_DIR}/telecom.cpp
     ${H_DRIVERS_DIR}/telecom.h
-    ${H_DRIVERS_DIR}/PR_board.cpp
-    ${H_DRIVERS_DIR}/PR_board.h
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
+  
 )   
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
     ${DATA_DIR}
+    ${H_DRIVERS_DIR}
     ${FLIGHT_CONTROL_DIR}
     ${I2C_INTERFACE_DIR}
     ${DRIVERS_DIR}
-    ${H_DRIVERS_DIR}
 )
 
 target_link_libraries(flight_computer PUBLIC
