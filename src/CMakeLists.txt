@@ -16,6 +16,8 @@ add_subdirectory(${DRIVERS_DIR})
 set(FIREHORN_FC_SOURCES
     ${DATA_DIR}/data.cpp
     ${DATA_DIR}/data.h
+    ${DATA_DIR}/logger.cpp
+    ${DATA_DIR}/logger.h
     ${H_DRIVERS_DIR}/h_driver.h
     ${H_DRIVERS_DIR}/sensors.cpp
     ${H_DRIVERS_DIR}/sensors.h
