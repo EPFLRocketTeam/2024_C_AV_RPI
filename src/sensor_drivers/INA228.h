@@ -13,9 +13,12 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <exception>
+#include <string>
 
 #define INA228_LIB_VERSION (F("0.2.0"))
-#define INA228_DEFAULT_ADDRESS (0x40) // TODO: change this to the correct address
+#define INA228_ADDRESS_1 (0x40)
+#define INA228_ADDRESS_2 (0x41)
 //  for setMode() and getMode()
 enum ina228_mode_enum
 {
@@ -86,11 +89,52 @@ enum ina228_diag_enum
   INA228_DIAG_ALERT_LATCH = 15
 };
 
+/*!
+ * @brief Bus communication function pointer which should be mapped to
+ * the platform specific read functions of the user
+ *
+ * @param[in]     reg_addr : 8bit register address of the sensor
+ * @param[out]    reg_data : Data from the specified address
+ * @param[in]     length   : Length of the reg_data array
+ * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
+ *                           for interface related callbacks
+ * @retval 0 for Success
+ * @retval Non-zero for Failure
+ */
+typedef int8_t (*ina228_read_fptr_t)(uint8_t reg_addr, uint8_t *read_data, uint32_t len, void *intf_ptr);
+
+/*!
+ * @brief Bus communication function pointer which should be mapped to
+ * the platform specific write functions of the user
+ *
+ * @param[in]     reg_addr : 8bit register address of the sensor
+ * @param[out]    reg_data : Data to the specified address
+ * @param[in]     length   : Length of the reg_data array
+ * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
+ *                           for interface related callbacks
+ * @retval 0 for Success
+ * @retval Non-zero for Failure
+ *
+ */
+typedef int8_t (*ina228_write_fptr_t)(uint8_t reg_addr, const uint8_t *read_data, uint32_t len,
+                                      void *intf_ptr);
+
+/*!
+ * @brief Delay function pointer which should be mapped to
+ * delay function of the user
+ *
+ * @param[in] period              : Delay in microseconds.
+ * @param[in, out] intf_ptr       : Void pointer that can enable the linking of descriptors
+ *                                  for interface related call backs
+ *
+ */
+typedef void (*ina228_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
+
 class INA228
 {
 public:
   //  address between 0x40 and 0x4F
-  explicit INA228(const uint8_t address);
+  explicit INA228(const uint8_t address, float _shunt=0.015, float _maxCurrent=10.0);
 
   bool begin();
   bool isConnected();
@@ -240,47 +284,6 @@ public:
   //
   int getLastError();
 
-  /*!
-   * @brief Bus communication function pointer which should be mapped to
-   * the platform specific read functions of the user
-   *
-   * @param[in]     reg_addr : 8bit register address of the sensor
-   * @param[out]    reg_data : Data from the specified address
-   * @param[in]     length   : Length of the reg_data array
-   * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
-   *                           for interface related callbacks
-   * @retval 0 for Success
-   * @retval Non-zero for Failure
-   */
-  typedef int8_t (*ina228_read_fptr_t)(uint8_t reg_addr, uint8_t *read_data, uint32_t len, void *intf_ptr);
-
-  /*!
-   * @brief Bus communication function pointer which should be mapped to
-   * the platform specific write functions of the user
-   *
-   * @param[in]     reg_addr : 8bit register address of the sensor
-   * @param[out]    reg_data : Data to the specified address
-   * @param[in]     length   : Length of the reg_data array
-   * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
-   *                           for interface related callbacks
-   * @retval 0 for Success
-   * @retval Non-zero for Failure
-   *
-   */
-  typedef int8_t (*ina228_write_fptr_t)(uint8_t reg_addr, const uint8_t *read_data, uint32_t len,
-                                        void *intf_ptr);
-
-  /*!
-   * @brief Delay function pointer which should be mapped to
-   * delay function of the user
-   *
-   * @param[in] period              : Delay in microseconds.
-   * @param[in, out] intf_ptr       : Void pointer that can enable the linking of descriptors
-   *                                  for interface related call backs
-   *
-   */
-  typedef void (*ina228_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
-
 private:
   //  max 4 bytes
   uint32_t _readRegister(uint8_t reg, uint8_t bytes);
@@ -293,7 +296,7 @@ private:
   float _maxCurrent;
   bool _ADCRange;
 
-  uint8_t _address = INA228_DEFAULT_ADDRESS;
+  uint8_t _address;
 
   /*!
    * The interface pointer is used to enable the user
@@ -318,4 +321,20 @@ private:
   int _error;
 };
 
+class INA228Exception : public std::exception
+{
+private:
+  std::string message;
+
+public:
+  INA228Exception()
+  {
+    message = "Error during initialization of TMP1075";
+  }
+
+  virtual const char *what() const throw()
+  {
+    return message.c_str();
+  }
+};
 //  -- END OF FILE --

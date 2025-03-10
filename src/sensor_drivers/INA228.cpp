@@ -54,27 +54,22 @@
 //
 //  CONSTRUCTOR
 //
-INA228::INA228(const uint8_t address)
+INA228::INA228(const uint8_t address, float _shunt, float _maxCurrent)  
 {
   _address = address;
   //  no calibrated values by default.
-  _shunt = 0.015;
-  _maxCurrent = 10.0;
+  _shunt = _shunt;
+  _maxCurrent = _maxCurrent;
   _current_LSB = _maxCurrent * pow(2, -19);
   _error = 0;
+  _ADCRange = false;
 
-  _read = nullptr;
-  _write = nullptr;
-  _delay_us = nullptr;
-  _intf_ptr = nullptr;
-
-}
-
-bool INA228::begin()
-{
   if (i2c_open(_address) != 0)
-    return false;
+  {
 
+    throw INA228Exception();
+    return;
+  }
   _read = i2c_read;
   _write = i2c_write;
   _delay_us = i2c_delay_us;
@@ -82,15 +77,15 @@ bool INA228::begin()
   if (get_intf_ptr(_address, &_intf_ptr) != 0)
   {
     _error = -1;
-    return false;
+    throw INA228Exception();
+    return;
   }
   getADCRange();
-  return true;
 }
 
 bool INA228::isConnected()
 {
-  //simple check to see if the device is connected
+  // simple check to see if the device is connected
   uint8_t buffer[2] = {0};
   int8_t ret = _read(INA228_MANUFACTURER, buffer, 2, _intf_ptr);
   return (ret == 0);
@@ -586,7 +581,7 @@ int INA228::getLastError()
 uint32_t INA228::_readRegister(uint8_t reg, uint8_t bytes)
 {
   _error = 0;
-  uint8_t buffer[5] = {0};//5 because 40 bit registers(cf: Table7-3 datasheet:https://www.ti.com/lit/ds/symlink/ina228.pdf)
+  uint8_t buffer[5] = {0}; // 5 because 40 bit registers(cf: Table7-3 datasheet:https://www.ti.com/lit/ds/symlink/ina228.pdf)
 
   _intf_rslt = _read(reg, buffer, bytes, _intf_ptr);
   if (_intf_rslt != 0)
@@ -609,7 +604,7 @@ double INA228::_readRegisterF(uint8_t reg)
 
   _error = 0;
   uint8_t buffer[5] = {0};
-  
+
   _intf_rslt = _read(reg, buffer, 5, _intf_ptr);
   if (_intf_rslt != 0)
   {
