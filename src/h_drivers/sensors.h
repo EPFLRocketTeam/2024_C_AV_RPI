@@ -38,7 +38,8 @@ private:
     Bmp390 bmp1, bmp2;
     I2CGPS i2cgps;
     TinyGPSPlus gps;
-    INA228 ina1{INA228_ADDRESS_1}, ina2{INA228_ADDRESS_2};
+    INA228 ina1{INA228_ADDRESS_1};
+    INA228 ina2{INA228_ADDRESS_2};
 
     // SensStatus status;
     // SensRaw raw_data;
