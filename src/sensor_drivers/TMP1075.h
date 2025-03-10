@@ -23,120 +23,117 @@
 
 #include <stdint.h> // uint16_t, etc.
 
-namespace TMP1075
+enum ConsecutiveFaults : uint8_t
 {
-  enum ConsecutiveFaults : uint8_t
-  {
-    Fault_1 = 0b00,
-    Fault_2 = 0b01,
-    Fault_3 = 0b10,
-    Fault_4 = 0b11,
-  };
+  Fault_1 = 0b00,
+  Fault_2 = 0b01,
+  Fault_3 = 0b10,
+  Fault_4 = 0b11,
+};
 
-  enum ConversionTime : uint8_t
-  {
-    ConversionTime27_5ms = 0b00,
-    ConversionTime55ms = 0b01,
-    ConversionTime110ms = 0b10,
-    ConversionTime220ms = 0b11,
-  };
+enum ConversionTime : uint8_t
+{
+  ConversionTime27_5ms = 0b00,
+  ConversionTime55ms = 0b01,
+  ConversionTime110ms = 0b10,
+  ConversionTime220ms = 0b11,
+};
 
-  enum Offsets : uint8_t
-  {
-    OS = 7,
-    R = 5,
-    F = 3,
-    POL = 2,
-    TM = 1,
-    SD = 0,
-  };
+enum Offsets : uint8_t
+{
+  OS = 7,
+  R = 5,
+  F = 3,
+  POL = 2,
+  TM = 1,
+  SD = 0,
+};
 
-    /*!
-   * @brief Bus communication function pointer which should be mapped to
-   * the platform specific read functions of the user
-   *
-   * @param[in]     reg_addr : 8bit register address of the sensor
-   * @param[out]    reg_data : Data from the specified address
-   * @param[in]     length   : Length of the reg_data array
-   * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
-   *                           for interface related callbacks
-   * @retval 0 for Success
-   * @retval Non-zero for Failure
-   */
-  typedef int8_t (*tmp1075_read_fptr_t)(uint8_t reg, uint8_t* data, uint32_t len, void* intf_ptr);
-  /*!
-   * @brief Bus communication function pointer which should be mapped to
-   * the platform specific write functions of the user
-   *
-   * @param[in]     reg_addr : 8bit register address of the sensor
-   * @param[out]    reg_data : Data to the specified address
-   * @param[in]     length   : Length of the reg_data array
-   * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
-   *                           for interface related callbacks
-   * @retval 0 for Success
-   * @retval Non-zero for Failure
-   *
-   */
-  typedef int8_t (*tmp1075_write_fptr_t)(uint8_t reg, const uint8_t* data, uint32_t len, void* intf_ptr);
-  /*!
-   * @brief Delay function pointer which should be mapped to
-   * delay function of the user
-   *
-   * @param[in] period              : Delay in microseconds.
-   * @param[in, out] intf_ptr       : Void pointer that can enable the linking of descriptors
-   *                                  for interface related call backs
-   *
-   */
-  typedef void (*tmp1075_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
+/*!
+ * @brief Bus communication function pointer which should be mapped to
+ * the platform specific read functions of the user
+ *
+ * @param[in]     reg_addr : 8bit register address of the sensor
+ * @param[out]    reg_data : Data from the specified address
+ * @param[in]     length   : Length of the reg_data array
+ * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
+ *                           for interface related callbacks
+ * @retval 0 for Success
+ * @retval Non-zero for Failure
+ */
+typedef int8_t (*tmp1075_read_fptr_t)(uint8_t reg, uint8_t *data, uint32_t len, void *intf_ptr);
+/*!
+ * @brief Bus communication function pointer which should be mapped to
+ * the platform specific write functions of the user
+ *
+ * @param[in]     reg_addr : 8bit register address of the sensor
+ * @param[out]    reg_data : Data to the specified address
+ * @param[in]     length   : Length of the reg_data array
+ * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
+ *                           for interface related callbacks
+ * @retval 0 for Success
+ * @retval Non-zero for Failure
+ *
+ */
+typedef int8_t (*tmp1075_write_fptr_t)(uint8_t reg, const uint8_t *data, uint32_t len, void *intf_ptr);
+/*!
+ * @brief Delay function pointer which should be mapped to
+ * delay function of the user
+ *
+ * @param[in] period              : Delay in microseconds.
+ * @param[in, out] intf_ptr       : Void pointer that can enable the linking of descriptors
+ *                                  for interface related call backs
+ *
+ */
+typedef void (*tmp1075_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
 
-  class TMP1075
-  {
-  public:
-    // i2cAddress is the default address when A0, A1 and A2 is tied low
-    explicit TMP1075(uint8_t i2cAddress = 0x48);
+class TMP1075
+{
+public:
+  // i2cAddress is the default address when A0, A1 and A2 is tied low
+  explicit TMP1075(uint8_t addr = 0x48);
+  bool isInitialized() const;
+  int16_t getTemperatureRaw();
+  float getTemperatureCelsius();
+  void startConversion();
+  bool getConversionMode() const;
+  void setConversionMode(const bool isSingleShot = false);
+  ConversionTime getConversionTime() const;
+  void setConversionTime(ConversionTime value = ConversionTime27_5ms);
+  ConsecutiveFaults getFaultsUntilAlert() const;
+  void setFaultsUntilAlert(ConsecutiveFaults value = Fault_1);
+  bool getAlertPolarity() const;
+  void setAlertPolarity(const bool isHigh = false);
+  bool getAlertMode() const;
+  void setAlertMode(const bool isInterrupt = false);
+  int16_t getLowTemperatureLimitRaw();
+  float getLowTemperatureLimitCelsius();
+  void setLowTemperatureLimitRaw(int16_t value = 0x4b00);
+  void setLowTemperatureLimitCelsius(float value = 75.f);
+  int16_t getHighTemperatureLimitRaw();
+  float getHighTemperatureLimitCelsius();
+  void setHighTemperatureLimitRaw(int16_t value = 0x5000);
+  void setHighTemperatureLimitCelsius(float value = 80.f);
+  uint16_t getDeviceId();
 
-    bool begin();
-    int16_t getTemperatureRaw();
-    float getTemperatureCelsius();
-    void startConversion();
-    bool getConversionMode() const;
-    void setConversionMode(const bool isSingleShot = false);
-    ConversionTime getConversionTime() const;
-    void setConversionTime(ConversionTime value = ConversionTime27_5ms);
-    ConsecutiveFaults getFaultsUntilAlert() const;
-    void setFaultsUntilAlert(ConsecutiveFaults value = Fault_1);
-    bool getAlertPolarity() const;
-    void setAlertPolarity(const bool isHigh = false);
-    bool getAlertMode() const;
-    void setAlertMode(const bool isInterrupt = false);
-    int16_t getLowTemperatureLimitRaw();
-    float getLowTemperatureLimitCelsius();
-    void setLowTemperatureLimitRaw(int16_t value = 0x4b00);
-    void setLowTemperatureLimitCelsius(float value = 75.f);
-    int16_t getHighTemperatureLimitRaw();
-    float getHighTemperatureLimitCelsius();
-    void setHighTemperatureLimitRaw(int16_t value = 0x5000);
-    void setHighTemperatureLimitCelsius(float value = 80.f);
-    uint16_t getDeviceId();
+private:
+  uint16_t readRegister(uint8_t reg);
+  void writeRegister(uint8_t reg, uint16_t value);
+  void writeRegister(uint8_t reg, uint8_t value);
 
-  private:
-    uint16_t readRegister(uint8_t reg);
-    void writeRegister(uint8_t reg, uint16_t value);
-    void writeRegister(uint8_t reg, uint8_t value);
+  uint8_t i2cAddress;
+  uint8_t configRegister;
 
-    uint8_t i2cAddress;
-    uint8_t configRegister;
+  static float convertToCelsius(int16_t value);
+  static int16_t convertFromCelsius(float value);
 
-    static float convertToCelsius(int16_t value);
-    static int16_t convertFromCelsius(float value);
+  tmp1075_read_fptr_t _read;
+  tmp1075_write_fptr_t _write;
+  tmp1075_delay_us_fptr_t _delay_us;
 
-    
-    tmp1075_read_fptr_t _read;
-    tmp1075_write_fptr_t _write;
-    tmp1075_delay_us_fptr_t _delay_us;
+  void *_intf_ptr;
+  bool initialized;
+};
 
-    void* _intf_ptr;
 
-  };
-}
 #endif // TMP1075_H

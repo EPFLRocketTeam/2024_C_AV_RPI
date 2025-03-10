@@ -3,12 +3,10 @@
 #include <cassert>
 #include "TMP1075.h"
 
-using namespace TMP1075;
-
 int main() {
-    TMP1075::TMP1075 sensor(0x48);
+    TMP1075 sensor(0x48);
 
-    if (!sensor.begin()) {
+    if (!sensor.isInitialized()) {
         std::cerr << "Failed to initialize TMP1075 sensor!" << std::endl;
         return -1;
     }

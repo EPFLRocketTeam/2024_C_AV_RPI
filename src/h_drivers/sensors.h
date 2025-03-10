@@ -38,7 +38,7 @@ private:
     Bmp390 bmp1, bmp2;
     I2CGPS i2cgps;
     TinyGPSPlus gps;
-    TMP1075::TMP1075 tmp1075;
+    TMP1075 tmp1075;
 
     // SensStatus status;
     // SensRaw raw_data;
