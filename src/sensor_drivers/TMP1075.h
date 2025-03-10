@@ -22,6 +22,8 @@
 #define TMP1075_H
 
 #include <stdint.h> // uint16_t, etc.
+#include <exception>
+#include <string>
 
 enum ConsecutiveFaults : uint8_t
 {
@@ -92,7 +94,6 @@ class TMP1075
 public:
   // i2cAddress is the default address when A0, A1 and A2 is tied low
   explicit TMP1075(uint8_t addr = 0x48);
-  bool isInitialized() const;
   int16_t getTemperatureRaw();
   float getTemperatureCelsius();
   void startConversion();
@@ -132,8 +133,23 @@ private:
   tmp1075_delay_us_fptr_t _delay_us;
 
   void *_intf_ptr;
-  bool initialized;
 };
 
+class TMP1075Exception : public std::exception
+{
+private:
+  std::string message;
+
+public:
+  TMP1075Exception()
+  {
+    message = "Error during initialization of TMP1075";
+  }
+
+  virtual const char *what() const throw()
+  {
+    return message.c_str();
+  }
+};
 
 #endif // TMP1075_H

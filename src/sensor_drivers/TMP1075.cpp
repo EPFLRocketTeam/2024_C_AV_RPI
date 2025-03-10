@@ -23,26 +23,25 @@
 
 TMP1075::TMP1075(uint8_t addr)
     : i2cAddress(addr), configRegister(0x00FF),
-      _read(nullptr), _write(nullptr), _delay_us(nullptr), _intf_ptr(nullptr), initialized(false)
+      _read(nullptr), _write(nullptr), _delay_us(nullptr), _intf_ptr(nullptr)
 {
-    if (i2c_open(i2cAddress) != 0){
+    if (i2c_open(i2cAddress) != 0)
+    {
+        throw TMP1075Exception();
         return;
     }
     _read = i2c_read;
     _write = i2c_write;
     _delay_us = i2c_delay_us;
 
-    if (get_intf_ptr(i2cAddress, &_intf_ptr) != 0){
+    if (get_intf_ptr(i2cAddress, &_intf_ptr) != 0)
+    {
+        throw TMP1075Exception();
         return;
     }
     this->configRegister = (uint8_t)(this->readRegister(0x01) >> 8);
-    this->initialized = true;
 }
 
-bool TMP1075::isInitialized() const
-{
-    return this->initialized;
-}
 void TMP1075::writeRegister(const uint8_t pointerRegister, const uint16_t value)
 {
     uint8_t buffer[2];
