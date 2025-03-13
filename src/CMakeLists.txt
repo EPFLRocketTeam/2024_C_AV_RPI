@@ -4,9 +4,9 @@ option(ENABLE_COVERAGE "Enable coverage" OFF)
 
 set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
-set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
 set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
 set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
+set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
 
 
 add_subdirectory(${I2C_INTERFACE_DIR})
@@ -26,6 +26,7 @@ set(FIREHORN_FC_SOURCES
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
+  
 )   
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
@@ -40,6 +41,7 @@ target_include_directories(flight_computer PUBLIC
 
 target_link_libraries(flight_computer PUBLIC
     ERT_RF_Protocol_Interface
+    2024_C_AV_INTRANET
     Capsule
     LoRa4Raspi
     adxl375
@@ -47,3 +49,4 @@ target_link_libraries(flight_computer PUBLIC
     bmp3
     gps
 )
+
