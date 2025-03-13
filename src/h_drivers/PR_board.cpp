@@ -3,15 +3,7 @@
 #include "av_state.h"
 #include <iostream>
 
-// TODO: coté hardware, voir i2_interface.h
-// if adress missing put a fix me and set the adress to 0x00 in the meantime 
-
 // Enumeration for the command of the PR board
-
-
-// Define constants for valve bit positions
-// TODO: Check whether the order is ok or not
-
 
 PR_board::PR_board() {
     // Initialize the board by setting all the valves to closed
@@ -68,14 +60,11 @@ void PR_board::handleDescent(const DataDump& dump) {
     // Handle logic for descent phase
 }
 
-// eteindre et allumer chacune des valves
+// TODO: eteindre et allumer chacune des valves
 void PR_board::processManualMode(const DataDump& dump) {
     // Process commands in manual mode
     if (dump.event.command_updated) {
         switch (dump.telemetry_cmd.id) {
-            case CMD_ID::AV_CMD_IGNITION:
-                triggerIgnition();
-                break;
             case CMD_ID::AV_CMD_ABORT:
                 executeAbort();  // <-- FIXED: Replaced incorrect constructor call
                 break;
