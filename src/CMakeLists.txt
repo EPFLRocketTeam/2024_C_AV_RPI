@@ -19,6 +19,8 @@ set(FIREHORN_FC_SOURCES
     ${DATA_DIR}/logger.cpp
     ${DATA_DIR}/logger.h
     ${H_DRIVERS_DIR}/h_driver.h
+    ${H_DRIVERS_DIR}/trigger_board.cpp
+    ${H_DRIVERS_DIR}/trigger_board.h
     ${H_DRIVERS_DIR}/sensors.cpp
     ${H_DRIVERS_DIR}/sensors.h
     ${H_DRIVERS_DIR}/telecom.cpp
@@ -26,7 +28,6 @@ set(FIREHORN_FC_SOURCES
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
-  
 )   
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})

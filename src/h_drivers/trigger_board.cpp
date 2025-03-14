@@ -22,37 +22,107 @@ TriggerBoard::~TriggerBoard() {
 void TriggerBoard::check_policy(Data::GoatReg reg, const DataDump& dump) {
     switch (dump.av_state) {
         case State::INIT:
-            write_timestamp();
+            handle_init();
             break;
         case State::CALIBRATION:
-            write_timestamp();
-            // TODO: send wake up until is_woken_up is true
-            send_wake_up();
-            read_is_woken_up();
+            handle_calibration();
             break;
         case State::MANUAL:
+            handle_manual();
+            break;
         case State::ARMED:
+            handle_armed();
+            break;
         case State::READY:
+            handle_ready();
+            break;
         case State::THRUSTSEQUENCE:
-            write_timestamp();
+            handle_thrustsequence();
             break;
         case State::LIFTOFF:
-            write_timestamp();
-            send_clear_to_trigger();
+            handle_liftoff();
             break;
         case State::ASCENT:
-        case State::LANDED:
-            write_timestamp();
-            break;
+            handle_ascent();
         case State::DESCENT:
-            write_timestamp();
-            read_has_triggered();
+            handle_descent();
+            break;
+        case State::LANDED:
+            handle_landed();
             break;
         case State::ERRORGROUND:
+            handle_errorground();
+            break;
         case State::ERRORFLIGHT:
-            write_timestamp();
+            handle_errorflight();
             break;
     }
+}
+
+void TriggerBoard::handle_init() {
+    write_timestamp();
+}
+
+void TriggerBoard::handle_calibration() {
+    write_timestamp();
+    // TODO: send wake up until is_woken_up id true
+    send_wake_up();
+    read_is_woken_up();
+}
+
+void TriggerBoard::handle_manual() {
+    write_timestamp();
+}
+
+void TriggerBoard::handle_armed() {
+    write_timestamp();
+}
+
+void TriggerBoard::handle_ready() {
+    write_timestamp();
+}
+
+void TriggerBoard::handle_thrustsequence() {
+    write_timestamp();
+}
+
+void TriggerBoard::handle_liftoff() {
+    write_timestamp();
+}
+
+void TriggerBoard::handle_ascent() {
+    write_timestamp();
+}
+
+// Transition ASCENT->DESCENT is done upon apogee detection
+void TriggerBoard::handle_descent() {
+    write_timestamp();
+
+    // Send main pyro order to trigger the sep mech
+    uint32_t order(NET_CMD_ON);
+    write_pyros(order);
+    // TODO: if passed a delay of no trigger ACK, fire on the spare channels
+    read_has_triggered();
+
+    // order = NET_CMD_ON << 8;
+    // write_pyros(order);
+    // read_has_triggered();
+    //
+    // order = NET_CMD_ON << 16;
+    // write_pyros(order);
+    // read_has_triggered();
+}
+
+void TriggerBoard::handle_landed() {
+    write_timestamp();
+}
+
+void TriggerBoard::handle_errorground() {
+    write_timestamp();
+}
+
+void TriggerBoard::handle_errorflight() {
+    write_timestamp();
 }
 
 void TriggerBoard::write_timestamp() {

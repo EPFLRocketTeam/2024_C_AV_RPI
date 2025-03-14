@@ -11,6 +11,19 @@ public:
     void check_policy(Data::GoatReg reg, const DataDump& dump) override;
 
 private:
+    void handle_init();
+    void handle_calibration();
+    void handle_manual();
+    void handle_armed();
+    void handle_ready();
+    void handle_thrustsequence();
+    void handle_liftoff();
+    void handle_ascent();
+    void handle_descent();
+    void handle_landed();
+    void handle_errorground();
+    void handle_errorflight();
+
     void write_timestamp();
     void send_wake_up();
     void read_is_woken_up();
