@@ -16,7 +16,6 @@
 #include "I2CGPS.h"
 #include "TinyGPS++.h"
 #include "adxl375.h"
-#include "data.h"
 #include "h_driver.h"
 
 class Sensors : public HDriver {
@@ -24,7 +23,7 @@ public:
     Sensors();
     ~Sensors();
 
-    void check_policy(Data::GoatReg reg,const DataDump& dump) override;
+    void check_policy(const DataDump& dump) override;
 
     void calibrate();
     bool update();

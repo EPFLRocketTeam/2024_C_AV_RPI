@@ -1,3 +1,4 @@
+#include <string>
 #include "trigger_board.h"
 #include "i2c_interface.h"
 #include "intranet_commands.h"
@@ -6,7 +7,7 @@ TriggerBoard::TriggerBoard() {
     try {
         I2CInterface::getInstance().open(NET_ADDR_TRB);
     }catch(const I2CInterfaceException& e) {
-        std::cout << "Error during TRB I2C initilazation:" << e.what() << "\n";
+        std::cout << "Error during TRB I2C initilazation: " << e.what() << "\n";
     }    
 }
 
@@ -18,8 +19,70 @@ TriggerBoard::~TriggerBoard() {
     }
 }
 
+void TriggerBoard::write_timestamp() {
+    // TODO: Need to add main timestamp to the GOAT.
+//    I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_TIMESTAMP_MAIN, 
+}
+
+void TriggerBoard::send_wake_up() {
+    const uint32_t order(NET_CMD_ON);
+    try {
+        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_WAKE_UP, (uint8_t*)&order, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB wake_up error: ");
+        throw TriggerBoardException(msg + e.what());
+    }
+}
+
+bool TriggerBoard::read_is_woken_up() {
+    uint32_t rslt(0);
+    try {
+        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_IS_WOKEN_UP, (uint8_t*)&rslt, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB read_is_woken_up error: ");
+        throw TriggerBoardException(msg + e.what());
+    }
+
+    const bool trb_woken_up(rslt == NET_CMD_ON);
+    // TODO: Write rslt to the GOAT (need to add woken_up entries to the GOAT for TRB and PRB)
+    return rslt;
+}
+
+void TriggerBoard::send_clear_to_trigger() {
+    const uint32_t cmd(NET_CMD_ON);
+    try {
+        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB clear_to_trigger error: ");
+        throw TriggerBoardException(msg + e.what());
+    }
+}
+
+void TriggerBoard::write_pyros(const uint32_t pyros) {
+    try {
+        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&pyros, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB write_pyros error: ");
+        throw TriggerBoardException(msg + e.what());
+    }
+}
+
+bool TriggerBoard::read_has_triggered() {
+    uint32_t rslt(0);
+    try {
+        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_HAS_TRIGGERED, (uint8_t*)&rslt, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB read_has_triggered error: ");
+        throw TriggerBoardException(msg + e.what());
+    }
+
+    const bool trb_triggered(rslt == NET_CMD_ON);
+    // TODO: Write the rslt to the GOAT
+    return trb_triggered;
+}
+
 // TODO: regulate interactions/polling rates
-void TriggerBoard::check_policy(Data::GoatReg reg, const DataDump& dump) {
+void TriggerBoard::check_policy( const DataDump& dump) {
     switch (dump.av_state) {
         case State::INIT:
             handle_init();
@@ -123,56 +186,6 @@ void TriggerBoard::handle_errorground() {
 
 void TriggerBoard::handle_errorflight() {
     write_timestamp();
-}
-
-void TriggerBoard::write_timestamp() {
-    // TODO: Need to add main timestamp to the GOAT.
-//    I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_TIMESTAMP_MAIN, 
-}
-
-void TriggerBoard::send_wake_up() {
-    const uint32_t order(NET_CMD_ON);
-    try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_WAKE_UP, (uint8_t*)&order, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::cout << "TRB communication error: " << e.what() << "\n";
-    }
-}
-
-void TriggerBoard::read_is_woken_up() {
-    uint32_t rslt(0);
-    try {
-        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_IS_WOKEN_UP, (uint8_t*)&rslt, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::cout << "TRB communication error: " << e.what() << "\n";
-    }
-    // TODO: Write rslt to the GOAT (need to add woken_up entries to the GOAT for TRB and PRB)
-}
-
-void TriggerBoard::send_clear_to_trigger() {
-    const uint32_t cmd(NET_CMD_ON);
-    try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::cout << "TRB communication error: " << e.what() << "\n";
-    }
-}
-
-void TriggerBoard::write_pyros(const uint32_t pyros) {
-    try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&pyros, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::cout << "TRB communication error: " << e.what() << "\n";
-    }
-}
-
-void TriggerBoard::read_has_triggered() {
-    uint32_t rslt(0);
-    try {
-        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_HAS_TRIGGERED, (uint8_t*)&rslt, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::cout << "TRB communication error: " << e.what() << "\n";
-    }
 }
 
 
