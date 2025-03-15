@@ -21,7 +21,7 @@ uint8_t PR_board::read_valves() const {
     return current_valve_state;  // Return the stored valve state
 }
 
-void PR_board::check_policy(Data::GoatReg reg, const DataDump& dump) {
+void PR_board::check_policy(const DataDump& dump) {
     switch (dump.av_state) {
         case State::INIT:
             // For the INIT state we do nothing
