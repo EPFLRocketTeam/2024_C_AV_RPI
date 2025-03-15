@@ -18,6 +18,7 @@
 #include "adxl375.h"
 #include "data.h"
 #include "h_driver.h"
+#include "INA228.h"
 
 class Sensors : public HDriver {
 public:
@@ -37,6 +38,8 @@ private:
     Bmp390 bmp1, bmp2;
     I2CGPS i2cgps;
     TinyGPSPlus gps;
+    INA228 ina1{INA228_ADDRESS_1};
+    INA228 ina2{INA228_ADDRESS_2};
 
     // SensStatus status;
     // SensRaw raw_data;
