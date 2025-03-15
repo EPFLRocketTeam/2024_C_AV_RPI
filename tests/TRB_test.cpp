@@ -9,4 +9,10 @@ int main() {
     goat.av_state = State::INIT;
 
     trb.check_policy(goat);
+
+    try {
+        trb.send_wake_up();
+    }catch(TriggerBoardException& e) {
+        std::cout << e.what() << "\n";
+    }
 }
