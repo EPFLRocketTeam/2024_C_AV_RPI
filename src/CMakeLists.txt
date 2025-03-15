@@ -1,5 +1,7 @@
 
 option(ENABLE_TESTING "Enable testing" OFF)
+option(ENABLE_TESTING_SOFT "Enable software testing" OFF)
+option(ENABLE_TESTING_HARD "Enable hardware testing" OFF)
 option(ENABLE_COVERAGE "Enable coverage" OFF)
 
 set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
