@@ -17,6 +17,7 @@ bool areEqualBmp3_status(const bmp3_status& s1, const bmp3_status& s2) {
     );
 }
 
+// return true iff the content of the two adxl375_data structs is equal
 bool areEqualAdxl1375_data(const adxl375_data& s1, const adxl375_data& s2) {
     return (
         s1.x == s2.x &&
@@ -25,6 +26,7 @@ bool areEqualAdxl1375_data(const adxl375_data& s1, const adxl375_data& s2) {
     );
 }
 
+// return true iff the content of the two bmi08_sensor_data_f structs is equal
 bool areEqualbmi08_sensor_data_f(const bmi08_sensor_data_f& s1, const bmi08_sensor_data_f& s2) {
     return (
         s1.x == s2.x &&
@@ -33,6 +35,7 @@ bool areEqualbmi08_sensor_data_f(const bmi08_sensor_data_f& s1, const bmi08_sens
     );
 }
 
+// return true iff the content of the two bmp3_data structs is equal
 bool areEqualbmp3_data(const bmp3_data& s1, const bmp3_data& s2) {
     return (
         s1.pressure == s2.pressure &&
@@ -43,6 +46,8 @@ bool areEqualbmp3_data(const bmp3_data& s1, const bmp3_data& s2) {
 int main(int argc, char** argv) {
     // Initialize the Goat
     Data& goatData = Data::get_instance();
+
+    /*Tests Telemetry command*/
 
     // Test TLM_CMD_ID
     Data::GoatReg telemetryCommand = Data::GoatReg::TLM_CMD_ID;
@@ -57,6 +62,8 @@ int main(int argc, char** argv) {
     goatData.write(telemetryValueReg, &testTelemetryCmdValue);
     dump = goatData.get();
     assert(dump.telemetry_cmd.value == testTelemetryCmdValue);
+
+    /*Tests Navigation sensors status*/
 
     // Test NAV_SENSOR_ADXL1_STAT
     Data::GoatReg adxl1StatusReg = Data::GoatReg::NAV_SENSOR_ADXL1_STAT;
@@ -114,6 +121,8 @@ int main(int argc, char** argv) {
     dump = goatData.get();
     assert(areEqualBmp3_status(dump.stat.bmp_aux_status, testbmp2Status));
 
+    /*Tests raw navigation sensors data*/
+
     // Test NAV_SENSOR_ADXL1_DATA
     Data::GoatReg adxl1DataReg = Data::GoatReg::NAV_SENSOR_ADXL1_DATA;
     adxl375_data testadxl1Data = {1.5, 2.6, 3.7};
@@ -169,4 +178,125 @@ int main(int argc, char** argv) {
     goatData.write(bmp2DataReg, &testBmp2Data);
     dump = goatData.get();
     assert(areEqualbmp3_data(dump.sens.bmp_aux, testBmp2Data));
+
+    /*Tests Propulsion sensors*/
+
+    // Test PR_SENSOR_P_NCO
+    Data::GoatReg pNcoReg = Data::GoatReg::PR_SENSOR_P_NCO;
+    double testPNco = 1.1;
+    goatData.write(pNcoReg, &testPNco);
+    dump = goatData.get();
+    assert(dump.prop.N2_pressure == testPNco);
+
+    // Test PR_SENSOR_P_ETA
+    Data::GoatReg pEtaReg = Data::GoatReg::PR_SENSOR_P_ETA;
+    double testPEta = 2.2;
+    goatData.write(pEtaReg, &testPEta);
+    dump = goatData.get();
+    assert(dump.prop.fuel_pressure == testPEta);
+
+    // Test PR_SENSOR_P_OTA
+    Data::GoatReg pOtaReg = Data::GoatReg::PR_SENSOR_P_OTA;
+    double testPOta = 3.3;
+    goatData.write(pOtaReg, &testPOta);
+    dump = goatData.get();
+    assert(dump.prop.LOX_pressure == testPOta);
+
+    // Test PR_SENSOR_P_CIG
+    Data::GoatReg pCigReg = Data::GoatReg::PR_SENSOR_P_CIG;
+    double testPCig = 4.4;
+    goatData.write(pCigReg, &testPCig);
+    dump = goatData.get();
+    assert(dump.prop.igniter_pressure == testPCig);
+
+    // Test PR_SENSOR_P_EIN
+    Data::GoatReg pEinReg = Data::GoatReg::PR_SENSOR_P_EIN;
+    double testPEin = 5.5;
+    goatData.write(pEinReg, &testPEin);
+    dump = goatData.get();
+    assert(dump.prop.fuel_inj_pressure == testPEin);
+
+    // Test PR_SENSOR_P_OIN
+    Data::GoatReg pOinReg = Data::GoatReg::PR_SENSOR_P_OIN;
+    double testPOin = 6.6;
+    goatData.write(pOinReg, &testPOin);
+    dump = goatData.get();
+    assert(dump.prop.LOX_inj_pressure == testPOin);
+
+    // Test PR_SENSOR_P_CCC
+    Data::GoatReg pCccReg = Data::GoatReg::PR_SENSOR_P_CCC;
+    double testpCcc = 7.7;
+    goatData.write(pCccReg, &testpCcc);
+    dump = goatData.get();
+    assert(dump.prop.chamber_pressure == testpCcc);
+
+    // Test PR_SENSOR_L_ETA
+    Data::GoatReg lEtaReg = Data::GoatReg::PR_SENSOR_L_ETA;
+    double testlEta = 8.8;
+    goatData.write(lEtaReg, &testlEta);
+    dump = goatData.get();
+    assert(dump.prop.fuel_level == testlEta);
+
+    // Test PR_SENSOR_L_OTA
+    Data::GoatReg lOtaReg = Data::GoatReg::PR_SENSOR_L_OTA;
+    double testlOta = 9.9;
+    goatData.write(lOtaReg, &testlOta);
+    dump = goatData.get();
+    assert(dump.prop.LOX_level == testlOta);
+
+    // Test PR_SENSOR_T_NCO
+    Data::GoatReg tNcoReg = Data::GoatReg::PR_SENSOR_T_NCO;
+    double testtNco = 1.0;
+    goatData.write(tNcoReg, &testtNco);
+    dump = goatData.get();
+    assert(dump.prop.N2_temperature == testtNco);
+
+    // Test PR_SENSOR_T_ETA
+    Data::GoatReg tEtaReg = Data::GoatReg::PR_SENSOR_T_ETA;
+    double testtEta = 2.0;
+    goatData.write(tEtaReg, &testtEta);
+    dump = goatData.get();
+    assert(dump.prop.fuel_temperature == testtEta);
+
+    // Test PR_SENSOR_T_OTA
+    Data::GoatReg tOtaReg = Data::GoatReg::PR_SENSOR_T_OTA;
+    double testtOta = 3.0;
+    goatData.write(tOtaReg, &testtOta);
+    dump = goatData.get();
+    assert(dump.prop.LOX_temperature == testtOta);
+
+    // Test PR_SENSOR_T_CIG
+    Data::GoatReg tCigReg = Data::GoatReg::PR_SENSOR_T_CIG;
+    double testtCig = 4.0;
+    goatData.write(tCigReg, &testtCig);
+    dump = goatData.get();
+    assert(dump.prop.igniter_temperature == testtCig);
+
+    // Test PR_SENSOR_T_EIN
+    Data::GoatReg tEinReg = Data::GoatReg::PR_SENSOR_T_EIN;
+    double testtEin = 5.0;
+    goatData.write(tEinReg, &testtEin);
+    dump = goatData.get();
+    assert(dump.prop.fuel_inj_temperature == testtEin);
+
+    // Test PR_SENSOR_T_EIN_CF
+    Data::GoatReg tEinCfReg = Data::GoatReg::PR_SENSOR_T_EIN_CF;
+    double testtEinCf = 6.0;
+    goatData.write(tEinCfReg, &testtEinCf);
+    dump = goatData.get();
+    assert(dump.prop.fuel_inj_cooling_temperature == testtEinCf);
+
+    // Test PR_SENSOR_T_OIN
+    Data::GoatReg tOinReg = Data::GoatReg::PR_SENSOR_T_OIN;
+    double testtOin = 7.0;
+    goatData.write(tOinReg, &testtOin);
+    dump = goatData.get();
+    assert(dump.prop.LOX_inj_temperature == testtOin);
+
+    // Test PR_SENSOR_T_CCC
+    Data::GoatReg tCccReg = Data::GoatReg::PR_SENSOR_T_CCC;
+    double testtCcc = 8.0;
+    goatData.write(tCccReg, &testtCcc);
+    dump = goatData.get();
+    assert(dump.prop.chamber_temperature == testtCcc);
 }
