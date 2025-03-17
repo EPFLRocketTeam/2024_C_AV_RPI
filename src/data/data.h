@@ -62,8 +62,8 @@ struct PropSensors {
     double    fuel_pressure;
     double    LOX_pressure;
     double    igniter_pressure;
-    double    LOX_inj_pressure;
     double    fuel_inj_pressure;
+    double    LOX_inj_pressure;
     double    chamber_pressure;
     double    fuel_level;
     double    LOX_level;
