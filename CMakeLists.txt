@@ -26,15 +26,28 @@ add_executable(main main.cpp)
 
 add_subdirectory(src)
 add_subdirectory(LoRa4Raspi)
-if(ENABLE_TESTING)
-# Set the build type to Debug
-set(CMAKE_BUILD_TYPE Debug)
-#print in terminal that testing is enabled
+
+if(ENABLE_TESTING OR ENABLE_TESTING_SOFT OR ENABLE_TESTING_HARD)
+    set(CMAKE_BUILD_TYPE Debug)
     message(STATUS "Testing is enabled")
     enable_testing()
     find_package(GTest REQUIRED)
     include(GoogleTest)
+endif()
+
+if(ENABLE_TESTING)
+    message(STATUS "Testing is enabled")
     add_subdirectory(tests)
+else()
+    if(ENABLE_TESTING_SOFT)
+        message(STATUS "Software testing is enabled")
+        add_subdirectory(tests/software)
+    endif()
+
+    if(ENABLE_TESTING_HARD)
+        message(STATUS "Hardware testing is enabled")
+        add_subdirectory(tests/hardware)
+    endif()
 endif()
 
 # Enable coverage if the option is set
