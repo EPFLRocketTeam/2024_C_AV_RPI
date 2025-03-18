@@ -12,11 +12,12 @@ public:
     void check_policy(const DataDump& dump) override;
 
     // Valve control functions
-    void write_valves(uint8_t valve_states);
-    uint8_t read_valves() const;
+    void write_valve(uint8_t valve_id, ValveOpenDegree degree);
+    ValveOpenDegree read_valve(uint8_t valve_id) const;
 
 private:
-    uint8_t current_valve_state = 0;  // Store the current valve states
+    // Each element is 4 bits (we store in uint8_t for simplicity, masking the 4 LSB)
+    std::array<uint8_t, NUM_VALVES> current_valve_states = {0};
 
     void handleErrorFlight(const DataDump& dump);
     void handleErrorGround(const DataDump& dump);
