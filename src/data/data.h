@@ -57,6 +57,7 @@ struct NavSensors {
     NavSensors();
 };
 
+// TODO: merge PropSensors and Valves into Prop struct
 struct PropSensors {
     double    N2_pressure;
     double    fuel_pressure;
@@ -77,25 +78,6 @@ struct PropSensors {
     double    chamber_temperature;
 
     PropSensors();
-};
-
-struct Event {
-    bool   dpr_ok;
-    bool   ignited;
-    bool calibrated;
-    bool seperated;
-    bool chute_opened;
-    bool chute_unreefed;
-    bool command_updated;
-    //armed state this resets to 0
-    bool ignition_failed;
-
-    // will have to be discussed in interface meeting w/ prop
-    // transition b/w ARMED and ERRORGROUND states
-    // each tank should be checked for catastrophic failure
-    bool catastrophic_failure;
-
-    Event();
 };
 
 struct Valves{
@@ -150,15 +132,38 @@ struct NavigationData {
     NavigationData();
 };
 
+struct Event {
+    bool command_updated;
+    bool calibrated;
+    bool dpr_ok;
+    bool prb_ok;
+    bool trb_ok;
+    bool ignited;
+    bool seperated;
+    bool chute_unreefed;
+    //armed state this resets to 0
+    bool ignition_failed;
+
+    // will have to be discussed in interface meeting w/ prop
+    // transition b/w ARMED and ERRORGROUND states
+    // each tank should be checked for catastrophic failure
+    bool catastrophic_failure;
+
+    Event();
+};
+
 struct DataDump {
+    State av_state;
+    uint32_t av_timestamp;
     UplinkCmd telemetry_cmd;
     SensStatus stat;
     NavSensors sens;
     PropSensors prop;
+    Valves valves;
     NavigationData nav;
     Event event;
-    Valves valves;
-    State av_state;
+
+    // TODO: move to PR_board.check_policy
     bool depressurised() const;
 };
 
@@ -171,70 +176,78 @@ struct DataDump {
 class Data {
 public:
     enum GoatReg {
+        AV_STATE = 0x00,
+        AV_TIMESTAMP, // milliseconds since init
+
         /* Telemetry command */
-        TLM_CMD_ID = 0x00,
-        TLM_CMD_VALUE = 0x01,
+        TLM_CMD_ID,
+        TLM_CMD_VALUE,
 
         /* Navigation sensors status */
         //TODO: sensors that have 3 32 bits values should be split into 3 registers?
-        NAV_SENSOR_ADXL1_STAT = 0x02,
-        NAV_SENSOR_ADXL2_STAT = 0x03,
-        NAV_SENSOR_BMI1_ACCEL_STAT = 0x04,
-        NAV_SENSOR_BMI2_ACCEL_STAT = 0x05,
-        NAV_SENSOR_BMI1_GYRO_STAT = 0x07,
-        NAV_SENSOR_BMI2_GYRO_STAT = 0x08,
-        NAV_SENSOR_BMP1_STAT = 0x09,
-        NAV_SENSOR_BMP2_STAT = 0x0A,
+        NAV_SENSOR_ADXL1_STAT,
+        NAV_SENSOR_ADXL2_STAT,
+        NAV_SENSOR_BMI1_ACCEL_STAT,
+        NAV_SENSOR_BMI2_ACCEL_STAT,
+        NAV_SENSOR_BMI1_GYRO_STAT,
+        NAV_SENSOR_BMI2_GYRO_STAT,
+        NAV_SENSOR_BMP1_STAT,
+        NAV_SENSOR_BMP2_STAT,
 
         /* Raw navigation sensors data */
-        NAV_SENSOR_ADXL1_DATA = 0x0B,
-        NAV_SENSOR_ADXL2_DATA = 0x0C,
-        NAV_SENSOR_BMI1_ACCEL_DATA = 0x0D,
-        NAV_SENSOR_BMI1_GYRO_DATA = 0x0E,
-        NAV_SENSOR_BMI2_ACCEL_DATA = 0x0F,
-        NAV_SENSOR_BMI2_GYRO_DATA = 0x10,
-        NAV_SENSOR_BMP1_DATA = 0x11,
-        NAV_SENSOR_BMP2_DATA = 0x12,
+        NAV_SENSOR_ADXL1_DATA,
+        NAV_SENSOR_ADXL2_DATA,
+        NAV_SENSOR_BMI1_ACCEL_DATA,
+        NAV_SENSOR_BMI1_GYRO_DATA,
+        NAV_SENSOR_BMI2_ACCEL_DATA,
+        NAV_SENSOR_BMI2_GYRO_DATA,
+        NAV_SENSOR_BMP1_DATA,
+        NAV_SENSOR_BMP2_DATA,
+
+        /* GPS data */
+        NAV_GNSS_TIME_YEAR,
+        NAV_GNSS_TIME_MONTH,
+        NAV_GNSS_TIME_DAY,
+        NAV_GNSS_TIME_HOUR,
+        NAV_GNSS_TIME_MINUTE,
+        NAV_GNSS_TIME_SECOND,
+        NAV_GNSS_TIME_CENTI,
+        NAV_GNSS_POS_LAT,
+        NAV_GNSS_POS_LNG,
+        NAV_GNSS_POS_ALT,
+        NAV_GNSS_COURSE,
 
         /* Propulsion sensors */
-        PR_SENSOR_P_NCO = 0x13, // N2 Pressure
-        PR_SENSOR_P_ETA = 0x14, // Ethanol Tank Pressure
-        PR_SENSOR_P_OTA = 0x15, // Lox Tank Pressure
-        PR_SENSOR_P_CIG = 0x16, // Igniter Pressure
-        PR_SENSOR_P_EIN = 0x17, // Ethanol Injector Pressure
-        PR_SENSOR_P_OIN = 0x18, // Lox Injector Pressure
-        PR_SENSOR_P_CCC = 0x19, // Combustion Chamber Pressure
-        PR_SENSOR_L_ETA = 0x1A, // Ethanol Tank Level
-        PR_SENSOR_L_OTA = 0x1B, // Lox Tank Level
-        PR_SENSOR_T_NCO = 0x1C, // N2 Temperature
-        PR_SENSOR_T_ETA = 0x1D, // Ethanol Tank Temperature
-        PR_SENSOR_T_OTA = 0x1E, // Lox Tank Temperature
-        PR_SENSOR_T_CIG = 0x1F, // Igniter Temperature
-        PR_SENSOR_T_EIN = 0x20, // Ethanol Injector Temperature (Sensata PTE7300)
-        PR_SENSOR_T_EIN_CF = 0x21, // Ethanol Injector Cooling Fluid Tempreature (PT1000)
-        PR_SENSOR_T_OIN = 0x22, // Lox Injector Temperature
-        PR_SENSOR_T_CCC = 0x23,  // Combustion Chamber Temperature
+        PR_SENSOR_P_NCO, // N2 Pressure
+        PR_SENSOR_P_ETA, // Ethanol Tank Pressure
+        PR_SENSOR_P_OTA, // Lox Tank Pressure
+        PR_SENSOR_P_CIG, // Igniter Pressure
+        PR_SENSOR_P_EIN, // Ethanol Injector Pressure
+        PR_SENSOR_P_OIN, // Lox Injector Pressure
+        PR_SENSOR_P_CCC, // Combustion Chamber Pressure
+        PR_SENSOR_L_ETA, // Ethanol Tank Level
+        PR_SENSOR_L_OTA, // Lox Tank Level
+        PR_SENSOR_T_NCO, // N2 Temperature
+        PR_SENSOR_T_ETA, // Ethanol Tank Temperature
+        PR_SENSOR_T_OTA, // Lox Tank Temperature
+        PR_SENSOR_T_CIG, // Igniter Temperature
+        PR_SENSOR_T_EIN , // Ethanol Injector Temperature (Sensata PTE7300)
+        PR_SENSOR_T_EIN_CF, // Ethanol Injector Cooling Fluid Tempreature (PT1000)
+        PR_SENSOR_T_OIN, // Lox Injector Temperature
+        PR_SENSOR_T_CCC,  // Combustion Chamber Temperature
 
-        NAV_GNSS_TIME_YEAR = 0x24,
-        NAV_GNSS_TIME_MONTH = 0x25,
-        NAV_GNSS_TIME_DAY = 0x26,
-        NAV_GNSS_TIME_HOUR = 0x27,
-        NAV_GNSS_TIME_MINUTE = 0x28,
-        NAV_GNSS_TIME_SECOND = 0x29,
-        NAV_GNSS_TIME_CENTI = 0x2A,
-        NAV_GNSS_POS_LAT = 0x2B,
-        NAV_GNSS_POS_LNG = 0x2C,
-        NAV_GNSS_POS_ALT = 0x2D,
-        NAV_GNSS_COURSE = 0x2E,
-        //TODO deconstruct EVENT and VALVES
-        EVENT_ARMED = 0x2F,
-        EVENT_IGNITED = 0x30,
-        EVENT_CALIBRATED = 0x31,
-        EVENT_SEPERATED = 0x33,
-        EVENT_CHUTE_OPENED = 0x34,
-        EVENT_CHUTE_UNREEFED = 0x35,
-        VALVES = 0x36,
-        AV_STATE = 0x37
+        VALVES,
+
+        /* Events */
+        EVENT_CMD_RECEIVED,
+        EVENT_CALIBRATED,
+        EVENT_DPR_OK,
+        EVENT_PRB_OK,
+        EVENT_TRB_OK,
+        EVENT_IGNITED,
+        EVENT_SEPERATED,
+        EVENT_CHUTE_OPENED,
+        EVENT_CHUTE_UNREEFED
     };
 
     static inline Data& get_instance() {
@@ -264,15 +277,15 @@ private:
     inline Data() {}
     inline ~Data() {}
 
+    State av_state;
+    unsigned long av_timestamp;
     UplinkCmd telemetry_cmd;
     SensStatus sensors_status;
     NavSensors nav_sensors;
     PropSensors prop_sensors;
+    Valves valves;
     NavigationData nav;
     Event event;
-    Valves valves;
-    State av_state;
-
 };
 
 #endif /* DATA_H */

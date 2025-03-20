@@ -163,6 +163,7 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
 
             Data::get_instance().write(Data::TLM_CMD_ID, &last_packet.order_id);
             Data::get_instance().write(Data::TLM_CMD_VALUE, &last_packet.order_value);
+            Data::get_instance().write(Data::EVENT_CMD_RECEIVED, &new_cmd_received);
 
             std::cout << "Command received from GS!\n"
                       << "ID: " << (int)last_packet.order_id << "\n"

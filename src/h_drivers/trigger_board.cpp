@@ -20,8 +20,14 @@ TriggerBoard::~TriggerBoard() {
 }
 
 void TriggerBoard::write_timestamp() {
-    // TODO: Need to add main timestamp to the GOAT.
-//    I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_TIMESTAMP_MAIN, 
+    const uint32_t timestamp(Data::get_instance().get().av_timestamp);
+    try {
+        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_TIMESTAMP_MAIN, (uint8_t*)&timestamp,
+        NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB write_timestamp error: ");
+        throw TriggerBoardException(msg + e.what());
+    }
 }
 
 void TriggerBoard::send_wake_up() {
@@ -43,9 +49,10 @@ bool TriggerBoard::read_is_woken_up() {
         throw TriggerBoardException(msg + e.what());
     }
 
-    const bool trb_woken_up(rslt == NET_CMD_ON);
-    // TODO: Write rslt to the GOAT (need to add woken_up entries to the GOAT for TRB and PRB)
-    return rslt;
+    bool trb_woken_up(rslt == NET_CMD_ON);
+    Data::get_instance().write(Data::EVENT_TRB_OK, &trb_woken_up);
+
+    return trb_woken_up;
 }
 
 void TriggerBoard::send_clear_to_trigger() {
@@ -76,13 +83,14 @@ bool TriggerBoard::read_has_triggered() {
         throw TriggerBoardException(msg + e.what());
     }
 
-    const bool trb_triggered(rslt == NET_CMD_ON);
-    // TODO: Write the rslt to the GOAT
+    bool trb_triggered(rslt == NET_CMD_ON);
+    Data::get_instance().write(Data::EVENT_SEPERATED, &trb_triggered);
+
     return trb_triggered;
 }
 
 // TODO: regulate interactions/polling rates
-void TriggerBoard::check_policy( const DataDump& dump) {
+void TriggerBoard::check_policy(const DataDump& dump) {
     switch (dump.av_state) {
         case State::INIT:
             handle_init();
@@ -123,37 +131,49 @@ void TriggerBoard::check_policy( const DataDump& dump) {
 }
 
 void TriggerBoard::handle_init() {
+    // TODO: write timestamp at a freq of 0.5Hz
     write_timestamp();
 }
 
 void TriggerBoard::handle_calibration() {
+    // TODO: write timestamp at a freq of 0.5Hz
     write_timestamp();
-    // TODO: send wake up until is_woken_up id true
-    send_wake_up();
-    read_is_woken_up();
 }
 
 void TriggerBoard::handle_manual() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
 }
 
 void TriggerBoard::handle_armed() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
+    // TODO: After DPR GO, send wake_up each sec until is_woken_up is true
+    static bool trb_woken_up(Data::get_instance().get().event.trb_ok);
+    if (!trb_woken_up) {
+        send_wake_up();
+        read_is_woken_up();
+    }
 }
 
 void TriggerBoard::handle_ready() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
 }
 
 void TriggerBoard::handle_thrustsequence() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
 }
 
 void TriggerBoard::handle_liftoff() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
+    send_clear_to_trigger();
 }
 
 void TriggerBoard::handle_ascent() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
 }
 
@@ -162,6 +182,7 @@ void TriggerBoard::handle_descent() {
     write_timestamp();
 
     // Send main pyro order to trigger the sep mech
+    // TODO: subroutine for timing ON/OFF (usually 300ms but TBD with ST)
     uint32_t order(NET_CMD_ON);
     write_pyros(order);
     // TODO: if passed a delay of no trigger ACK, fire on the spare channels
@@ -177,14 +198,17 @@ void TriggerBoard::handle_descent() {
 }
 
 void TriggerBoard::handle_landed() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
 }
 
 void TriggerBoard::handle_errorground() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
 }
 
 void TriggerBoard::handle_errorflight() {
+    // TODO: write timestamp at a freq of 1Hz
     write_timestamp();
 }
 
