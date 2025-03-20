@@ -33,8 +33,10 @@ int main(void){
     while (1)
     {
         dump = Data::get_instance().get();
-
+        state.update(dump);
         sens.check_policy(dump);
+        telecom.check_policy(dump);
+    
         
     }
     

@@ -18,9 +18,23 @@ Sensors::~Sensors() {}
 
 void Sensors::check_policy( const DataDump& dump) {
     // Everytime a new command is received we write to the goat
-
+    
+    switch (dump.av_state)
+    {
+    case State::CALIBRATION:
+    //TODO: should have a function to wake up the sensors
+    this->calibrate();
+        break;
+    
+    default:
     this->update();
+    }
+    //TODO: does status change when we calibrate?
     this->update_status();
+
+    
+
+
 
     
 
@@ -33,6 +47,7 @@ void Sensors::calibrate() {
     //Redo calibration
     adxl1.calibrate();
     adxl2.calibrate();
+
 }
 //TODO: should take in argument the dump
 bool Sensors::update() {
