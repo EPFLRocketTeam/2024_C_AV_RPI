@@ -21,11 +21,12 @@ void Sensors::check_policy( const DataDump& dump) {
     
     switch (dump.av_state)
     {
-    case State::CALIBRATION:
+    case State::CALIBRATION:{
     //TODO: should have a function to wake up the sensors
-    this->calibrate();
-    Data::get_instance().write(Data::EVENT_CALIBRATED, true);
-        break;
+        this->calibrate();
+        int temp_calibrated = 1;
+        Data::get_instance().write(Data::EVENT_CALIBRATED, &temp_calibrated);
+        break;}
     
     default:
     this->update();
