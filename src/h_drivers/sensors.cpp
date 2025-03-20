@@ -24,6 +24,7 @@ void Sensors::check_policy( const DataDump& dump) {
     case State::CALIBRATION:
     //TODO: should have a function to wake up the sensors
     this->calibrate();
+    Data::get_instance().write(Data::EVENT_CALIBRATED, true);
         break;
     
     default:

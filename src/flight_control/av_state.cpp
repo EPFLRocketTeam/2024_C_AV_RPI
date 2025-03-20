@@ -41,6 +41,7 @@ State AvState::fromCalibration(DataDump const &dump)
         return State::INIT;
     }
     // If all the sensors are calibrated and ready for use we go to the MANUAL state
+    //TODO:calibrated is never triggered by sensors
     else if (dump.event.calibrated)
     {
         return State::MANUAL;
