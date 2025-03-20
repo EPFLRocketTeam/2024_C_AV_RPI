@@ -16,10 +16,30 @@ Sensors::Sensors()
 
 Sensors::~Sensors() {}
 
-void Sensors::check_policy(Data::GoatReg reg, const DataDump& dump) {
+void Sensors::check_policy( const DataDump& dump) {
     // Everytime a new command is received we write to the goat
+    
+    switch (dump.av_state)
+    {
+    case State::CALIBRATION:{
+    //TODO: should have a function to wake up the sensors
+        this->calibrate();
+        int temp_calibrated = 1;
+        Data::get_instance().write(Data::EVENT_CALIBRATED, &temp_calibrated);
+        break;}
+    
+    default:
+    this->update();
+    }
+    //TODO: does status change when we calibrate?
+    this->update_status();
 
-    // TODO: Implement the logic for the sensors driver
+    
+
+
+
+    
+
     return;
 }
 
@@ -29,8 +49,9 @@ void Sensors::calibrate() {
     //Redo calibration
     adxl1.calibrate();
     adxl2.calibrate();
-}
 
+}
+//TODO: should take in argument the dump
 bool Sensors::update() {
     update_status();
 
