@@ -6,6 +6,7 @@
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "adxl375.h"
+#include "rotation_utils.h"
 
 enum class State
 {
@@ -162,6 +163,14 @@ struct DataDump {
     bool depressurised() const;
 };
 
+struct CleanedData {
+    Quaternion orientation;
+    Vector3 velocity;
+    Vector3 position;
+
+    CleanedData();
+}
+
 /**
  * @brief GOAT - Global Objects Atomic Table
  * https://rocket-team.epfl.ch/competition/firehorn/systems_engineering/other/sam_homepage/avionics/software/architecture
@@ -235,6 +244,9 @@ public:
         EVENT_CHUTE_UNREEFED = 0x35,
         VALVES = 0x36,
         AV_STATE = 0x37
+
+        /* Kalman Clean Data */
+        NAV_CLEAN_DATA = 0x38
     };
 
     static inline Data& get_instance() {
@@ -272,6 +284,7 @@ private:
     Event event;
     Valves valves;
     State av_state;
+    CleanedData cleaned_data;
 
 };
 

@@ -18,6 +18,7 @@
 #include "adxl375.h"
 #include "data.h"
 #include "h_driver.h"
+#include "kalman.h"
 
 class Sensors : public HDriver {
 public:
@@ -41,6 +42,8 @@ private:
     // SensStatus status;
     // SensRaw raw_data;
     // SensFiltered clean_data;
+
+    Kalman kalman;
 
     // Read sensors status
     void update_status();

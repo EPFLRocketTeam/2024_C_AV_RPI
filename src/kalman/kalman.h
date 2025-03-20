@@ -41,9 +41,9 @@ private:
     Quaternion orientation_dot;             // quaternion time derivative
     unsigned long last_measurement_time = 0; // time of the last IMU measurement (in milliseconds)
     float time_delta = 0;                   // time between current and previous IMU measurements (in seconds)
-    float initial_azimuth = 0;              // initial azimuth angle
 
-    // static continuous calibration
+    // static periodic calibration
+    bool is_static = true;
     bool is_calibrating = false;
     Eigen::Vector3f gyro_static_sum = Eigen::Vector3f::Zero();
     Eigen::Vector3f accel_static_sum = Eigen::Vector3f::Zero();
@@ -54,32 +54,43 @@ private:
     const unsigned long static_calib_duration = 5000; // 5 second
     const unsigned long static_recalibration_interval = 120000; // 2 minutes between two static calibrations
 
-    // Helper method for skew-symmetric matrix creation
-    Eigen::Matrix3f skew_symmetric_eigen(const Eigen::Vector3f& v);
+    // Initial position (to set the coordinates origin)
+    double initial_lon = 0;
+    double initial_lat = 0;
+    double initial_alt = 0;
+
+
+    // Last gps observation (to check if we should update)
+    double last_gps_lat = 0;
+    double last_gps_lon = 0;
 
 public:
-    Kalman(const Quaternion& initial_orientation_est, 
-           const Eigen::Vector3f& initial_gyro_bias_est, 
-           const Eigen::Vector3f& initial_accel_bias_est,
-           float estimate_covariance_val, 
+    Kalman(float estimate_covariance_val, 
            float gyro_cov, 
            float gyro_bias_cov,
            float accel_proc_cov, 
            float accel_bias_cov,
            float gps_obs_cov, 
-           float alt_obs_cov,
-           float initial_azimuth);
+           float alt_obs_cov);
 
     void calculate_initial_orientation();
     Eigen::MatrixXf process_covariance();
-    void predict(const Eigen::Vector3f& gyro_meas, const Eigen::Vector3f& acc_meas, bool is_static = false);
-    void update(const Eigen::Vector3f& gps_meas, float alt_meas, bool is_static = false);
+
+    // takes the NavSensors data and outputs a single fused IMU measurement for all IMUs
+    void fuse_IMUs(const NavSensors& nav_sensors, const Eigen::Vector3f& output_gyro_meas, const Eigen::Vector3f& output_acc_meas);
+
+    // void predict(const Eigen::Vector3f& gyro_meas, const Eigen::Vector3f& acc_meas);
+    void predict(const NavSensors& nav_sensors, const NavigationData& nav_data);
+    void update(const NavSensors& nav_sensors, const NavigationData& nav_data);
 
     Quaternion get_orientation() const;
     Eigen::Vector3f get_velocity() const;
     Eigen::Vector3f get_position() const;
     Eigen::Vector3f get_gyro_bias() const;
     Eigen::Vector3f get_accel_bias() const;
+    float get_azimuth() const;
+    float get_pitch() const;
+    CleanedData Kalman::get_clean_data() const;
 };
 
 #endif // KALMAN_H

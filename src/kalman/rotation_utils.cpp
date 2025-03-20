@@ -1,8 +1,5 @@
 #include "rotation_utils.h"
 #include <Eigen/Dense>
-#include <stdexcept>
-
-#define HALF_PI 1.57079632679
 
 // Quaternion class implementation
 Quaternion::Quaternion() : scalar(1.0), vector(Eigen::Vector3f::Zero()) {}
@@ -90,13 +87,21 @@ Quaternion rot_matrix_to_quat(const Eigen::Matrix3f& M) {
     }
 }
 
+Eigen::Matrix3f skew_symmetric_eigen(const Eigen::Vector3f& v) {
+    Eigen::Matrix3f m;
+    m <<  0,    -v(2),  v(1),
+          v(2),  0,    -v(0),
+         -v(1),  v(0),  0;
+    return m;
+}
 
 float azimuth_of_quaternion(const Quaternion& q) {
+    // = atan2((N x Z) • U, N • Z) = atan2((N x M^T U) • U, N • M^T U)
     return std::atan2(-2.0f * (q.vector[0] * q.vector[2] + q.vector[1] * q.scalar   ),
                       -2.0f * (q.vector[0] * q.scalar    - q.vector[1] * q.vector[2]));
 }
 
 float pitch_of_quaternion(const Quaternion& q) {
-    // pi/2 - arccos(1 − 2 (qi(t)^2 + qj (t)^2)))
+    // = pi/2 - arccos(Z • U) = pi/2 - arccos(M^T U • U)
     return HALF_PI - std::acos(1.0f - 2.0f * (q.vector[0] * q.vector[0] + q.vector[1] * q.vector[1]));
 }

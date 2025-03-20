@@ -1,6 +1,7 @@
 #include "kalman.h"
 #include "sensors.h"
 #include <Eigen/Dense>
+#include "kalman_params.h"
 
 Kalman::Kalman(const Quaternion& initial_orientation_est, 
                const Eigen::Vector3f& initial_gyro_bias_est, 
@@ -38,6 +39,13 @@ Kalman::Kalman(const Quaternion& initial_orientation_est,
     for (int i = 0; i < 3; ++i) {
         G(i, i + 9) = -1.0;
         G(i + 6, i + 3) = 1.0;
+    }
+}
+
+void Kalman::check_policy(Data::GoatReg reg, const DataDump& dump) {
+    // updates is_static 
+    if(dump.State == State.READY){
+        is_static = false; // Stop the periodic calibration
     }
 }
 
@@ -92,10 +100,51 @@ void Kalman::calculate_initial_orientation() {
     orientation_estimate = rot_matrix_to_quat(R);
 }
 
-void Kalman::predict(const Eigen::Vector3f& gyro_meas, const Eigen::Vector3f& acc_meas, bool is_static = false) {
+void Kalman::fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gyro_meas, Eigen::Vector3f& output_acc_meas) {
+    // TODO : Make it by . Meanwhile only use one IMU
+
+    // Question : What are the units of the bmi IMU ? acc_meas and gyro_meas should be in SI units
+
+    // Extract acceleration data from the primary BMI sensor
+    output_acc_meas << nav_sensors.bmi_accel.x, nav_sensors.bmi_accel.y, nav_sensors.bmi_accel.z;
+
+    // Extract gyroscope data from the primary BMI sensor
+    output_gyro_meas << nav_sensors.bmi_gyro.x, nav_sensors.bmi_gyro.y, nav_sensors.bmi_gyro.z;
+}
+
+// Convert atmospheric pressure (hPa) to altitude (m) using the barometric formula
+double pressure_to_altitude(double pressure_hpa) {
+    const double P0 = 1013.25;  // Standard sea-level pressure in hPa
+    const double T0 = 288.15;   // Standard temperature at sea level in Kelvin (15°C)
+    const double L = 0.0065;    // Temperature lapse rate (K/m)
+    const double g = 9.80665;   // Gravity (m/s²)
+    const double R = 287.05;    // Specific gas constant for dry air (J/kg·K)
+
+    return (T0 / L) * (1 - std::pow(pressure_hpa / P0, (R * L / g)));
+}
+
+void Kalman::gps_pressure_to_obs(const NavSensors& nav_sensors, const NavigationData& nav_data, Eigen::Vector3f& gps_meas, float& alt_meas) {
+    const double delta_lat = nav_data.position.lat - initial_lat;
+    const double delta_lon = nav_data.position.lon - initial_lon;
+    const double lat_avg = (nav_data.position.lat + initial_lat)/ 2.0;
+
+    gps_meas(0) = delta_lon * DEG_TO_RAD * EARTH_RADIUS * std::cos(lat_avg * DEG_TO_RAD);
+    gps_meas(1) = delta_lat * DEG_TO_RAD * EARTH_RADIUS;
+
+    // TODO? detect failure of one of the pressure sensors (maybe using gps alt to do a majority vote?)
+    alt_meas = pressure_to_altitude((nav_sensors.bmp.pressure + nav_sensors.bmp_aux.pressure)/2) - initial_alt;
+}
+
+void Kalman::predict(const NavSensors& nav_sensors, const NavigationData& nav_data) {
+
+    Eigen::Vector3f gyro_meas;
+    Eigen::Vector3f acc_meas;
+    fuse_IMUs(nav_sensors, gyro_meas, acc_meas);
+
     time_delta = (millis() - last_measurement_time) / 1000.0f;
     last_measurement_time = millis();
     
+    // TODO : I should probably put this in a different function
     if (is_static) {
         // If the rocket is static, and it hasn't calibrated in a while, do a new calibration
         if(millis() - last_static_calib_time > static_recalibration_interval) {
@@ -121,6 +170,10 @@ void Kalman::predict(const Eigen::Vector3f& gyro_meas, const Eigen::Vector3f& ac
             is_calibrating = false;
             g = accel_static_avg.norm();
             calculate_initial_orientation();
+
+            initial_lat = nav_data.position.lat;
+            initial_lon = nav_data.position.lon;
+            initial_alt = pressure_to_altitude((nav_sensors.bmp.pressure + nav_sensors.bmp_aux.pressure)/2);
         }
     }
 
@@ -178,8 +231,15 @@ void Kalman::predict(const Eigen::Vector3f& gyro_meas, const Eigen::Vector3f& ac
     
 }
 
-void Kalman::update(const Eigen::Vector3f& gps_meas, float alt_meas, bool is_static = false) {
-    if(!is_static) {
+void Kalman::update(const NavSensors& nav_sensors, const NavigationData& nav_data) {
+    if(!is_static && nav_data.position.lat!=last_gps_lat && nav_data.position.lat!=last_gps_lon) {
+        last_gps_lat = nav_data.position.lat;
+        last_gps_lon = nav_data.position.lon;
+
+        Eigen::Vector3f gps_meas;
+        float alt_meas;
+        gps_pressure_to_obs(nav_sensors, nav_data, gps_meas, alt_meas);
+
         Eigen::MatrixXf H = Eigen::MatrixXf::Zero(3, 15);
         
         // H[0:3, 6:9] = np.identity(3)
@@ -223,15 +283,6 @@ void Kalman::update(const Eigen::Vector3f& gps_meas, float alt_meas, bool is_sta
     }
 }
 
-// Helper function for Eigen skew symmetric matrix
-Eigen::Matrix3f Kalman::skew_symmetric_eigen(const Eigen::Vector3f& v) {
-    Eigen::Matrix3f m;
-    m <<  0,    -v(2),  v(1),
-          v(2),  0,    -v(0),
-         -v(1),  v(0),  0;
-    return m;
-}
-
 Quaternion Kalman::get_orientation() const {
     return orientation_estimate;
 }
@@ -252,3 +303,14 @@ Eigen::Vector3f Kalman::get_accel_bias() const {
     return accelerometer_bias;
 }
 
+float Kalman::get_azimuth() const {
+    return azimuth_of_quaternion(orientation_estimate);
+}
+
+float Kalman::get_pitch() const {
+    return pitch_of_quaternion(orientation_estimate);
+}
+
+CleanedData Kalman::get_clean_data() const {
+    return {orientation_estimate,velocity_estimate,position_estimate};
+}

@@ -55,6 +55,13 @@ Event::Event()
     ignition_failed{false}
 {}
 
+CleanedData::CleanedData()
+:   orientation(Quaternion(1,0,0,0)),
+    velocity{0,0,0},
+    position{0,0,0}
+{}
+
+
 // const void* Data::read(GoatReg reg) {
 //     // Big switch to read at the field given as argument
 //     // Cast the void ptr to the type of data located at the given field
@@ -226,13 +233,16 @@ void Data::write(GoatReg reg, void* data) {
         case VALVES:
             valves = *reinterpret_cast<Valves*>(data);
             break;
-            case AV_STATE:
+        case AV_STATE:
             av_state = *reinterpret_cast<State*>(data);
             break;
+
+        case NAV_CLEAN_DATA:
+            cleaned_data = *reinterpret_cast<CleanedData*>(data);
     }
 }
 DataDump Data::get() const {
-    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state};
+    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state,cleaned_data};
 }
 
 bool DataDump::depressurised() const {

@@ -1,7 +1,6 @@
 #ifndef ROTATION_UTILS_H
 #define ROTATION_UTILS_H
 
-#include <iostream>
 #include <Eigen/Dense>
 
 
@@ -23,6 +22,8 @@ public:
 
 Eigen::Matrix3f quat_to_matrix(const Quaternion& q);
 Quaternion rot_matrix_to_quat(const Eigen::Matrix3f& M);
+
+Eigen::Matrix3f skew_symmetric_eigen(const Eigen::Vector3f& v);
 
 // the azimuth is the (oriented) angle between the north vector and the projection of the rocket's up vector on the horizontal plane
 // positive counter clockwise, i.e increases from the north to the west
