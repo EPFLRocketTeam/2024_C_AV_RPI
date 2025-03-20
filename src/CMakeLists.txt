@@ -29,6 +29,7 @@ set(FIREHORN_FC_SOURCES
   
 )   
 
+
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
@@ -49,4 +50,7 @@ target_link_libraries(flight_computer PUBLIC
     bmp3
     gps
 )
+
+
+
 

@@ -11,7 +11,7 @@ public:
     Telecom();
     ~Telecom() = default;
 
-    void check_policy(Data::GoatReg reg, const DataDump& dump) override;
+    void check_policy( const DataDump& dump) override;
 
     bool begin();
     void send_telemetry();

@@ -24,7 +24,7 @@ public:
     Sensors();
     ~Sensors();
 
-    void check_policy(Data::GoatReg reg,const DataDump& dump) override;
+    void check_policy(const DataDump& dump) override;
 
     void calibrate();
     bool update();

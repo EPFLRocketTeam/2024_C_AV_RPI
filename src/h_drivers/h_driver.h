@@ -8,7 +8,7 @@
 class HDriver {
 public:
     virtual ~HDriver() = default;
-    virtual void check_policy(Data::GoatReg reg, const DataDump& dump) = 0;
+    virtual void check_policy(const DataDump& dump) = 0;
 };
 
 

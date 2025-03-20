@@ -26,6 +26,8 @@ add_executable(main main.cpp)
 
 add_subdirectory(src)
 add_subdirectory(LoRa4Raspi)
+
+target_link_libraries(main flight_computer)
 if(ENABLE_TESTING)
 # Set the build type to Debug
 set(CMAKE_BUILD_TYPE Debug)

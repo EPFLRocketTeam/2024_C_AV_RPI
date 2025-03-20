@@ -31,7 +31,7 @@ Telecom::Telecom()
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
 {}
 
-void Telecom::check_policy(Data::GoatReg reg, const DataDump& dump) {
+void Telecom::check_policy( const DataDump& dump) {
     if (new_cmd_received) {
         new_cmd_received = false;
         switch (last_packet.order_id) {
@@ -42,6 +42,8 @@ void Telecom::check_policy(Data::GoatReg reg, const DataDump& dump) {
                 break;
         }
     }
+    this->send_telemetry();
+    
 }
 
 bool Telecom::begin() {
@@ -141,6 +143,7 @@ void Telecom::update() {
 }
 
 void Telecom::reset_cmd() {
+
 }
 
 void Telecom::handle_uplink(int packet_size) {
