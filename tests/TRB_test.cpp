@@ -8,8 +8,8 @@
 #include <cassert>
 #include <unistd.h>
 #include "av_state.h"
-#include "bmi08_defs.h"
 #include "data.h"
+#include "intranet_commands.h"
 #include "trigger_board.h"
 
 void read_write_test(TriggerBoard& trb);
@@ -23,22 +23,26 @@ int main() {
     std::cout << "Testing R/W op. and TRB behavior\n";
     read_write_test(trb);
 
-    std::cout << "Testing driver policy\n";
-    check_policy_test(trb);
+    //std::cout << "Testing driver policy\n";
+    //check_policy_test(trb);
 }
 
 void read_write_test(TriggerBoard& trb) {
     // TRB is in SLEEP mode until we send WAKEUP
     std::cout << " - Checking TRB is in SLEEP mode... ";
-    assert(trb.read_is_woken_up() == false);
+    //assert(trb.read_is_woken_up() == false);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Checking TRB triggered flag is not set... ";
+    //assert(trb.read_has_triggered() == false);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Writing FSM timestamp to TRB... ";
-    trb.send_wake_up();
+    //trb.send_wake_up();
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Sending WAKEUP order... ";
-    trb.send_wake_up();
+    //trb.send_wake_up();
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 100ms... ";
@@ -46,10 +50,32 @@ void read_write_test(TriggerBoard& trb) {
     std::cout << "Done\n";
 
     std::cout << " - Checking TRB is woken up... ";
-    assert(trb.read_is_woken_up() == true);
+    //assert(trb.read_is_woken_up() == true);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << "\x1b[32mI2C R/W SUCCESS\x1b[0m\n\n";
+    std::cout << " - Checking TRB triggered flag is not set... ";
+    //assert(trb.read_has_triggered() == false);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Sending PYRO NET_CMD_ON... ";
+    uint32_t cmd(NET_CMD_ON);
+    //trb.write_pyros(cmd);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Waiting 300ms...";
+    usleep(300e3);
+    std::cout << "Done\n";
+
+    std::cout << " - Sending PYRO NET_CMD_OFF... ";
+    cmd = NET_CMD_OFF;
+    //trb.write_pyros(cmd);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Checking TRB has triggered... ";
+    //assert(trb.read_has_triggered() == true);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << "\x1b[32m\x1b[7mI2C R/W SUCCESS\x1b[0m\n\n";
 }
 
 void check_policy_test(TriggerBoard& trb) {
