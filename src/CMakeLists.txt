@@ -27,6 +27,8 @@ set(FIREHORN_FC_SOURCES
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
+    ${KALMAN_DIR}/kalman.cpp
+    ${KALMAN_DIR}/kalman.h
 )   
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
