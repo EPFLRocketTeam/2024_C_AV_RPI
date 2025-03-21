@@ -238,13 +238,13 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
 
         // Send main pyro order to trigger the sep mech
         if (!pyro_main_fail) {
-            uint32_t order(NET_CMD_ON);
-            write_pyros(order);
-            trigger_ms += delta_ms;
-
-            if (trigger_ms >= 400) {
+            if (trigger_ms < 400) {
+                uint32_t order(NET_CMD_ON);
+                write_pyros(order);
+                trigger_ms += delta_ms;
+            }else {
                 read_has_triggered();
-                order = NET_CMD_OFF;
+                uint32_t order(NET_CMD_OFF);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;
@@ -257,13 +257,13 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         }
         // If passed a delay of no trigger ACK, fire on the spare channels
         else if (!pyro_spare1_fail) {
-            uint32_t order(NET_CMD_ON << 8);
-            write_pyros(order);
-            trigger_ms += delta_ms;
-
-            if (trigger_ms >= 400) {
+            if (trigger_ms < 400) {
+                uint32_t order(NET_CMD_ON << 8);
+                write_pyros(order);
+                trigger_ms += delta_ms;
+            }else {
                 read_has_triggered();
-                order = NET_CMD_OFF << 8;
+                uint32_t order(NET_CMD_OFF << 8);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;
@@ -276,13 +276,13 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         }
         // Again, if passed a delay of no trigger ACK, fire on the next channel
         else {
-            uint32_t order(NET_CMD_ON << 16);
-            write_pyros(order);
-            trigger_ms += delta_ms;
-
-            if (trigger_ms >= 400) {
+            if (trigger_ms < 400) {
+                uint32_t order(NET_CMD_ON << 16);
+                write_pyros(order);
+                trigger_ms += delta_ms;
+            }else {
                 read_has_triggered();
-                order = NET_CMD_OFF << 16;
+                uint32_t order(NET_CMD_OFF << 16);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;
