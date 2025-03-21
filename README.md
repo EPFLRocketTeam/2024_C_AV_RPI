@@ -64,3 +64,6 @@ sudo chmod 0755 gdb
 ```
 Then you can debug any executable by selecting it in the CMake Tools window, and
 clicking on the executable name under debug.
+
+
+script| workaround

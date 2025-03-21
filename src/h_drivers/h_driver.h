@@ -3,14 +3,13 @@
 
 #include "data.h"
 #include "av_state.h"
+#include "intranet_commands.h"
 
 class HDriver {
-    public:
-        HDriver() = default;
-        virtual ~HDriver() = default;
-    
-        virtual void check_policy(Data::GoatReg reg, const DataDump& dump) = 0; // Pure virtual
+public:
+    virtual ~HDriver() = default;
+    virtual void check_policy(Data::GoatReg reg, const DataDump& dump) = 0;
 };
-    
+
 
 #endif /* H_DRIVER_H */
