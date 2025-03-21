@@ -10,7 +10,7 @@ public:
     Telecom();
     ~Telecom() = default;
 
-    void check_policy(const DataDump& dump) override;
+    void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
     bool begin();
     void send_telemetry();

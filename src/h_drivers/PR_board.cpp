@@ -39,7 +39,7 @@ ValveOpenDegree PR_board::read_valve(uint8_t valve_id) const {
     return static_cast<ValveOpenDegree>(current_valve_states[valve_id] & 0x0F);
 }
 
-void PR_board::check_policy(const DataDump& dump) {
+void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     switch (dump.av_state) {
         case State::INIT:
             // For the INIT state we do nothing
