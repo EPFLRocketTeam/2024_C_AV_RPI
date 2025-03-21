@@ -31,7 +31,7 @@ Telecom::Telecom()
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
 {}
 
-void Telecom::check_policy(const DataDump& dump) {
+void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     if (new_cmd_received) {
         new_cmd_received = false;
         switch (last_packet.order_id) {

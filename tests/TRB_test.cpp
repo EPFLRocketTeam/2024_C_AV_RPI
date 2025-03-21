@@ -59,7 +59,7 @@ void check_policy_test(TriggerBoard& trb) {
 
     while (state < static_cast<uint8_t>(State::ERRORFLIGHT)) {
         goat.av_state = static_cast<State>(state); 
-        trb.check_policy(goat);
+        trb.check_policy(goat, 0);
         ++state;
 
         usleep(5e5);

@@ -90,7 +90,7 @@ bool TriggerBoard::read_has_triggered() {
 }
 
 // TODO: regulate interactions/polling rates
-void TriggerBoard::check_policy(const DataDump& dump) {
+void TriggerBoard::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     switch (dump.av_state) {
         case State::INIT:
             handle_init();

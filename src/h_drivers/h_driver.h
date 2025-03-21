@@ -7,7 +7,11 @@
 class HDriver {
 public:
     virtual ~HDriver() = default;
-    virtual void check_policy(const DataDump& dump) = 0;
+    /**
+     *  @param dump:        Goat struct
+     *  @param delta_ms:    Delta time (time difference between last call and current call, in ms) 
+     */
+    virtual void check_policy(const DataDump& dump, const uint32_t delta_ms) = 0;
 };
 
 

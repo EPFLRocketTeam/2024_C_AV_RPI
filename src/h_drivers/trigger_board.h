@@ -17,7 +17,7 @@ public:
     void write_pyros(const uint32_t pyros);    
     bool read_has_triggered();
 
-    void check_policy(const DataDump& dump) override;
+    void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
 private:
     void handle_init();
