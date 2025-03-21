@@ -278,7 +278,7 @@ private:
     inline ~Data() {}
 
     State av_state;
-    unsigned long av_timestamp;
+    uint32_t av_timestamp;
     UplinkCmd telemetry_cmd;
     SensStatus sensors_status;
     NavSensors nav_sensors;
