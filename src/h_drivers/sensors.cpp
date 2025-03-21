@@ -9,7 +9,8 @@ Sensors::Sensors()
     bmp1(BMP3_ADDR_I2C_PRIM),
     bmp2(BMP3_ADDR_I2C_SEC),
     i2cgps(),
-    gps()
+    gps(),
+    kalman()
 {
     update_status();
 }
@@ -20,6 +21,10 @@ void Sensors::check_policy(Data::GoatReg reg, const DataDump& dump) {
     // Everytime a new command is received we write to the goat
 
     // TODO: Implement the logic for the sensors driver
+
+
+    // kalman checks if we are static for calibration
+    kalman.check_policy(reg, dump);
     return;
 }
 
@@ -92,7 +97,13 @@ bool Sensors::update() {
         }
     }
 
-    // TODO: Kalmann filter
+    // Kalmann filter
+    kalman.predict(Data::get_instance().get().sens, Data::get_instance().get().nav);
+    kalman.update(Data::get_instance().get().sens, Data::get_instance().get().nav);
+
+    auto temp_kalman(kalman.get_clean_data());
+    Data::get_instance().write(Data::NAV_CLEAN_DATA, &temp_kalman);
+
 
     return true;
 }
