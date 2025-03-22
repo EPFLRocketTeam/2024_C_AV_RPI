@@ -1,6 +1,7 @@
 #ifndef TRIGGER_BOARD_H
 #define TRIGGER_BOARD_H
 
+#include "data.h"
 #include "h_driver.h"
 #include <exception>
 #include <string>
@@ -20,15 +21,18 @@ public:
     void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
 private:
+    uint32_t delta_ms;
+    uint32_t count_ms;
+
     void handle_init();
     void handle_calibration();
     void handle_manual();
-    void handle_armed();
+    void handle_armed(const DataDump& dump);
     void handle_ready();
     void handle_thrustsequence();
     void handle_liftoff();
     void handle_ascent();
-    void handle_descent();
+    void handle_descent(const DataDump& dump);
     void handle_landed();
     void handle_errorground();
     void handle_errorflight();
