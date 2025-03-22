@@ -3,6 +3,7 @@
 
 #include <capsule.h>
 #include <Protocol.h>
+#include <exception>
 #include "h_driver.h"
 
 class Telecom : public HDriver {
@@ -30,6 +31,18 @@ private:
 
     av_uplink_t last_packet;
     bool new_cmd_received;
+};
+
+class TelecomException : public std::exception {
+public:
+    TelecomException(const std::string& msg_) : msg(msg_) {}
+
+    virtual const char* what() const throw() {
+        return msg.c_str();
+    }
+
+private:
+    std::string msg;
 };
 
 #endif /* TELECOM_H */
