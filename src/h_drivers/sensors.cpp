@@ -2,37 +2,72 @@
 #include "data.h"
 
 Sensors::Sensors()
-:   adxl1(ADXL375_ADDR_I2C_PRIM),
-    adxl2(ADXL375_ADDR_I2C_SEC),
-    bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY),
-    bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY),
-    bmp1(BMP3_ADDR_I2C_PRIM),
-    bmp2(BMP3_ADDR_I2C_SEC),
-    i2cgps(),
-    gps()
+    : adxl1(ADXL375_ADDR_I2C_PRIM),
+      adxl2(ADXL375_ADDR_I2C_SEC),
+      bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY),
+      bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY),
+      bmp1(BMP3_ADDR_I2C_PRIM),
+      bmp2(BMP3_ADDR_I2C_SEC),
+      i2cgps(),
+      gps()
 {
+    tdb = TDB::from_csv("../tests/sim.csv");
+    if (tdb != nullptr)
+    {
+        simulation_mode = true;
+        tdb->init();
+
+        adxl1_x = tdb->get_time_series("adxl1_x");
+        adxl1_y = tdb->get_time_series("adxl1_y");
+        adxl1_z = tdb->get_time_series("adxl1_z");
+        bmp1_p = tdb->get_time_series("bmp1_p");
+        bmp1_t = tdb->get_time_series("bmp1_t");
+
+        std::cout << "start\n";
+    }
     update_status();
 }
 
 Sensors::~Sensors() {}
 
-void Sensors::check_policy(Data::GoatReg reg, const DataDump& dump) {
+void Sensors::check_policy(Data::GoatReg reg, const DataDump &dump)
+{
     // Everytime a new command is received we write to the goat
 
     // TODO: Implement the logic for the sensors driver
+    update();
     return;
 }
 
-//TODO: must return bool to written into goat.event
-void Sensors::calibrate() {
-    //must have counter ro return an error if too much
-    //Redo calibration
+// TODO: must return bool to written into goat.event
+void Sensors::calibrate()
+{
+    // must have counter ro return an error if too much
+    // Redo calibration
     adxl1.calibrate();
     adxl2.calibrate();
 }
 
-bool Sensors::update() {
+bool Sensors::update()
+{
     update_status();
+
+    if (simulation_mode && tdb != nullptr)
+    {
+        adxl375_data adxl1_data = {
+            adxl1_x.value().get(),
+            adxl1_y.value().get(),
+            adxl1_z.value().get()};
+
+        bmp3_data bmp1_data = {
+            bmp1_p.value().get(),
+            bmp1_t.value().get()};
+
+        Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &adxl1_data);
+        Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &bmp1_data);
+
+        return true;
+    }
 
     // Update raw sensors values and write them to the GOAT
     auto temp_adxl(adxl1.get_data());
@@ -53,12 +88,15 @@ bool Sensors::update() {
     Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &temp_bmp);
 
     // TODO: Propulsion sensors acquisition
-    
-    while (i2cgps.available()) {
+
+    while (i2cgps.available())
+    {
         gps.encode(i2cgps.read());
     }
-    if (gps.time.isUpdated()) {
-        if (gps.date.isValid()) {
+    if (gps.time.isUpdated())
+    {
+        if (gps.date.isValid())
+        {
             unsigned temp(gps.date.year());
             Data::get_instance().write(Data::NAV_GNSS_TIME_YEAR, &temp);
             temp = gps.date.month();
@@ -66,7 +104,8 @@ bool Sensors::update() {
             temp = gps.date.day();
             Data::get_instance().write(Data::NAV_GNSS_TIME_DAY, &temp);
         }
-        if (gps.time.isValid()) {
+        if (gps.time.isValid())
+        {
             unsigned temp(gps.time.hour());
             Data::get_instance().write(Data::NAV_GNSS_TIME_HOUR, &temp);
             temp = gps.time.minute();
@@ -76,17 +115,20 @@ bool Sensors::update() {
             temp = gps.time.centisecond();
             Data::get_instance().write(Data::NAV_GNSS_TIME_CENTI, &temp);
         }
-        if (gps.location.isValid()) {
+        if (gps.location.isValid())
+        {
             double temp(gps.location.lat());
             Data::get_instance().write(Data::NAV_GNSS_POS_LAT, &temp);
             temp = gps.location.lng();
             Data::get_instance().write(Data::NAV_GNSS_POS_LNG, &temp);
         }
-        if (gps.altitude.isValid()) {
+        if (gps.altitude.isValid())
+        {
             double temp(gps.altitude.meters());
             Data::get_instance().write(Data::NAV_GNSS_POS_ALT, &temp);
         }
-        if (gps.course.isValid()) {
+        if (gps.course.isValid())
+        {
             double temp(gps.course.deg());
             Data::get_instance().write(Data::NAV_GNSS_COURSE, &temp);
         }
@@ -97,7 +139,8 @@ bool Sensors::update() {
     return true;
 }
 
-void Sensors::update_status() {
+void Sensors::update_status()
+{
     uint8_t temp(adxl1.get_status());
     Data::get_instance().write(Data::NAV_SENSOR_ADXL1_STAT, &temp);
     temp = adxl2.get_status();
@@ -110,7 +153,7 @@ void Sensors::update_status() {
     Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_STAT, &temp);
     temp = bmi2.get_gyro_status();
     Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_STAT, &temp);
-    
+
     auto temp_bmp(bmp1.get_status());
     Data::get_instance().write(Data::NAV_SENSOR_BMP1_STAT, &temp_bmp);
     temp_bmp = bmp2.get_status();

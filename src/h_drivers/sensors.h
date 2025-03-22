@@ -4,7 +4,7 @@
 // Either way, do we still need to store sensors status, raw navigation values,
 // and filtered global sensors values as members of this class ? Since we have the GOAT,
 // can't we directly write them to it upon sensors acquisition, i.e. in Sensors::update() ?
-// This typically would look like: 
+// This typically would look like:
 //  Data::get_instance().write(ADXL1_RAW_DATA, adxl1.get_data());
 // That way, Sensors is just a wrapper to manage the sensor drivers, without storing anything.
 
@@ -19,12 +19,13 @@
 #include "data.h"
 #include "h_driver.h"
 
-class Sensors : public HDriver {
+class Sensors : public HDriver
+{
 public:
     Sensors();
     ~Sensors();
 
-    void check_policy(Data::GoatReg reg,const DataDump& dump) override;
+    void check_policy(Data::GoatReg reg, const DataDump &dump) override;
 
     void calibrate();
     bool update();
@@ -38,6 +39,12 @@ private:
     I2CGPS i2cgps;
     TinyGPSPlus gps;
 
+    TDB *tdb = nullptr;
+    bool simulation_mode = false;
+
+    std::optional<TimeSeries> adxl1_x, adxl1_y, adxl1_z;
+    std::optional<TimeSeries> bmp1_p, bmp1_t;
+    
     // SensStatus status;
     // SensRaw raw_data;
     // SensFiltered clean_data;
