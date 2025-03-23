@@ -49,7 +49,7 @@ void TMP1075::writeRegister(const uint8_t pointerRegister, const uint16_t value)
     buffer[0] = (value >> 8) & 0xFF;
     buffer[1] = value & 0xFF;
     if (_write(pointerRegister, buffer, 2, _intf_ptr) != 0) {
-        std::string msg("TMP1075 I2C error: failed writing to ");
+        std::string msg("TMP1075 I2C error: failed writing to reg: ");
         throw TMP1075Exception(msg + std::to_string(pointerRegister));
     }
 }
@@ -57,7 +57,7 @@ void TMP1075::writeRegister(const uint8_t pointerRegister, const uint16_t value)
 void TMP1075::writeRegister(const uint8_t pointerRegister, const uint8_t value)
 {
     if (_write(pointerRegister, &value, 1, _intf_ptr) != 0) {
-        std::string msg("TMP1075 I2C error: failed writing to ");
+        std::string msg("TMP1075 I2C error: failed writing to reg: ");
         throw TMP1075Exception(msg + std::to_string(pointerRegister));
     }
 }
@@ -65,9 +65,8 @@ void TMP1075::writeRegister(const uint8_t pointerRegister, const uint8_t value)
 uint16_t TMP1075::readRegister(const uint8_t pointerRegister)
 {
     uint8_t buffer[2] = {0};
-    _write(pointerRegister, nullptr, 0, _intf_ptr);
     if (_read(pointerRegister, buffer, 2, _intf_ptr) != 0) {
-        std::string msg("TMP1075 I2C error: failed writing to ");
+        std::string msg("TMP1075 I2C error: failed reading from reg: ");
         throw TMP1075Exception(msg + std::to_string(pointerRegister));
     }
     return ((uint16_t)buffer[0] << 8) | buffer[1];
