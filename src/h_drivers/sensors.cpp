@@ -16,7 +16,7 @@ Sensors::Sensors()
 
 Sensors::~Sensors() {}
 
-void Sensors::check_policy(Data::GoatReg reg, const DataDump& dump) {
+void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     // Everytime a new command is received we write to the goat
 
     // TODO: Implement the logic for the sensors driver

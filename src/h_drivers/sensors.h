@@ -16,7 +16,6 @@
 #include "I2CGPS.h"
 #include "TinyGPS++.h"
 #include "adxl375.h"
-#include "data.h"
 #include "h_driver.h"
 #include "TMP1075.h"
 
@@ -25,7 +24,7 @@ public:
     Sensors();
     ~Sensors();
 
-    void check_policy(Data::GoatReg reg, const DataDump& dump) override;
+    void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
     void calibrate();
     bool update();
