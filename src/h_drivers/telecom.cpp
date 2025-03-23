@@ -1,3 +1,5 @@
+// TODO: log events instead of std::cout
+
 #include <LoRa.h>
 #include <LoopbackStream.h>
 #include <Protocol.h>
@@ -31,7 +33,7 @@ Telecom::Telecom()
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
 {}
 
-void Telecom::check_policy(Data::GoatReg reg, const DataDump& dump) {
+void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     if (new_cmd_received) {
         new_cmd_received = false;
         switch (last_packet.order_id) {
@@ -47,7 +49,7 @@ void Telecom::check_policy(Data::GoatReg reg, const DataDump& dump) {
 bool Telecom::begin() {
     lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
     if (!lora_uplink.begin(UPLINK_FREQUENCY, SPI0)) {
-        std::cout << "LoRa uplink init failed!\n";
+        throw TelecomException("LoRa uplink init failed\n");
         return false;
     }else {
         std::cout << "LoRa uplink init succeeded!\n";
@@ -76,7 +78,7 @@ bool Telecom::begin() {
 
     lora_downlink.setPins(LORA_DOWNLINK_CS, LORA_DOWNLINK_RST, LORA_DOWNLINK_DI0);
     if (!lora_downlink.begin(AV_DOWNLINK_FREQUENCY, SPI1)) {
-        std::cout << "LoRa downlink init failed!\n";
+        throw TelecomException("LoRa downlink init failed\n");
         return false;
     }else {
         std::cout << "LoRa downlink init succeeded!\n";
@@ -163,6 +165,7 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
 
             Data::get_instance().write(Data::TLM_CMD_ID, &last_packet.order_id);
             Data::get_instance().write(Data::TLM_CMD_VALUE, &last_packet.order_value);
+            Data::get_instance().write(Data::EVENT_CMD_RECEIVED, &new_cmd_received);
 
             std::cout << "Command received from GS!\n"
                       << "ID: " << (int)last_packet.order_id << "\n"
