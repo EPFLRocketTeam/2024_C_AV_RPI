@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include "rotation_utils.h"
-#include "h_driver.h"
+#include "data.h"
 
 // conventions used : 
 // The rotation matrix R that represents the orientation of the rocket is of the form
@@ -22,7 +22,7 @@
 // [6:9] position error
 // [9:12] gyro bias error
 // [12:15] accelerometer bias error
-class Kalman : public HDriver {
+class Kalman {
 private:
     Quaternion orientation_estimate;        // quaternion representing the orientation of the rocket
     Eigen::Vector3f velocity_estimate;      // velocity of the rocket in the earth frame
@@ -31,16 +31,20 @@ private:
     Eigen::Vector3f accelerometer_bias;     // (estimated) bias of the accelerometer
     Eigen::VectorXf state;                  // error state
     Eigen::MatrixXf estimate_covariance;    // covariance matrix of the error state
+    Eigen::MatrixXf initial_estimate_covariance; // initial covariance matrix of the error state (used for callibration reset)
     Eigen::Matrix3f observation_covariance; // covariance matrix of the observation noise
     Eigen::Matrix3f gyro_cov_mat;           // covariance matrix of the gyroscope noise
     Eigen::Matrix3f gyro_bias_cov_mat;      // covariance matrix of the gyroscope bias noise
     Eigen::Matrix3f accel_cov_mat;          // covariance matrix of the accelerometer noise
     Eigen::Matrix3f accel_bias_cov_mat;     // covariance matrix of the accelerometer bias noise
     Eigen::MatrixXf G;                      // Jacobian of the error state dynamics
+    float initial_azimuth;
     float g;                                // gravity norm
     Quaternion orientation_dot;             // quaternion time derivative
     unsigned long last_measurement_time = 0; // time of the last IMU measurement (in milliseconds)
     float time_delta = 0;                   // time between current and previous IMU measurements (in seconds)
+
+    Vector3 current_accel = {0, 0, 0};
 
     // static periodic calibration
     bool is_static = true;
@@ -65,19 +69,27 @@ private:
     double last_gps_lon = 0;
 
 public:
-    Kalman(float estimate_covariance_val, 
-           float gyro_cov, 
-           float gyro_bias_cov,
-           float accel_proc_cov, 
-           float accel_bias_cov,
-           float gps_obs_cov, 
-           float alt_obs_cov);
+    Kalman( float estimate_covariance_gyro, 
+            float estimate_covariance_accel,
+            float estimate_covariance_orientation,
+            float gyro_cov, 
+            float gyro_bias_cov,
+            float accel_proc_cov, 
+            float accel_bias_cov,
+            float gps_obs_cov, 
+            float alt_obs_cov);
+    ~Kalman() = default;
 
     void calculate_initial_orientation();
     Eigen::MatrixXf process_covariance();
 
+    void check_static(Data::GoatReg reg, const DataDump& dump);
+
     // takes the NavSensors data and outputs a single fused IMU measurement for all IMUs
-    void fuse_IMUs(const NavSensors& nav_sensors, const Eigen::Vector3f& output_gyro_meas, const Eigen::Vector3f& output_acc_meas);
+    void fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gyro_meas, Eigen::Vector3f& output_acc_meas);
+
+    // converts the GPS and pressure measurements to the observation space (in meters)
+    void gps_pressure_to_obs(const NavSensors& nav_sensors, const NavigationData& nav_data, Eigen::Vector3f& gps_meas, float& alt_meas);
 
     // void predict(const Eigen::Vector3f& gyro_meas, const Eigen::Vector3f& acc_meas);
     void predict(const NavSensors& nav_sensors, const NavigationData& nav_data);
@@ -90,7 +102,9 @@ public:
     Eigen::Vector3f get_accel_bias() const;
     float get_azimuth() const;
     float get_pitch() const;
-    CleanedData Kalman::get_clean_data() const;
+    float get_roll() const;
+    NavigationData get_nav_data() const;
+
 };
 
 #endif // KALMAN_H

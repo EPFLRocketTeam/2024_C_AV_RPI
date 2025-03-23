@@ -1,34 +1,60 @@
 #include "kalman.h"
 #include "sensors.h"
+#include "data.h"
 #include <Eigen/Dense>
 #include "kalman_params.h"
 
-Kalman::Kalman(const Quaternion& initial_orientation_est, 
-               const Eigen::Vector3f& initial_gyro_bias_est, 
-               const Eigen::Vector3f& initial_accel_bias_est,
-               float estimate_covariance_val, 
-               float gyro_cov, 
-               float gyro_bias_cov,
-               float accel_proc_cov, 
-               float accel_bias_cov,
-               float gps_obs_cov, 
-               float alt_obs_cov,
-               float gravity)
-    : orientation_estimate(initial_orientation_est),
+namespace {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    uint32_t millis() {
+        // Calculate the elapsed time, converting duration to milliseconds
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now-start);
+        return static_cast<uint32_t>(duration.count());
+    };
+}
+
+
+Kalman::Kalman( float estimate_covariance_gyro, 
+                float estimate_covariance_accel,
+                float estimate_covariance_orientation,
+                float gyro_cov, 
+                float gyro_bias_cov,
+                float accel_proc_cov, 
+                float accel_bias_cov,
+                float gps_obs_cov, 
+                float alt_obs_cov)
+    : orientation_estimate(Quaternion(1,0,0,0)),
       velocity_estimate(Eigen::Vector3f::Zero()),
       position_estimate(Eigen::Vector3f::Zero()),
-      gyro_bias(initial_gyro_bias_est),
-      accelerometer_bias(initial_accel_bias_est),
+      gyro_bias(Eigen::Vector3f::Zero()),
+      accelerometer_bias(Eigen::Vector3f::Zero()),
       state(Eigen::VectorXf::Zero(15)),
-      estimate_covariance(Eigen::MatrixXf::Identity(15, 15) * estimate_covariance_val),
       observation_covariance(Eigen::Matrix3f::Zero()),
       gyro_cov_mat(Eigen::Matrix3f::Identity() * gyro_cov),
       gyro_bias_cov_mat(Eigen::Matrix3f::Identity() * gyro_bias_cov),
       accel_cov_mat(Eigen::Matrix3f::Identity() * accel_proc_cov),
       accel_bias_cov_mat(Eigen::Matrix3f::Identity() * accel_bias_cov),
       G(Eigen::MatrixXf::Zero(15, 15)),
-      initial_azimuth(initial_azimuth),
-      g(gravity) {
+      initial_azimuth(INITIAL_AZIMUTH),
+      g(GRAVITY) {
+    
+
+    // Initialize covariance matrices
+    initial_estimate_covariance.setZero();
+    initial_estimate_covariance(0, 0) = estimate_covariance_orientation;
+    initial_estimate_covariance(1, 1) = estimate_covariance_orientation;
+    initial_estimate_covariance(2, 2) = estimate_covariance_orientation;
+    initial_estimate_covariance(9, 9) = estimate_covariance_gyro;
+    initial_estimate_covariance(10, 10) = estimate_covariance_gyro;
+    initial_estimate_covariance(11, 11) = estimate_covariance_gyro;
+    initial_estimate_covariance(12, 12) = estimate_covariance_accel;
+    initial_estimate_covariance(13, 13) = estimate_covariance_accel;
+    initial_estimate_covariance(14, 14) = estimate_covariance_accel;
+
+    estimate_covariance = initial_estimate_covariance;
+
     
     // Initialize observation covariance
     observation_covariance(0, 0) = gps_obs_cov;
@@ -42,12 +68,14 @@ Kalman::Kalman(const Quaternion& initial_orientation_est,
     }
 }
 
-void Kalman::check_policy(Data::GoatReg reg, const DataDump& dump) {
+void Kalman::check_static(Data::GoatReg reg, const DataDump& dump) {
     // updates is_static 
-    if(dump.State == State.READY){
+    if(dump.av_state == State::READY){
         is_static = false; // Stop the periodic calibration
     }
 }
+
+ 
 
 Eigen::MatrixXf Kalman::process_covariance() {
     Eigen::MatrixXf Q = Eigen::MatrixXf::Zero(15, 15);
@@ -125,14 +153,15 @@ double pressure_to_altitude(double pressure_hpa) {
 
 void Kalman::gps_pressure_to_obs(const NavSensors& nav_sensors, const NavigationData& nav_data, Eigen::Vector3f& gps_meas, float& alt_meas) {
     const double delta_lat = nav_data.position.lat - initial_lat;
-    const double delta_lon = nav_data.position.lon - initial_lon;
+    const double delta_lon = nav_data.position.lng - initial_lon;
     const double lat_avg = (nav_data.position.lat + initial_lat)/ 2.0;
 
     gps_meas(0) = delta_lon * DEG_TO_RAD * EARTH_RADIUS * std::cos(lat_avg * DEG_TO_RAD);
     gps_meas(1) = delta_lat * DEG_TO_RAD * EARTH_RADIUS;
 
     // TODO? detect failure of one of the pressure sensors (maybe using gps alt to do a majority vote?)
-    alt_meas = pressure_to_altitude((nav_sensors.bmp.pressure + nav_sensors.bmp_aux.pressure)/2) - initial_alt;
+    const float avg_pressure = (nav_sensors.bmp.pressure + nav_sensors.bmp_aux.pressure)/2.0f;
+    alt_meas = pressure_to_altitude(avg_pressure) - initial_alt;
 }
 
 void Kalman::predict(const NavSensors& nav_sensors, const NavigationData& nav_data) {
@@ -140,6 +169,7 @@ void Kalman::predict(const NavSensors& nav_sensors, const NavigationData& nav_da
     Eigen::Vector3f gyro_meas;
     Eigen::Vector3f acc_meas;
     fuse_IMUs(nav_sensors, gyro_meas, acc_meas);
+    current_accel = {acc_meas(0), acc_meas(1), acc_meas(2)};
 
     time_delta = (millis() - last_measurement_time) / 1000.0f;
     last_measurement_time = millis();
@@ -172,7 +202,7 @@ void Kalman::predict(const NavSensors& nav_sensors, const NavigationData& nav_da
             calculate_initial_orientation();
 
             initial_lat = nav_data.position.lat;
-            initial_lon = nav_data.position.lon;
+            initial_lon = nav_data.position.lng;
             initial_alt = pressure_to_altitude((nav_sensors.bmp.pressure + nav_sensors.bmp_aux.pressure)/2);
         }
     }
@@ -210,8 +240,8 @@ void Kalman::predict(const NavSensors& nav_sensors, const NavigationData& nav_da
         velocity_estimate += acc_world * time_delta;
 
         // Update the error state Jacobian blocks
-        const Eigen::Matrix3f gyroSkew = skew_symmetric_eigen(gyro_meas_corrected);
-        const Eigen::Matrix3f accelSkew = skew_symmetric_eigen(acc_meas_corrected);
+        const Eigen::Matrix3f gyroSkew = skew_symmetric(gyro_meas_corrected);
+        const Eigen::Matrix3f accelSkew = skew_symmetric(acc_meas_corrected);
         
         // G[0:3, 0:3] = -skewSymmetric(gyro_meas_corrected)
         G.block<3, 3>(0, 0) = -gyroSkew;
@@ -234,7 +264,7 @@ void Kalman::predict(const NavSensors& nav_sensors, const NavigationData& nav_da
 void Kalman::update(const NavSensors& nav_sensors, const NavigationData& nav_data) {
     if(!is_static && nav_data.position.lat!=last_gps_lat && nav_data.position.lat!=last_gps_lon) {
         last_gps_lat = nav_data.position.lat;
-        last_gps_lon = nav_data.position.lon;
+        last_gps_lon = nav_data.position.lng;
 
         Eigen::Vector3f gps_meas;
         float alt_meas;
@@ -310,7 +340,16 @@ float Kalman::get_azimuth() const {
 float Kalman::get_pitch() const {
     return pitch_of_quaternion(orientation_estimate);
 }
+float Kalman::get_roll() const {
+    return roll_of_quaternion(orientation_estimate);
+}
 
-CleanedData Kalman::get_clean_data() const {
-    return {orientation_estimate,velocity_estimate,position_estimate};
+NavigationData Kalman::get_nav_data() const {
+    NavigationData nav_data;
+    nav_data.position_kalman = {position_estimate(0), position_estimate(1), position_estimate(2)};
+    nav_data.speed = {velocity_estimate(0), velocity_estimate(1), velocity_estimate(2)};
+    nav_data.accel = current_accel;
+    nav_data.attitude = {orientation_estimate.vector[0], orientation_estimate.vector[1], orientation_estimate.vector[2]};
+    nav_data.altitude = position_estimate(2);
+    return nav_data;
 }

@@ -140,10 +140,11 @@ struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
     //referentiel earth
+    Vector3 position_kalman;
     Vector3   speed;
     //ref of accel TBD !!!!
     Vector3   accel;
-    Vector3   attitude;
+    Vector3   attitude; // Quaternion vector q = {w, x, y, z} -> {x,y,z}
     double    course;
     double    altitude;
     bmp3_data baro;
@@ -163,13 +164,7 @@ struct DataDump {
     bool depressurised() const;
 };
 
-struct CleanedData {
-    Quaternion orientation;
-    Vector3 velocity;
-    Vector3 position;
 
-    CleanedData();
-}
 
 /**
  * @brief GOAT - Global Objects Atomic Table
@@ -243,10 +238,9 @@ public:
         EVENT_CHUTE_OPENED = 0x34,
         EVENT_CHUTE_UNREEFED = 0x35,
         VALVES = 0x36,
-        AV_STATE = 0x37
+        AV_STATE = 0x37,
 
-        /* Kalman Clean Data */
-        NAV_CLEAN_DATA = 0x38
+        NAV_KALMAN_DATA = 0x38
     };
 
     static inline Data& get_instance() {
@@ -284,8 +278,6 @@ private:
     Event event;
     Valves valves;
     State av_state;
-    CleanedData cleaned_data;
-
 };
 
 #endif /* DATA_H */

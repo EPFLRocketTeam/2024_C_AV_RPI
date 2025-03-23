@@ -55,12 +55,6 @@ Event::Event()
     ignition_failed{false}
 {}
 
-CleanedData::CleanedData()
-:   orientation(Quaternion(1,0,0,0)),
-    velocity{0,0,0},
-    position{0,0,0}
-{}
-
 
 // const void* Data::read(GoatReg reg) {
 //     // Big switch to read at the field given as argument
@@ -237,12 +231,20 @@ void Data::write(GoatReg reg, void* data) {
             av_state = *reinterpret_cast<State*>(data);
             break;
 
-        case NAV_CLEAN_DATA:
-            cleaned_data = *reinterpret_cast<CleanedData*>(data);
+        case NAV_KALMAN_DATA:
+            const NavigationData temp = *reinterpret_cast<NavigationData*>(data);
+            // only update the data given by the kalman filter
+            nav.position_kalman = temp.position_kalman;
+            nav.speed = temp.speed;
+            nav.accel = temp.accel;
+            nav.attitude = temp.attitude;
+            nav.altitude = temp.altitude;
+            nav.baro = temp.baro;
+            break;
     }
 }
 DataDump Data::get() const {
-    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state,cleaned_data};
+    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event, valves, av_state};
 }
 
 bool DataDump::depressurised() const {

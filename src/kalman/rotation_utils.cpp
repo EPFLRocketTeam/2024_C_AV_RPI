@@ -33,6 +33,10 @@ Quaternion Quaternion::normalised() const {
     return Quaternion(scalar * invNorm, vector * invNorm);
 }
 
+// Quaternion Quaternion::conjugate(const Quaternion& q) const {
+//     return Quaternion(q.scalar, -q.vector[0], -q.vector[1], -q.vector[2]);
+// }
+
 Eigen::Matrix3f quat_to_matrix(const Quaternion& q) {
     float qi = q.vector(0), qj = q.vector(1), qk = q.vector(2), qw = q.scalar;
     
@@ -47,9 +51,9 @@ Eigen::Matrix3f quat_to_matrix(const Quaternion& q) {
 Quaternion rot_matrix_to_quat(const Eigen::Matrix3f& M) {
     float T = M.trace(); // Trace of M
     // Determine the max between the trace and the diagonal coefficients to ensure numerical stability
-    float temp1 = max(M(0,0), M(1,1));
-    float temp2 = max(M(2,2), T);
-    float m = max(temp1, temp2);
+    float temp1 = std::max(M(0,0), M(1,1));
+    float temp2 = std::max(M(2,2), T);
+    float m = std::max(temp1, temp2);
     float qmax = 0.5 * sqrt(1.0 - T + 2.0 * m);
 
     if (m == M(0,0))
@@ -87,7 +91,7 @@ Quaternion rot_matrix_to_quat(const Eigen::Matrix3f& M) {
     }
 }
 
-Eigen::Matrix3f skew_symmetric_eigen(const Eigen::Vector3f& v) {
+Eigen::Matrix3f skew_symmetric(const Eigen::Vector3f& v) {
     Eigen::Matrix3f m;
     m <<  0,    -v(2),  v(1),
           v(2),  0,    -v(0),
@@ -95,13 +99,33 @@ Eigen::Matrix3f skew_symmetric_eigen(const Eigen::Vector3f& v) {
     return m;
 }
 
+
+
+// E : east vector, N : north vector, U : up vector
+// X and Y : transversal plane of the rocket frame
+// Z : longitudinal vector of the rocket frame (tail to nose)
+// vectors are expressed in the earth frame so U = (0, 0, 1).T and Z = R^T U for example
+
+
+// We define the Euler angle sequence following the Z-Y-Z convention:
+// azimuth (or yaw) then pitch then roll
+// so R = Rz(azimuth) * Ry(pi/2 - pitch) * Rz(roll)
+
 float azimuth_of_quaternion(const Quaternion& q) {
-    // = atan2((N x Z) • U, N • Z) = atan2((N x M^T U) • U, N • M^T U)
-    return std::atan2(-2.0f * (q.vector[0] * q.vector[2] + q.vector[1] * q.scalar   ),
-                      -2.0f * (q.vector[0] * q.scalar    - q.vector[1] * q.vector[2]));
+    // = atan2((Z x N) • U, N • Z) = atan2((R^T U x N) • U, N • R^T U) = atan2(R(0,2),R(1,2))
+    return std::atan2(2.0f * (q.vector[0] * q.vector[2] + q.vector[1] * q.scalar),
+                      2.0f * (q.vector[1] * q.vector[2] - q.vector[0] * q.scalar));
 }
 
 float pitch_of_quaternion(const Quaternion& q) {
-    // = pi/2 - arccos(Z • U) = pi/2 - arccos(M^T U • U)
-    return HALF_PI - std::acos(1.0f - 2.0f * (q.vector[0] * q.vector[0] + q.vector[1] * q.vector[1]));
+    // = asin(Z • U) = asin(R^T U • U) = asin(R(2,2))
+    return std::asin(1.0f - 2.0f * (q.vector[0] * q.vector[0] + q.vector[1] * q.vector[1]));
+}
+
+
+// note : this is wrong, TODO : correct it
+float roll_of_quaternion(const Quaternion& q) {
+    // last rotation around Z after applying yaw and pitch
+    return std::atan2(  2.0f * (q.vector[0] * q.vector[2] - q.vector[1] * q.scalar),
+                      - 2.0f * (q.vector[1] * q.vector[2] + q.vector[0] * q.scalar));
 }

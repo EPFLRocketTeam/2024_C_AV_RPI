@@ -1,4 +1,5 @@
 #include "sensors.h"
+#include "kalman_params.h"
 #include "data.h"
 
 Sensors::Sensors()
@@ -10,7 +11,15 @@ Sensors::Sensors()
     bmp2(BMP3_ADDR_I2C_SEC),
     i2cgps(),
     gps(),
-    kalman()
+    kalman(INITIAL_COV_GYR_BIAS,
+           INITIAL_COV_ACCEL_BIAS,
+           INITIAL_COV_ORIENTATION,
+           GYRO_COV,
+           GYRO_BIAS_COV,
+           ACCEL_COV,
+           ACCEL_BIAS_COV,
+           GPS_OBS_COV,
+           ALT_OBS_COV)
 {
     update_status();
 }
@@ -24,7 +33,7 @@ void Sensors::check_policy(Data::GoatReg reg, const DataDump& dump) {
 
 
     // kalman checks if we are static for calibration
-    kalman.check_policy(reg, dump);
+    kalman.check_static(reg, dump);
     return;
 }
 
@@ -101,8 +110,8 @@ bool Sensors::update() {
     kalman.predict(Data::get_instance().get().sens, Data::get_instance().get().nav);
     kalman.update(Data::get_instance().get().sens, Data::get_instance().get().nav);
 
-    auto temp_kalman(kalman.get_clean_data());
-    Data::get_instance().write(Data::NAV_CLEAN_DATA, &temp_kalman);
+    auto temp_nav_data(kalman.get_nav_data());
+    Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
 
 
     return true;
