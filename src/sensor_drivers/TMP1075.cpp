@@ -86,75 +86,75 @@ float TMP1075::getTemperatureCelsius()
 void TMP1075::startConversion()
 {
     // There is no need to save the OS bit to the cache, because it will always be zero when read.
-    this->writeRegister(0x01, (uint8_t)(this->configRegister | (1 << Offsets::OS)));
+    this->writeRegister(0x01, (uint8_t)(this->configRegister | (1 << TMP1075_Offsets::OS)));
 }
 
 bool TMP1075::getConversionMode() const
 {
-    return (this->configRegister >> Offsets::SD) & 0b1;
+    return (this->configRegister >> TMP1075_Offsets::SD) & 0b1;
 }
 
 void TMP1075::setConversionMode(const bool isSingleShot)
 {
-    if (((configRegister >> Offsets::SD) & 0b1) != isSingleShot)
+    if (((configRegister >> TMP1075_Offsets::SD) & 0b1) != isSingleShot)
     {
-        this->configRegister = (this->configRegister & ~(1 << Offsets::SD)) | (isSingleShot << Offsets::SD);
+        this->configRegister = (this->configRegister & ~(1 << TMP1075_Offsets::SD)) | (isSingleShot << TMP1075_Offsets::SD);
         this->writeRegister(0x01, this->configRegister);
     }
 }
 
-ConversionTime TMP1075::getConversionTime() const
+TMP1075_ConversionTime TMP1075::getConversionTime() const
 {
-    return ConversionTime((this->configRegister >> Offsets::R) & 0b11);
+    return TMP1075_ConversionTime((this->configRegister >> TMP1075_Offsets::R) & 0b11);
 }
 
-void TMP1075::setConversionTime(const ConversionTime value)
+void TMP1075::setConversionTime(const TMP1075_ConversionTime value)
 {
-    if (ConversionTime((configRegister >> Offsets::R) & 0b11) != value)
+    if (TMP1075_ConversionTime((configRegister >> TMP1075_Offsets::R) & 0b11) != value)
     {
-        this->configRegister = (this->configRegister & ~(11 << Offsets::R)) | (value << Offsets::R);
+        this->configRegister = (this->configRegister & ~(11 << TMP1075_Offsets::R)) | (value << TMP1075_Offsets::R);
         this->writeRegister(0x01, this->configRegister);
     }
 }
 
-ConsecutiveFaults TMP1075::getFaultsUntilAlert() const
+TMP1075_ConsecutiveFaults TMP1075::getFaultsUntilAlert() const
 {
-    return ConsecutiveFaults((this->configRegister >> Offsets::F) & 0b11);
+    return TMP1075_ConsecutiveFaults((this->configRegister >> TMP1075_Offsets::F) & 0b11);
 }
 
-void TMP1075::setFaultsUntilAlert(const ConsecutiveFaults value)
+void TMP1075::setFaultsUntilAlert(const TMP1075_ConsecutiveFaults value)
 {
-    if (ConsecutiveFaults((configRegister >> Offsets::F) & 0b11) != value)
+    if (TMP1075_ConsecutiveFaults((configRegister >> TMP1075_Offsets::F) & 0b11) != value)
     {
-        this->configRegister = (this->configRegister & ~(11 << Offsets::F)) | (value << Offsets::F);
+        this->configRegister = (this->configRegister & ~(11 << TMP1075_Offsets::F)) | (value << TMP1075_Offsets::F);
         this->writeRegister(0x01, this->configRegister);
     }
 }
 
 bool TMP1075::getAlertPolarity() const
 {
-    return (this->configRegister >> Offsets::POL) & 0b1;
+    return (this->configRegister >> TMP1075_Offsets::POL) & 0b1;
 }
 
 void TMP1075::setAlertPolarity(const bool isHigh)
 {
-    if (((configRegister >> Offsets::POL) & 0b1) != isHigh)
+    if (((configRegister >> TMP1075_Offsets::POL) & 0b1) != isHigh)
     {
-        this->configRegister = (this->configRegister & ~(1 << Offsets::POL)) | (isHigh << Offsets::POL);
+        this->configRegister = (this->configRegister & ~(1 << TMP1075_Offsets::POL)) | (isHigh << TMP1075_Offsets::POL);
         this->writeRegister(0x01, this->configRegister);
     }
 }
 
 bool TMP1075::getAlertMode() const
 {
-    return (this->configRegister >> Offsets::TM) & 0b1;
+    return (this->configRegister >> TMP1075_Offsets::TM) & 0b1;
 }
 
 void TMP1075::setAlertMode(const bool isInterrupt)
 {
-    if (((configRegister >> Offsets::TM) & 0b1) != isInterrupt)
+    if (((configRegister >> TMP1075_Offsets::TM) & 0b1) != isInterrupt)
     {
-        this->configRegister = (this->configRegister & ~(1 << Offsets::TM)) | (isInterrupt << Offsets::TM);
+        this->configRegister = (this->configRegister & ~(1 << TMP1075_Offsets::TM)) | (isInterrupt << TMP1075_Offsets::TM);
         this->writeRegister(0x01, this->configRegister);
     }
 }

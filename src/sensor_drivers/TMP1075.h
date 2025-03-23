@@ -27,21 +27,21 @@
 
 #define TMP1075_ADDR_I2C 0x4E
 
-enum ConsecutiveFaults : uint8_t {
+enum TMP1075_ConsecutiveFaults : uint8_t {
     Fault_1 = 0b00,
     Fault_2 = 0b01,
     Fault_3 = 0b10,
     Fault_4 = 0b11,
 };
 
-enum ConversionTime : uint8_t {
+enum TMP1075_ConversionTime : uint8_t {
     ConversionTime27_5ms = 0b00,
     ConversionTime55ms = 0b01,
     ConversionTime110ms = 0b10,
     ConversionTime220ms = 0b11,
 };
 
-enum Offsets : uint8_t {
+enum TMP1075_Offsets : uint8_t {
     OS = 7,
     R = 5,
     F = 3,
@@ -102,11 +102,11 @@ public:
     void startConversion();
     bool getConversionMode() const;
     void setConversionMode(const bool isSingleShot = false);
-    ConversionTime getConversionTime() const;
-    void setConversionTime(ConversionTime value = ConversionTime27_5ms);
+    TMP1075_ConversionTime getConversionTime() const;
+    void setConversionTime(TMP1075_ConversionTime value = ConversionTime27_5ms);
 
-    ConsecutiveFaults getFaultsUntilAlert() const;
-    void setFaultsUntilAlert(ConsecutiveFaults value = Fault_1);
+    TMP1075_ConsecutiveFaults getFaultsUntilAlert() const;
+    void setFaultsUntilAlert(TMP1075_ConsecutiveFaults value = Fault_1);
     bool getAlertPolarity() const;
     void setAlertPolarity(const bool isHigh = false);
     bool getAlertMode() const;
