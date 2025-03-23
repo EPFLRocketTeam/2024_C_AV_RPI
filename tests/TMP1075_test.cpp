@@ -8,7 +8,7 @@ int main()
 
     try
     {
-        TMP1075 sensor(0x48);
+        TMP1075 sensor(TMP1075_ADDR_I2C);
         std::cout << "TMP1075 sensor initialized successfully." << std::endl;
 
         uint16_t deviceId = sensor.getDeviceId();
@@ -32,7 +32,7 @@ int main()
     }
     catch (TMP1075Exception &e)
     {
-        std::cerr << "Failed to initialize TMP1075 sensor!" << std::endl;
+        std::cerr << e.what() << std::endl;
         return -1;
     }
 
