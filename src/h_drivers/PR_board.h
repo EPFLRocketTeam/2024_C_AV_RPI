@@ -9,7 +9,7 @@ public:
     PR_board();
     ~PR_board() = default;
 
-    void check_policy( const DataDump& dump) override;
+    void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
     // Valve control functions
     void write_valves(uint8_t valve_states);
