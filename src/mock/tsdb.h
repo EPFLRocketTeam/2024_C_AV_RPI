@@ -1,3 +1,5 @@
+#ifndef TSDB_H
+#define TSDB_H
 
 #include <map>
 #include <string>
@@ -42,3 +44,5 @@ public:
 
     std::optional<TimeSeries> get_time_series (std::string name);
 };
+
+#endif /* TSDB_H */
