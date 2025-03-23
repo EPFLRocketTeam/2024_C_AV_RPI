@@ -132,6 +132,11 @@ struct NavigationData {
     NavigationData();
 };
 
+struct Batteries {
+    float lpb_voltage;
+    float hpb_voltage;
+};
+
 struct Event {
     bool command_updated;
     bool calibrated;
@@ -161,6 +166,7 @@ struct DataDump {
     PropSensors prop;
     Valves valves;
     NavigationData nav;
+    Batteries bat;
     Event event;
 
     // TODO: move to PR_board.check_policy
@@ -238,6 +244,10 @@ public:
 
         VALVES,
 
+        /* Batteries status */
+        BAT_LPB_VOLTAGE,
+        BAT_HPB_VOLTAGE,
+
         /* Events */
         EVENT_CMD_RECEIVED,
         EVENT_CALIBRATED,
@@ -285,6 +295,7 @@ private:
     PropSensors prop_sensors;
     Valves valves;
     NavigationData nav;
+    Batteries bat;
     Event event;
 };
 

@@ -1,4 +1,5 @@
 #include "sensors.h"
+#include "INA228.h"
 #include "data.h"
 
 Sensors::Sensors()
@@ -9,7 +10,9 @@ Sensors::Sensors()
     bmp1(BMP3_ADDR_I2C_PRIM),
     bmp2(BMP3_ADDR_I2C_SEC),
     i2cgps(),
-    gps()
+    gps(),
+    ina_lpb(INA228_ADDRESS_LPB),
+    ina_hpb(INA228_ADDRESS_HPB)
 {
     update_status();
 }
@@ -33,6 +36,20 @@ void Sensors::calibrate() {
 
 bool Sensors::update() {
     update_status();
+
+    try {
+        float lpb_voltage(ina_lpb.getBusVoltage());
+        Data::get_instance().write(Data::BAT_LPB_VOLTAGE, &lpb_voltage);
+    }catch(INA228Exception& e) {
+        std::cout << "INA228 LPB: " << e.what() << "\n";
+    }
+
+    try {
+        float hpb_voltage(ina_hpb.getBusVoltage());
+        Data::get_instance().write(Data::BAT_HPB_VOLTAGE, &hpb_voltage);
+    }catch(INA228Exception& e) {
+        std::cout << "INA228 HPB: " << e.what() << "\n";
+    }
 
     // Update raw sensors values and write them to the GOAT
     auto temp_adxl(adxl1.get_data());

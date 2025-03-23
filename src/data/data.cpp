@@ -212,6 +212,12 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_GNSS_COURSE:
             nav.course = *reinterpret_cast<double*>(data);
             break;
+        case BAT_LPB_VOLTAGE:
+            bat.lpb_voltage = *reinterpret_cast<float*>(data);
+            break;
+        case BAT_HPB_VOLTAGE:
+            bat.hpb_voltage = *reinterpret_cast<float*>(data);
+            break;
         case EVENT_CMD_RECEIVED:
             event.command_updated = *reinterpret_cast<bool*>(data);
             break;
@@ -249,6 +255,7 @@ DataDump Data::get() const {
         prop_sensors, 
         valves,
         nav,
+        bat,
         event
     };
 }

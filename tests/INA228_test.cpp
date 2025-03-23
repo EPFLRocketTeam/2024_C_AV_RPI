@@ -15,7 +15,7 @@
 int main() {
     try
     {
-        INA228 ina(0x40);
+        INA228 ina(INA228_ADDRESS_LPB);
     
         if (!ina.isConnected()){
             std::cerr << "INA228 not connected." << std::endl;
