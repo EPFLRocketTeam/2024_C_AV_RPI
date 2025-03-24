@@ -33,7 +33,7 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 
 
     // kalman checks if we are static for calibration
-    kalman.check_static(reg, dump);
+    kalman.check_static(dump);
     return;
 }
 

@@ -68,7 +68,7 @@ Kalman::Kalman( float estimate_covariance_gyro,
     }
 }
 
-void Kalman::check_static(Data::GoatReg reg, const DataDump& dump) {
+void Kalman::check_static(const DataDump& dump) {
     // updates is_static 
     if(dump.av_state == State::READY){
         is_static = false; // Stop the periodic calibration

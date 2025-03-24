@@ -237,12 +237,6 @@ void Data::write(GoatReg reg, void* data) {
         case EVENT_CHUTE_UNREEFED:
             event.chute_unreefed = *reinterpret_cast<bool*>(data);
             break;
-        case VALVES:
-            valves = *reinterpret_cast<Valves*>(data);
-            break;
-        case AV_STATE:
-            av_state = *reinterpret_cast<State*>(data);
-            break;
 
         case NAV_KALMAN_DATA:
             const NavigationData temp = *reinterpret_cast<NavigationData*>(data);

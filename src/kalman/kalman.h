@@ -83,7 +83,7 @@ public:
     void calculate_initial_orientation();
     Eigen::MatrixXf process_covariance();
 
-    void check_static(Data::GoatReg reg, const DataDump& dump);
+    void check_static(const DataDump& dump);
 
     // takes the NavSensors data and outputs a single fused IMU measurement for all IMUs
     void fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gyro_meas, Eigen::Vector3f& output_acc_meas);
