@@ -18,6 +18,10 @@ set(FIREHORN_FC_SOURCES
     ${DATA_DIR}/logger.cpp
     ${DATA_DIR}/logger.h
     ${H_DRIVERS_DIR}/h_driver.h
+    ${H_DRIVERS_DIR}/PR_board.cpp
+    ${H_DRIVERS_DIR}/PR_board.h
+    ${H_DRIVERS_DIR}/trigger_board.cpp
+    ${H_DRIVERS_DIR}/trigger_board.h
     ${H_DRIVERS_DIR}/sensors.cpp
     ${H_DRIVERS_DIR}/sensors.h
     ${H_DRIVERS_DIR}/telecom.cpp

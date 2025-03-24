@@ -1,4 +1,4 @@
 /build/
 .vscode/settings.json
-
-.cache/clangd/index
+.cache/clangd
+.vscode/
