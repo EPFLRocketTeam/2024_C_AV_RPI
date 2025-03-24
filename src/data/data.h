@@ -156,6 +156,7 @@ struct DataDump {
     State av_state;
     uint32_t av_timestamp;
     UplinkCmd telemetry_cmd;
+    float av_fc_temp;
     SensStatus stat;
     NavSensors sens;
     PropSensors prop;
@@ -182,6 +183,9 @@ public:
         /* Telemetry command */
         TLM_CMD_ID,
         TLM_CMD_VALUE,
+
+        /* CM4 temperature */
+        AV_FC_TEMPERATURE,
 
         /* Navigation sensors status */
         //TODO: sensors that have 3 32 bits values should be split into 3 registers?
@@ -280,6 +284,7 @@ private:
     State av_state;
     uint32_t av_timestamp;
     UplinkCmd telemetry_cmd;
+    float av_fc_temp;
     SensStatus sensors_status;
     NavSensors nav_sensors;
     PropSensors prop_sensors;

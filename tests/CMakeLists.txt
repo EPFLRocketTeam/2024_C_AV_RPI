@@ -26,6 +26,9 @@ target_link_libraries(lora_test LoRa4Raspi)
 add_executable(main_test main_test.cpp)
 target_link_libraries(main_test flight_computer)
 
+add_executable(TMP1075_test TMP1075_test.cpp)
+target_link_libraries(TMP1075_test PRIVATE tmp1075)
+
 add_executable(data_test data_test.cpp)
 target_link_libraries(data_test flight_computer)
 target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
