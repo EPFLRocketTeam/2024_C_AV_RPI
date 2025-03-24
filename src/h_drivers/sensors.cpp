@@ -1,6 +1,7 @@
 #include "sensors.h"
 #include "INA228.h"
 #include "TMP1075.h"
+#include "config.h"
 #include "data.h"
 
 Sensors::Sensors() try
@@ -12,8 +13,8 @@ Sensors::Sensors() try
     bmp2(BMP3_ADDR_I2C_SEC),
     i2cgps(),
     gps(),
-    ina_lpb(INA228_ADDRESS_LPB),
-    ina_hpb(INA228_ADDRESS_HPB),
+    ina_lpb(INA228_ADDRESS_LPB, INA228_LPB_SHUNT, INA228_LPB_MAX_CUR),
+    ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR),
     tmp1075(TMP1075_ADDR_I2C)
 {
     update_status();
@@ -35,7 +36,9 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::CALIBRATION:
             // TODO: calibration + low polling rate
             // update();
-            calibrate();
+            if (!dump.event.calibrated) {
+                calibrate();
+            }
             break;
         case State::READY:
         case State::THRUSTSEQUENCE:
@@ -55,10 +58,22 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 
 //TODO: must return bool to written into goat.event
 void Sensors::calibrate() {
+    bool calibrated(true);
+
     //must have counter ro return an error if too much
     //Redo calibration
     adxl1.calibrate();
     adxl2.calibrate();
+
+    try {
+        ina_lpb.setMaxCurrentShunt(INA228_LPB_MAX_CUR, INA228_LPB_SHUNT);
+        ina_hpb.setMaxCurrentShunt(INA228_HPB_MAX_CUR, INA228_HPB_SHUNT);
+    }catch(INA228Exception& e) {
+        std::cout << "INA228 calibration error: " << e.what() << "\n";
+        calibrated = false;
+    }
+
+    Data::get_instance().write(Data::EVENT_CALIBRATED, &calibrated);
 }
 
 bool Sensors::update() {

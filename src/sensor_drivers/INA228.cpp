@@ -54,12 +54,12 @@
 //
 //  CONSTRUCTOR
 //
-INA228::INA228(const uint8_t address, float _shunt, float _maxCurrent)  
+INA228::INA228(const uint8_t address, float shunt, float maxCurrent)  
 {
     _address = address;
     //  no calibrated values by default.
-    _shunt = _shunt;
-    _maxCurrent = _maxCurrent;
+    _shunt = shunt;
+    _maxCurrent = maxCurrent;
     _current_LSB = _maxCurrent * pow(2, -19);
     _error = 0;
     _ADCRange = false;

@@ -135,7 +135,7 @@ typedef void (*ina228_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
 class INA228 {
 public:
         //  address between 0x40 and 0x4F
-    explicit INA228(const uint8_t address, float _shunt=0.015, float _maxCurrent=10.0);
+    explicit INA228(const uint8_t address, float shunt=0.015, float maxCurrent=10.0);
 
     bool begin();
     bool isConnected();

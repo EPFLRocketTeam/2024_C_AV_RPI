@@ -9,6 +9,12 @@
 #define LORA_DOWNLINK_RST   25
 #define LORA_DOWNLINK_DI0   6
 
+#define INA228_LPB_SHUNT    65.2e-3
+#define INA228_LPB_MAX_CUR  2.5
+
+#define INA228_HPB_SHUNT    27e-3
+#define INA228_HPB_MAX_CUR  6
+
 #define BUZZER 4
 
 #define LED_STATUS  27
