@@ -2,7 +2,11 @@
 #define PR_BOARD_H
 
 #include "h_driver.h"
+#include <array>
 #include <cstdint>  // For uint8_t
+
+// FIXME: should be deined in intranet_commands.h ?
+#define NUM_VALVES 6
 
 class PR_board : public HDriver {
 public:
@@ -11,9 +15,10 @@ public:
 
     void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
+    // FIXME: implement the valve logic later on
     // Valve control functions
-    void write_valve(uint8_t valve_id, ValveOpenDegree degree);
-    ValveOpenDegree read_valve(uint8_t valve_id) const;
+    // void write_valve(uint8_t valve_id, ValveOpenDegree degree);
+    // ValveOpenDegree read_valve(uint8_t valve_id) const;
 
 private:
     // Each element is 4 bits (we store in uint8_t for simplicity, masking the 4 LSB)
