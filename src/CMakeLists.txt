@@ -38,6 +38,7 @@ set(FIREHORN_FC_SOURCES
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
     /usr/include/eigen3
     ${DATA_DIR}
     ${H_DRIVERS_DIR}
@@ -56,5 +57,6 @@ target_link_libraries(flight_computer PUBLIC
     bmi08
     bmp3
     gps
+    tmp1075
     kalman  # Kalman should now be linked properly
 )

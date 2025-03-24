@@ -18,6 +18,7 @@
 #include "adxl375.h"
 #include "h_driver.h"
 #include "kalman.h"
+#include "TMP1075.h"
 
 class Sensors : public HDriver {
 public:
@@ -37,6 +38,7 @@ private:
     Bmp390 bmp1, bmp2;
     I2CGPS i2cgps;
     TinyGPSPlus gps;
+    TMP1075 tmp1075;
 
     // SensStatus status;
     // SensRaw raw_data;

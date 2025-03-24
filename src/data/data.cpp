@@ -78,6 +78,9 @@ void Data::write(GoatReg reg, void* data) {
         case TLM_CMD_VALUE:
             telemetry_cmd.value = *reinterpret_cast<uint8_t*>(data);
             break;
+        case AV_FC_TEMPERATURE:
+            av_fc_temp = *reinterpret_cast<float*>(data);
+            break;
         case NAV_SENSOR_ADXL1_STAT:
             sensors_status.adxl_status = *reinterpret_cast<uint8_t*>(data);
             break;
@@ -256,6 +259,7 @@ DataDump Data::get() const {
         av_state,
         av_timestamp,
         telemetry_cmd,
+        av_fc_temp,
         sensors_status, 
         nav_sensors, 
         prop_sensors, 

@@ -1,8 +1,9 @@
 #include "sensors.h"
+#include "TMP1075.h"
 #include "kalman_params.h"
 #include "data.h"
 
-Sensors::Sensors()
+Sensors::Sensors() try
 :   adxl1(ADXL375_ADDR_I2C_PRIM),
     adxl2(ADXL375_ADDR_I2C_SEC),
     bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY),
@@ -11,6 +12,7 @@ Sensors::Sensors()
     bmp2(BMP3_ADDR_I2C_SEC),
     i2cgps(),
     gps(),
+    tmp1075(TMP1075_ADDR_I2C),
     kalman(INITIAL_COV_GYR_BIAS,
            INITIAL_COV_ACCEL_BIAS,
            INITIAL_COV_ORIENTATION,
@@ -23,10 +25,39 @@ Sensors::Sensors()
 {
     update_status();
 }
+catch(...) {
+    std::cout << "Sensors init error\n";
+}
 
 Sensors::~Sensors() {}
 
 void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
+    switch (dump.av_state) {
+        case State::INIT:
+        case State::MANUAL:
+        case State::ARMED:
+            // TODO: low polling rate
+            // update();
+            break;
+        case State::CALIBRATION:
+            // TODO: calibration + low polling rate
+            // update();
+            calibrate();
+            break;
+        case State::READY:
+        case State::THRUSTSEQUENCE:
+        case State::LIFTOFF:
+        case State::ASCENT:
+        case State::DESCENT:
+        case State::LANDED:
+            // TODO: high polling rate
+            update();
+            break;
+        case State::ERRORGROUND:
+            break;
+        case State::ERRORFLIGHT:
+            break;
+    }
     // Everytime a new command is received we write to the goat
 
     // TODO: Implement the logic for the sensors driver
@@ -48,6 +79,13 @@ void Sensors::calibrate() {
 bool Sensors::update() {
     update_status();
 
+    try {
+        float fc_temperature(tmp1075.getTemperatureCelsius());
+        Data::get_instance().write(Data::AV_FC_TEMPERATURE, &fc_temperature);
+    }catch(TMP1075Exception& e) {
+        std::cout << e.what() << "\n";
+    }
+
     // Update raw sensors values and write them to the GOAT
     auto temp_adxl(adxl1.get_data());
     Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &temp_adxl);
@@ -66,8 +104,6 @@ bool Sensors::update() {
     temp_bmp = bmp2.get_sensor_data();
     Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &temp_bmp);
 
-    // TODO: Propulsion sensors acquisition
-    
     while (i2cgps.available()) {
         gps.encode(i2cgps.read());
     }
