@@ -49,6 +49,7 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     switch (dump.av_state) {
         case State::INIT:
             // For the INIT state we do nothing
+
             break;
         case State::ERRORGROUND:
             handleErrorGround(dump);
@@ -62,9 +63,13 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::ERRORFLIGHT:
             handleErrorFlight(dump);
             break;
-        case State::ARMED:
+        case State::ARMED: {
+            // FIXME: this logic is only valid for the FT
+            bool dpr_ok = true;
+            Data::get_instance().write(Data::EVENT_DPR_OK, &dpr_ok);
             // For the ARMED state we do nothing
             break;
+        }
         case State::READY:
             processReadyState(dump);
             break;
