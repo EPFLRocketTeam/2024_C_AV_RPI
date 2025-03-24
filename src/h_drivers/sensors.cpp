@@ -86,22 +86,34 @@ bool Sensors::update() {
         std::cout << e.what() << "\n";
     }
 
+    struct NavSensors nav_sensors;
+    
+    
+
     // Update raw sensors values and write them to the GOAT
     auto temp_adxl(adxl1.get_data());
+    nav_sensors.adxl = temp_adxl;
     Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &temp_adxl);
     temp_adxl = adxl2.get_data();
+    nav_sensors.adxl_aux = temp_adxl;
     Data::get_instance().write(Data::NAV_SENSOR_ADXL2_DATA, &temp_adxl);
     auto temp_bmi(bmi1.get_accel_data());
+    nav_sensors.bmi_accel = temp_bmi;
     Data::get_instance().write(Data::NAV_SENSOR_BMI1_ACCEL_DATA, &temp_bmi);
     temp_bmi = bmi1.get_gyro_data();
+    nav_sensors.bmi_gyro = temp_bmi;
     Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_DATA, &temp_bmi);
     temp_bmi = bmi2.get_accel_data();
+    nav_sensors.bmi_aux_accel = temp_bmi;
     Data::get_instance().write(Data::NAV_SENSOR_BMI2_ACCEL_DATA, &temp_bmi);
     temp_bmi = bmi2.get_gyro_data();
+    nav_sensors.bmi_aux_gyro = temp_bmi;
     Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_DATA, &temp_bmi);
     auto temp_bmp(bmp1.get_sensor_data());
+    nav_sensors.bmp = temp_bmp;
     Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &temp_bmp);
     temp_bmp = bmp2.get_sensor_data();
+    nav_sensors.bmp_aux = temp_bmp;
     Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &temp_bmp);
 
     while (i2cgps.available()) {
@@ -142,9 +154,14 @@ bool Sensors::update() {
         }
     }
 
+    
+
+
+    
+
     // Kalmann filter
-    kalman.predict(Data::get_instance().get().sens, Data::get_instance().get().nav);
-    kalman.update(Data::get_instance().get().sens, Data::get_instance().get().nav);
+    kalman.predict(nav_sensors, Data::get_instance().get().nav);
+    kalman.update(nav_sensors, Data::get_instance().get().nav);
 
     auto temp_nav_data(kalman.get_nav_data());
     Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
