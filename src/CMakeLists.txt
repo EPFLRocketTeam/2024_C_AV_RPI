@@ -58,5 +58,5 @@ target_link_libraries(flight_computer PUBLIC
     bmp3
     gps
     tmp1075
-    kalman  # Kalman should now be linked properly
+      # Kalman should now be linked properly
 )
