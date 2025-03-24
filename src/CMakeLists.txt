@@ -35,6 +35,7 @@ set(FIREHORN_FC_SOURCES
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${DATA_DIR}
     ${H_DRIVERS_DIR}
     ${FLIGHT_CONTROL_DIR}
