@@ -46,3 +46,12 @@ set(INA228_SOURCES
 add_library(ina228 ${INA228_SOURCES})
 target_include_directories(ina228 INTERFACE ${DRIVERS_DIR})
 target_link_libraries(ina228 PRIVATE i2c_interface)
+
+# TMP1075
+set(TMP1075_SOURCES
+    TMP1075.cpp
+    TMP1075.h
+)
+add_library(tmp1075 ${TMP1075_SOURCES})
+target_include_directories(tmp1075 INTERFACE ${DRIVERS_DIR})
+target_link_libraries(tmp1075 PRIVATE i2c_interface)

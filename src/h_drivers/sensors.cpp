@@ -1,8 +1,9 @@
 #include "sensors.h"
 #include "INA228.h"
+#include "TMP1075.h"
 #include "data.h"
 
-Sensors::Sensors()
+Sensors::Sensors() try
 :   adxl1(ADXL375_ADDR_I2C_PRIM),
     adxl2(ADXL375_ADDR_I2C_SEC),
     bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY),
@@ -12,18 +13,44 @@ Sensors::Sensors()
     i2cgps(),
     gps(),
     ina_lpb(INA228_ADDRESS_LPB),
-    ina_hpb(INA228_ADDRESS_HPB)
+    ina_hpb(INA228_ADDRESS_HPB),
+    tmp1075(TMP1075_ADDR_I2C)
 {
     update_status();
+}
+catch(...) {
+    std::cout << "Sensors init error\n";
 }
 
 Sensors::~Sensors() {}
 
 void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
-    // Everytime a new command is received we write to the goat
-
-    // TODO: Implement the logic for the sensors driver
-    return;
+    switch (dump.av_state) {
+        case State::INIT:
+        case State::MANUAL:
+        case State::ARMED:
+            // TODO: low polling rate
+            // update();
+            break;
+        case State::CALIBRATION:
+            // TODO: calibration + low polling rate
+            // update();
+            calibrate();
+            break;
+        case State::READY:
+        case State::THRUSTSEQUENCE:
+        case State::LIFTOFF:
+        case State::ASCENT:
+        case State::DESCENT:
+        case State::LANDED:
+            // TODO: high polling rate
+            update();
+            break;
+        case State::ERRORGROUND:
+            break;
+        case State::ERRORFLIGHT:
+            break;
+    }
 }
 
 //TODO: must return bool to written into goat.event
@@ -43,12 +70,18 @@ bool Sensors::update() {
     }catch(INA228Exception& e) {
         std::cout << "INA228 LPB: " << e.what() << "\n";
     }
-
     try {
         float hpb_voltage(ina_hpb.getBusVoltage());
         Data::get_instance().write(Data::BAT_HPB_VOLTAGE, &hpb_voltage);
     }catch(INA228Exception& e) {
         std::cout << "INA228 HPB: " << e.what() << "\n";
+    }
+
+    try {
+        float fc_temperature(tmp1075.getTemperatureCelsius());
+        Data::get_instance().write(Data::AV_FC_TEMPERATURE, &fc_temperature);
+    }catch(TMP1075Exception& e) {
+        std::cout << e.what() << "\n";
     }
 
     // Update raw sensors values and write them to the GOAT
@@ -69,8 +102,6 @@ bool Sensors::update() {
     temp_bmp = bmp2.get_sensor_data();
     Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &temp_bmp);
 
-    // TODO: Propulsion sensors acquisition
-    
     while (i2cgps.available()) {
         gps.encode(i2cgps.read());
     }
