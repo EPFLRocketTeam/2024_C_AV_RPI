@@ -3,7 +3,7 @@
 
 #include "data.h"
 #include "av_state.h"
-//#include "intranet_commands.h"
+#include "intranet_commands.h"
 
 class HDriver {
 public:
