@@ -83,7 +83,7 @@ struct Event {
     bool   dpr_ok;
     bool   ignited;
     bool calibrated;
-    bool seperated;
+    bool separated;
     bool chute_opened;
     bool chute_unreefed;
     bool command_updated;

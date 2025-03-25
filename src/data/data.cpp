@@ -49,7 +49,7 @@ Event::Event()
 :   dpr_ok{false},
     ignited{false},
     calibrated{false},
-    seperated{false},
+    separated{false},
     chute_opened{false},
     chute_unreefed{false},
     ignition_failed{false}
@@ -215,7 +215,7 @@ void Data::write(GoatReg reg, void* data) {
             event.calibrated = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_SEPERATED:
-            event.seperated = *reinterpret_cast<bool*>(data);
+            event.separated = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_CHUTE_OPENED:
             event.chute_opened = *reinterpret_cast<bool*>(data);

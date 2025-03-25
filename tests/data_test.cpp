@@ -35,6 +35,15 @@ bool areEqualbmi08_sensor_data_f(const bmi08_sensor_data_f& s1, const bmi08_sens
     );
 }
 
+bool areEqualValves(const Valves& s1, const Valves& s2) {
+    return (
+        s1.valve1 == s2.valve1 &&
+        s1.valve2 == s2.valve2 &&
+        s1.vent3 == s2.vent3 &&
+        s1.vent4 == s2.vent4
+    );
+}
+
 // return true iff the content of the two bmp3_data structs is equal
 bool areEqualbmp3_data(const bmp3_data& s1, const bmp3_data& s2) {
     return (
@@ -299,4 +308,66 @@ int main(int argc, char** argv) {
     goatData.write(tCccReg, &testtCcc);
     dump = goatData.get();
     assert(dump.prop.chamber_temperature == testtCcc);
+
+    /*Tests Navigation data*/
+
+    // TODO
+
+    /*Tests Event, Valves and State*/
+
+    // Test EVENT_ARMED
+    Data::GoatReg eventArmedReg = Data::GoatReg::EVENT_ARMED;
+    bool testEventArmed = true;
+    goatData.write(eventArmedReg, &testEventArmed);
+    dump = goatData.get();
+    assert(dump.event.dpr_ok == testEventArmed);
+
+    // Test EVENT_IGNITED
+    Data::GoatReg eventIgnitedReg = Data::GoatReg::EVENT_IGNITED;
+    bool testEventIgnited = true;
+    goatData.write(eventIgnitedReg, &testEventIgnited);
+    dump = goatData.get();
+    assert(dump.event.ignited == testEventIgnited);
+
+    // Test EVENT_CALIBRATED
+    Data::GoatReg eventCalibratedReg = Data::GoatReg::EVENT_CALIBRATED;
+    bool testEventCalibrated = 8.0;
+    goatData.write(eventCalibratedReg, &testEventCalibrated);
+    dump = goatData.get();
+    assert(dump.event.calibrated == testEventCalibrated);
+
+    // Test EVENT_SEPERATED
+    Data::GoatReg eventSeparetedReg = Data::GoatReg::EVENT_SEPERATED;
+    bool testEventSepareted = true;
+    goatData.write(eventSeparetedReg, &testEventSepareted);
+    dump = goatData.get();
+    assert(dump.event.separated == testEventSepareted);
+
+    // Test EVENT_CHUTE_OPENED
+    Data::GoatReg chuteOpenedReg = Data::GoatReg::EVENT_CHUTE_OPENED;
+    bool testChuteOpened = true;
+    goatData.write(chuteOpenedReg, &testChuteOpened);
+    dump = goatData.get();
+    assert(dump.event.chute_opened == testChuteOpened);
+
+    // Test EVENT_CHUTE_UNREEFED
+    Data::GoatReg chuteUnreefedReg = Data::GoatReg::EVENT_CHUTE_UNREEFED;
+    bool testChuteUnreefed = true;
+    goatData.write(chuteUnreefedReg, &testChuteUnreefed);
+    dump = goatData.get();
+    assert(dump.event.chute_unreefed == testChuteUnreefed);
+
+    // Test VALVES
+    Data::GoatReg valvesReg = Data::GoatReg::VALVES;
+    Valves testValves = {true, true, false, true};
+    goatData.write(valvesReg, &testValves);
+    dump = goatData.get();
+    assert(areEqualValves(dump.valves, testValves));
+
+    // Test AV_STATE
+    Data::GoatReg avStateReg = Data::GoatReg::AV_STATE;
+    State testAvState = State::LIFTOFF;
+    goatData.write(avStateReg, &testAvState);
+    dump = goatData.get();
+    assert(dump.av_state == testAvState);
 }
