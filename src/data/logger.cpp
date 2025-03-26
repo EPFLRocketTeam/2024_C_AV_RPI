@@ -34,6 +34,5 @@ DataLogger& DataLogger::getInstance(const std::string& path, const std::string& 
 void DataLogger::eventConv(std::string event,DataDump &dump){
     uint32_t str_length = event.size();
     eventStream.write((char*)dump.av_timestamp, sizeof(dump.av_timestamp));
-    eventStream.write((char*)&str_length, sizeof(str_length));
     eventStream.write(event.c_str(), str_length*sizeof(char));
 }

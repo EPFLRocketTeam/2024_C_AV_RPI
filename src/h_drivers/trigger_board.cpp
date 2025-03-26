@@ -6,6 +6,7 @@
 #include "trigger_board.h"
 #include "i2c_interface.h"
 #include "intranet_commands.h"
+#include "logger.h"
 
 TriggerBoard::TriggerBoard() {
     try {
@@ -19,6 +20,7 @@ TriggerBoard::~TriggerBoard() {
     try {
         I2CInterface::getInstance().close(NET_ADDR_TRB);
     }catch(I2CInterfaceException& e) {
+        DataLogger::getInstance().eventConv("Error during TRB I2C deinitialization: ", Data::get_instance().av_timestamp);
         std::cout << "Error during TRB I2C deinitialization: " << e.what() << "\n";
     }
 }
