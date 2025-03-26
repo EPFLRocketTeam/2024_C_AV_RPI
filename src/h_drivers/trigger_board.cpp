@@ -12,6 +12,7 @@ TriggerBoard::TriggerBoard() {
     try {
         I2CInterface::getInstance().open(NET_ADDR_TRB);
     }catch(const I2CInterfaceException& e) {
+        DataLogger::getInstance().eventConv("Error during TRB I2C initilazation: ", Data::get_instance().get().av_timestamp);
         std::cout << "Error during TRB I2C initilazation: " << e.what() << "\n";
     }    
 }
@@ -20,7 +21,7 @@ TriggerBoard::~TriggerBoard() {
     try {
         I2CInterface::getInstance().close(NET_ADDR_TRB);
     }catch(I2CInterfaceException& e) {
-        DataLogger::getInstance().eventConv("Error during TRB I2C deinitialization: ", Data::get_instance().av_timestamp);
+        DataLogger::getInstance().eventConv("Error during TRB I2C deinitialization: ", Data::get_instance().get().av_timestamp);
         std::cout << "Error during TRB I2C deinitialization: " << e.what() << "\n";
     }
 }
@@ -32,6 +33,7 @@ void TriggerBoard::write_timestamp() {
         NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB write_timestamp error: ");
+        DataLogger::getInstance().eventConv(msg, Data::get_instance().get().av_timestamp);
         throw TriggerBoardException(msg + e.what());
     }
 }
@@ -42,6 +44,7 @@ void TriggerBoard::send_wake_up() {
         I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_WAKE_UP, (uint8_t*)&order, NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB wake_up error: ");
+        DataLogger::getInstance().eventConv(msg, Data::get_instance().get().av_timestamp);
         throw TriggerBoardException(msg + e.what());
     }
 }
@@ -51,6 +54,7 @@ bool TriggerBoard::read_is_woken_up() {
     try {
         I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_IS_WOKEN_UP, (uint8_t*)&rslt, NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
+        DataLogger::getInstance().eventConv("Error during TRB I2C read_is_woken_up: ", Data::get_instance().get().av_timestamp);
         std::string msg("TRB read_is_woken_up error: ");
         throw TriggerBoardException(msg + e.what());
     }
@@ -67,6 +71,7 @@ void TriggerBoard::send_clear_to_trigger() {
         I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd, NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB clear_to_trigger error: ");
+        DataLogger::getInstance().eventConv(msg, Data::get_instance().get().av_timestamp);
         throw TriggerBoardException(msg + e.what());
     }
 }
@@ -76,6 +81,7 @@ void TriggerBoard::write_pyros(const uint32_t pyros) {
         I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&pyros, NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB write_pyros error: ");
+        DataLogger::getInstance().eventConv(msg, Data::get_instance().get().av_timestamp);
         throw TriggerBoardException(msg + e.what());
     }
 }
@@ -86,6 +92,7 @@ bool TriggerBoard::read_has_triggered() {
         I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_HAS_TRIGGERED, (uint8_t*)&rslt, NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB read_has_triggered error: ");
+        DataLogger::getInstance().eventConv(msg, Data::get_instance().get().av_timestamp);
         throw TriggerBoardException(msg + e.what());
     }
 
@@ -242,6 +249,7 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         if (!pyro_main_fail) {
             if (trigger_ms < 400) {
                 uint32_t order(NET_CMD_ON);
+                DataLogger::getInstance().eventConv("Main pyro triggered: ", dump.av_timestamp);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {
@@ -261,6 +269,7 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         else if (!pyro_spare1_fail) {
             if (trigger_ms < 400) {
                 uint32_t order(NET_CMD_ON << 8);
+                DataLogger::getInstance().eventConv("Spare1 pyro triggered: ", dump.av_timestamp);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {
@@ -280,6 +289,7 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         else {
             if (trigger_ms < 400) {
                 uint32_t order(NET_CMD_ON << 16);
+                DataLogger::getInstance().eventConv("Spare2 pyro triggered: ", dump.av_timestamp);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {

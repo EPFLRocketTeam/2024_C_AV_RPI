@@ -36,7 +36,7 @@ public:
     
     ~DataLogger ();
     void conv (DataDump &dump);
-    void eventConv(std::string event,DataDump &dump);
+    void eventConv(std::string event,uint32_t ts);
 };
 
 #endif
