@@ -6,6 +6,7 @@
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "adxl375.h"
+#include "rotation_utils.h"
 
 enum class State
 {
@@ -121,15 +122,21 @@ struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
     //referentiel earth
+    Vector3 position_kalman;
     Vector3   speed;
     //ref of accel TBD !!!!
     Vector3   accel;
-    Vector3   attitude;
+    Vector3   attitude; // Quaternion vector q = {w, x, y, z} -> {x,y,z}
     double    course;
     double    altitude;
     bmp3_data baro;
 
     NavigationData();
+};
+
+struct Batteries {
+    float lpb_voltage;
+    float hpb_voltage;
 };
 
 struct Event {
@@ -162,11 +169,14 @@ struct DataDump {
     PropSensors prop;
     Valves valves;
     NavigationData nav;
+    Batteries bat;
     Event event;
 
     // TODO: move to PR_board.check_policy
     bool depressurised() const;
 };
+
+
 
 /**
  * @brief GOAT - Global Objects Atomic Table
@@ -220,6 +230,8 @@ public:
         NAV_GNSS_POS_LNG,
         NAV_GNSS_POS_ALT,
         NAV_GNSS_COURSE,
+      
+        NAV_KALMAN_DATA,
 
         /* Propulsion sensors */
         PR_SENSOR_P_NCO, // N2 Pressure
@@ -242,6 +254,10 @@ public:
 
         VALVES,
 
+        /* Batteries status */
+        BAT_LPB_VOLTAGE,
+        BAT_HPB_VOLTAGE,
+
         /* Events */
         EVENT_CMD_RECEIVED,
         EVENT_CALIBRATED,
@@ -252,6 +268,7 @@ public:
         EVENT_SEPERATED,
         EVENT_CHUTE_OPENED,
         EVENT_CHUTE_UNREEFED
+          
     };
 
     static inline Data& get_instance() {
@@ -290,6 +307,7 @@ private:
     PropSensors prop_sensors;
     Valves valves;
     NavigationData nav;
+    Batteries bat;
     Event event;
 };
 

@@ -37,6 +37,16 @@ set(GPS_SOURCES
 add_library(gps ${GPS_SOURCES})
 target_include_directories(gps INTERFACE ${DRIVERS_DIR})
 target_link_libraries(gps PRIVATE i2c_interface)
+
+# INA228
+set(INA228_SOURCES
+    INA228.cpp
+    INA228.h
+)
+add_library(ina228 ${INA228_SOURCES})
+target_include_directories(ina228 INTERFACE ${DRIVERS_DIR})
+target_link_libraries(ina228 PRIVATE i2c_interface)
+
 # TMP1075
 set(TMP1075_SOURCES
     TMP1075.cpp
