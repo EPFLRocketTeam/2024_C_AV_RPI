@@ -20,6 +20,7 @@ int main(void){
     AvState state;
     DataDump dump = Data::get_instance().get();
     std::cout << "Current state: " << state.stateToString(state.getCurrentState()) << std::endl;
+    //FIXME: on peut pas vrmt catch tt les init sinon on peut pas utiliser la var
     Telecom telecom;
     Sensors sens;
     telecom.begin();
