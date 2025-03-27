@@ -86,7 +86,7 @@ void Kalman::check_static(const DataDump& dump) {
         case State::LANDED:
             is_static = false;
             break;
-        case default:
+        default:
             break;    
     }
 }
