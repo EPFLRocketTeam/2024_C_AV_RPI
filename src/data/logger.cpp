@@ -6,10 +6,14 @@
 
 DataLogger::DataLogger (std::string path, std::string eventPath): path(path),eventPath(eventPath), stream(path),eventStream(eventPath) {}
 
+std::unique_ptr<DataLogger> DataLogger::instance;
+std::mutex DataLogger::instanceMutex;
+
 
 void DataLogger::conv (DataDump &dump) { 
-    char* buffer = (char*) (&dump); 
+    char* buffer = reinterpret_cast<char*>(&dump);
     stream.write(buffer, sizeof(DataDump));
+    stream.flush();  // ✅ Ensure data is written to disk
 }
 
 DataLogger::~DataLogger() {
@@ -18,8 +22,8 @@ DataLogger::~DataLogger() {
 }
 
 DataLogger& DataLogger::getInstance(const std::string& path, const std::string& eventPath) {
-    std::lock_guard<std::mutex> lock(instanceMutex);
-    if (!instance) {
+    std::lock_guard<std::mutex> lock(instanceMutex);  
+     if (!instance) {
         instance = std::make_unique<DataLogger>(path,eventPath);
     }
     return *instance;
@@ -29,6 +33,6 @@ DataLogger& DataLogger::getInstance(const std::string& path, const std::string& 
 
 void DataLogger::eventConv(std::string event,uint32_t ts){
     uint32_t str_length = event.size();
-    eventStream.write((char*)ts, sizeof(ts));
+    eventStream.write(reinterpret_cast<char*>(&ts), sizeof(ts));
     eventStream.write(event.c_str(), str_length*sizeof(char));
 }

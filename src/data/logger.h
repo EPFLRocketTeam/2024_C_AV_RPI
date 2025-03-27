@@ -22,9 +22,9 @@ private:
      static std::unique_ptr<DataLogger> instance;
      static std::mutex instanceMutex;
  
-    DataLogger (std::string path, std::string eventPath);
+    
 public:
-
+DataLogger (std::string path, std::string eventPath);
     // Deleted to prevent copying
     DataLogger(const DataLogger&) = delete;
     DataLogger& operator=(const DataLogger&) = delete;
