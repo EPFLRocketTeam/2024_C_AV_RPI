@@ -1,4 +1,3 @@
-
 option(ENABLE_TESTING "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable coverage" OFF)
 
@@ -7,11 +6,11 @@ set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
 set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
 set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
 set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
-
+set(KALMAN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/kalman)
 
 add_subdirectory(${I2C_INTERFACE_DIR})
 add_subdirectory(${DRIVERS_DIR})
-
+# add_subdirectory(${KALMAN_DIR})
 
 set(FIREHORN_FC_SOURCES
     ${DATA_DIR}/data.cpp
@@ -30,17 +29,23 @@ set(FIREHORN_FC_SOURCES
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
-)   
+    ${KALMAN_DIR}/kalman.cpp
+    ${KALMAN_DIR}/kalman.h
+    ${KALMAN_DIR}/rotation_utils.h
+    ${KALMAN_DIR}/rotation_utils.cpp
+)
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    /usr/include/eigen3
     ${DATA_DIR}
     ${H_DRIVERS_DIR}
     ${FLIGHT_CONTROL_DIR}
     ${I2C_INTERFACE_DIR}
     ${DRIVERS_DIR}
+    ${KALMAN_DIR}
 )
 
 target_link_libraries(flight_computer PUBLIC
@@ -53,5 +58,5 @@ target_link_libraries(flight_computer PUBLIC
     bmp3
     gps
     tmp1075
+      # Kalman should now be linked properly
 )
-

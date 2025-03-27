@@ -1,5 +1,6 @@
 #include "sensors.h"
 #include "TMP1075.h"
+#include "kalman_params.h"
 #include "data.h"
 
 Sensors::Sensors() try
@@ -11,7 +12,16 @@ Sensors::Sensors() try
     bmp2(BMP3_ADDR_I2C_SEC),
     i2cgps(),
     gps(),
-    tmp1075(TMP1075_ADDR_I2C)
+    tmp1075(TMP1075_ADDR_I2C),
+    kalman(INITIAL_COV_GYR_BIAS,
+           INITIAL_COV_ACCEL_BIAS,
+           INITIAL_COV_ORIENTATION,
+           GYRO_COV,
+           GYRO_BIAS_COV,
+           ACCEL_COV,
+           ACCEL_BIAS_COV,
+           GPS_OBS_COV,
+           ALT_OBS_COV)
 {
     update_status();
 }
@@ -48,6 +58,14 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::ERRORFLIGHT:
             break;
     }
+    // Everytime a new command is received we write to the goat
+
+    // TODO: Implement the logic for the sensors driver
+
+
+    // kalman checks if we are static for calibration
+    kalman.check_static(dump);
+    return;
 }
 
 //TODO: must return bool to written into goat.event
@@ -68,22 +86,34 @@ bool Sensors::update() {
         std::cout << e.what() << "\n";
     }
 
+    struct NavSensors nav_sensors;
+    
+    
+
     // Update raw sensors values and write them to the GOAT
     auto temp_adxl(adxl1.get_data());
+    nav_sensors.adxl = temp_adxl;
     Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &temp_adxl);
     temp_adxl = adxl2.get_data();
+    nav_sensors.adxl_aux = temp_adxl;
     Data::get_instance().write(Data::NAV_SENSOR_ADXL2_DATA, &temp_adxl);
     auto temp_bmi(bmi1.get_accel_data());
+    nav_sensors.bmi_accel = temp_bmi;
     Data::get_instance().write(Data::NAV_SENSOR_BMI1_ACCEL_DATA, &temp_bmi);
     temp_bmi = bmi1.get_gyro_data();
+    nav_sensors.bmi_gyro = temp_bmi;
     Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_DATA, &temp_bmi);
     temp_bmi = bmi2.get_accel_data();
+    nav_sensors.bmi_aux_accel = temp_bmi;
     Data::get_instance().write(Data::NAV_SENSOR_BMI2_ACCEL_DATA, &temp_bmi);
     temp_bmi = bmi2.get_gyro_data();
+    nav_sensors.bmi_aux_gyro = temp_bmi;
     Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_DATA, &temp_bmi);
     auto temp_bmp(bmp1.get_sensor_data());
+    nav_sensors.bmp = temp_bmp;
     Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &temp_bmp);
     temp_bmp = bmp2.get_sensor_data();
+    nav_sensors.bmp_aux = temp_bmp;
     Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &temp_bmp);
 
     while (i2cgps.available()) {
@@ -124,7 +154,18 @@ bool Sensors::update() {
         }
     }
 
-    // TODO: Kalmann filter
+    
+
+
+    
+
+    // Kalmann filter
+    kalman.predict(nav_sensors, Data::get_instance().get().nav);
+    kalman.update(nav_sensors, Data::get_instance().get().nav);
+
+    auto temp_nav_data(kalman.get_nav_data());
+    Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
+
 
     return true;
 }

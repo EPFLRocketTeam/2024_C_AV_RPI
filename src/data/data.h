@@ -6,6 +6,7 @@
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "adxl375.h"
+#include "rotation_utils.h"
 
 enum class State
 {
@@ -121,10 +122,11 @@ struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
     //referentiel earth
+    Vector3 position_kalman;
     Vector3   speed;
     //ref of accel TBD !!!!
     Vector3   accel;
-    Vector3   attitude;
+    Vector3   attitude; // Quaternion vector q = {w, x, y, z} -> {x,y,z}
     double    course;
     double    altitude;
     bmp3_data baro;
@@ -167,6 +169,8 @@ struct DataDump {
     // TODO: move to PR_board.check_policy
     bool depressurised() const;
 };
+
+
 
 /**
  * @brief GOAT - Global Objects Atomic Table
@@ -220,6 +224,8 @@ public:
         NAV_GNSS_POS_LNG,
         NAV_GNSS_POS_ALT,
         NAV_GNSS_COURSE,
+      
+        NAV_KALMAN_DATA,
 
         /* Propulsion sensors */
         PR_SENSOR_P_NCO, // N2 Pressure
@@ -252,6 +258,7 @@ public:
         EVENT_SEPERATED,
         EVENT_CHUTE_OPENED,
         EVENT_CHUTE_UNREEFED
+          
     };
 
     static inline Data& get_instance() {
