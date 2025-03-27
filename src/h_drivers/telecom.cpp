@@ -4,17 +4,11 @@
 #include <LoopbackStream.h>
 #include <Protocol.h>
 #include <capsule.h>
+#include <pigpio.h>
 #include "telecom.h"
 #include "data.h"
 #include "h_driver.h"
-
-#define LORA_UPLINK_CS      8
-#define LORA_UPLINK_RST     25
-#define LORA_UPLINK_DI0     5
-
-#define LORA_DOWNLINK_CS    7
-#define LORA_DOWNLINK_RST   24
-#define LORA_DOWNLINK_DI0   6
+#include "config.h"
 
 #define lora_uplink LoRa
 
@@ -36,6 +30,8 @@ Telecom::Telecom()
 void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     if (new_cmd_received) {
         new_cmd_received = false;
+
+        //TODO probably check the messages and put into flags
         switch (last_packet.order_id) {
             case CMD_ID::AV_CMD_ABORT:
                 reset_cmd();
@@ -44,8 +40,20 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
                 break;
         }
     }
-    this->send_telemetry();
-    
+
+    // Policy regarding downlink
+    switch (dump.av_state) {
+        case State::INIT:
+            // TODO: try establishing communication with GS
+            break;
+        default:
+            send_telemetry();
+            break;
+    }
+
+    // Write incoming packets to buffer
+    // TODO: see if this can be called in handle_uplink during callback instead of polling
+    update();
 }
 
 bool Telecom::begin() {
@@ -163,6 +171,8 @@ void Telecom::handle_uplink(int packet_size) {
 void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_t len) {
     switch (packet_id) {
         case CAPSULE_ID::GS_CMD:
+            gpioWrite(LED_LORA_RX, 1);
+
             memcpy(&last_packet, data_in, len);
             new_cmd_received = true;
 
@@ -173,6 +183,8 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
             std::cout << "Command received from GS!\n"
                       << "ID: " << (int)last_packet.order_id << "\n"
                       << "Value: " << (int)last_packet.order_value << "\n\n";
+
+            gpioWrite(LED_LORA_RX, 0);
             break;
     }
 }
@@ -194,6 +206,8 @@ void Telecom::handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint3
 }
 
 void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
+    gpioWrite(LED_LORA_TX, 1);
+
     uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));
     size_t length(capsule_downlink.getCodedLen(len));
 
@@ -202,4 +216,6 @@ void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
     lora_downlink.endPacket(true);
 
     delete[] coded_buffer;
+
+    gpioWrite(LED_LORA_TX, 0);
 }
