@@ -1,6 +1,7 @@
 #include "sensors.h"
 #include "TMP1075.h"
 #include "data.h"
+#include "logger.h"
 
 Sensors::Sensors() try
 :   adxl1(ADXL375_ADDR_I2C_PRIM),
@@ -16,6 +17,7 @@ Sensors::Sensors() try
     update_status();
 }
 catch(...) {
+    DataLogger::getInstance().eventConv("Sensors init error", 0);
     std::cout << "Sensors init error\n";
 }
 
