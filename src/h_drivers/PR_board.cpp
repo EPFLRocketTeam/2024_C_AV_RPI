@@ -5,26 +5,51 @@
 
 // Enumeration for the command of the PR board
 
+// FIXME: implement the valve logic later on
 PR_board::PR_board() {
-    // Initialize the board by setting all the valves to closed
-    current_valve_state = 0;
-    // TODO: should modify the goat accordingly 
-    // inline function
+    // Currently does nothing
 }
 
-void PR_board::write_valves(uint8_t valve_states) {
-    current_valve_state = valve_states;  // Store the valve state
-    // TODO: Implement hardware control logic if needed
-}
+// fixme: implement the valve logic later on 
+// PR_board::PR_board() {
+//     // Initialize all valves to closed (0 degrees)
+//     for (auto& valve_state : current_valve_states) {
+//         valve_state = static_cast<uint8_t>(ValveOpenDegree::DEG_0);
+//     }
+//     // TODO: should modify the goat accordingly 
+//     // inline function
+// }
 
-uint8_t PR_board::read_valves() const {
-    return current_valve_state;  // Return the stored valve state
-}
+// // Write a single valve's degree
+// void PR_board::write_valve(uint8_t valve_id, ValveOpenDegree degree) {
+//     // If the valve ID is invalid, print an error message and return
+//     if (valve_id >= NUM_VALVES) {
+//         std::cerr << "Invalid valve ID: " << static_cast<int>(valve_id) << "\n";
+//         return;
+//     }
+
+//     current_valve_states[valve_id] = static_cast<uint8_t>(degree) & 0x0F; // Mask to 4 bits
+
+//     // TODO: implement actual hardware control if needed
+// }
+
+// // Read a single valve's degree
+// ValveOpenDegree PR_board::read_valve(uint8_t valve_id) const {
+//     // If the valve ID is invalid, print an error message and return 0 degrees
+//     if (valve_id >= NUM_VALVES) {
+//         std::cerr << "Invalid valve ID: " << static_cast<int>(valve_id) << "\n";
+//         return ValveOpenDegree::DEG_0; // Default to 0 degrees on error
+//     }
+
+//     // Mask the 4 LSB to get the actual degree
+//     return static_cast<ValveOpenDegree>(current_valve_states[valve_id] & 0x0F);
+// }
 
 void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     switch (dump.av_state) {
         case State::INIT:
             // For the INIT state we do nothing
+
             break;
         case State::ERRORGROUND:
             handleErrorGround(dump);
@@ -38,9 +63,13 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::ERRORFLIGHT:
             handleErrorFlight(dump);
             break;
-        case State::ARMED:
+        case State::ARMED: {
+            // FIXME: this logic is only valid for the FT
+            bool dpr_ok = true;
+            Data::get_instance().write(Data::EVENT_DPR_OK, &dpr_ok);
             // For the ARMED state we do nothing
             break;
+        }
         case State::READY:
             processReadyState(dump);
             break;
