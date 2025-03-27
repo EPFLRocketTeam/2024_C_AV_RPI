@@ -54,6 +54,7 @@ Event::Event()
     ignition_failed{false}
 {}
 
+
 // const void* Data::read(GoatReg reg) {
 //     // Big switch to read at the field given as argument
 //     // Cast the void ptr to the type of data located at the given field
@@ -244,6 +245,17 @@ void Data::write(GoatReg reg, void* data) {
             break;
         case EVENT_CHUTE_UNREEFED:
             event.chute_unreefed = *reinterpret_cast<bool*>(data);
+            break;
+
+        case NAV_KALMAN_DATA:
+            const NavigationData temp = *reinterpret_cast<NavigationData*>(data);
+            // only update the data given by the kalman filter
+            nav.position_kalman = temp.position_kalman;
+            nav.speed = temp.speed;
+            nav.accel = temp.accel;
+            nav.attitude = temp.attitude;
+            nav.altitude = temp.altitude;
+            nav.baro = temp.baro;
             break;
     }
 }
