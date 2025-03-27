@@ -11,15 +11,17 @@
 #include "data.h"
 #include "intranet_commands.h"
 #include "trigger_board.h"
+#include "logger.h"
 
 void read_write_test(TriggerBoard& trb);
 void check_policy_test(TriggerBoard& trb);
 
 int main() {
+    DataLogger::getInstance().eventConv("TRB test", 0);
     std::cout << "\x1b[7m" "Avionics Trigger Board I2C Tests" "\x1b[0m\n\n";
 
     TriggerBoard trb;
-    
+    DataLogger::getInstance().eventConv("TRB init", 0);
     std::cout << "Testing R/W op. and TRB behavior\n";
     read_write_test(trb);
 
@@ -29,10 +31,11 @@ int main() {
 
 void read_write_test(TriggerBoard& trb) {
     // TRB is in SLEEP mode until we send WAKEUP
+    DataLogger::getInstance().eventConv(" - Checking TRB is in SLEEP mode...", 0);
     std::cout << " - Checking TRB is in SLEEP mode... ";
     assert(trb.read_is_woken_up() == false);
     std::cout << "\x1b[32mOK\x1b[0m\n";
-
+    DataLogger::getInstance().eventConv(" - Checking TRB triggered flag is not set ...", 0);
     std::cout << " - Checking TRB triggered flag is not set... ";
     assert(trb.read_has_triggered() == false);
     std::cout << "\x1b[32mOK\x1b[0m\n";

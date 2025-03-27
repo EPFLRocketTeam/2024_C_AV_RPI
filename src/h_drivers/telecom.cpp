@@ -30,6 +30,8 @@ Telecom::Telecom()
 void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     if (new_cmd_received) {
         new_cmd_received = false;
+
+        //TODO probably check the messages and put into flags
         switch (last_packet.order_id) {
             case CMD_ID::AV_CMD_ABORT:
                 reset_cmd();
@@ -151,6 +153,7 @@ void Telecom::update() {
 }
 
 void Telecom::reset_cmd() {
+
 }
 
 void Telecom::handle_uplink(int packet_size) {

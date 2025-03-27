@@ -35,6 +35,8 @@ set(FIREHORN_FC_SOURCES
     ${KALMAN_DIR}/rotation_utils.cpp
 )
 
+
+
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
@@ -61,3 +63,7 @@ target_link_libraries(flight_computer PUBLIC
     tmp1075
       # Kalman should now be linked properly
 )
+
+
+
+
