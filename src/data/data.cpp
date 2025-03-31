@@ -49,11 +49,11 @@ Event::Event()
 :   dpr_ok{false},
     ignited{false},
     calibrated{false},
-    separated{false},
-    chute_opened{false},
+    seperated{false},
     chute_unreefed{false},
     ignition_failed{false}
 {}
+
 
 // const void* Data::read(GoatReg reg) {
 //     // Big switch to read at the field given as argument
@@ -66,11 +66,20 @@ void Data::write(GoatReg reg, void* data) {
     // Cast the void ptr to the type of data located at the given field
     // Write the data.
     switch (reg) {
+        case AV_STATE:
+            av_state = *reinterpret_cast<State*>(data);
+            break;
+        case AV_TIMESTAMP:
+            av_timestamp = *reinterpret_cast<uint32_t*>(data);
+            break;
         case TLM_CMD_ID:
             telemetry_cmd.id = *reinterpret_cast<CMD_ID*>(data);
             break;
         case TLM_CMD_VALUE:
             telemetry_cmd.value = *reinterpret_cast<uint8_t*>(data);
+            break;
+        case AV_FC_TEMPERATURE:
+            av_fc_temp = *reinterpret_cast<float*>(data);
             break;
         case NAV_SENSOR_ADXL1_STAT:
             sensors_status.adxl_status = *reinterpret_cast<uint8_t*>(data);
@@ -171,6 +180,9 @@ void Data::write(GoatReg reg, void* data) {
         case PR_SENSOR_T_CCC:
             prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
             break;
+        case VALVES:
+            valves = *reinterpret_cast<Valves*>(data);
+            break;
         case NAV_GNSS_TIME_YEAR:
             nav.time.year = *reinterpret_cast<unsigned*>(data);
             break;
@@ -204,44 +216,66 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_GNSS_COURSE:
             nav.course = *reinterpret_cast<double*>(data);
             break;
-
-        case EVENT_ARMED:
-            event.dpr_ok = *reinterpret_cast<bool*>(data);
-            break;
-        case EVENT_IGNITED:
-            event.ignited = *reinterpret_cast<bool*>(data);
+        case EVENT_CMD_RECEIVED:
+            event.command_updated = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_CALIBRATED:
             event.calibrated = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_SEPERATED:
-            event.separated = *reinterpret_cast<bool*>(data);
+        case EVENT_DPR_OK:
+            event.dpr_ok = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_CHUTE_OPENED:
-            event.chute_opened = *reinterpret_cast<bool*>(data);
+        case EVENT_PRB_OK:
+            event.prb_ok = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_TRB_OK:
+            event.trb_ok = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_IGNITED:
+            event.ignited = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_SEPERATED:
+            event.seperated = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_CHUTE_UNREEFED:
             event.chute_unreefed = *reinterpret_cast<bool*>(data);
             break;
-        case VALVES:
-            valves = *reinterpret_cast<Valves*>(data);
-            break;
-            case AV_STATE:
-            av_state = *reinterpret_cast<State*>(data);
+
+        case NAV_KALMAN_DATA:
+            const NavigationData temp = *reinterpret_cast<NavigationData*>(data);
+            // only update the data given by the kalman filter
+            nav.position_kalman = temp.position_kalman;
+            nav.speed = temp.speed;
+            nav.accel = temp.accel;
+            nav.attitude = temp.attitude;
+            nav.altitude = temp.altitude;
+            nav.baro = temp.baro;
             break;
     }
 }
+
 DataDump Data::get() const {
-    return {telemetry_cmd, sensors_status, nav_sensors, prop_sensors, nav,event,valves,av_state};
+    return {
+        av_state,
+        av_timestamp,
+        telemetry_cmd,
+        av_fc_temp,
+        sensors_status, 
+        nav_sensors, 
+        prop_sensors, 
+        valves,
+        nav,
+        event
+    };
 }
 
 bool DataDump::depressurised() const {
-    return this->prop.N2_pressure < N2_PRESSURE_ZERO
-        && this->prop.fuel_pressure < FUEL_PRESSURE_ZERO
-        && this->prop.LOX_pressure < LOX_PRESSURE_ZERO
-        && this->prop.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && this->prop.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && this->prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
+    return prop.N2_pressure < N2_PRESSURE_ZERO
+        && prop.fuel_pressure < FUEL_PRESSURE_ZERO
+        && prop.LOX_pressure < LOX_PRESSURE_ZERO
+        && prop.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
+        && prop.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
+        && prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
 }
 
 bool Valves::ValvesForIgnition() const {
