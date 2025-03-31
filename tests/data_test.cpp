@@ -52,6 +52,47 @@ bool areEqualbmp3_data(const bmp3_data& s1, const bmp3_data& s2) {
     );
 }
 
+bool areEqualVector3(const Vector3& s1, const Vector3& s2) {
+    return (
+        s1.x == s2.x &&
+        s1.y == s2.y &&
+        s1.z == s1.z
+    );
+}
+
+bool areEqualGPSCoord(const GPSCoord& s1, const GPSCoord& s2) {
+    return (
+        s1.alt == s2.alt &&
+        s1.lat == s2.lat &&
+        s1.lng == s2.lng
+    );
+}
+
+bool areEqualGPSTime(const GPSTime& s1, const GPSTime& s2) {
+    return (
+        s1.year == s2.year &&
+        s1.month == s2.month &&
+        s1.day == s2.day &&
+        s1.hour == s2.hour &&
+        s1.minute == s2.minute &&
+        s1.second == s2.second &&
+        s1.centisecond == s2.centisecond
+    );
+}
+
+void assertNavData(const NavigationData& s1, const NavigationData& s2) {
+    assert(areEqualGPSTime(s1.time, s2.time));
+    assert(areEqualGPSCoord(s1.position, s2.position));
+    assert(areEqualVector3(s1.position_kalman,s2.position_kalman));
+    assert(areEqualVector3(s1.speed, s2.speed));
+    assert(areEqualVector3(s1.accel, s2.accel));
+    assert(areEqualVector3(s1.attitude, s2.attitude));
+    assert(s1.course == s2.course);
+    assert(s1.altitude == s2.altitude);
+    assert(areEqualbmp3_data(s1.baro, s2.baro));
+    return;
+}
+
 int main(int argc, char** argv) {
     // Initialize the Goat
     Data& goatData = Data::get_instance();
@@ -309,10 +350,6 @@ int main(int argc, char** argv) {
     dump = goatData.get();
     assert(dump.prop.chamber_temperature == testtCcc);
 
-    /*Tests Navigation data*/
-
-    // TODO
-
     /*Tests Event, Valves and State*/
 
     // Test EVENT_ARMED
@@ -374,4 +411,30 @@ int main(int argc, char** argv) {
     goatData.write(avStateReg, &testAvState);
     dump = goatData.get();
     assert(dump.av_state == testAvState);
+
+    /* Test NAV_KALMAN_DATA (NavigationData) */
+
+    Data::GoatReg navKalmanReg = Data::GoatReg::NAV_KALMAN_DATA;
+    GPSTime time = {1, 2, 3, 4, 5, 6, 7};
+    GPSCoord coord = {2.0, 3.0, 4.0};
+    Vector3 pos = {1.0, 2.0, 3.0};
+    Vector3 speed = {2.0, 3.0, 1.0};
+    Vector3 accel = {3.0, 1.0, 2.0};
+    Vector3 attitude = {1.1, 2.0, 3.0};
+    double course = 3.2;
+    double altitude = 2.3;
+    bmp3_data baro = {2.3, 3.2};
+    NavigationData testNavData;
+    testNavData.time = time;
+    testNavData.position = coord;
+    testNavData.position_kalman = pos;
+    testNavData.speed = speed;
+    testNavData.accel = accel;
+    testNavData.attitude = attitude;
+    testNavData.course = course;
+    testNavData.altitude = altitude;
+    testNavData.baro = baro;
+    goatData.write(navKalmanReg, &testNavData);
+    dump = goatData.get();
+    assertNavData(dump.nav, testNavData);
 }
