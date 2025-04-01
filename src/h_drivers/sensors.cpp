@@ -26,9 +26,7 @@ Sensors::Sensors() try
            ACCEL_COV,
            ACCEL_BIAS_COV,
            GPS_OBS_COV,
-           ALT_OBS_COV),
-    ina_lpb(INA228_ADDRESS_LPB, INA228_LPB_SHUNT, INA228_LPB_MAX_CUR),
-    ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR)
+           ALT_OBS_COV)
 {
     update_status();
 }
