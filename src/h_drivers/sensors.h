@@ -16,16 +16,18 @@
 #include "I2CGPS.h"
 #include "TinyGPS++.h"
 #include "adxl375.h"
-#include "data.h"
 #include "h_driver.h"
 #include "tsdb.h"
-class Sensors : public HDriver
-{
+#include "kalman.h"
+#include "INA228.h"
+#include "TMP1075.h"
+
+class Sensors : public HDriver {
 public:
     Sensors();
     ~Sensors();
 
-    void check_policy(Data::GoatReg reg, const DataDump &dump) override;
+    void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
     void calibrate();
     bool update();
@@ -38,6 +40,8 @@ private:
     Bmp390 bmp1, bmp2;
     I2CGPS i2cgps;
     TinyGPSPlus gps;
+    INA228 ina_lpb, ina_hpb;
+    TMP1075 tmp1075;
 
     TDB *tdb = nullptr;
     bool simulation_mode = false;
@@ -48,6 +52,8 @@ private:
     // SensStatus status;
     // SensRaw raw_data;
     // SensFiltered clean_data;
+
+    Kalman kalman;
 
     // Read sensors status
     void update_status();
