@@ -16,6 +16,8 @@ Sensors::Sensors() try
     i2cgps(),
     gps(),
     tmp1075(TMP1075_ADDR_I2C),
+    ina_lpb(INA228_ADDRESS_LPB, INA228_LPB_SHUNT, INA228_LPB_MAX_CUR),
+    ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR),
     kalman(INITIAL_COV_GYR_BIAS,
            INITIAL_COV_ACCEL_BIAS,
            INITIAL_COV_ORIENTATION,
