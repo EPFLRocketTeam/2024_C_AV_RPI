@@ -11,17 +11,17 @@ Sensors::Sensors()
       i2cgps(),
       gps()
 {
-    tdb = TDB::from_csv("../tests/sim.csv");
+    tdb = TDB::from_csv("../tests/NavigationData.csv");
     if (tdb != nullptr)
     {
         simulation_mode = true;
         tdb->init();
 
-        adxl1_x = tdb->get_time_series("adxl1_x");
-        adxl1_y = tdb->get_time_series("adxl1_y");
-        adxl1_z = tdb->get_time_series("adxl1_z");
-        bmp1_p = tdb->get_time_series("bmp1_p");
-        bmp1_t = tdb->get_time_series("bmp1_t");
+        adxl1_x = tdb->get_time_series("Vx");
+        adxl1_y = tdb->get_time_series("Vy");
+        adxl1_z = tdb->get_time_series("Vz");
+        bmp1_p = tdb->get_time_series("BaroPressure");
+        bmp1_t = tdb->get_time_series("Altitude");
 
         std::cout << "start\n";
     }
