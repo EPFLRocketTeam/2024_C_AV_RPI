@@ -28,41 +28,41 @@ try
              GPS_OBS_COV,
              ALT_OBS_COV)
 {
-    tdb = TDB::from_csv("../tests/NavigationData.csv");
+    tdb = TDB::from_csv("../tests/NavigationSensors.csv");
     if (tdb != nullptr)
     {
         simulation_mode = true;
         tdb->init();
 
-        adxl1_x = tdb->get_time_series("???");
-        adxl1_y = tdb->get_time_series("???");
-        adxl1_z = tdb->get_time_series("???");
+        adxl1_x = tdb->get_time_series("adxl1_x");
+        adxl1_y = tdb->get_time_series("adxl1_y");
+        adxl1_z = tdb->get_time_series("adxl1_z");
 
-        adxl2_x = tdb->get_time_series("???");
-        adxl2_y = tdb->get_time_series("???");
-        adxl2_z = tdb->get_time_series("???");
+        adxl2_x = tdb->get_time_series("adxl2_x");
+        adxl2_y = tdb->get_time_series("adxl2_y");
+        adxl2_z = tdb->get_time_series("adxl2_z");
 
-        bmi1_acc_x = tdb->get_time_series("???");
-        bmi1_acc_y = tdb->get_time_series("???");
-        bmi1_acc_z = tdb->get_time_series("???");
+        bmi1_acc_x = tdb->get_time_series("bmi1_acc_x");
+        bmi1_acc_y = tdb->get_time_series("bmi1_acc_y");
+        bmi1_acc_z = tdb->get_time_series("bmi1_acc_z");
 
-        bmi1_gyro_x = tdb->get_time_series("???");
-        bmi1_gyro_y = tdb->get_time_series("???");
-        bmi1_gyro_z = tdb->get_time_series("???");
+        bmi1_gyro_x = tdb->get_time_series("bmi1_gyro_x");
+        bmi1_gyro_y = tdb->get_time_series("bmi1_gyro_y");
+        bmi1_gyro_z = tdb->get_time_series("bmi1_gyro_z");
 
-        bmi2_acc_x = tdb->get_time_series("???");
-        bmi2_acc_y = tdb->get_time_series("???");
-        bmi2_acc_z = tdb->get_time_series("???");
+        bmi2_acc_x = tdb->get_time_series("bmi2_acc_x");
+        bmi2_acc_y = tdb->get_time_series("bmi2_acc_y");
+        bmi2_acc_z = tdb->get_time_series("bmi2_acc_z");
 
-        bmi2_gyro_x = tdb->get_time_series("???");
-        bmi2_gyro_y = tdb->get_time_series("???");
-        bmi2_gyro_z = tdb->get_time_series("???");
+        bmi2_gyro_x = tdb->get_time_series("bmi2_gyro_x");
+        bmi2_gyro_y = tdb->get_time_series("bmi2_gyro_y");
+        bmi2_gyro_z = tdb->get_time_series("bmi2_gyro_z");
 
-        bmp1_p = tdb->get_time_series("???");
-        bmp1_t = tdb->get_time_series("???");
+        bmp1_p = tdb->get_time_series("bmp1_p");
+        bmp1_t = tdb->get_time_series("bmp1_t");
 
-        bmp2_p = tdb->get_time_series("???");
-        bmp2_t = tdb->get_time_series("???");
+        bmp2_p = tdb->get_time_series("bmp2_p");
+        bmp2_t = tdb->get_time_series("bmp2_t");
 
         std::cout << "start\n";
     }
