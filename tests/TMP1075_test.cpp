@@ -27,6 +27,8 @@ int main()
             int16_t rawTemp = sensor.getTemperatureRaw();
             float tempC = sensor.getTemperatureCelsius();
 
+
+            
             log << "Iteration " << i << ":" << std::endl;
             log << "  Raw Temperature: " << rawTemp << std::endl;
             log << "  Temperature: " << tempC << " °C" << std::endl;
