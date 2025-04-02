@@ -34,5 +34,6 @@ DataLogger& DataLogger::getInstance(const std::string& path, const std::string& 
 void DataLogger::eventConv(std::string event,uint32_t ts){
     uint32_t str_length = event.size();
     eventStream.write(reinterpret_cast<char*>(&ts), sizeof(ts));
+    eventStream.write(reinterpret_cast<char*>(&str_length), sizeof(uint32_t));
     eventStream.write(event.c_str(), str_length*sizeof(char));
 }
