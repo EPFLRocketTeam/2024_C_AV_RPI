@@ -1,42 +1,45 @@
 /**
-* Copyright (c) 2022 Bosch Sensortec GmbH. All rights reserved.
-*
-* BSD-3-Clause
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* 1. Redistributions of source code must retain the above copyright
-*    notice, this list of conditions and the following disclaimer.
-*
-* 2. Redistributions in binary form must reproduce the above copyright
-*    notice, this list of conditions and the following disclaimer in the
-*    documentation and/or other materials provided with the distribution.
-*
-* 3. Neither the name of the copyright holder nor the names of its
-*    contributors may be used to endorse or promote products derived from
-*    this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-* STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-* IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*
-* @file       bmp3.c
-* @date       2022-04-01
-* @version    v2.0.6
-*
-*/
+ * Copyright (c) 2022 Bosch Sensortec GmbH. All rights reserved.
+ *
+ * BSD-3-Clause
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @file       bmp3.c
+ * @date       2022-04-01
+ * @version    v2.0.6
+ *
+ */
 #include <stdio.h>
 #include <stdint.h>
+
+#include <stdlib.h>
+#include <math.h>
 
 /*! @file bmp3.c
  * @brief Sensor driver for BMP3 sensor */
@@ -791,6 +794,8 @@ int8_t bmp3_init(struct bmp3_dev *dev)
     return rslt;
 }
 
+
+
 /*!
  * @brief This API reads the data from the given register address of the sensor.
  */
@@ -1098,7 +1103,7 @@ int8_t bmp3_set_fifo_watermark(const struct bmp3_fifo_data *fifo,
 {
     int8_t rslt;
     uint8_t reg_data[2];
-    uint8_t reg_addr[2] = { BMP3_REG_FIFO_WM, BMP3_REG_FIFO_WM + 1 };
+    uint8_t reg_addr[2] = {BMP3_REG_FIFO_WM, BMP3_REG_FIFO_WM + 1};
     uint16_t watermark_len;
 
     if ((fifo != NULL) && (fifo_settings != NULL))
@@ -1156,7 +1161,7 @@ int8_t bmp3_extract_fifo_data(struct bmp3_data *data, struct bmp3_fifo_data *fif
     uint8_t header;
     uint8_t parsed_frames = 0;
     uint8_t t_p_frame;
-    struct bmp3_uncomp_data uncomp_data = { 0 };
+    struct bmp3_uncomp_data uncomp_data = {0};
 
     rslt = null_ptr_check(dev);
 
@@ -1434,8 +1439,8 @@ int8_t bmp3_get_sensor_data(uint8_t sensor_comp, struct bmp3_data *comp_data, st
 
     /* Array to store the pressure and temperature data read from
      * the sensor */
-    uint8_t reg_data[BMP3_LEN_P_T_DATA] = { 0 };
-    struct bmp3_uncomp_data uncomp_data = { 0 };
+    uint8_t reg_data[BMP3_LEN_P_T_DATA] = {0};
+    struct bmp3_uncomp_data uncomp_data = {0};
 
     if (comp_data != NULL)
     {
@@ -1542,43 +1547,45 @@ static uint8_t parse_fifo_data_frame(uint8_t header,
 
     switch (header)
     {
-        case BMP3_FIFO_TEMP_PRESS_FRAME:
-            unpack_temp_press_frame(byte_index, fifo->buffer, uncomp_data);
-            *parsed_frames = *parsed_frames + 1;
-            t_p_frame = BMP3_PRESS_TEMP;
-            break;
-        case BMP3_FIFO_TEMP_FRAME:
-            unpack_temp_frame(byte_index, fifo->buffer, uncomp_data);
-            *parsed_frames = *parsed_frames + 1;
-            t_p_frame = BMP3_TEMP;
-            break;
-        case BMP3_FIFO_PRESS_FRAME:
-            unpack_press_frame(byte_index, fifo->buffer, uncomp_data);
-            *parsed_frames = *parsed_frames + 1;
-            t_p_frame = BMP3_PRESS;
-            break;
-        case BMP3_FIFO_TIME_FRAME:
-            unpack_time_frame(byte_index, fifo->buffer, &fifo->sensor_time);
-            break;
-        case BMP3_FIFO_CONFIG_CHANGE:
-            fifo->config_change = 1;
-            *byte_index = *byte_index + 1;
-            break;
-        case BMP3_FIFO_ERROR_FRAME:
-            fifo->config_err = 1;
-            *byte_index = *byte_index + 1;
-            break;
-        case BMP3_FIFO_EMPTY_FRAME:
-            *byte_index = fifo->byte_count;
-            break;
-        default:
-            fifo->config_err = 1;
-            *byte_index = *byte_index + 1;
-            break;
+    case BMP3_FIFO_TEMP_PRESS_FRAME:
+        unpack_temp_press_frame(byte_index, fifo->buffer, uncomp_data);
+        *parsed_frames = *parsed_frames + 1;
+        t_p_frame = BMP3_PRESS_TEMP;
+        break;
+    case BMP3_FIFO_TEMP_FRAME:
+        unpack_temp_frame(byte_index, fifo->buffer, uncomp_data);
+        *parsed_frames = *parsed_frames + 1;
+        t_p_frame = BMP3_TEMP;
+        break;
+    case BMP3_FIFO_PRESS_FRAME:
+        unpack_press_frame(byte_index, fifo->buffer, uncomp_data);
+        *parsed_frames = *parsed_frames + 1;
+        t_p_frame = BMP3_PRESS;
+        break;
+    case BMP3_FIFO_TIME_FRAME:
+        unpack_time_frame(byte_index, fifo->buffer, &fifo->sensor_time);
+        break;
+    case BMP3_FIFO_CONFIG_CHANGE:
+        fifo->config_change = 1;
+        *byte_index = *byte_index + 1;
+        break;
+    case BMP3_FIFO_ERROR_FRAME:
+        fifo->config_err = 1;
+        *byte_index = *byte_index + 1;
+        break;
+    case BMP3_FIFO_EMPTY_FRAME:
+        *byte_index = fifo->byte_count;
+        break;
+    default:
+        fifo->config_err = 1;
+        *byte_index = *byte_index + 1;
+        break;
     }
 
     return t_p_frame;
 }
+
+
 
 /*!
  * @brief This internal API unpacks the FIFO data frame from the fifo buffer and
@@ -1792,7 +1799,7 @@ static int8_t get_calib_data(struct bmp3_dev *dev)
     uint8_t reg_addr = BMP3_REG_CALIB_DATA;
 
     /* Array to store calibration data */
-    uint8_t calib_data[BMP3_LEN_CALIB_DATA] = { 0 };
+    uint8_t calib_data[BMP3_LEN_CALIB_DATA] = {0};
 
     /* Read the calibration data from the sensor */
     rslt = bmp3_get_regs(reg_addr, calib_data, BMP3_LEN_CALIB_DATA, dev);
@@ -1859,7 +1866,7 @@ static void parse_advance_settings(const uint8_t *reg_data, struct bmp3_adv_sett
  * @brief This internal API parse the power control(power mode, pressure enable
  * and temperature enable) settings and store in the device structure.
  */
-static void  parse_pwr_ctrl_settings(const uint8_t *reg_data, struct bmp3_settings *settings)
+static void parse_pwr_ctrl_settings(const uint8_t *reg_data, struct bmp3_settings *settings)
 {
     settings->op_mode = BMP3_GET_BITS(*reg_data, BMP3_OP_MODE);
     settings->press_en = BMP3_GET_BITS_POS_0(*reg_data, BMP3_PRESS_EN);
@@ -1870,7 +1877,7 @@ static void  parse_pwr_ctrl_settings(const uint8_t *reg_data, struct bmp3_settin
  * @brief This internal API parse the over sampling, ODR and filter
  * settings and store in the device structure.
  */
-static void  parse_odr_filter_settings(const uint8_t *reg_data, struct bmp3_odr_filter_settings *settings)
+static void parse_odr_filter_settings(const uint8_t *reg_data, struct bmp3_odr_filter_settings *settings)
 {
     uint8_t index = 0;
 
@@ -1933,7 +1940,7 @@ static int8_t set_odr_filter_settings(uint32_t desired_settings, struct bmp3_set
     int8_t rslt;
 
     /* No of registers to be configured is 3*/
-    uint8_t reg_addr[3] = { 0 };
+    uint8_t reg_addr[3] = {0};
 
     /* No of register data to be read is 4 */
     uint8_t reg_data[4];
@@ -1946,7 +1953,7 @@ static int8_t set_odr_filter_settings(uint32_t desired_settings, struct bmp3_set
         if (are_settings_changed((BMP3_SEL_PRESS_OS | BMP3_SEL_TEMP_OS), desired_settings))
         {
             /* Fill the over sampling register address and
-            * register data to be written in the sensor */
+             * register data to be written in the sensor */
             fill_osr_data(desired_settings, reg_addr, reg_data, &len, settings);
         }
 
@@ -2103,8 +2110,7 @@ static int8_t validate_osr_and_odr_settings(const struct bmp3_settings *settings
     /* Sampling period corresponding to ODR in microseconds  */
     uint32_t odr[18] = {
         5000, 10000, 20000, 40000, 80000, 160000, 320000, 640000, 1280000, 2560000, 5120000, 10240000, 20480000,
-        40960000, 81920000, 163840000, 327680000, 655360000
-    };
+        40960000, 81920000, 163840000, 327680000, 655360000};
 
     if (settings->press_en)
     {
@@ -2448,7 +2454,7 @@ static int8_t compensate_temperature(double *temperature,
     /* Update the compensated temperature in calib structure since this is
      * needed for pressure calculation */
     calib_data->quantized_calib_data.t_lin = partial_data2 + (partial_data1 * partial_data1) *
-                                             calib_data->quantized_calib_data.par_t3;
+                                                                 calib_data->quantized_calib_data.par_t3;
 
     /* Returns compensated temperature */
     if (calib_data->quantized_calib_data.t_lin < BMP3_MIN_TEMP_DOUBLE)
@@ -2533,12 +2539,41 @@ static float pow_bmp3(double base, uint8_t power)
 
     while (power != 0)
     {
-        pow_output = (float) base * pow_output;
+        pow_output = (float)base * pow_output;
         power--;
     }
 
     return pow_output;
 }
+
+/*!
+ * @brief Generate Gaussian noise with given mean and standard deviation.
+    *
+    * @param mean     Mean of the Gaussian distribution.
+    * @param stddev   Standard deviation of the Gaussian distribution.
+    * 
+    * @return Generated Gaussian noise.
+ */
+static double generate_gaussian_noise(double mean, double stddev)
+{
+    double u1 = ((double)rand() + 1.0) / ((double)RAND_MAX + 1.0);
+    double u2 = ((double)rand() + 1.0) / ((double)RAND_MAX + 1.0);
+    return mean + stddev * sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
+}
+
+/*!
+ * @brief Add Gaussian noise to the original data value.
+ *
+ * @param original_value Original data value.
+ * @param stddev         Standard deviation of the noise.
+ *
+ * @return Data value with added noise.
+ */
+static double add_noise_to_data(double original_value, double stddev)
+{
+    return original_value + generate_gaussian_noise(0.0, stddev);
+}
+
 #else
 
 /*!
@@ -2966,8 +3001,10 @@ static int8_t get_err_status(struct bmp3_status *status, struct bmp3_dev *dev)
  * @brief Function to initialise the I2C interface, with functions from
  * i2c_common.h
  */
-int8_t bmp3_i2c_init(struct bmp3_dev *bmp3, uint8_t addr) {
-    if (i2c_open(addr) != 0) {
+int8_t bmp3_i2c_init(struct bmp3_dev *bmp3, uint8_t addr)
+{
+    if (i2c_open(addr) != 0)
+    {
         return BMP3_E_COMM_FAIL;
     }
 
@@ -2975,12 +3012,13 @@ int8_t bmp3_i2c_init(struct bmp3_dev *bmp3, uint8_t addr) {
     bmp3->intf = BMP3_I2C_INTF;
     bmp3->read = i2c_read;
     bmp3->write = i2c_write;
-    
+
     /* Configure delay in microseconds */
     bmp3->delay_us = i2c_delay_us;
 
     /* Assign device address to interface pointer */
-    if (get_intf_ptr(addr, &(bmp3->intf_ptr)) != 0) {
+    if (get_intf_ptr(addr, &(bmp3->intf_ptr)) != 0)
+    {
         return BMP3_E_COMM_FAIL;
     }
 
@@ -2991,18 +3029,20 @@ int8_t bmp3_i2c_init(struct bmp3_dev *bmp3, uint8_t addr) {
  * @brief Function to deinitialise the I2C interface, with functions from
  * i2c_common.h
  */
-int8_t bmp3_i2c_deinit(uint8_t addr) {
-    if(i2c_close(addr) != 0) {
+int8_t bmp3_i2c_deinit(uint8_t addr)
+{
+    if (i2c_close(addr) != 0)
+    {
         return BMP3_E_COMM_FAIL;
     }
 
     return BMP3_OK;
 }
 
-
 // Bmp390 class functions
 
-Bmp390::Bmp390(uint8_t addr, uint16_t settings_sel) : addr(addr), settings_sel(settings_sel) {
+Bmp390::Bmp390(uint8_t addr, uint16_t settings_sel) : addr(addr), settings_sel(settings_sel)
+{
     settings.int_settings.drdy_en = BMP3_ENABLE;
     settings.press_en = BMP3_ENABLE;
     settings.temp_en = BMP3_ENABLE;
@@ -3012,49 +3052,58 @@ Bmp390::Bmp390(uint8_t addr, uint16_t settings_sel) : addr(addr), settings_sel(s
     settings.op_mode = BMP3_MODE_NORMAL;
 
     int8_t rslt = bmp3_i2c_init(&dev, addr);
-    if (rslt != 0) {
+    if (rslt != 0)
+    {
         throw Bmp390Exception(rslt);
     }
 
     rslt = bmp3_init(&dev);
-    if (rslt != 0) {
+    if (rslt != 0)
+    {
         throw Bmp390Exception(rslt);
     }
 
     rslt = bmp3_set_sensor_settings(settings_sel, &settings, &dev);
-    if (rslt != 0) {
+    if (rslt != 0)
+    {
         throw Bmp390Exception(rslt);
     }
 
     rslt = bmp3_set_op_mode(&settings, &dev);
-    if (rslt != 0) {
+    if (rslt != 0)
+    {
         throw Bmp390Exception(rslt);
     }
 }
 
-Bmp390::~Bmp390() {
+Bmp390::~Bmp390()
+{
     bmp3_i2c_deinit(addr);
 }
 
-bmp3_status Bmp390::get_status() {
+bmp3_status Bmp390::get_status()
+{
     int8_t rslt = bmp3_get_status(&status, &dev);
-    if (rslt != 0) {
+    if (rslt != 0)
+    {
         throw Bmp390Exception(rslt);
     }
     return status;
 }
 
-bmp3_data Bmp390::get_sensor_data(uint8_t sensor_comp) {
+bmp3_data Bmp390::get_sensor_data(uint8_t sensor_comp)
+{
     int8_t rslt = bmp3_get_sensor_data(sensor_comp, &data, &dev);
-    if (rslt != 0) {
+    if (rslt != 0)
+    {
         throw Bmp390Exception(rslt);
     }
 
     // Read status register again to clear data ready interrupt status
     rslt = bmp3_get_status(&status, &dev);
-    if (rslt != 0) {
+    if (rslt != 0)
+    {
         throw Bmp390Exception(rslt);
     }
     return data;
 }
-

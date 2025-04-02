@@ -42,6 +42,9 @@
 
 #ifndef _BMP3_H
 #define _BMP3_H
+#define TEMP_NOISE_STDDEV    0.05 
+#define PRESSURE_NOISE_STDDEV 0.1 
+
 
 /* Header includes */
 #include "bmp3_defs.h"
