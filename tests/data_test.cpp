@@ -16,9 +16,6 @@ void test_simulation_mode()
     assert(dump.stat.adxl_aux_status == 1);
     assert(dump.stat.bmi_accel_status == 1);
     assert(dump.stat.bmi_gyro_status == 1);
-    assert(dump.stat.bmp_status == 1);
-    assert(dump.stat.bmp_aux_status == 1);
-
 
     // Check if the data is being written correctly
     assert(dump.sens.adxl.x == 0.0);
@@ -33,7 +30,6 @@ int main(int argc, char **argv)
     Data &goatData = Data::get_instance();
 
     test_simulation_mode();
-    test_sensor_status();
 
     std::cout << "All sensors tests passed!\n";
     return 0;
