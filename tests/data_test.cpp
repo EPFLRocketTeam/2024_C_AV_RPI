@@ -12,10 +12,35 @@ void test_simulation_mode()
     assert(update_result == true);
     
     DataDump dump = Data::get_instance().get();
-    assert(Data::get_instance().is_written(Data::NAV_SENSOR_ADXL1_DATA));
-    assert(Data::get_instance().is_written(Data::NAV_SENSOR_BMI1_ACCEL_DATA));
-    assert(Data::get_instance().is_written(Data::NAV_SENSOR_BMP1_DATA));
-    
+    assert(dump.stat.adxl_status == 1);
+    assert(dump.stat.adxl_aux_status == 1);
+    assert(dump.stat.bmi_accel_status == 1);
+    assert(dump.stat.bmi_gyro_status == 1);
+    assert(dump.stat.bmp_status == 1);
+    assert(dump.stat.bmp_aux_status == 1);
+    assert(dump.stat.adxl1_x == 0.0);
+    assert(dump.stat.adxl1_y == 0.0);
+    assert(dump.stat.adxl1_z == 0.0);
+    assert(dump.stat.adxl2_x == 0.0);
+    assert(dump.stat.adxl2_y == 0.0);
+    assert(dump.stat.adxl2_z == 0.0);
+    assert(dump.stat.bmi1_accel_x == 0.0);
+    assert(dump.stat.bmi1_accel_y == 0.0);
+    assert(dump.stat.bmi1_accel_z == 0.0);
+    assert(dump.stat.bmi1_gyro_x == 0.0);
+    assert(dump.stat.bmi1_gyro_y == 0.0);
+    assert(dump.stat.bmi1_gyro_z == 0.0);
+    assert(dump.stat.bmi2_accel_x == 0.0);
+    assert(dump.stat.bmi2_accel_y == 0.0);
+    assert(dump.stat.bmi2_accel_z == 0.0);
+    assert(dump.stat.bmi2_gyro_x == 0.0);
+    assert(dump.stat.bmi2_gyro_y == 0.0);
+    assert(dump.stat.bmi2_gyro_z == 0.0);
+    assert(dump.stat.bmp1_pressure == 0.0);
+    assert(dump.stat.bmp1_temperature == 0.0);
+    assert(dump.stat.bmp2_pressure == 0.0);
+    assert(dump.stat.bmp2_temperature == 0.0);
+
     std::cout << "Simulation mode test passed!\n";
 }
 
