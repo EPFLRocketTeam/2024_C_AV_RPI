@@ -22,12 +22,13 @@
 #include "INA228.h"
 #include "TMP1075.h"
 
-class Sensors : public HDriver {
+class Sensors : public HDriver
+{
 public:
     Sensors();
     ~Sensors();
 
-    void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
+    void check_policy(const DataDump &dump, const uint32_t delta_ms) override;
 
     void calibrate();
     bool update();
@@ -47,8 +48,15 @@ private:
     bool simulation_mode = false;
 
     std::optional<TimeSeries> adxl1_x, adxl1_y, adxl1_z;
+    std::optional<TimeSeries> adxl2_x, adxl2_y, adxl2_z;
+
     std::optional<TimeSeries> bmp1_p, bmp1_t;
-    
+    std::optional<TimeSeries> bmi1_acc_x, bmi1_acc_y, bmi1_acc_z;
+    std::optional<TimeSeries> bmi1_gyro_x, bmi1_gyro_y, bmi1_gyro_z;
+    std::optional<TimeSeries> bmi2_acc_x, bmi2_acc_y, bmi2_acc_z;
+    std::optional<TimeSeries> bmi2_gyro_x, bmi2_gyro_y, bmi2_gyro_z;
+    std::optional<TimeSeries> bmp2_p, bmp2_t;
+
     // SensStatus status;
     // SensRaw raw_data;
     // SensFiltered clean_data;

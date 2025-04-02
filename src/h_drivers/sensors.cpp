@@ -5,27 +5,28 @@
 #include "config.h"
 #include "data.h"
 
-Sensors::Sensors() try
-:   adxl1(ADXL375_ADDR_I2C_PRIM),
-    adxl2(ADXL375_ADDR_I2C_SEC),
-    bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY),
-    bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY),
-    bmp1(BMP3_ADDR_I2C_PRIM),
-    bmp2(BMP3_ADDR_I2C_SEC),
-    i2cgps(),
-    gps(),
-    tmp1075(TMP1075_ADDR_I2C),
-    ina_lpb(INA228_ADDRESS_LPB, INA228_LPB_SHUNT, INA228_LPB_MAX_CUR),
-    ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR),
-    kalman(INITIAL_COV_GYR_BIAS,
-           INITIAL_COV_ACCEL_BIAS,
-           INITIAL_COV_ORIENTATION,
-           GYRO_COV,
-           GYRO_BIAS_COV,
-           ACCEL_COV,
-           ACCEL_BIAS_COV,
-           GPS_OBS_COV,
-           ALT_OBS_COV)
+Sensors::Sensors()
+try
+    : adxl1(ADXL375_ADDR_I2C_PRIM),
+      adxl2(ADXL375_ADDR_I2C_SEC),
+      bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY),
+      bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY),
+      bmp1(BMP3_ADDR_I2C_PRIM),
+      bmp2(BMP3_ADDR_I2C_SEC),
+      i2cgps(),
+      gps(),
+      tmp1075(TMP1075_ADDR_I2C),
+      ina_lpb(INA228_ADDRESS_LPB, INA228_LPB_SHUNT, INA228_LPB_MAX_CUR),
+      ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR),
+      kalman(INITIAL_COV_GYR_BIAS,
+             INITIAL_COV_ACCEL_BIAS,
+             INITIAL_COV_ORIENTATION,
+             GYRO_COV,
+             GYRO_BIAS_COV,
+             ACCEL_COV,
+             ACCEL_BIAS_COV,
+             GPS_OBS_COV,
+             ALT_OBS_COV)
 {
     tdb = TDB::from_csv("../tests/NavigationData.csv");
     if (tdb != nullptr)
@@ -33,74 +34,105 @@ Sensors::Sensors() try
         simulation_mode = true;
         tdb->init();
 
-        adxl1_x = tdb->get_time_series("Vx");
-        adxl1_y = tdb->get_time_series("Vy");
-        adxl1_z = tdb->get_time_series("Vz");
-        bmp1_p = tdb->get_time_series("BaroPressure");
-        bmp1_t = tdb->get_time_series("Altitude");
+        adxl1_x = tdb->get_time_series("???");
+        adxl1_y = tdb->get_time_series("???");
+        adxl1_z = tdb->get_time_series("???");
+
+        adxl2_x = tdb->get_time_series("???");
+        adxl2_y = tdb->get_time_series("???");
+        adxl2_z = tdb->get_time_series("???");
+
+        bmi1_acc_x = tdb->get_time_series("???");
+        bmi1_acc_y = tdb->get_time_series("???");
+        bmi1_acc_z = tdb->get_time_series("???");
+
+        bmi1_gyro_x = tdb->get_time_series("???");
+        bmi1_gyro_y = tdb->get_time_series("???");
+        bmi1_gyro_z = tdb->get_time_series("???");
+
+        bmi2_acc_x = tdb->get_time_series("???");
+        bmi2_acc_y = tdb->get_time_series("???");
+        bmi2_acc_z = tdb->get_time_series("???");
+
+        bmi2_gyro_x = tdb->get_time_series("???");
+        bmi2_gyro_y = tdb->get_time_series("???");
+        bmi2_gyro_z = tdb->get_time_series("???");
+
+        bmp1_p = tdb->get_time_series("???");
+        bmp1_t = tdb->get_time_series("???");
+
+        bmp2_p = tdb->get_time_series("???");
+        bmp2_t = tdb->get_time_series("???");
 
         std::cout << "start\n";
     }
     update_status();
 }
-catch(...) {
+catch (...)
+{
     std::cout << "Sensors init error\n";
 }
 
 Sensors::~Sensors() {}
 
-void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
-    switch (dump.av_state) {
-        case State::INIT:
-        case State::MANUAL:
-        case State::ARMED:
-            // TODO: low polling rate
-            // update();
-            break;
-        case State::CALIBRATION:
-            // TODO: calibration + low polling rate
-            // update();
-            if (!dump.event.calibrated) {
-                calibrate();
-            }
-            break;
-        case State::READY:
-        case State::THRUSTSEQUENCE:
-        case State::LIFTOFF:
-        case State::ASCENT:
-        case State::DESCENT:
-        case State::LANDED:
-            // TODO: high polling rate
-            update();
-            break;
-        case State::ERRORGROUND:
-            break;
-        case State::ERRORFLIGHT:
-            break;
+void Sensors::check_policy(const DataDump &dump, const uint32_t delta_ms)
+{
+    switch (dump.av_state)
+    {
+    case State::INIT:
+    case State::MANUAL:
+    case State::ARMED:
+        // TODO: low polling rate
+        // update();
+        break;
+    case State::CALIBRATION:
+        // TODO: calibration + low polling rate
+        // update();
+        if (!dump.event.calibrated)
+        {
+            calibrate();
+        }
+        break;
+    case State::READY:
+    case State::THRUSTSEQUENCE:
+    case State::LIFTOFF:
+    case State::ASCENT:
+    case State::DESCENT:
+    case State::LANDED:
+        // TODO: high polling rate
+        update();
+        break;
+    case State::ERRORGROUND:
+        break;
+    case State::ERRORFLIGHT:
+        break;
     }
     // Everytime a new command is received we write to the goat
 
     // TODO: Implement the logic for the sensors driver
-
 
     // kalman checks if we are static for calibration
     kalman.check_static(dump);
     return;
 }
 
-//TODO: must return bool to written into goat.event
-void Sensors::calibrate() {
+// TODO: must return bool to written into goat.event
+void Sensors::calibrate()
+{
     bool calibrated(true);
 
-    //must have counter ro return an error if too much
-    //Redo calibration
+    // must have counter ro return an error if too much
+    // Redo calibration
     adxl1.calibrate();
     adxl2.calibrate();
 
-    try {
+    try
+    {
         ina_lpb.setMaxCurrentShunt(INA228_LPB_MAX_CUR, INA228_LPB_SHUNT);
         ina_hpb.setMaxCurrentShunt(INA228_HPB_MAX_CUR, INA228_HPB_SHUNT);
-    }catch(INA228Exception& e) {
+    }
+    catch (INA228Exception &e)
+    {
         std::cout << "INA228 calibration error: " << e.what() << "\n";
         calibrated = false;
     }
@@ -117,40 +149,97 @@ bool Sensors::update()
             adxl1_x.value().get(),
             adxl1_y.value().get(),
             adxl1_z.value().get()};
+        Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &adxl1_data);
+
+        adxl375_data adxl2_data = {
+            adxl2_x.value().get(),
+            adxl2_y.value().get(),
+            adxl2_z.value().get()};
+        Data::get_instance().write(Data::NAV_SENSOR_ADXL2_DATA, &adxl2_data);
+
+        bmi08_sensor_data_f bmi1_acc_data = {
+            bmi1_acc_x.value().get(),
+            bmi1_acc_y.value().get(),
+            bmi1_acc_z.value().get()};
+        Data::get_instance().write(Data::NAV_SENSOR_BMI1_ACCEL_DATA, &bmi1_acc_data);
+
+        bmi08_sensor_data_f bmi1_gyro_data = {
+            bmi1_gyro_x.value().get(),
+            bmi1_gyro_y.value().get(),
+            bmi1_gyro_z.value().get()};
+        Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_DATA, &bmi1_gyro_data);
+
+        bmi08_sensor_data_f bmi2_acc_data = {
+            bmi2_acc_x.value().get(),
+            bmi2_acc_y.value().get(),
+            bmi2_acc_z.value().get()};
+        Data::get_instance().write(Data::NAV_SENSOR_BMI2_ACCEL_DATA, &bmi2_acc_data);
+
+        bmi08_sensor_data_f bmi2_gyro_data = {
+            bmi2_gyro_x.value().get(),
+            bmi2_gyro_y.value().get(),
+            bmi2_gyro_z.value().get()};
+        Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_DATA, &bmi2_gyro_data);
 
         bmp3_data bmp1_data = {
             bmp1_p.value().get(),
             bmp1_t.value().get()};
-
-        Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &adxl1_data);
         Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &bmp1_data);
+
+        bmp3_data bmp2_data = {
+            bmp2_p.value().get(),
+            bmp2_t.value().get()};
+        Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &bmp2_data);
+
+        NavSensors nav_sensors{};
+        nav_sensors.adxl = adxl1_data;
+        nav_sensors.adxl_aux = adxl2_data;
+        nav_sensors.bmi_accel = bmi1_acc_data;
+        nav_sensors.bmi_gyro = bmi1_gyro_data;
+        nav_sensors.bmi_aux_accel = bmi2_acc_data;
+        nav_sensors.bmi_aux_gyro = bmi2_gyro_data;
+        nav_sensors.bmp = bmp1_data;
+        nav_sensors.bmp_aux = bmp2_data;
+
+        kalman.predict(nav_sensors, Data::get_instance().get().nav);
+        kalman.update(nav_sensors, Data::get_instance().get().nav);
+
+        auto temp_nav_data = kalman.get_nav_data();
+        Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
 
         return true;
     }
-    
-    try {
+
+    try
+    {
         float lpb_voltage(ina_lpb.getBusVoltage());
         Data::get_instance().write(Data::BAT_LPB_VOLTAGE, &lpb_voltage);
-    }catch(INA228Exception& e) {
+    }
+    catch (INA228Exception &e)
+    {
         std::cout << "INA228 LPB: " << e.what() << "\n";
     }
-    try {
+    try
+    {
         float hpb_voltage(ina_hpb.getBusVoltage());
         Data::get_instance().write(Data::BAT_HPB_VOLTAGE, &hpb_voltage);
-    }catch(INA228Exception& e) {
+    }
+    catch (INA228Exception &e)
+    {
         std::cout << "INA228 HPB: " << e.what() << "\n";
     }
 
-    try {
+    try
+    {
         float fc_temperature(tmp1075.getTemperatureCelsius());
         Data::get_instance().write(Data::AV_FC_TEMPERATURE, &fc_temperature);
-    }catch(TMP1075Exception& e) {
+    }
+    catch (TMP1075Exception &e)
+    {
         std::cout << e.what() << "\n";
     }
 
     struct NavSensors nav_sensors;
-    
-    
 
     // Update raw sensors values and write them to the GOAT
     auto temp_adxl(adxl1.get_data());
@@ -225,18 +314,12 @@ bool Sensors::update()
         }
     }
 
-    
-
-
-    
-
     // Kalmann filter
     kalman.predict(nav_sensors, Data::get_instance().get().nav);
     kalman.update(nav_sensors, Data::get_instance().get().nav);
 
     auto temp_nav_data(kalman.get_nav_data());
     Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
-
 
     return true;
 }
