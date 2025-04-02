@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cassert>
 #include <unistd.h>
+#include <fstream>
 
 #include "adxl375.h"
 
@@ -22,17 +23,22 @@
 
 
 int main(void) {
+
+    std::ofstream log("~/adxl375_test.log", std::ios::app);
+
+
+
     int loop = 0;
     Adxl375 adxl1(ADXL375_ADDR_I2C_PRIM), adxl2(ADXL375_ADDR_I2C_SEC);    
     adxl375_data data;
-    std::cout << "Calibrating..." << std::endl;
+    log << "Calibrating..." << std::endl;
     adxl1.calibrate();
     adxl2.calibrate();
     usleep(100000);
     while (loop < ITERATION) {
         if (adxl1.get_status() & ADXL375_DATA_READY) {
             data = adxl1.get_data();
-            std::cout << "Secondary data[" << loop << "] x: " << data.x << ", y: "
+            log << "Secondary data[" << loop << "] x: " << data.x << ", y: "
                       << data.y << ", z: " << data.z << std::endl;
         }
 
@@ -45,7 +51,7 @@ int main(void) {
         if (adxl2.get_status() & ADXL375_DATA_READY) {
            data = adxl2.get_data();
 
-            std::cout << "Secondary data[" << loop << "] x: " << data.x << ", y: "
+            log << "Secondary data[" << loop << "] x: " << data.x << ", y: "
                       << data.y << ", z: " << data.z << std::endl;
         }
 

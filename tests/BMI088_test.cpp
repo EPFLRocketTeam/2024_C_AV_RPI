@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <cassert>
 #include "bmi08x.h"
+#include <fstream>
 
 /************************************************************************/
 /*********                     Test code                           ******/
@@ -15,13 +16,16 @@
 
 int main(void)
 {
+    std::ofstream log("~/bmi088_test.log", std::ios::app);
+    log << "Calibrating..." << std::endl;
+    log << "BMI088 test" << std::endl;
     int times_to_read = 0;
     Bmi088 bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY);
     Bmi088 bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY);
     bmi08_sensor_data_f data;
     const int ITERATION = 10;
 
-    std::cout << std::endl << "ACCEL DATA" << std::endl
+    log << std::endl << "ACCEL DATA" << std::endl
         << "Accel data in m/s^2" << std::endl
         << "Accel data range 24G for BMI088" << std::endl
         << "Sample_Count, Acc_Raw_X, Acc_Raw_Y, Acc_Raw_Z, Acc_ms2_X, Acc_ms2_Y, Acc_ms2_Z\n";
@@ -30,7 +34,7 @@ int main(void)
         if (bmi1.get_accel_status() & BMI08_ACCEL_DATA_READY_INT) {
             data = bmi1.get_accel_data();
 
-            std::cout << "PRIMARY: " << times_to_read << ", " << data.x << ", " << data.y
+            log << "PRIMARY: " << times_to_read << ", " << data.x << ", " << data.y
                       << ", " << data.z << std::endl;
         }
 
@@ -42,7 +46,7 @@ int main(void)
         if (bmi2.get_accel_status() & BMI08_ACCEL_DATA_READY_INT) {
             data = bmi2.get_accel_data();
 
-            std::cout << "SECONDARY: " << times_to_read << ", " << data.x << ", " << data.y
+            log << "SECONDARY: " << times_to_read << ", " << data.x << ", " << data.y
                       << ", " << data.z << std::endl;
         }
 
@@ -57,7 +61,7 @@ int main(void)
 
     times_to_read = 0;
 
-    std::cout << "\n\nGYRO DATA" << std::endl
+    log << "\n\nGYRO DATA" << std::endl
         << "Gyro data in degrees per second" << std::endl
         << "Gyro data range : 250 dps for BMI088" << std::endl << std::endl
         << "Sample_Count, Gyr_Raw_X, Gyr_Raw_Y, Gyr_Raw_Z, Gyr_DPS_X, Gyr_DPS_Y, Gyr_DPS_Z\n";
@@ -66,7 +70,7 @@ int main(void)
         if (bmi1.get_gyro_status() & BMI08_GYRO_DATA_READY_INT) {
             data = bmi1.get_gyro_data();
 
-            std::cout << "PRIMARY: " << times_to_read << ", " << data.x << ", " << data.y
+            log << "PRIMARY: " << times_to_read << ", " << data.x << ", " << data.y
                       << ", " << data.z << std::endl;
         }
 
@@ -78,7 +82,7 @@ int main(void)
         if (bmi2.get_gyro_status() & BMI08_GYRO_DATA_READY_INT) {
             data = bmi2.get_gyro_data();
 
-            std::cout << "SECONDARY: " << times_to_read << ", " << data.x << ", " << data.y
+            log << "SECONDARY: " << times_to_read << ", " << data.x << ", " << data.y
                       << ", " << data.z << std::endl;
         }
 

@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <cassert>
 #include "bmp3.h"
-
+#include <fstream>
 /************************************************************************/
 /*********                     Macros                              ******/
 /************************************************************************/
@@ -20,7 +20,8 @@
 /************************************************************************/
 
 int main(void)
-{
+{ 
+    std::ofstream log("~/bmp3_test.log", std::ios::app);
     int loop = 0;
     Bmp390 bmp1(BMP3_ADDR_I2C_PRIM), bmp2(BMP3_ADDR_I2C_SEC);
     bmp3_data data;
@@ -37,7 +38,7 @@ int main(void)
         if (bmp1.get_status().intr.drdy) {
             data = bmp1.get_sensor_data();
 
-            std::cout << "Data[" << loop << "] PRIMARY T: " << data.temperature
+            log << "Data[" << loop << "] PRIMARY T: " << data.temperature
                 << " deg C, P: " << data.pressure << " Pa\n";
             
             /* assertions for unit testing. Pretty arbitrary numbers */
@@ -48,7 +49,7 @@ int main(void)
         if (bmp2.get_status().intr.drdy) {
             data = bmp2.get_sensor_data();
 
-            std::cout << "Data[" << loop << "] SECONDARY T: " << data.temperature
+            log << "Data[" << loop << "] SECONDARY T: " << data.temperature
                 << " deg C, P: " << data.pressure << " Pa\n";
 
             /* assertions for unit testing. Pretty arbitrary numbers */
