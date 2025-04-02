@@ -33,6 +33,8 @@ set(FIREHORN_FC_SOURCES
     ${KALMAN_DIR}/kalman.h
     ${KALMAN_DIR}/rotation_utils.h
     ${KALMAN_DIR}/rotation_utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.h   
 )
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
