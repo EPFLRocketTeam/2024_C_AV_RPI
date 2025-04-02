@@ -2309,4 +2309,35 @@ static int8_t set_fifo_full_int(const struct bmi08_accel_int_channel_cfg *int_co
     return rslt;
 }
 
+
+/*!
+ * @brief Generate Gaussian noise with given mean and standard deviation.
+    *
+    * @param mean     Mean of the Gaussian distribution.
+    * @param stddev   Standard deviation of the Gaussian distribution.
+    * 
+    * @return Generated Gaussian noise.
+ */
+static double generate_gaussian_noise(double mean, double stddev)
+{
+    double u1 = ((double)rand() + 1.0) / ((double)RAND_MAX + 1.0);
+    double u2 = ((double)rand() + 1.0) / ((double)RAND_MAX + 1.0);
+    return mean + stddev * sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
+}
+
+/*!
+ * @brief Add Gaussian noise to a given data value.
+ *
+ * @param original_value    Original data value.
+ * @param stddev   Standard deviation of the Gaussian noise.
+ *
+ * @return Data value with added Gaussian noise.
+ */
+static int16_t add_noise_to_data(int16_t original_value, float stddev)
+{
+    return original_value + (int16_t)generate_gaussian_noise(0.0f, stddev);
+}
+
+
+
 /*! @endcond */
