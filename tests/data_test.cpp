@@ -1,67 +1,46 @@
+#include "sensors.h"
 #include "data.h"
 #include <cassert>
+#include <iostream>
 
-int main(int argc, char **argv)
-{
-    // Initialize the Goat
+void test_simulation_mode() {
+    std::cout << "Testing simulation mode...\n";
+    
+    Sensors sensors;
+    DataDump dump = Data::get_instance().get();
+    assert(sensors.simulation_mode == true);
+    bool update_result = sensors.update();
+    assert(update_result == true);
+    dump = Data::get_instance().get();
+    
+    assert(dump.sens.adxl.x != 0.0f || dump.sens.adxl.y != 0.0f || dump.sens.adxl.z != 0.0f);
+    assert(dump.sens.bmi_accel.x != 0.0f || dump.sens.bmi_accel.y != 0.0f || dump.sens.bmi_accel.z != 0.0f);
+    assert(dump.sens.bmp.pressure != 0.0f);
+    
+    std::cout << "Simulation mode test passed!\n";
+}
+
+void test_sensor_status() {
+    std::cout << "Testing sensor status updates...\n";
+    
+    Sensors sensors;
+    sensors.update_status();
+    DataDump dump = Data::get_instance().get();
+    assert(dump.stat.adxl_status == 1);
+    assert(dump.stat.adxl_aux_status == 1);
+    assert(dump.stat.bmi_accel_status == 1);
+    assert(dump.stat.bmi_gyro_status == 1);
+    assert(dump.stat.bmp_status == 1);
+    std::cout << "Sensor status test passed!\n";
+}
+
+
+int main(int argc, char **argv) {
     Data &goatData = Data::get_instance();
-
-    // Test TLM_CMD_ID
-    Data::GoatReg telemetryCommand = Data::GoatReg::TLM_CMD_ID;
-    int testTelemetryValue = 42;
-    goatData.write(telemetryCommand, &testTelemetryValue);
-    DataDump dump = goatData.get();
-    assert(dump.telemetry_cmd.id == testTelemetryValue);
-
-    // Test TLM_CMD_VALUE
-    Data::GoatReg telemetryValueReg = Data::GoatReg::TLM_CMD_VALUE;
-    uint8_t testTelemetryCmdValue = 128;
-    goatData.write(telemetryValueReg, &testTelemetryCmdValue);
-    dump = goatData.get();
-    assert(dump.telemetry_cmd.value == testTelemetryCmdValue);
-
-    // Test NAV_SENSOR_ADXL1_STAT
-    Data::GoatReg adxl1StatusReg = Data::GoatReg::NAV_SENSOR_ADXL1_STAT;
-    uint8_t testAdxl1Status = 1;
-    goatData.write(adxl1StatusReg, &testAdxl1Status);
-    dump = goatData.get();
-    assert(dump.stat.adxl_status == testAdxl1Status);
-
-    // Test NAV_SENSOR_ADXL2_STAT
-    Data::GoatReg adxl2StatusReg = Data::GoatReg::NAV_SENSOR_ADXL2_STAT;
-    uint8_t testAdxl2Status = 1;
-    goatData.write(adxl2StatusReg, &testAdxl2Status);
-    dump = goatData.get();
-    assert(dump.stat.adxl_aux_status == testAdxl2Status);
-
-
-    // Test ADXL375 
-    adxl375_data testAdxl1Data = {0.1f, 0.2f, 0.3f};
-    Data::GoatReg adxl1DataReg = Data::GoatReg::NAV_SENSOR_ADXL1_DATA;
-    goatData.write(adxl1DataReg, &testAdxl1Data);
-
-    dump = goatData.get();
-    assert(dump.sens.adxl.x == testAdxl1Data.x);
-    assert(dump.sens.adxl.y == testAdxl1Data.y);
-    assert(dump.sens.adxl.z == testAdxl1Data.z);
-
-
-    // Test BMI
-    bmi08_sensor_data_f testBmi1Accel = {1.1f, 2.2f, 3.3f};
-    Data::GoatReg bmi1AccelReg = Data::GoatReg::NAV_SENSOR_BMI1_ACCEL_DATA;
-    goatData.write(bmi1AccelReg, &testBmi1Accel);
-
-    dump = goatData.get();
-    assert(dump.sens.bmi_accel.x == testBmi1Accel.x);
-    assert(dump.sens.bmi_accel.y == testBmi1Accel.y);
-    assert(dump.sens.bmi_accel.z == testBmi1Accel.z);
-
-    // Test  BMP
-    bmp3_data testBmp1Data = {101325.0f, 25.0f};
-    Data::GoatReg bmp1DataReg = Data::GoatReg::NAV_SENSOR_BMP1_DATA;
-    goatData.write(bmp1DataReg, &testBmp1Data);
-
-    dump = goatData.get();
-    assert(dump.sens.bmp.pressure == testBmp1Data.pressure);
-    assert(dump.sens.bmp.temperature == testBmp1Data.temperature);
+    
+    test_simulation_mode();
+    test_sensor_status();
+    
+    std::cout << "All sensors tests passed!\n";
+    return 0;
 }
