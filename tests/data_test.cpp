@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     Data::GoatReg adxl1DataReg = Data::GoatReg::NAV_SENSOR_ADXL1_DATA;
     goatData.write(adxl1DataReg, &testAdxl1Data);
 
-    DataDump dump = goatData.get();
+    dump = goatData.get();
     assert(dump.sens.adxl.x == testAdxl1Data.x);
     assert(dump.sens.adxl.y == testAdxl1Data.y);
     assert(dump.sens.adxl.z == testAdxl1Data.z);
