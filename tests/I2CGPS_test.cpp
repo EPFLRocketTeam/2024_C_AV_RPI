@@ -15,7 +15,7 @@
 static void displayInfo(TinyGPSPlus& gps) {
     
     //create log file
-    std::ofstream log("~/gps_test.log", std::ios::app);
+    std::ofstream log("/home/av/logd/gps_test1.log", std::ios::app);
     log << "Calibrating..." << std::endl;
     log << "GPS test" << std::endl;
     log << std::endl << "GPS DATA" << std::endl
@@ -80,6 +80,9 @@ static void displayInfo(TinyGPSPlus& gps) {
 }
 
 int main(void) {
+    std::ofstream log("/home/av/logd/gps_test2.log", std::ios::app);
+    log << "init" << std::endl;
+    try{
     I2CGPS i2cgps;
     TinyGPSPlus gps;
     int loop = 0;
@@ -96,5 +99,13 @@ int main(void) {
         }
         loop++;
     }
+
+}
+catch(const std::exception& e)
+{
+    log << e.what() << '\n';
+    log.close();
+}
+log.close();
 }
 

@@ -16,10 +16,15 @@
 
 int main(void)
 {
-    std::ofstream log("~/bmi088_test.log", std::ios::app);
+    std::ofstream log("/home/av/logd/bmi088_test.log", std::ios::app);
     log << "Calibrating..." << std::endl;
     log << "BMI088 test" << std::endl;
     int times_to_read = 0;
+    try
+    {
+        /* code */
+    
+    
     Bmi088 bmi1(BMI08_ACCEL_I2C_ADDR_PRIMARY, BMI08_GYRO_I2C_ADDR_PRIMARY);
     Bmi088 bmi2(BMI08_ACCEL_I2C_ADDR_SECONDARY, BMI08_GYRO_I2C_ADDR_SECONDARY);
     bmi08_sensor_data_f data;
@@ -94,6 +99,12 @@ int main(void)
         times_to_read = times_to_read + 1;
         if (times_to_read < ITERATION) usleep(100000);
     }
-
+}
+catch(const std::exception& e)
+{
+    log << e.what() << '\n';
+    log.close();
+}
+log.close();
     return 0;
 }

@@ -21,8 +21,12 @@
 
 int main(void)
 { 
-    std::ofstream log("~/bmp3_test.log", std::ios::app);
+    std::ofstream log("/home/av/logd/bmp3_test.log", std::ios::app);
     int loop = 0;
+    try
+    {
+        /* code */
+    
     Bmp390 bmp1(BMP3_ADDR_I2C_PRIM), bmp2(BMP3_ADDR_I2C_SEC);
     bmp3_data data;
     // Main get data loop
@@ -60,5 +64,12 @@ int main(void)
         loop = loop + 1;
         if (loop < ITERATION) sleep(1);
     }
+}
+catch(const std::exception& e)
+{
+    log << e.what() << '\n';
+    log.close();
+}
+log.close();
     return 0;
 }

@@ -24,11 +24,22 @@
 
 int main(void) {
 
-    std::ofstream log("~/adxl375_test.log", std::ios::app);
+    std::ofstream log("/home/av/logd/adxl375_test.log", std::ios::app);
+    if(!log.is_open()){
+        log<<"fuckoff" << std::endl;
+        log.close();
+        return 1;
+        
+    }
+
 
 
 
     int loop = 0;
+    try
+    {
+        /* code */
+   
     Adxl375 adxl1(ADXL375_ADDR_I2C_PRIM), adxl2(ADXL375_ADDR_I2C_SEC);    
     adxl375_data data;
     log << "Calibrating..." << std::endl;
@@ -63,6 +74,13 @@ int main(void) {
         usleep(1000000);
         loop++;
     }
+}
+catch(const std::exception& e)
+{
+   log << e.what() << std::endl;
+   log.close();
+}
+log.close();
 
     return 0;
 }

@@ -7,12 +7,8 @@
 int main()
 {
 
-    std::ofstream log("~/tmp1075_test.log", std::ios::app);
-    log << "Calibrating..." << std::endl;
-    log << "TMP1075 test" << std::endl;
-    log << std::endl << "TMP1075 DATA" << std::endl
-        << "Temperature data in °C" << std::endl
-        << "Sample_Count, Raw_Temperature, Temperature\n";
+    std::ofstream log("/home/av/logd/tmp1075_test.log", std::ios::app);
+    log << "init test" << std::endl;
 
     try
     {
@@ -42,9 +38,10 @@ int main()
     }
     catch (TMP1075Exception &e)
     {
-        std::cerr << e.what() << std::endl;
+        log << e.what() << std::endl;
+        log.close();
         return -1;
     }
-
+log.close();
     return 0;
 }
