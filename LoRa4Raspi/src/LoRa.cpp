@@ -120,7 +120,8 @@ int LoRaClass::begin(long frequency, int SPI) {
     _spi_handle = spiOpen(_spi, _spi_frequency, 0);
     if (_spi_handle < 0) {
         fprintf (stderr, "Unable to open SPI device 0: %s\n", strerror (errno)) ;
-        exit (1) ;
+        //exit (1) ;
+        return 0;
     }
 
     // check version
