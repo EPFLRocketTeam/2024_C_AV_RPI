@@ -47,6 +47,7 @@
 #include <stddef.h>
 #include <exception>
 #include <string>
+#include <random>
 
 /*! CPP guard */
 #ifdef __cplusplus

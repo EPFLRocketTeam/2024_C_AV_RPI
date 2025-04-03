@@ -1,40 +1,40 @@
 /**
-* Copyright (c) 2023 Bosch Sensortec GmbH. All rights reserved.
-*
-* BSD-3-Clause
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* 1. Redistributions of source code must retain the above copyright
-*    notice, this list of conditions and the following disclaimer.
-*
-* 2. Redistributions in binary form must reproduce the above copyright
-*    notice, this list of conditions and the following disclaimer in the
-*    documentation and/or other materials provided with the distribution.
-*
-* 3. Neither the name of the copyright holder nor the names of its
-*    contributors may be used to endorse or promote products derived from
-*    this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-* COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-* STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-* IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*
-* @file       bmi08a.c
-* @date       2023-03-27
-* @version    v1.7.1
-*
-*/
+ * Copyright (c) 2023 Bosch Sensortec GmbH. All rights reserved.
+ *
+ * BSD-3-Clause
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @file       bmi08a.c
+ * @date       2023-03-27
+ * @version    v1.7.1
+ *
+ */
 
 /****************************************************************************/
 
@@ -708,7 +708,7 @@ int8_t bmi08a_set_meas_conf(struct bmi08_dev *dev)
 {
     int8_t rslt;
     uint8_t bw, odr;
-    uint8_t data = { 0 };
+    uint8_t data = {0};
     uint8_t is_odr_invalid = FALSE, is_bw_invalid = FALSE;
 
     /* Check for null pointer in the device structure*/
@@ -799,7 +799,7 @@ int8_t bmi08a_set_power_mode(struct bmi08_dev *dev)
 {
     int8_t rslt;
     uint8_t power_mode;
-    uint8_t data[2] = { 0 };
+    uint8_t data[2] = {0};
 
     /* Check for null pointer in the device structure*/
     rslt = null_ptr_check(dev);
@@ -877,17 +877,17 @@ int8_t bmi08a_get_data(struct bmi08_sensor_data *accel, struct bmi08_dev *dev)
             lsb = data[0];
             msb = data[1];
             msblsb = (msb << 8) | lsb;
-            accel->x = ((int16_t) msblsb); /* Data in X axis */
+            accel->x = ((int16_t)msblsb); /* Data in X axis */
 
             lsb = data[2];
             msb = data[3];
             msblsb = (msb << 8) | lsb;
-            accel->y = ((int16_t) msblsb); /* Data in Y axis */
+            accel->y = ((int16_t)msblsb); /* Data in Y axis */
 
             lsb = data[4];
             msb = data[5];
             msblsb = (msb << 8) | lsb;
-            accel->z = ((int16_t) msblsb); /* Data in Z axis */
+            accel->z = ((int16_t)msblsb); /* Data in Z axis */
         }
     }
     else
@@ -915,34 +915,34 @@ int8_t bmi08a_set_int_config(const struct bmi08_accel_int_channel_cfg *int_confi
     {
         switch (int_config->int_type)
         {
-            case BMI08_ACCEL_INT_DATA_RDY:
+        case BMI08_ACCEL_INT_DATA_RDY:
 
-                /* Data ready interrupt */
-                rslt = set_accel_data_ready_int(int_config, dev);
-                break;
-            case BMI08_ACCEL_INT_SYNC_DATA_RDY:
+            /* Data ready interrupt */
+            rslt = set_accel_data_ready_int(int_config, dev);
+            break;
+        case BMI08_ACCEL_INT_SYNC_DATA_RDY:
 
-                /* synchronized data ready interrupt */
-                rslt = set_accel_sync_data_ready_int(int_config, dev);
-                break;
-            case BMI08_ACCEL_SYNC_INPUT:
+            /* synchronized data ready interrupt */
+            rslt = set_accel_sync_data_ready_int(int_config, dev);
+            break;
+        case BMI08_ACCEL_SYNC_INPUT:
 
-                /* input for synchronization on accel */
-                rslt = set_accel_sync_input(int_config, dev);
-                break;
-            case BMI08_ACCEL_INT_FIFO_WM:
+            /* input for synchronization on accel */
+            rslt = set_accel_sync_input(int_config, dev);
+            break;
+        case BMI08_ACCEL_INT_FIFO_WM:
 
-                /* FIFO watermark interrupt */
-                rslt = set_fifo_wm_int(int_config, dev);
-                break;
-            case BMI08_ACCEL_INT_FIFO_FULL:
+            /* FIFO watermark interrupt */
+            rslt = set_fifo_wm_int(int_config, dev);
+            break;
+        case BMI08_ACCEL_INT_FIFO_FULL:
 
-                /* FIFO full interrupt */
-                rslt = set_fifo_full_int(int_config, dev);
-                break;
-            default:
-                rslt = BMI08_E_INVALID_CONFIG;
-                break;
+            /* FIFO full interrupt */
+            rslt = set_fifo_full_int(int_config, dev);
+            break;
+        default:
+            rslt = BMI08_E_INVALID_CONFIG;
+            break;
         }
     }
     else
@@ -959,7 +959,7 @@ int8_t bmi08a_set_int_config(const struct bmi08_accel_int_channel_cfg *int_confi
 int8_t bmi08a_get_sensor_temperature(struct bmi08_dev *dev, int32_t *sensor_temp)
 {
     int8_t rslt;
-    uint8_t data[2] = { 0 };
+    uint8_t data[2] = {0};
     uint16_t msb, lsb;
     uint16_t msblsb;
     int16_t temp;
@@ -977,16 +977,16 @@ int8_t bmi08a_get_sensor_temperature(struct bmi08_dev *dev, int32_t *sensor_temp
         {
             msb = (data[0] << 3); /* MSB data */
             lsb = (data[1] >> 5); /* LSB data */
-            msblsb = (uint16_t) (msb + lsb);
+            msblsb = (uint16_t)(msb + lsb);
 
             if (msblsb > 1023)
             {
                 /* Updating the msblsb */
-                temp = (int16_t) (msblsb - 2048);
+                temp = (int16_t)(msblsb - 2048);
             }
             else
             {
-                temp = (int16_t) msblsb;
+                temp = (int16_t)msblsb;
             }
 
             /* sensor temperature */
@@ -999,7 +999,6 @@ int8_t bmi08a_get_sensor_temperature(struct bmi08_dev *dev, int32_t *sensor_temp
     }
 
     return rslt;
-
 }
 
 /*!
@@ -1008,7 +1007,7 @@ int8_t bmi08a_get_sensor_temperature(struct bmi08_dev *dev, int32_t *sensor_temp
 int8_t bmi08a_get_sensor_time(struct bmi08_dev *dev, uint32_t *sensor_time)
 {
     int8_t rslt;
-    uint8_t data[3] = { 0 };
+    uint8_t data[3] = {0};
     uint32_t byte2, byte1, byte0;
 
     /* Check for null pointer in the device structure*/
@@ -1022,8 +1021,8 @@ int8_t bmi08a_get_sensor_time(struct bmi08_dev *dev, uint32_t *sensor_time)
 
         if (rslt == BMI08_OK)
         {
-            byte0 = data[0]; /* Lower byte */
-            byte1 = (data[1] << 8); /* Middle byte */
+            byte0 = data[0];         /* Lower byte */
+            byte1 = (data[1] << 8);  /* Middle byte */
             byte2 = (data[2] << 16); /* Higher byte */
 
             /* Sensor time */
@@ -1049,7 +1048,7 @@ int8_t bmi08a_set_fifo_config(const struct bmi08_accel_fifo_config *config, stru
     /* Array to store the default value of FIFO configuration
      * reserved registers
      */
-    uint8_t data_array[2] = { 0 };
+    uint8_t data_array[2] = {0};
 
     /* Check for null pointer in the device structure */
     rslt = null_ptr_check(dev);
@@ -1092,7 +1091,7 @@ int8_t bmi08a_get_fifo_config(struct bmi08_accel_fifo_config *config, struct bmi
     int8_t rslt;
 
     /* Array to store data */
-    uint8_t data[2] = { 0 };
+    uint8_t data[2] = {0};
 
     /* Check for null pointer in the device structure */
     rslt = null_ptr_check(dev);
@@ -1205,7 +1204,7 @@ int8_t bmi08a_get_fifo_length(uint16_t *fifo_length, struct bmi08_dev *dev)
     int8_t rslt;
 
     /* Array to store FIFO data length */
-    uint8_t data[BMI08_FIFO_DATA_LENGTH] = { 0 };
+    uint8_t data[BMI08_FIFO_DATA_LENGTH] = {0};
 
     /* Check for null pointer in the device structure */
     rslt = null_ptr_check(dev);
@@ -1237,7 +1236,7 @@ int8_t bmi08a_get_fifo_wm(uint16_t *wm, struct bmi08_dev *dev)
 {
     int8_t rslt;
 
-    uint8_t data[2] = { 0 };
+    uint8_t data[2] = {0};
 
     /* Check for null pointer in the device structure */
     rslt = null_ptr_check(dev);
@@ -1266,7 +1265,7 @@ int8_t bmi08a_set_fifo_wm(uint16_t wm, struct bmi08_dev *dev)
     int8_t rslt;
 
     /* Array to store data */
-    uint8_t data[2] = { 0 };
+    uint8_t data[2] = {0};
 
     /* Check for null pointer in the device structure */
     rslt = null_ptr_check(dev);
@@ -1461,26 +1460,26 @@ int8_t bmi08a_configure_data_synchronization(struct bmi08_data_sync_cfg sync_cfg
         /* Change sensor meas config */
         switch (sync_cfg.mode)
         {
-            case BMI08_ACCEL_DATA_SYNC_MODE_2000HZ:
-                dev->accel_cfg.odr = BMI08_ACCEL_ODR_1600_HZ;
-                dev->accel_cfg.bw = BMI08_ACCEL_BW_NORMAL;
-                dev->gyro_cfg.odr = BMI08_GYRO_BW_230_ODR_2000_HZ;
-                dev->gyro_cfg.bw = BMI08_GYRO_BW_230_ODR_2000_HZ;
-                break;
-            case BMI08_ACCEL_DATA_SYNC_MODE_1000HZ:
-                dev->accel_cfg.odr = BMI08_ACCEL_ODR_800_HZ;
-                dev->accel_cfg.bw = BMI08_ACCEL_BW_NORMAL;
-                dev->gyro_cfg.odr = BMI08_GYRO_BW_116_ODR_1000_HZ;
-                dev->gyro_cfg.bw = BMI08_GYRO_BW_116_ODR_1000_HZ;
-                break;
-            case BMI08_ACCEL_DATA_SYNC_MODE_400HZ:
-                dev->accel_cfg.odr = BMI08_ACCEL_ODR_400_HZ;
-                dev->accel_cfg.bw = BMI08_ACCEL_BW_NORMAL;
-                dev->gyro_cfg.odr = BMI08_GYRO_BW_47_ODR_400_HZ;
-                dev->gyro_cfg.bw = BMI08_GYRO_BW_47_ODR_400_HZ;
-                break;
-            default:
-                break;
+        case BMI08_ACCEL_DATA_SYNC_MODE_2000HZ:
+            dev->accel_cfg.odr = BMI08_ACCEL_ODR_1600_HZ;
+            dev->accel_cfg.bw = BMI08_ACCEL_BW_NORMAL;
+            dev->gyro_cfg.odr = BMI08_GYRO_BW_230_ODR_2000_HZ;
+            dev->gyro_cfg.bw = BMI08_GYRO_BW_230_ODR_2000_HZ;
+            break;
+        case BMI08_ACCEL_DATA_SYNC_MODE_1000HZ:
+            dev->accel_cfg.odr = BMI08_ACCEL_ODR_800_HZ;
+            dev->accel_cfg.bw = BMI08_ACCEL_BW_NORMAL;
+            dev->gyro_cfg.odr = BMI08_GYRO_BW_116_ODR_1000_HZ;
+            dev->gyro_cfg.bw = BMI08_GYRO_BW_116_ODR_1000_HZ;
+            break;
+        case BMI08_ACCEL_DATA_SYNC_MODE_400HZ:
+            dev->accel_cfg.odr = BMI08_ACCEL_ODR_400_HZ;
+            dev->accel_cfg.bw = BMI08_ACCEL_BW_NORMAL;
+            dev->gyro_cfg.odr = BMI08_GYRO_BW_47_ODR_400_HZ;
+            dev->gyro_cfg.bw = BMI08_GYRO_BW_47_ODR_400_HZ;
+            break;
+        default:
+            break;
         }
 
         rslt = bmi08a_set_meas_conf(dev);
@@ -1532,17 +1531,17 @@ int8_t bmi08a_get_synchronized_data(struct bmi08_sensor_data *accel,
                 lsb = data[0];
                 msb = data[1];
                 msblsb = (msb << 8) | lsb;
-                accel->x = ((int16_t) msblsb); /* Data in X axis */
+                accel->x = ((int16_t)msblsb); /* Data in X axis */
 
                 lsb = data[2];
                 msb = data[3];
                 msblsb = (msb << 8) | lsb;
-                accel->y = ((int16_t) msblsb); /* Data in Y axis */
+                accel->y = ((int16_t)msblsb); /* Data in Y axis */
 
                 lsb = data[4];
                 msb = data[5];
                 msblsb = (msb << 8) | lsb;
-                accel->z = ((int16_t) msblsb); /* Data in Z axis */
+                accel->z = ((int16_t)msblsb); /* Data in Z axis */
 
                 /* Read gyro sensor data */
                 rslt = bmi08g_get_data(gyro, dev);
@@ -1719,21 +1718,21 @@ static int8_t set_int_pin_config(const struct bmi08_accel_int_channel_cfg *int_c
 
     switch (int_config->int_channel)
     {
-        case BMI08_INT_CHANNEL_1:
+    case BMI08_INT_CHANNEL_1:
 
-            /* update reg_addr based on channel inputs */
-            reg_addr = BMI08_REG_ACCEL_INT1_IO_CONF;
-            break;
+        /* update reg_addr based on channel inputs */
+        reg_addr = BMI08_REG_ACCEL_INT1_IO_CONF;
+        break;
 
-        case BMI08_INT_CHANNEL_2:
+    case BMI08_INT_CHANNEL_2:
 
-            /* update reg_addr based on channel inputs */
-            reg_addr = BMI08_REG_ACCEL_INT2_IO_CONF;
-            break;
+        /* update reg_addr based on channel inputs */
+        reg_addr = BMI08_REG_ACCEL_INT2_IO_CONF;
+        break;
 
-        default:
-            is_channel_invalid = TRUE;
-            break;
+    default:
+        is_channel_invalid = TRUE;
+        break;
     }
 
     if (!is_channel_invalid)
@@ -1788,21 +1787,21 @@ static int8_t set_accel_data_ready_int(const struct bmi08_accel_int_channel_cfg 
 
         switch (int_config->int_channel)
         {
-            case BMI08_INT_CHANNEL_1:
+        case BMI08_INT_CHANNEL_1:
 
-                /* Updating the data */
-                data = BMI08_SET_BITS(data, BMI08_ACCEL_INT1_DRDY, conf);
-                break;
+            /* Updating the data */
+            data = BMI08_SET_BITS(data, BMI08_ACCEL_INT1_DRDY, conf);
+            break;
 
-            case BMI08_INT_CHANNEL_2:
+        case BMI08_INT_CHANNEL_2:
 
-                /* Updating the data */
-                data = BMI08_SET_BITS(data, BMI08_ACCEL_INT2_DRDY, conf);
-                break;
+            /* Updating the data */
+            data = BMI08_SET_BITS(data, BMI08_ACCEL_INT2_DRDY, conf);
+            break;
 
-            default:
-                rslt = BMI08_E_INVALID_INPUT;
-                break;
+        default:
+            rslt = BMI08_E_INVALID_INPUT;
+            break;
         }
 
         if (rslt == BMI08_OK)
@@ -1837,17 +1836,17 @@ static int8_t set_accel_sync_data_ready_int(const struct bmi08_accel_int_channel
 
         switch (int_config->int_channel)
         {
-            case BMI08_INT_CHANNEL_1:
-                reg_addr = BMI08_REG_ACCEL_INT1_MAP;
-                break;
+        case BMI08_INT_CHANNEL_1:
+            reg_addr = BMI08_REG_ACCEL_INT1_MAP;
+            break;
 
-            case BMI08_INT_CHANNEL_2:
-                reg_addr = BMI08_REG_ACCEL_INT2_MAP;
-                break;
+        case BMI08_INT_CHANNEL_2:
+            reg_addr = BMI08_REG_ACCEL_INT2_MAP;
+            break;
 
-            default:
-                rslt = BMI08_E_INVALID_INPUT;
-                break;
+        default:
+            rslt = BMI08_E_INVALID_INPUT;
+            break;
         }
 
         if (rslt == BMI08_OK)
@@ -1989,7 +1988,6 @@ static void unpack_accel_data(struct bmi08_sensor_data *acc,
     data_lsb = fifo->data[data_start_index++];
     data_msb = fifo->data[data_start_index++];
     acc->z = (int16_t)((data_msb << 8) | data_lsb);
-
 }
 
 /*!
@@ -2008,38 +2006,38 @@ static int8_t unpack_accel_frame(struct bmi08_sensor_data *acc,
 
     switch (frame)
     {
-        /* If frame contains only accelerometer data */
-        case BMI08_FIFO_HEADER_ACC_FRM:
+    /* If frame contains only accelerometer data */
+    case BMI08_FIFO_HEADER_ACC_FRM:
 
-            /* Partially read, then skip the data */
-            if (((*idx) + BMI08_FIFO_ACCEL_LENGTH) > fifo->length)
-            {
-                /* Update the data index as complete*/
-                (*idx) = fifo->length;
-
-                /* FIFO is empty */
-                rslt = BMI08_W_FIFO_EMPTY;
-                break;
-            }
-
-            /* Get the accelerometer data */
-            unpack_accel_data(&acc[(*acc_idx)], *idx, fifo);
-
-            /* Update data index */
-            (*idx) = (*idx) + BMI08_FIFO_ACCEL_LENGTH;
-
-            /* Update accelerometer frame index */
-            (*acc_idx)++;
-
-            break;
-        default:
-
-            /* Move the data index to the last byte in case of invalid values */
+        /* Partially read, then skip the data */
+        if (((*idx) + BMI08_FIFO_ACCEL_LENGTH) > fifo->length)
+        {
+            /* Update the data index as complete*/
             (*idx) = fifo->length;
 
             /* FIFO is empty */
             rslt = BMI08_W_FIFO_EMPTY;
             break;
+        }
+
+        /* Get the accelerometer data */
+        unpack_accel_data(&acc[(*acc_idx)], *idx, fifo);
+
+        /* Update data index */
+        (*idx) = (*idx) + BMI08_FIFO_ACCEL_LENGTH;
+
+        /* Update accelerometer frame index */
+        (*acc_idx)++;
+
+        break;
+    default:
+
+        /* Move the data index to the last byte in case of invalid values */
+        (*idx) = fifo->length;
+
+        /* FIFO is empty */
+        rslt = BMI08_W_FIFO_EMPTY;
+        break;
     }
 
     return rslt;
@@ -2108,7 +2106,6 @@ static int8_t unpack_sensortime_frame(uint16_t *data_index, struct bmi08_fifo_fr
 
         /* Move the data index by 3 bytes */
         (*data_index) = (*data_index) + BMI08_SENSOR_TIME_LENGTH;
-
     }
 
     return rslt;
@@ -2146,51 +2143,51 @@ static int8_t extract_acc_header_mode(struct bmi08_sensor_data *acc,
         data_index++;
         switch (frame_header)
         {
-            /* If header defines accelerometer frame */
-            case BMI08_FIFO_HEADER_ACC_FRM:
-            case BMI08_FIFO_HEADER_ALL_FRM:
+        /* If header defines accelerometer frame */
+        case BMI08_FIFO_HEADER_ACC_FRM:
+        case BMI08_FIFO_HEADER_ALL_FRM:
 
-                /* Unpack from normal frames */
-                rslt = unpack_accel_frame(acc, &data_index, &accel_index, frame_header, fifo);
-                break;
+            /* Unpack from normal frames */
+            rslt = unpack_accel_frame(acc, &data_index, &accel_index, frame_header, fifo);
+            break;
 
-            /* If header defines sensor time frame */
-            case BMI08_FIFO_HEADER_SENS_TIME_FRM:
-                rslt = unpack_sensortime_frame(&data_index, fifo);
-                break;
+        /* If header defines sensor time frame */
+        case BMI08_FIFO_HEADER_SENS_TIME_FRM:
+            rslt = unpack_sensortime_frame(&data_index, fifo);
+            break;
 
-            /* If header defines skip frame */
-            case BMI08_FIFO_HEADER_SKIP_FRM:
-                rslt = unpack_skipped_frame(&data_index, fifo);
-                break;
+        /* If header defines skip frame */
+        case BMI08_FIFO_HEADER_SKIP_FRM:
+            rslt = unpack_skipped_frame(&data_index, fifo);
+            break;
 
-            /* If header defines Input configuration frame */
-            case BMI08_FIFO_HEADER_INPUT_CFG_FRM:
-                rslt = move_next_frame(&data_index, BMI08_FIFO_INPUT_CFG_LENGTH, fifo);
-                break;
+        /* If header defines Input configuration frame */
+        case BMI08_FIFO_HEADER_INPUT_CFG_FRM:
+            rslt = move_next_frame(&data_index, BMI08_FIFO_INPUT_CFG_LENGTH, fifo);
+            break;
 
-            /* If header defines sample drop frame */
-            case BMI08_FIFO_SAMPLE_DROP_FRM:
-                rslt = move_next_frame(&data_index, BMI08_FIFO_INPUT_CFG_LENGTH, fifo);
-                break;
+        /* If header defines sample drop frame */
+        case BMI08_FIFO_SAMPLE_DROP_FRM:
+            rslt = move_next_frame(&data_index, BMI08_FIFO_INPUT_CFG_LENGTH, fifo);
+            break;
 
-            /* If header defines invalid frame or end of valid data */
-            case BMI08_FIFO_HEAD_OVER_READ_MSB:
+        /* If header defines invalid frame or end of valid data */
+        case BMI08_FIFO_HEAD_OVER_READ_MSB:
 
-                /* Move the data index to the last byte to mark completion */
-                data_index = fifo->length;
+            /* Move the data index to the last byte to mark completion */
+            data_index = fifo->length;
 
-                /* FIFO is empty */
-                rslt = BMI08_W_FIFO_EMPTY;
-                break;
-            default:
+            /* FIFO is empty */
+            rslt = BMI08_W_FIFO_EMPTY;
+            break;
+        default:
 
-                /* Move the data index to the last byte in case of invalid values */
-                data_index = fifo->length;
+            /* Move the data index to the last byte in case of invalid values */
+            data_index = fifo->length;
 
-                /* FIFO is empty */
-                rslt = BMI08_W_FIFO_EMPTY;
-                break;
+            /* FIFO is empty */
+            rslt = BMI08_W_FIFO_EMPTY;
+            break;
         }
 
         /* Break if Number of frames to be read is complete or FIFO is mpty */
@@ -2226,21 +2223,21 @@ static int8_t set_fifo_wm_int(const struct bmi08_accel_int_channel_cfg *int_conf
 
         switch (int_config->int_channel)
         {
-            case BMI08_INT_CHANNEL_1:
+        case BMI08_INT_CHANNEL_1:
 
-                /* Updating the data */
-                data = BMI08_SET_BITS(data, BMI08_ACCEL_INT1_FWM, conf);
-                break;
+            /* Updating the data */
+            data = BMI08_SET_BITS(data, BMI08_ACCEL_INT1_FWM, conf);
+            break;
 
-            case BMI08_INT_CHANNEL_2:
+        case BMI08_INT_CHANNEL_2:
 
-                /* Updating the data */
-                data = BMI08_SET_BITS(data, BMI08_ACCEL_INT2_FWM, conf);
-                break;
+            /* Updating the data */
+            data = BMI08_SET_BITS(data, BMI08_ACCEL_INT2_FWM, conf);
+            break;
 
-            default:
-                rslt = BMI08_E_INVALID_INPUT;
-                break;
+        default:
+            rslt = BMI08_E_INVALID_INPUT;
+            break;
         }
 
         if (rslt == BMI08_OK)
@@ -2276,21 +2273,21 @@ static int8_t set_fifo_full_int(const struct bmi08_accel_int_channel_cfg *int_co
 
         switch (int_config->int_channel)
         {
-            case BMI08_INT_CHANNEL_1:
+        case BMI08_INT_CHANNEL_1:
 
-                /* Updating the data */
-                data = BMI08_SET_BITS_POS_0(data, BMI08_ACCEL_INT1_FFULL, conf);
-                break;
+            /* Updating the data */
+            data = BMI08_SET_BITS_POS_0(data, BMI08_ACCEL_INT1_FFULL, conf);
+            break;
 
-            case BMI08_INT_CHANNEL_2:
+        case BMI08_INT_CHANNEL_2:
 
-                /* Updating the data */
-                data = BMI08_SET_BITS(data, BMI08_ACCEL_INT2_FFULL, conf);
-                break;
+            /* Updating the data */
+            data = BMI08_SET_BITS(data, BMI08_ACCEL_INT2_FFULL, conf);
+            break;
 
-            default:
-                rslt = BMI08_E_INVALID_INPUT;
-                break;
+        default:
+            rslt = BMI08_E_INVALID_INPUT;
+            break;
         }
 
         if (rslt == BMI08_OK)
@@ -2309,22 +2306,6 @@ static int8_t set_fifo_full_int(const struct bmi08_accel_int_channel_cfg *int_co
     return rslt;
 }
 
-
-/*!
- * @brief Generate Gaussian noise with given mean and standard deviation.
-    *
-    * @param mean     Mean of the Gaussian distribution.
-    * @param stddev   Standard deviation of the Gaussian distribution.
-    * 
-    * @return Generated Gaussian noise.
- */
-static double generate_gaussian_noise(double mean, double stddev)
-{
-    double u1 = ((double)rand() + 1.0) / ((double)RAND_MAX + 1.0);
-    double u2 = ((double)rand() + 1.0) / ((double)RAND_MAX + 1.0);
-    return mean + stddev * sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
-}
-
 /*!
  * @brief Add Gaussian noise to a given data value.
  *
@@ -2335,9 +2316,11 @@ static double generate_gaussian_noise(double mean, double stddev)
  */
 static int16_t add_noise_to_data(int16_t original_value, float stddev)
 {
-    return original_value + (int16_t)generate_gaussian_noise(0.0f, stddev);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<float> noise(0.0f, stddev);
+    
+    return original_value + (int16_t)noise(gen);
 }
-
-
 
 /*! @endcond */

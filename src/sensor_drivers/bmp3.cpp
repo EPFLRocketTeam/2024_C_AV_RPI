@@ -2545,22 +2545,6 @@ static float pow_bmp3(double base, uint8_t power)
 
     return pow_output;
 }
-
-/*!
- * @brief Generate Gaussian noise with given mean and standard deviation.
-    *
-    * @param mean     Mean of the Gaussian distribution.
-    * @param stddev   Standard deviation of the Gaussian distribution.
-    * 
-    * @return Generated Gaussian noise.
- */
-static double generate_gaussian_noise(double mean, double stddev)
-{
-    double u1 = ((double)rand() + 1.0) / ((double)RAND_MAX + 1.0);
-    double u2 = ((double)rand() + 1.0) / ((double)RAND_MAX + 1.0);
-    return mean + stddev * sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
-}
-
 /*!
  * @brief Add Gaussian noise to the original data value.
  *
@@ -2571,7 +2555,11 @@ static double generate_gaussian_noise(double mean, double stddev)
  */
 static double add_noise_to_data(double original_value, double stddev)
 {
-    return original_value + generate_gaussian_noise(0.0, stddev);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<float> noise(0.0f, stddev);
+    
+    return original_value + noise(gen);
 }
 
 #else

@@ -51,6 +51,7 @@ extern "C" {
 /*********************************************************************/
 /* header files */
 #include "bmi08_defs.h"
+#include <random>
 
 /*********************** BMI08x Accelerometer function prototypes ************************/
 

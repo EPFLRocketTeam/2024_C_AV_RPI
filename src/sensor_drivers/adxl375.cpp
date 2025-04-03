@@ -48,7 +48,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <random>
 
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
@@ -609,7 +608,7 @@ adxl375_data Adxl375::get_data() {
 	return data;
 }
 
-// Returns noisa data
+// Returns noisy data
 adxl375_data add_noise_to_data(const adxl375_data& input, float stddev = 0.2f) {
     std::random_device rd;
     std::mt19937 gen(rd()); 

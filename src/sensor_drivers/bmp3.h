@@ -50,6 +50,7 @@
 #include "bmp3_defs.h"
 #include <stdexcept>
 #include <string>
+#include <random>
 
 /*! CPP guard */
 #ifdef __cplusplus
