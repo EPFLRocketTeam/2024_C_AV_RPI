@@ -20,6 +20,25 @@
 /* Iteration count to run example code */
 #define ITERATION  UINT16_C(2000)
 
+namespace {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    uint32_t millis() {
+        // Calculate the elapsed time, converting duration to milliseconds
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now-start);
+        return static_cast<uint32_t>(duration.count());
+    };
+
+    uint32_t micros() {
+        // Calculate the elapsed time, converting duration to microseconds
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now-start);
+        return static_cast<uint32_t>(duration.count());
+    };
+
+}
+
 /************************************************************************/
 /*********                     Test code                           ******/
 /************************************************************************/
@@ -32,7 +51,7 @@ int main(void) {
         return 1;
     }
 
-    log << "Sample, ADXL_Prim_X, ADXL_Prim_Y, ADXL_Prim_Z, ADXL_Sec_X, ADXL_Sec_Y, ADXL_Sec_Z, "
+    log << "time (us), ADXL_Prim_X, ADXL_Prim_Y, ADXL_Prim_Z, ADXL_Sec_X, ADXL_Sec_Y, ADXL_Sec_Z, "
         << "BMI_Prim_Acc_X, BMI_Prim_Acc_Y, BMI_Prim_Acc_Z, BMI_Prim_Gyr_X, BMI_Prim_Gyr_Y, BMI_Prim_Gyr_Z, "
         << "BMI_Sec_Acc_X, BMI_Sec_Acc_Y, BMI_Sec_Acc_Z, BMI_Sec_Gyr_X, BMI_Sec_Gyr_Y, BMI_Sec_Gyr_Z, "
         << "Azimuth, Pitch" << std::endl;
@@ -100,7 +119,7 @@ int main(void) {
 
             kalman.predict(nav_sensors, nav_data);
 
-            log << loop << ","
+            log << micros() << ","
                 << nav_sensors.adxl.x << "," << nav_sensors.adxl.y << "," << nav_sensors.adxl.z << ","
                 << nav_sensors.adxl_aux.x << "," << nav_sensors.adxl_aux.y << "," << nav_sensors.adxl_aux.z << ","
                 << nav_sensors.bmi_accel.x << "," << nav_sensors.bmi_accel.y << "," << nav_sensors.bmi_accel.z << ","
