@@ -11,10 +11,17 @@ std::mutex DataLogger::instanceMutex;
 
 
 void DataLogger::conv (DataDump &dump) { 
-
+static int counter =0;
     char* buffer = reinterpret_cast<char*>(&dump);
     stream.write(buffer, sizeof(DataDump));
-    stream.flush();  // ✅ Ensure data is written to disk
+    if (__glibc_unlikely((counter & 63 )!=0)){
+        counter =0;
+        ::fsync(fd);
+
+    }
+    counter++;
+
+
 }
 
 DataLogger::~DataLogger() {
