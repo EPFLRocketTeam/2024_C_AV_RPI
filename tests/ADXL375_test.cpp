@@ -49,7 +49,7 @@ int main(void) {
     while (loop < ITERATION) {
         if (adxl1.get_status() & ADXL375_DATA_READY) {
             data = adxl1.get_data();
-            log << "Secondary data[" << loop << "] x: " << data.x << ", y: "
+            log << "Primary data[" << loop << "] x: " << data.x << ", y: "
                       << data.y << ", z: " << data.z << std::endl;
         }
 
