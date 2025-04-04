@@ -32,7 +32,7 @@ DataLogger (std::string path, std::string eventPath);
     DataLogger& operator=(const DataLogger&) = delete;
 
     // Singleton accessor
-    static DataLogger& getInstance(const std::string& path = "~/dump_log.txt", const std::string& eventPath = "~/event_log.txt");
+    static DataLogger& getInstance(const std::string& path = "/boot/av_log/dump_log.log", const std::string& eventPath = "/boot/av_log/event_log.log");
     
     ~DataLogger ();
     void conv (DataDump &dump);

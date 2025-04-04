@@ -3,8 +3,9 @@
 
 bool readEvent (std::ifstream &file) {
     uint32_t ts, str_length;
-
+    printf("Reading event...\n");
     file.read(reinterpret_cast<char*>(&ts), sizeof(uint32_t));
+    printf("Timestamp: %lld\n", (long long) ts);
     if (file.eof()) return false;
     file.read(reinterpret_cast<char*>(&str_length), sizeof(uint32_t));
 

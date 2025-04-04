@@ -2,8 +2,9 @@
 #include "data.h"
 #include "logger.h"
 #include <cassert>
+#include <iostream>
 
-#define LOG_FILE "log.txt"
+#define LOG_FILE "/tmp/log.txt"
 
 int main (void) {
     DataDump dump;
@@ -31,7 +32,7 @@ int main (void) {
 
     size_t read_size = fread(buffer, 1, SIZE, file);
     fclose(file);
-
+std::cout << "Read size: " << read_size << std::endl;
     assert(read_size == SIZE - 1);
 
     for (int i = 0; i + 1 < SIZE; i ++)
