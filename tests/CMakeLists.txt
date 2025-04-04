@@ -17,6 +17,10 @@ add_test(NAME DataLoggerTest COMMAND data_logger_test)
 add_executable(bmp390_test BMP390_test.cpp)
 target_link_libraries(bmp390_test bmp3)
 
+add_executable(fusion_test fusion_test.cpp)
+target_link_libraries(fusion_test bmi08 adxl375 flight_computer ERT_RF_Protocol_Interface )
+target_include_directories(fusion_test PUBLIC ${CMAKE_SOURCE_DIR}/src/kalman ${CMAKE_SOURCE_DIR}/src/data  /usr/include/eigen3 )
+
 add_executable(gps_test I2CGPS_test.cpp)
 target_link_libraries(gps_test gps)
 

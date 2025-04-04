@@ -4,6 +4,16 @@
 #include "kalman_params.h"
 #include "config.h"
 #include "data.h"
+#include "logger.h"
+#include "cmath"
+#include <numeric>
+
+#define P0 101325
+#define T0 288.15
+#define L 0.00065
+#define R 8.3144598
+#define G 9.80665
+#define M 0.0289644
 
 Sensors::Sensors() try
 :   adxl1(ADXL375_ADDR_I2C_PRIM),
@@ -30,6 +40,7 @@ Sensors::Sensors() try
     update_status();
 }
 catch(...) {
+    DataLogger::getInstance().eventConv("Sensors init error", 0);
     std::cout << "Sensors init error\n";
 }
 
@@ -57,7 +68,7 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::DESCENT:
         case State::LANDED:
             // TODO: high polling rate
-            update();
+            update(dump,delta_ms);
             break;
         case State::ERRORGROUND:
             break;
@@ -72,6 +83,13 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     // kalman checks if we are static for calibration
     kalman.check_static(dump);
     return;
+}
+
+void Sensors::push(double value){
+    if (speedQueue.size()>=50){
+        speedQueue.pop_front();
+    }
+    speedQueue.push_back(value);
 }
 
 //TODO: must return bool to written into goat.event
@@ -94,7 +112,15 @@ void Sensors::calibrate() {
     Data::get_instance().write(Data::EVENT_CALIBRATED, &calibrated);
 }
 
-bool Sensors::update() {
+double Sensors::get_speed() const {
+    if (speedQueue.empty()) return 0.0;
+    double sum = std::accumulate(speedQueue.begin(), speedQueue.end(), 0.0);
+    return sum / speedQueue.size();
+}
+
+
+//TODO: should take in argument the dump
+bool Sensors::update(const DataDump& dump, uint32_t delta_ms) {
     update_status();
 
     try {
@@ -145,6 +171,15 @@ bool Sensors::update() {
     Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &temp_bmp);
     temp_bmp = bmp2.get_sensor_data();
     nav_sensors.bmp_aux = temp_bmp;
+    auto altitude = (T0/L)*pow(1 - (temp_bmp.pressure / P0), (R * L) / (G * M));
+    auto temp_speed = (altitude - dump.nav.altitude)/(1000*delta_ms);
+    push(temp_speed);
+    auto speed = get_speed();
+    
+    NavigationData nav;
+    nav.altitude = altitude;
+    nav.speed.z = speed;
+    Data::get_instance().write(Data::NAV_KALMAN_DATA, &nav);
     Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &temp_bmp);
 
     while (i2cgps.available()) {
@@ -191,11 +226,11 @@ bool Sensors::update() {
     
 
     // Kalmann filter
-    kalman.predict(nav_sensors, Data::get_instance().get().nav);
-    kalman.update(nav_sensors, Data::get_instance().get().nav);
+    //kalman.predict(nav_sensors, Data::get_instance().get().nav);
+    //kalman.update(nav_sensors, Data::get_instance().get().nav);
 
-    auto temp_nav_data(kalman.get_nav_data());
-    Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
+    //auto temp_nav_data(kalman.get_nav_data());
+    //Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
 
 
     return true;

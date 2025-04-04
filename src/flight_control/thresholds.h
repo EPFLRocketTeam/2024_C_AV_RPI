@@ -9,6 +9,7 @@
 #define SPEED_ZERO 0.1
 #define SPEED_MIN_ASCENT 0.1
 #define ALTITUDE_MAX 9000
+//TODO: rename groud_zero
 #define ALTITUDE_ZERO 10
 #define LOX_PRESSURE_WANTED 0.1
 #define LOX_PRESSURE_ZERO 0.1

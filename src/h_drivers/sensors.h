@@ -20,20 +20,26 @@
 #include "kalman.h"
 #include "INA228.h"
 #include "TMP1075.h"
+#include <deque>
 
 class Sensors : public HDriver {
 public:
     Sensors();
     ~Sensors();
+    
 
     void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
     void calibrate();
-    bool update();
+    void push(double value);
+    bool update(const DataDump& dump, const uint32_t delta_ms);
+    
     // inline SensStatus get_status() const { return status; }
     // inline SensRaw get_raw() const { return raw_data; }
     // inline SensFiltered get_clean() const { return clean_data; }
 private:
+    double get_speed() const;
+    std::deque<double> speedQueue;
     Adxl375 adxl1, adxl2;
     Bmi088 bmi1, bmi2;
     Bmp390 bmp1, bmp2;

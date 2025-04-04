@@ -125,7 +125,7 @@ extern "C" {
 #endif
 
 /**\name I2C addresses */
-#define BMP3_ADDR_I2C_PRIM                      UINT8_C(0x76)
+#define BMP3_ADDR_I2C_PRIM                      UINT8_C(0x75)
 #define BMP3_ADDR_I2C_SEC                       UINT8_C(0x77)
 
 /**\name BMP3 chip identifier */

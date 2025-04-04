@@ -48,6 +48,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <iostream>
 
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
@@ -572,7 +573,7 @@ int8_t adxl375_i2c_deinit(uint8_t addr) {
 Adxl375::Adxl375(uint8_t addr) : addr(addr) {
 	int8_t rslt = adxl375_init(&dev, addr);
 	if (rslt != ADXL375_OK) {
-		throw Adxl375Exception(rslt);
+		std::cerr << Adxl375Exception(rslt).what()<< std::endl;
 	}
 }
 

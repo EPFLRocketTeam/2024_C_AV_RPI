@@ -30,6 +30,8 @@ Telecom::Telecom()
 void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     if (new_cmd_received) {
         new_cmd_received = false;
+
+        //TODO probably check the messages and put into flags
         switch (last_packet.order_id) {
             case CMD_ID::AV_CMD_ABORT:
                 reset_cmd();
@@ -62,6 +64,7 @@ bool Telecom::begin() {
     }else {
         std::cout << "LoRa uplink init succeeded!\n";
     }
+    
 
     lora_uplink.setTxPower(UPLINK_POWER);
     lora_uplink.setSignalBandwidth(UPLINK_BW);
@@ -151,6 +154,7 @@ void Telecom::update() {
 }
 
 void Telecom::reset_cmd() {
+
 }
 
 void Telecom::handle_uplink(int packet_size) {
@@ -203,6 +207,7 @@ void Telecom::handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint3
 }
 
 void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
+    //TODO:
     gpioWrite(LED_LORA_TX, 1);
 
     uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));

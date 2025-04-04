@@ -8,6 +8,9 @@ import os
 import sys
 from typing import Dict, List, Tuple
 import clang.cindex
+
+
+
 def get_qualified_enum_name(enum_node):
     parent = enum_node.semantic_parent
     if parent.kind == clang.cindex.CursorKind.STRUCT_DECL or parent.kind == clang.cindex.CursorKind.CLASS_DECL:
@@ -152,24 +155,24 @@ BASE_HEADER = [
     f"#include <fstream>",
     f"#include <sstream>",
     f"#include \"dump2csv.h\"",
-    f"{generate_dumper_function_definition("int")};",
-    f"{generate_dumper_function_definition("unsigned int")};",
-    f"{generate_dumper_function_definition("unsigned")};",
-    f"{generate_dumper_function_definition("float")};",
-    f"{generate_dumper_function_definition("double")};",
-    f"{generate_dumper_function_definition("uint8_t")};",
-    f"{generate_dumper_function_definition("bool")};"
+    f"{generate_dumper_function_definition('int')};",
+    f"{generate_dumper_function_definition('unsigned int')};",
+    f"{generate_dumper_function_definition('unsigned')};",
+    f"{generate_dumper_function_definition('float')};",
+    f"{generate_dumper_function_definition('double')};",
+    f"{generate_dumper_function_definition('uint8_t')};",
+    f"{generate_dumper_function_definition('bool')};"
 ]
 
 DEFINE_SIMPLE_STREAM = "{ stream << value << \",\"; }"
 BASE_DEFINE = [
-    f"{generate_dumper_function_definition("int")}" + DEFINE_SIMPLE_STREAM,
-    f"{generate_dumper_function_definition("unsigned int")}" + DEFINE_SIMPLE_STREAM,
-    f"{generate_dumper_function_definition("unsigned")}" + DEFINE_SIMPLE_STREAM,
-    f"{generate_dumper_function_definition("float")}" + DEFINE_SIMPLE_STREAM,
-    f"{generate_dumper_function_definition("double")}" + DEFINE_SIMPLE_STREAM,
-    f"{generate_dumper_function_definition("uint8_t")}" + "{ stream << ((int) value) << \",\"; }",
-    f"{generate_dumper_function_definition("bool")}" + " {\n\tif(value) { stream << \"true,\"; } else { stream << \"false,\"; } }"
+    f"{generate_dumper_function_definition('int')}" + DEFINE_SIMPLE_STREAM,
+    f"{generate_dumper_function_definition('unsigned int')}" + DEFINE_SIMPLE_STREAM,
+    f"{generate_dumper_function_definition('unsigned')}" + DEFINE_SIMPLE_STREAM,
+    f"{generate_dumper_function_definition('float')}" + DEFINE_SIMPLE_STREAM,
+    f"{generate_dumper_function_definition('double')}" + DEFINE_SIMPLE_STREAM,
+    f"{generate_dumper_function_definition('uint8_t')}" + "{ stream << ((int) value) << \",\"; }",
+    f"{generate_dumper_function_definition('bool')}" + " {\n\tif(value) { stream << \"true,\"; } else { stream << \"false,\"; } }"
 ]
 
 def generate_xmacros (structs: Dict[str, List[Tuple[str, str]]], enums: Dict[str, Tuple[int, List[Tuple[str, int]]]]):
@@ -240,6 +243,7 @@ def main (target: str, struct_name: str):
     all_enums  : Dict[str, Tuple[int, List[Tuple[str, int]]]] = {}
     for header in headers:
         structs, enums = find_dumpable_of_header(header)
+        print(structs,enums)
 
         for key in structs.keys():
             all_structs[key] = structs[key]
@@ -255,6 +259,7 @@ def main (target: str, struct_name: str):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
+        print(sys.argv)
         print("Usage: python generate_macros_clang.py <header | folder> <struct>")
         sys.exit(1)
 

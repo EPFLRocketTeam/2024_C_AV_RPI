@@ -2,6 +2,7 @@
 #include <cassert>
 #include <unistd.h>
 #include "INA228.h"
+#include <fstream>
 
 /************************************************************************/
 /*********                     Macros                              ******/
@@ -13,16 +14,20 @@
 /*********                     Test code                           ******/
 /************************************************************************/
 int main() {
+    std::fstream log("/boot/av_log/ina228_test.log", std::ios::app);
+    log << "before try"<< std::endl;
     try
     {
-        INA228 ina(INA228_ADDRESS_LPB);
+        log << " start test" << std::endl;
+
+        INA228 ina(INA228_ADDRESS_HPB);
     
         if (!ina.isConnected()){
             std::cerr << "INA228 not connected." << std::endl;
             return -1;
         }
         
-        std::cout << "INA228 test starting..." << std::endl;
+        log << "INA228 test starting..." << std::endl;
         
         ina.reset();
         
@@ -35,14 +40,14 @@ int main() {
             double energy       = ina.getEnergy();
             double charge       = ina.getCharge();
             
-            std::cout << "Iteration " << loop << ":\n";
-            std::cout << "  Bus Voltage: " << busVoltage << " V\n";
-            std::cout << "  Shunt Voltage: " << shuntVoltage << " V\n";
-            std::cout << "  Current: " << current << " A\n";
-            std::cout << "  Power: " << power << " W\n";
-            std::cout << "  Temperature: " << temperature << " °C\n";
-            std::cout << "  Energy: " << energy << " J\n";
-            std::cout << "  Charge: " << charge << " C\n";
+            log << "Iteration " << loop << ":\n";
+            log << "  Bus Voltage: " << busVoltage << " V\n";
+            log << "  Shunt Voltage: " << shuntVoltage << " V\n";
+            log << "  Current: " << current << " A\n";
+            log << "  Power: " << power << " W\n";
+            log << "  Temperature: " << temperature << " °C\n";
+            log << "  Energy: " << energy << " J\n";
+            log << "  Charge: " << charge << " C\n";
         
             assert(busVoltage >= 0 && busVoltage <= 100);
             assert(shuntVoltage > -0.1 && shuntVoltage < 0.1);
@@ -51,13 +56,15 @@ int main() {
             sleep(1);  
         }
         
-        std::cout << "INA228 test completed." << std::endl;
+        log << "INA228 test completed." << std::endl;
     }
     catch(INA228Exception& e)
     {
-        std::cerr << e.what() << '\n';
+        log << e.what() << '\n';
+        log.close();
         return -1;
     }
+    log.close();
     
    
     return 0;

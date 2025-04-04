@@ -13,6 +13,7 @@
 #include "INA228.h"
 
 #include "i2c_wrappers.h"
+#include <iostream>
 //      REGISTERS                   ADDRESS    BITS  RW
 #define INA228_CONFIG 0x00        //  16   RW
 #define INA228_ADC_CONFIG 0x01    //  16   RW
@@ -66,7 +67,7 @@ INA228::INA228(const uint8_t address, float shunt, float maxCurrent)
 
     if (i2c_open(_address) != 0)
     {
-        throw INA228Exception("INA228 I2C initilization error");
+        std::cerr << INA228Exception("INA228 I2C initilization error").what()<<std::endl;
         return;
     }
     _read = i2c_read;
@@ -76,7 +77,7 @@ INA228::INA228(const uint8_t address, float shunt, float maxCurrent)
     if (get_intf_ptr(_address, &_intf_ptr) != 0)
     {
         _error = -1;
-        throw INA228Exception("INA228 I2C null pointer error");
+        std::cerr <<  INA228Exception("INA228 I2C null pointer error").what()<<std::endl;
         return;
     }
 }

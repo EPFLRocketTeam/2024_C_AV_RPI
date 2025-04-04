@@ -21,6 +21,7 @@
 #include "TMP1075.h"
 #include "i2c_wrappers.h"
 #include <memory>
+#include <iostream>
 
 TMP1075::TMP1075(uint8_t addr)
     : i2cAddress(addr), configRegister(0x00FF),
@@ -28,7 +29,7 @@ TMP1075::TMP1075(uint8_t addr)
 {
     if (i2c_open(i2cAddress) != 0)
     {
-        throw TMP1075Exception("TMP1075 error during I2C initialization");
+        std::cerr << TMP1075Exception("TMP1075 error during I2C initialization").what() <<std::endl;
         return;
     }
     _read = i2c_read;
@@ -37,7 +38,7 @@ TMP1075::TMP1075(uint8_t addr)
 
     if (get_intf_ptr(i2cAddress, &_intf_ptr) != 0)
     {
-        throw TMP1075Exception("TMP1075 null pointer error");
+        std::cerr << TMP1075Exception("TMP1075 null pointer error").what()<<std::endl;
         return;
     }
     this->configRegister = (uint8_t)(this->readRegister(0x01) >> 8);
