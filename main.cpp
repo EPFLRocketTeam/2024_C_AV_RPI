@@ -10,6 +10,7 @@
 #include <trigger_board.h>
 #include <chrono>
 #include <logger.h>
+#include <PR_board.h>
 int main(void){
     // Record time of start
     //TODO: check if steady or high resolution clock is better
@@ -20,6 +21,7 @@ int main(void){
 
     AvState state;
     DataDump dump = Data::get_instance().get();
+    PR_board prb = PR_board();
     std::cout << "Current state: " << state.stateToString(state.getCurrentState()) << std::endl;
     //FIXME: on peut pas vrmt catch tt les init sinon on peut pas utiliser la var
     
@@ -78,6 +80,7 @@ try {
         dump = Data::get_instance().get();
 
         state.update(dump);
+        prb.check_policy(dump,(uint32_t)delta.count());
         if (sens)
             sens->check_policy(dump,(uint32_t)delta.count());
         if (telecom)
