@@ -469,6 +469,6 @@ NavigationData Kalman::get_nav_data() const {
     nav_data.speed = {velocity_estimate(0), velocity_estimate(1), velocity_estimate(2)};
     nav_data.accel = current_accel;
     nav_data.attitude = {orientation_estimate.vector[0], orientation_estimate.vector[1], orientation_estimate.vector[2]};
-    nav_data.altitude = alt_meas + initial_alt;
+    nav_data.altitude = position_estimate(2) + initial_alt;
     return nav_data;
 }
