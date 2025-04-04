@@ -206,6 +206,7 @@ void Telecom::handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint3
 }
 
 void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
+    //TODO:
     gpioWrite(LED_LORA_TX, 1);
 
     uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));

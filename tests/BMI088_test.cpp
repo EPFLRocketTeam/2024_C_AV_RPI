@@ -16,7 +16,7 @@
 
 int main(void)
 {
-    std::ofstream log("/home/av/logd/bmi088_test.log", std::ios::app);
+    std::ofstream log("/boot/av_log/bmi088_test.log", std::ios::app);
     log << "Calibrating..." << std::endl;
     log << "BMI088 test" << std::endl;
     int times_to_read = 0;

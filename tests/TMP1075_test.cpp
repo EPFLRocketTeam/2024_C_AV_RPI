@@ -7,7 +7,7 @@
 int main()
 {
 
-    std::ofstream log("/home/av/logd/tmp1075_test.log", std::ios::app);
+    std::ofstream log("/boot/av_log/tmp1075_test.log", std::ios::app);
     log << "init test" << std::endl;
 
     try

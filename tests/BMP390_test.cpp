@@ -21,7 +21,7 @@
 
 int main(void)
 { 
-    std::ofstream log("/home/av/logd/bmp3_test.log", std::ios::app);
+    std::ofstream log("/boot/av_log/bmp3_test.log", std::ios::app);
     int loop = 0;
     try
     {

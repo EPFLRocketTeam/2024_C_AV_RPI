@@ -24,7 +24,7 @@
 
 int main(void) {
 
-    std::ofstream log("/home/av/logd/adxl375_test.log", std::ios::app);
+    std::ofstream log("/boot/av_log/adxl375_test.log", std::ios::app);
     if(!log.is_open()){
         log<<"fuckoff" << std::endl;
         log.close();

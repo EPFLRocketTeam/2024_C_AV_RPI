@@ -15,7 +15,7 @@
 static void displayInfo(TinyGPSPlus& gps) {
     
     //create log file
-    std::ofstream log("/home/av/logd/gps_test1.log", std::ios::app);
+    std::ofstream log("/boot/av_log/gps_test1.log", std::ios::app);
     log << "Calibrating..." << std::endl;
     log << "GPS test" << std::endl;
     log << std::endl << "GPS DATA" << std::endl

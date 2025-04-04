@@ -14,9 +14,11 @@ class DataLogger {
 private:
     std::string   path;
     std::ofstream stream;
+    int fd;
 
     std::string   eventPath;
     std::ofstream eventStream;
+    int fdStream;
 
      // Singleton instance and mutex for thread safety
      static std::unique_ptr<DataLogger> instance;
