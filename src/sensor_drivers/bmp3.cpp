@@ -43,6 +43,7 @@
 
 #include "bmp3.h"
 #include "i2c_wrappers.h"
+#include <iostream>
 
 /***************** Static function declarations ******************************/
 
@@ -3013,22 +3014,22 @@ Bmp390::Bmp390(uint8_t addr, uint16_t settings_sel) : addr(addr), settings_sel(s
 
     int8_t rslt = bmp3_i2c_init(&dev, addr);
     if (rslt != 0) {
-        throw Bmp390Exception(rslt);
+        std::cerr << Bmp390Exception(rslt).what()<<std::endl;
     }
 
     rslt = bmp3_init(&dev);
     if (rslt != 0) {
-        throw Bmp390Exception(rslt);
+        std::cerr << Bmp390Exception(rslt).what()<<std::endl;
     }
 
     rslt = bmp3_set_sensor_settings(settings_sel, &settings, &dev);
     if (rslt != 0) {
-        throw Bmp390Exception(rslt);
+        std::cerr << Bmp390Exception(rslt).what()<<std::endl;
     }
 
     rslt = bmp3_set_op_mode(&settings, &dev);
     if (rslt != 0) {
-        throw Bmp390Exception(rslt);
+        std::cerr << Bmp390Exception(rslt).what()<<std::endl;
     }
 }
 

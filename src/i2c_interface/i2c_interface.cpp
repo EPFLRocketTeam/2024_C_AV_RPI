@@ -42,6 +42,7 @@ void I2CInterface::close(uint8_t addr) {
 
 void I2CInterface::write(uint8_t addr, uint8_t reg_addr, const uint8_t* data, uint32_t len) {
     int handle = handle_list[addr];
+    
     if (i2cWriteI2CBlockData(handle, reg_addr, (char*)(data), len) != 0) {
         throw I2CInterfaceException("I2C write operation failed");
     }

@@ -64,6 +64,7 @@ bool Telecom::begin() {
     }else {
         std::cout << "LoRa uplink init succeeded!\n";
     }
+    
 
     lora_uplink.setTxPower(UPLINK_POWER);
     lora_uplink.setSignalBandwidth(UPLINK_BW);

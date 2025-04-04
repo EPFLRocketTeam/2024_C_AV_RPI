@@ -46,6 +46,7 @@
 #include "bmi08x.h"
 #include "bmi08.h"
 #include "i2c_wrappers.h"
+#include <iostream>
 
 /****************************************************************************/
 
@@ -1174,20 +1175,20 @@ static int8_t set_range(struct bmi08_dev *dev)
 Bmi088::Bmi088(uint8_t accel_addr, uint8_t gyro_addr) : accel_addr(accel_addr), gyro_addr(gyro_addr) {
     int8_t rslt = bmi08_i2c_init(&dev, BMI088_VARIANT, accel_addr, gyro_addr);
     if (rslt != 0) {
-        throw Bmi088Exception("bmi08_interface_init failed with error: " + std::to_string(rslt));
+        std::cerr << Bmi088Exception("bmi08_interface_init failed with error: " + std::to_string(rslt)).what() << std::endl;
     }
 
     bmi08a_soft_reset(&dev); // Reset to start from a known state
 
     rslt = bmi08_init(&dev);
     if (rslt != 0) {
-        throw Bmi088Exception("bmi08_init failed with error: " + std::to_string(rslt));
+        std::cerr << Bmi088Exception("bmi08_init failed with error: " + std::to_string(rslt)).what() << std::endl;
     }
 
     /* Enable data ready interrupts */
     rslt = enable_bmi08_interrupt(&dev, &accel_int_config, &gyro_int_config);
     if (rslt != 0) {
-        throw Bmi088Exception("enable_bmi08_interrupt failed with error: " + std::to_string(rslt));
+        std::cerr <<  Bmi088Exception("enable_bmi08_interrupt failed with error: " + std::to_string(rslt)).what()<<std::endl;
     }
 }
 
