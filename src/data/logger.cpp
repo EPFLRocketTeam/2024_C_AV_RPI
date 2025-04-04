@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <iostream>
 
-DataLogger::DataLogger (std::string path, std::string eventPath): path(path),eventPath(eventPath), stream(path),eventStream(eventPath) {}
+DataLogger::DataLogger (std::string path, std::string eventPath): path(path),eventPath(eventPath), stream(path,std::ios::binary | std::ios::app),eventStream(eventPath,std::ios::app) {}
 
 std::unique_ptr<DataLogger> DataLogger::instance;
 std::mutex DataLogger::instanceMutex;
