@@ -167,6 +167,7 @@ bool Sensors::update()
             bmi1_gyro_x.value().get(),
             bmi1_gyro_y.value().get(),
             bmi1_gyro_z.value().get()};
+            //apply noise
         Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_DATA, &bmi1_gyro_data);
 
         bmi08_sensor_data_f bmi2_acc_data = {
