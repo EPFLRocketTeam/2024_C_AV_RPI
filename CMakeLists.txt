@@ -24,6 +24,13 @@ add_compile_definitions(RF_PROTOCOL_FIREHORN)
 
 add_executable(main main.cpp)
 
+target_include_directories(main PRIVATE
+    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/src/h_drivers
+    ${PROJECT_SOURCE_DIR}/src/data
+    ${PROJECT_SOURCE_DIR}/src/flight_control
+)
+
 add_subdirectory(src)
 add_subdirectory(LoRa4Raspi)
 if(ENABLE_TESTING)
