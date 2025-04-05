@@ -570,7 +570,8 @@ public:
     void set_offset(adxl375_data offset_in);
     void set_scale(float scale_in);
     void calibrate();
-} ;
+    adxl375_data add_noise_to_data(adxl375_data input, float stddev);
+};
 
 class Adxl375Exception : public std::exception {
 private:

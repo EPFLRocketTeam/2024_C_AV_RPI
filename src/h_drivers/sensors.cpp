@@ -149,47 +149,55 @@ bool Sensors::update()
             adxl1_x.value().get(),
             adxl1_y.value().get(),
             adxl1_z.value().get()};
+        adxl1_data = adxl1.add_noise_to_data(adxl1_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &adxl1_data);
 
         adxl375_data adxl2_data = {
             adxl2_x.value().get(),
             adxl2_y.value().get(),
             adxl2_z.value().get()};
+        adxl2_data = adxl2.add_noise_to_data(adxl2_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_ADXL2_DATA, &adxl2_data);
 
         bmi08_sensor_data_f bmi1_acc_data = {
             bmi1_acc_x.value().get(),
             bmi1_acc_y.value().get(),
             bmi1_acc_z.value().get()};
+        bmi1_acc_data = bmi1.add_noise_to_data(bmi1_acc_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMI1_ACCEL_DATA, &bmi1_acc_data);
 
         bmi08_sensor_data_f bmi1_gyro_data = {
             bmi1_gyro_x.value().get(),
             bmi1_gyro_y.value().get(),
             bmi1_gyro_z.value().get()};
-            //apply noise
+        bmi1_gyro_data = bmi1.add_noise_to_data(bmi1_gyro_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_DATA, &bmi1_gyro_data);
 
         bmi08_sensor_data_f bmi2_acc_data = {
             bmi2_acc_x.value().get(),
             bmi2_acc_y.value().get(),
             bmi2_acc_z.value().get()};
+
+        bmi1_acc_data = bmi2.add_noise_to_data(bmi2_acc_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMI2_ACCEL_DATA, &bmi2_acc_data);
 
         bmi08_sensor_data_f bmi2_gyro_data = {
             bmi2_gyro_x.value().get(),
             bmi2_gyro_y.value().get(),
             bmi2_gyro_z.value().get()};
+        bmi2_gyro_data = bmi2.add_noise_to_data(bmi2_gyro_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_DATA, &bmi2_gyro_data);
 
         bmp3_data bmp1_data = {
             bmp1_p.value().get(),
             bmp1_t.value().get()};
+        bmp1_data = bmp1.add_noise_to_data(bmp1_data, 0.5); 
         Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &bmp1_data);
 
         bmp3_data bmp2_data = {
             bmp2_p.value().get(),
             bmp2_t.value().get()};
+        bmp2_data = bmp2.add_noise_to_data(bmp2_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &bmp2_data);
 
         NavSensors nav_sensors{};

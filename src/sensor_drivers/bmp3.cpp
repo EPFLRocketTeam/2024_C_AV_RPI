@@ -794,8 +794,6 @@ int8_t bmp3_init(struct bmp3_dev *dev)
     return rslt;
 }
 
-
-
 /*!
  * @brief This API reads the data from the given register address of the sensor.
  */
@@ -1584,8 +1582,6 @@ static uint8_t parse_fifo_data_frame(uint8_t header,
 
     return t_p_frame;
 }
-
-
 
 /*!
  * @brief This internal API unpacks the FIFO data frame from the fifo buffer and
@@ -2545,22 +2541,6 @@ static float pow_bmp3(double base, uint8_t power)
 
     return pow_output;
 }
-/*!
- * @brief Add Gaussian noise to the original data value.
- *
- * @param original_value Original data value.
- * @param stddev         Standard deviation of the noise.
- *
- * @return Data value with added noise.
- */
-static double add_noise_to_data(double original_value, double stddev)
-{
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::normal_distribution<float> noise(0.0f, stddev);
-    
-    return original_value + noise(gen);
-}
 
 #else
 
@@ -3094,4 +3074,24 @@ bmp3_data Bmp390::get_sensor_data(uint8_t sensor_comp)
         throw Bmp390Exception(rslt);
     }
     return data;
+}
+
+/*!
+ * @brief Add Gaussian noise to the original data value.
+ *
+ * @param original_value Original data value.
+ * @param stddev         Standard deviation of the noise.
+ *
+ * @return Data value with added noise.
+ */
+bmp3_data Bmp390::add_noise_to_data(bmp3_data original_value, double stddev)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<float> noise(0.0f, stddev);
+    double noise_value = noise(gen);
+    double newTemperature = original_value.temperature + noise_value;
+    noise_value = noise(gen);
+    double newPressure = original_value.pressure + noise_value;
+    return {newTemperature, newPressure};
 }

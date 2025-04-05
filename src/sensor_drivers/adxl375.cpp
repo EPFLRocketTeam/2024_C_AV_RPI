@@ -608,19 +608,6 @@ adxl375_data Adxl375::get_data() {
 	return data;
 }
 
-// Returns noisy data
-adxl375_data add_noise_to_data(const adxl375_data& input, float stddev = 0.2f) {
-    std::random_device rd;
-    std::mt19937 gen(rd()); 
-    std::normal_distribution<float> noise(0.0f, stddev);//Uniform noise, more reflective of real world vibration
-
-    adxl375_data noisy_data;
-    noisy_data.x = input.x + noise(gen);
-    noisy_data.y = input.y + noise(gen);
-    noisy_data.z = input.z + noise(gen);
-
-    return noisy_data;
-}
 
 
 void Adxl375::set_offset(adxl375_data offset_in) {
@@ -656,4 +643,18 @@ void Adxl375::calibrate() {
     offset.x = sum.x / samples;
 	offset.y = sum.y / samples;
 	offset.z = sum.z / samples;
+}
+
+// Returns noisy data
+adxl375_data Adxl375::add_noise_to_data(adxl375_data input, float stddev = 0.2f) {
+    std::random_device rd;
+    std::mt19937 gen(rd()); 
+    std::normal_distribution<float> noise(0.0f, stddev);//Uniform noise, more reflective of real world vibration
+
+    adxl375_data noisy_data;
+    noisy_data.x = input.x + noise(gen);
+    noisy_data.y = input.y + noise(gen);
+    noisy_data.z = input.z + noise(gen);
+
+    return noisy_data;
 }

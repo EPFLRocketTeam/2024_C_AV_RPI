@@ -334,6 +334,7 @@ public:
     uint8_t get_gyro_status();
     bmi08_sensor_data_f get_accel_data();
     bmi08_sensor_data_f get_gyro_data();
+    bmi08_sensor_data_f add_noise_to_data(bmi08_sensor_data_f data, float noise_level);
 } ;
 
 class Bmi088Exception : public std::runtime_error {

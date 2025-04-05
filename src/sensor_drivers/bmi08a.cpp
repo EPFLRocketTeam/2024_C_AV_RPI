@@ -2306,21 +2306,6 @@ static int8_t set_fifo_full_int(const struct bmi08_accel_int_channel_cfg *int_co
     return rslt;
 }
 
-/*!
- * @brief Add Gaussian noise to a given data value.
- *
- * @param original_value    Original data value.
- * @param stddev   Standard deviation of the Gaussian noise.
- *
- * @return Data value with added Gaussian noise.
- */
-static int16_t add_noise_to_data(int16_t original_value, float stddev)
-{
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::normal_distribution<float> noise(0.0f, stddev);
-    
-    return original_value + (int16_t)noise(gen);
-}
+
 
 /*! @endcond */
