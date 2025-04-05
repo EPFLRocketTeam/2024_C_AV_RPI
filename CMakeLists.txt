@@ -22,27 +22,7 @@ target_include_directories(Capsule INTERFACE 2024_C_AV-GS_CAPSULE/src)
 # Set the RFBG protocol to Firehorn
 add_compile_definitions(RF_PROTOCOL_FIREHORN)
 
-set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
-set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
-set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
-set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
-set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/h_drivers)
-set(KALMAN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/kalman)
-
-# Main executable (must come after above definitions)
 add_executable(main main.cpp)
-target_include_directories(main PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${H_DRIVERS_DIR}
-    ${DATA_DIR}
-    ${FLIGHT_CONTROL_DIR}
-    ${I2C_INTERFACE_DIR}
-    ${DRIVERS_DIR}
-    ${KALMAN_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/extern/eigen
-    ${CMAKE_CURRENT_SOURCE_DIR}/mock
-)
-
 
 add_subdirectory(src)
 add_subdirectory(LoRa4Raspi)
