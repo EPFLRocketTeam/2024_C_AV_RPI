@@ -1,4 +1,7 @@
 #include <iostream>
+int main(void){
+    return 0;
+}
 // #include <memory>
 // #include <chrono>
 // #include <thread>
