@@ -24,6 +24,19 @@ add_compile_definitions(RF_PROTOCOL_FIREHORN)
 
 add_executable(main main.cpp)
 
+target_include_directories(main PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${H_DRIVERS_DIR}
+    ${DATA_DIR}
+    ${FLIGHT_CONTROL_DIR}
+    ${I2C_INTERFACE_DIR}
+    ${DRIVERS_DIR}
+    ${KALMAN_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/extern/eigen
+    ${CMAKE_CURRENT_SOURCE_DIR}/mock
+)
+
+
 add_subdirectory(src)
 add_subdirectory(LoRa4Raspi)
 if(ENABLE_TESTING)

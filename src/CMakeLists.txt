@@ -41,7 +41,7 @@ add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    /usr/include/eigen3
+    ${CMAKE_CURRENT_SOURCE_DIR}/extern/eigen
     ${DATA_DIR}
     ${H_DRIVERS_DIR}
     ${FLIGHT_CONTROL_DIR}
@@ -50,6 +50,7 @@ target_include_directories(flight_computer PUBLIC
     ${KALMAN_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/mock 
 )
+
 
 target_link_libraries(flight_computer PUBLIC
     ERT_RF_Protocol_Interface
