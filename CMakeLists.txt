@@ -31,6 +31,7 @@ add_compile_definitions(RF_PROTOCOL_FIREHORN)
 add_executable(main main.cpp)
 
 target_link_libraries(main PUBLIC
+    flight_computer
     ERT_RF_Protocol_Interface
     2024_C_AV_INTRANET
     Capsule
