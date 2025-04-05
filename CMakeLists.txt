@@ -18,18 +18,28 @@ add_library(Capsule INTERFACE)
 target_include_directories(Capsule INTERFACE 2024_C_AV-GS_CAPSULE/src)
 
 
+set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
+set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
+set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
+set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
+set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
+set(KALMAN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/kalman)
 
 # Set the RFBG protocol to Firehorn
 add_compile_definitions(RF_PROTOCOL_FIREHORN)
 
 add_executable(main main.cpp)
 
-target_include_directories(main PRIVATE
-    ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/src/h_drivers
-    ${PROJECT_SOURCE_DIR}/src/data
-    ${PROJECT_SOURCE_DIR}/src/flight_control
-    ${PROJECT_SOURCE_DIR}/src/sensor_drivers
+target_include_directories(main PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    /usr/include/eigen3
+    ${DATA_DIR}
+    ${H_DRIVERS_DIR}
+    ${FLIGHT_CONTROL_DIR}
+    ${I2C_INTERFACE_DIR}
+    ${DRIVERS_DIR}
+    ${KALMAN_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/mock 
 )
 
 add_subdirectory(src)
