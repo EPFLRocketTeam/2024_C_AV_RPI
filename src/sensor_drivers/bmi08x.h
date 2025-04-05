@@ -47,8 +47,7 @@
 #ifndef _BMI08X_H
 #define _BMI08X_H
 
-#include <stdexcept>
-#include <string>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -345,5 +344,7 @@ public:
     explicit Bmi088Exception(int error_code)
         : std::runtime_error("BMI088 Error: " + std::to_string(error_code)) {}
 };
-
+#include <stdexcept>
+#include <string>
+#include <random>
 #endif /* _BMI08X_H */
