@@ -26,7 +26,7 @@ set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
 set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
 set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
-set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
+set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/h_drivers)
 set(KALMAN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/kalman)
 
 # Main executable (must come after above definitions)
