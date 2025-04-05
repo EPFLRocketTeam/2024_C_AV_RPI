@@ -47,6 +47,11 @@
 #ifndef _BMI08X_H
 #define _BMI08X_H
 
+#ifdef __cplusplus
+#include <stdexcept>
+#include <string>
+#include <random>
+#endif
 
 
 #ifdef __cplusplus
@@ -313,10 +318,7 @@ int8_t bmi08_i2c_deinit(uint8_t acc_dev_add, uint8_t gyro_dev_add);
 #ifdef __cplusplus
 }
 #endif
-#include <stdexcept>
-#include <string>
-#include <random>
-
+#ifdef __cplusplus
 class Bmi088 {
 private:
     uint8_t accel_addr;
@@ -347,4 +349,5 @@ public:
     explicit Bmi088Exception(int error_code)
         : std::runtime_error("BMI088 Error: " + std::to_string(error_code)) {}
 };
+#endif // __cplusplus
 #endif /* _BMI08X_H */
