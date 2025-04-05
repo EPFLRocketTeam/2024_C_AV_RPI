@@ -1293,8 +1293,8 @@ extern "C"
     int8_t bmi08a_set_fifo_down_sample(uint8_t fifo_downs, struct bmi08_dev *dev);
 
 #ifdef __cplusplus
-#include <random>
 }
+#include <random>
 #endif
 
 #endif /* _BMI08_H */
