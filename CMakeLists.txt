@@ -50,9 +50,10 @@ target_link_libraries(main PUBLIC
 #     ${PROJECT_SOURCE_DIR}/src/flight_control
 #     ${PROJECT_SOURCE_DIR}/src/sensor_drivers
 # )
+
 target_include_directories(main PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    #/usr/include/eigen3
+    /usr/include/eigen3
     ${DATA_DIR}
     ${H_DRIVERS_DIR}
     ${FLIGHT_CONTROL_DIR}
