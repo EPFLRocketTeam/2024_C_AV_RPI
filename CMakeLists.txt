@@ -60,9 +60,7 @@ target_include_directories(main PUBLIC
     ${I2C_INTERFACE_DIR}
     ${DRIVERS_DIR}
     ${KALMAN_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/mock 
-    ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.cpp 
-    ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.h   
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/mock 
 )
 
 add_subdirectory(src)
