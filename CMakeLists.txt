@@ -29,6 +29,7 @@ target_include_directories(main PRIVATE
     ${PROJECT_SOURCE_DIR}/src/h_drivers
     ${PROJECT_SOURCE_DIR}/src/data
     ${PROJECT_SOURCE_DIR}/src/flight_control
+    ${PROJECT_SOURCE_DIR}/src/sensor_drivers
 )
 
 add_subdirectory(src)
