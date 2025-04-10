@@ -1,7 +1,6 @@
 #ifndef IBMP390_H
 #define IBMP390_H
 
-#include "bmp3.h"  
 #include "bmp3_defs.h"
 
 class IBmp390 {
