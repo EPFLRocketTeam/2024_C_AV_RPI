@@ -34,6 +34,8 @@
 
 #include "I2CGPS.h"
 #include "TinyGPS++.h"
+#include "tsdb.h"
+#include "h_driver.h"
 
 #include <optional>
 class Sensors
