@@ -1,5 +1,5 @@
 add_executable(adxl375_test ADXL375_test.cpp)
-target_link_libraries(adxl375_test adxl375)
+target_link_libraries(adxl375_test flight_computer)
 target_include_directories(adxl375_test PUBLIC ${CMAKE_SOURCE_DIR}/src/sensor_drivers)
 
 add_executable(avstate_test AvState_test.cpp)
