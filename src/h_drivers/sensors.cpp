@@ -28,6 +28,7 @@ try
              GPS_OBS_COV,
              ALT_OBS_COV)
 {
+    std::cout << "Sensors init\n";
     tdb = TDB::from_csv("../tests/NavigationSensors.csv");
     if (tdb != nullptr)
     {
