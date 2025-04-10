@@ -2,6 +2,9 @@
 #ifndef IADXL375_H
 #define IADXL375_H
 
+#include <cstdint>
+#include "adxl375.h" 
+
 class IAdxl375 {
 public:
     virtual ~IAdxl375() = default;
