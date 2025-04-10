@@ -144,20 +144,20 @@ private:
     void *_intf_ptr;
 };
 
-class TMP1075Exception : public std::exception {
-public:
-    TMP1075Exception(const std::string& msg) {
-        message = msg;
-    }
-    
-    virtual const char *what() const throw() {
-        return message.c_str();
-    }
-
-private:
-    std::string message;
-};
 #endif // MOCK_SENSORS_ENABLED
 
 
+class TMP1075Exception : public std::exception {
+    public:
+        TMP1075Exception(const std::string& msg) {
+            message = msg;
+        }
+        
+        virtual const char *what() const throw() {
+            return message.c_str();
+        }
+    
+    private:
+        std::string message;
+    };
 #endif // TMP1075_H
