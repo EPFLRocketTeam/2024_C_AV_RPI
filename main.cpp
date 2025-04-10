@@ -21,10 +21,10 @@ int main()
         std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
         std::cout << "[INFO] Sensors initialized.\n";
         // Check if we're in simulation mode or hardware mode
-        if (sensors->is_simulation_mode())
-            std::cout << "[INFO] Simulation mode: CSV data source active.\n";
-        else
-            std::cout << "[INFO] Hardware mode: Accessing real sensors.\n";
+        // if (sensors->is_simulation_mode())
+        //     std::cout << "[INFO] Simulation mode: CSV data source active.\n";
+        // else
+        //     std::cout << "[INFO] Hardware mode: Accessing real sensors.\n";
 
         std::cout << "[INFO] Sensors initialized. Beginning simulation loop...\n";
 
