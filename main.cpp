@@ -10,15 +10,23 @@ int main()
 {
     try
     {
-        AvState state;
+        // Set the AV state to READY
         DataDump dump = Data::get_instance().get();
         dump.av_state = State::READY;
         Data::get_instance().write(Data::AV_STATE, &dump.av_state);
 
+        // Initialize the sensor system
         std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
 
-        std::cout << "[INFO] Sensors initialized. Beginning simulation loop\n";
+        // Check if we're in simulation mode or hardware mode
+        if (sensors->is_simulation_mode())
+            std::cout << "[INFO] Simulation mode: CSV data source active.\n";
+        else
+            std::cout << "[INFO] Hardware mode: Accessing real sensors.\n";
 
+        std::cout << "[INFO] Sensors initialized. Beginning simulation loop...\n";
+
+        // Simulation loop
         for (int i = 0; i < 10; ++i)
         {
             auto now = std::chrono::steady_clock::now();
@@ -34,7 +42,7 @@ int main()
             std::cout << "[ADXL1] X: " << adxl_data.x
                       << ", Y: " << adxl_data.y
                       << ", Z: " << adxl_data.z << std::endl;
-                      
+
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
