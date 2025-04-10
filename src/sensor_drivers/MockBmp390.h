@@ -2,6 +2,7 @@
 #define MOCK_BMP390_H
 
 #include "IBmp390.h"
+#include "bmp3.h" 
 #include <random>
 
 class MockBmp390 : public IBmp390 {
