@@ -1,5 +1,7 @@
 option(ENABLE_TESTING "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable coverage" OFF)
+option(USE_MOCK_SENSORS "Use mock sensor drivers instead of real hardware ones" OFF)
+
 
 set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
@@ -36,6 +38,17 @@ set(FIREHORN_FC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.h   
 )
+if(USE_MOCK_SENSORS)
+    message(STATUS "Using mock sensor drivers in flight_computer")
+    list(APPEND FIREHORN_FC_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockAdxl375.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockBmi088.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockBmp390.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockIna228.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockTmp1075.cpp
+    )
+endif()
+
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
@@ -50,7 +63,7 @@ target_include_directories(flight_computer PUBLIC
     ${KALMAN_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/mock 
 )
-
+if(NOT USE_MOCK_SENSORS)
 target_link_libraries(flight_computer PUBLIC
     ERT_RF_Protocol_Interface
     2024_C_AV_INTRANET
@@ -64,3 +77,8 @@ target_link_libraries(flight_computer PUBLIC
     tmp1075
       # Kalman should now be linked properly
 )
+endif()
+
+if(USE_MOCK_SENSORS)
+    target_compile_definitions(flight_computer PUBLIC MOCK_SENSORS_ENABLED=1)
+endif()

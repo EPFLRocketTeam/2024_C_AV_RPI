@@ -50,6 +50,7 @@
 #include <stdexcept>
 #include <string>
 #include <random>
+#include "IBmp390.h"
 
 /*! CPP guard */
 #ifdef __cplusplus
@@ -583,7 +584,7 @@ extern "C"
 }
 #endif /* End of CPP guard */
 
-class Bmp390
+class Bmp390 : public IBmp390
 {
 private:
     uint8_t addr;

@@ -319,7 +319,7 @@ int8_t bmi08_i2c_deinit(uint8_t acc_dev_add, uint8_t gyro_dev_add);
 }
 #endif
 #ifdef __cplusplus
-class Bmi088 {
+class Bmi088:public IBmi088 {
 private:
     uint8_t accel_addr;
     uint8_t gyro_addr;

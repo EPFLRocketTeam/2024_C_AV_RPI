@@ -48,6 +48,7 @@
 #include <exception>
 #include <string>
 #include <random>
+#include "IAdxl375.h"
 
 /*! CPP guard */
 #ifdef __cplusplus
@@ -554,7 +555,7 @@ int8_t adxl375_i2c_deinit(uint8_t addr);
 }
 #endif /* End of CPP guard */
 
-class Adxl375 {
+class Adxl375 :public IAdxl375 {
 private:
 	uint8_t addr;
 	adxl375_dev dev;

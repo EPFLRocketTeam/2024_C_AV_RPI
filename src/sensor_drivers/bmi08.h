@@ -43,8 +43,9 @@
 
 #ifndef _BMI08_H
 #define _BMI08_H
-
+#include "IBmi08.h"
 #ifdef __cplusplus
+
 extern "C"
 {
 #endif
