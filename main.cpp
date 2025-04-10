@@ -13,11 +13,13 @@ int main()
         // Set the AV state to READY
         DataDump dump = Data::get_instance().get();
         dump.av_state = State::READY;
+        std::cout << "[INFO] Setting AV state to READY.\n";
         Data::get_instance().write(Data::AV_STATE, &dump.av_state);
-
+        std::cout << "[INFO] AV state set to READY.\n";
         // Initialize the sensor system
+        std::cout << "[INFO] Initializing sensors...\n";
         std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
-
+        std::cout << "[INFO] Sensors initialized.\n";
         // Check if we're in simulation mode or hardware mode
         if (sensors->is_simulation_mode())
             std::cout << "[INFO] Simulation mode: CSV data source active.\n";
