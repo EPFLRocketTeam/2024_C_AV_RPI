@@ -42,7 +42,6 @@ target_link_libraries(main PUBLIC
     gps
     ina228
     tmp1075
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/mock
       # Kalman should now be linked properly
 )
 # target_include_directories(main PRIVATE
