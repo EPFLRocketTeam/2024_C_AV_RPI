@@ -89,6 +89,17 @@ if(NOT USE_MOCK_SENSORS)
     )
 endif()
 
+if(USE_MOCK_SENSORS)
+    message(STATUS "Using mock sensor drivers in flight_computer")
+    list(APPEND FIREHORN_FC_SOURCES
+        ${DRIVERS_DIR}/mock/MockAdxl375.cpp
+        ${DRIVERS_DIR}/mock/MockBmi08.cpp
+        ${DRIVERS_DIR}/mock/MockBmp390.cpp
+        ${DRIVERS_DIR}/mock/MockIna228.cpp
+        ${DRIVERS_DIR}/mock/MockTmp1075.cpp
+    )
+endif()
+
 
 # Enable a macro for conditional compilation in C++ code
 if(USE_MOCK_SENSORS)
