@@ -1,29 +1,40 @@
 #pragma once
 
+#include "IAdxl375.h"
 #include "adxl375.h"
+#include <random>
 
-class MockAdxl375 : public Adxl375
+class MockAdxl375 : public IAdxl375
 {
 public:
-    MockAdxl375(uint8_t addr = 0) : Adxl375(addr) {}
+    MockAdxl375(uint8_t addr = 0) : address(addr) {}
 
-    virtual adxl375_data get_data() override
+    adxl375_data get_data() override
     {
-        return Adxl375::get_data();
+        // Return dummy data
+        return adxl375_data{1.0f, 2.0f, 3.0f};
     }
 
-    virtual uint8_t get_status() override
+    uint8_t get_status() override
     {
-        return Adxl375::get_status();
+        return 0x42; // Dummy status
     }
 
-    virtual adxl375_data add_noise_to_data(adxl375_data input, float stddev) override
+    adxl375_data add_noise_to_data(adxl375_data input, float stddev) override
     {
-        return Adxl375::add_noise_to_data(input, stddev);
+        std::default_random_engine generator;
+        std::normal_distribution<float> distribution(0.0, stddev);
+        input.x += distribution(generator);
+        input.y += distribution(generator);
+        input.z += distribution(generator);
+        return input;
     }
 
-    virtual void calibrate() override
+    void calibrate() override
     {
-        Adxl375::calibrate();
+        // No-op for mock
     }
+
+private:
+    uint8_t address;
 };
