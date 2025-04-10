@@ -62,6 +62,7 @@ target_include_directories(flight_computer PUBLIC
     ${DRIVERS_DIR}
     ${KALMAN_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/mock 
+    ${CMAKE_CURRENT_SOURCE_DIR}/ERT_RF_Protocol_Interface 
 )
 if(NOT USE_MOCK_SENSORS)
 target_link_libraries(flight_computer PUBLIC
