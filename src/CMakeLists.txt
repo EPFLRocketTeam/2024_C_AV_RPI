@@ -63,6 +63,8 @@ target_include_directories(flight_computer PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/mock
     ${CMAKE_CURRENT_SOURCE_DIR}/ERT_RF_Protocol_Interface
     ${CMAKE_CURRENT_SOURCE_DIR}/2024_C_AV_INTRANET
+    ${DRIVERS_DIR}/mock
+
 )
 
 target_link_libraries(flight_computer PUBLIC
