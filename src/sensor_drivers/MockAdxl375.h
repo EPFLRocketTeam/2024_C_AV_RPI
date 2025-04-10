@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../adxl375.h"
+#include "adxl375.h"
 class MockAdxl375 : public Adxl375
 {
 public:
