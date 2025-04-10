@@ -35,7 +35,9 @@ set(FIREHORN_FC_SOURCES
     ${KALMAN_DIR}/rotation_utils.cpp
     ${KALMAN_DIR}/rotation_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.cpp 
-    ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.h   
+     ${DRIVERS_DIR}/TinyGPS++.cpp         
+    ${DRIVERS_DIR}/I2CGPS.cpp   
 )
 
 # Add mock sensor sources if enabled
@@ -92,7 +94,6 @@ if(NOT USE_MOCK_SENSORS)
         adxl375
         bmi08
         bmp3
-        gps
         ina228
         tmp1075
     )
