@@ -30,32 +30,21 @@ add_compile_definitions(RF_PROTOCOL_FIREHORN)
 
 add_executable(main main.cpp)
 
-# target_link_libraries(main PUBLIC
-#     flight_computer
-#     ERT_RF_Protocol_Interface
-#     2024_C_AV_INTRANET
-#     Capsule
-#     LoRa4Raspi
-#     adxl375
-#     bmi08
-#     bmp3
-#     gps
-#     ina228
-#     tmp1075
-#       # Kalman should now be linked properly
-# )
-target_include_directories(main PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    /usr/include/eigen3
-    ${DATA_DIR}
-    ${H_DRIVERS_DIR}
-    ${FLIGHT_CONTROL_DIR}
-    ${I2C_INTERFACE_DIR}
-    ${DRIVERS_DIR}
-    ${KALMAN_DIR}
+target_link_libraries(main PUBLIC
+    flight_computer
+    ERT_RF_Protocol_Interface
+    2024_C_AV_INTRANET
+    Capsule
+    LoRa4Raspi
+    adxl375
+    bmi08
+    bmp3
+    gps
+    ina228
+    tmp1075
     ${CMAKE_CURRENT_SOURCE_DIR}/src/mock
+      # Kalman should now be linked properly
 )
-
 # target_include_directories(main PRIVATE
 #     ${PROJECT_SOURCE_DIR}/src
 #     ${PROJECT_SOURCE_DIR}/src/h_drivers
