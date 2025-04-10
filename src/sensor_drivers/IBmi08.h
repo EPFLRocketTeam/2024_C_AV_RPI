@@ -2,7 +2,9 @@
 #define IBMI088_H
 
 #include <stdint.h>
-#include <bmi08x.h>
+
+// ✅ Forward declaration
+struct bmi08_sensor_data_f;
 
 class IBmi088 {
 public:
