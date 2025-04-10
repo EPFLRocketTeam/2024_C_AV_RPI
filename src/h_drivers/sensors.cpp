@@ -68,9 +68,9 @@ try
     }
     update_status();
 }
-catch (...)
+catch (const std::exception &e)
 {
-    std::cout << "Sensors init error\n";
+    std::cerr << "Sensors init error: " << e.what() << "\n";
 }
 
 Sensors::~Sensors() {}
