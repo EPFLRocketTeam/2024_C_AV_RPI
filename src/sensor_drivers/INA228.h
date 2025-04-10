@@ -133,6 +133,7 @@ typedef int8_t (*ina228_write_fptr_t)(uint8_t reg_addr, const uint8_t *read_data
  */
 typedef void (*ina228_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
 
+#ifndef MOCK_SENSORS_ENABLED 
 class INA228 : public IIna228
  {
 public:
@@ -337,5 +338,5 @@ public:
 private:
     std::string message;
 };
-
+#endif //  MOCK_SENSORS_ENABLED
 #endif /* INA228_H */

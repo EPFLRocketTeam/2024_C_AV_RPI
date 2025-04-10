@@ -11,41 +11,55 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-#include "bmi08x.h"
-#include "bmp3.h"
-#include "I2CGPS.h"
-#include "TinyGPS++.h"
-#include "adxl375.h"
-#include "h_driver.h"
-#include "tsdb.h"
+#include "config.h"
+#include "data.h"
 #include "kalman.h"
+#include "telecom.h"
+#include "trigger_board.h"
+#include "PR_board.h"
+
+#ifdef MOCK_SENSORS_ENABLED
+#include "MockAdxl375.h"
+#include "MockBmi08.h"
+#include "MockBmp390.h"
+#include "MockIna228.h"
+#include "MockTmp1075.h"
+#else
+#include "adxl375.h"
+#include "bmi08.h"
+#include "bmp3.h"
 #include "INA228.h"
 #include "TMP1075.h"
+#endif
 
-class Sensors : public HDriver
+#include "I2CGPS.h"
+#include "TinyGPS++.h"
+
+class Sensors
 {
 public:
     Sensors();
     ~Sensors();
 
-    void check_policy(const DataDump &dump, const uint32_t delta_ms) override;
-
+    void check_policy(const DataDump &dump, uint32_t delta_ms);
     void calibrate();
     bool update();
-    // inline SensStatus get_status() const { return status; }
-    // inline SensRaw get_raw() const { return raw_data; }
-    // inline SensFiltered get_clean() const { return clean_data; }
+    void update_status();
+
 private:
+
     Adxl375 adxl1, adxl2;
     Bmi088 bmi1, bmi2;
     Bmp390 bmp1, bmp2;
+
     I2CGPS i2cgps;
     TinyGPSPlus gps;
-    INA228 ina_lpb, ina_hpb;
-    TMP1075 tmp1075;
 
-    TDB *tdb = nullptr;
-    bool simulation_mode = false;
+    TMP1075 tmp1075;
+    INA228 ina_lpb;
+    INA228 ina_hpb;
+
+    Kalman kalman;
 
     std::optional<TimeSeries> adxl1_x, adxl1_y, adxl1_z;
     std::optional<TimeSeries> adxl2_x, adxl2_y, adxl2_z;
@@ -60,8 +74,6 @@ private:
     // SensStatus status;
     // SensRaw raw_data;
     // SensFiltered clean_data;
-
-    Kalman kalman;
 
     // Read sensors status
     void update_status();

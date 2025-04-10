@@ -91,6 +91,7 @@ typedef int8_t (*tmp1075_write_fptr_t)(uint8_t reg, const uint8_t *data, uint32_
 */
 typedef void (*tmp1075_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
 
+#ifndef MOCK_SENSORS_ENABLED 
 class TMP1075 : public ITmp1075
 {
 public:
@@ -156,5 +157,7 @@ public:
 private:
     std::string message;
 };
+#endif // MOCK_SENSORS_ENABLED
+
 
 #endif // TMP1075_H

@@ -612,6 +612,7 @@ public:
      */
 };
 
+#ifndef MOCK_SENSORS_ENABLED 
 class Bmp390Exception : public std::runtime_error
 {
 public:
@@ -626,5 +627,6 @@ public:
 private:
     int error;
 };
+#endif /* MOCK_SENSORS_ENABLED */
 
 #endif /* _BMP3_H */
