@@ -2,6 +2,7 @@
 #define MOCK_BMI088_H
 
 #include "IBmi08.h"
+#include "bmi08x.h"
 #include <random>
 
 class MockBmi088 : public IBmi088 {
