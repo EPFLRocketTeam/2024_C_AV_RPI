@@ -5,7 +5,7 @@
 
 #include <random>
 
-class MockBmp390 : public IBmp390 {
+class Bmp390 : public IBmp390 {
 public:
     bmp3_status get_status() override {
         bmp3_status status{};

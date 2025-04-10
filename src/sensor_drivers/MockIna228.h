@@ -4,7 +4,7 @@
 #include "IIna228.h"
 #include <random>
 
-class MockIna228 : public IIna228 {
+class Ina228 : public IIna228 {
 public:
     float getBusVoltage() override {
         return 12.0 + randf(0.1);  // Simulated 12V system

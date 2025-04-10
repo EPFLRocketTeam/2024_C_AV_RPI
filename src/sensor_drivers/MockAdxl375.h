@@ -7,7 +7,7 @@
 #include "IAdxl375.h"   
 #include "adxl375.h" 
 
-class MockAdxl375 : public IAdxl375 {
+class Adxl375 : public IAdxl375 {
 public:
     adxl375_data get_data() override {
         return {0.0f + rand_noise(), rand_noise(), 0.2f + rand_noise()};

@@ -5,7 +5,7 @@
 #include "bmi08x.h"
 #include <random>
 
-class MockBmi088 : public IBmi088 {
+class Bmi08 : public IBmi088 {
 public:
     uint8_t get_accel_status() override { return 0xAB; }
     uint8_t get_gyro_status() override { return 0xCD; }
