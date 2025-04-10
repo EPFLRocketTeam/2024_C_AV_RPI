@@ -53,6 +53,17 @@ endif()
 # Now define the library with the correct sources
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
+if(USE_MOCK_SENSORS)
+    target_link_libraries(flight_computer PUBLIC
+        MockAdxl375
+        MockBmi08
+        MockBmp390
+        MockIna228
+        MockTmp1075
+    )
+endif()
+
+
 target_include_directories(flight_computer PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     /usr/include/eigen3
