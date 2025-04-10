@@ -38,8 +38,19 @@ set(FIREHORN_FC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.h
 )
 
+# Add mock sensor sources if enabled
+if(USE_MOCK_SENSORS)
+    message(STATUS "Using mock sensor drivers in flight_computer")
+    list(APPEND FIREHORN_FC_SOURCES
+        ${DRIVERS_DIR}/mock/MockAdxl375.cpp
+        ${DRIVERS_DIR}/mock/MockBmi08.cpp
+        ${DRIVERS_DIR}/mock/MockBmp390.cpp
+        ${DRIVERS_DIR}/mock/MockIna228.cpp
+        ${DRIVERS_DIR}/mock/MockTmp1075.cpp
+    )
+endif()
 
-
+# Now define the library with the correct sources
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
@@ -55,7 +66,6 @@ target_include_directories(flight_computer PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/ERT_RF_Protocol_Interface
     ${CMAKE_CURRENT_SOURCE_DIR}/2024_C_AV_INTRANET
     ${DRIVERS_DIR}/mock
-
 )
 
 target_link_libraries(flight_computer PUBLIC
@@ -65,12 +75,9 @@ target_link_libraries(flight_computer PUBLIC
     LoRa4Raspi
 )
 
-# Link hardware sensor libs only if not using mocks
+# Only link real sensor libraries if we're not using mocks
 if(NOT USE_MOCK_SENSORS)
     target_link_libraries(flight_computer PUBLIC
-        2024_C_AV_INTRANET
-        Capsule
-        LoRa4Raspi
         adxl375
         bmi08
         bmp3
@@ -79,18 +86,6 @@ if(NOT USE_MOCK_SENSORS)
         tmp1075
     )
 endif()
-
-if(USE_MOCK_SENSORS)
-    message(STATUS "Using mock sensor drivers in flight_computer")
-    list(APPEND FIREHORN_FC_SOURCES
-        ${DRIVERS_DIR}/mock/MockAdxl375.cpp
-        ${DRIVERS_DIR}/mock/MockBmi08.cpp
-        ${DRIVERS_DIR}/mock/MockBmp390.cpp
-        ${DRIVERS_DIR}/mock/MockIna228.cpp
-        ${DRIVERS_DIR}/mock/MockTmp1075.cpp
-    )
-endif()
-
 
 # Enable a macro for conditional compilation in C++ code
 if(USE_MOCK_SENSORS)
