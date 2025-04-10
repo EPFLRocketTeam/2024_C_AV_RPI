@@ -2,8 +2,6 @@
 #define MOCK_BMP390_H
 
 #include "IBmp390.h"
-#include "bmp3.h" 
-#include "bmp3_defs.h"
 
 #include <random>
 
