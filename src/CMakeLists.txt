@@ -67,6 +67,7 @@ target_include_directories(flight_computer PUBLIC
 
 target_link_libraries(flight_computer PUBLIC
     ERT_RF_Protocol_Interface
+    2024_C_AV_INTRANET
 )
 
 # Link hardware sensor libs only if not using mocks
