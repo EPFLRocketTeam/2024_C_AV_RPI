@@ -87,18 +87,15 @@ if(NOT USE_MOCK_SENSORS)
     )
 endif()
 if(USE_MOCK_SENSORS)
-    message(STATUS "Using mock sensor drivers in flight_computer")
-
-    list(APPEND FIREHORN_FC_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/mock/MockAdxl375.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/mock/MockBmi08.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/mock/MockBmp390.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/mock/MockIna228.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/mock/MockTmp1075.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/mock/mockNavSensors.cpp  # Include any other mock files
+    target_link_libraries(flight_computer PUBLIC
+        MockAdxl375
+        MockBmi08
+        MockBmp390
+        MockGps
+        MockIna228
+        MockTmp1075
     )
 endif()
-
 
 # Enable a macro for conditional compilation in C++ code
 if(USE_MOCK_SENSORS)
