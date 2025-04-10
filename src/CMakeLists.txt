@@ -86,6 +86,7 @@ target_link_libraries(flight_computer PUBLIC
     2024_C_AV_INTRANET
     Capsule
     LoRa4Raspi
+    i2c_interface
 )
 
 # Only link real sensor libraries if we're not using mocks
