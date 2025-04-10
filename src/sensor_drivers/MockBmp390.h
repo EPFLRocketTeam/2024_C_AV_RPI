@@ -3,6 +3,8 @@
 
 #include "IBmp390.h"
 #include "bmp3.h" 
+#include "bmp3_defs.h"
+
 #include <random>
 
 class MockBmp390 : public IBmp390 {
