@@ -99,7 +99,6 @@ if(USE_MOCK_SENSORS)
     )
 endif()
 
-add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 # Enable a macro for conditional compilation in C++ code
 if(USE_MOCK_SENSORS)
