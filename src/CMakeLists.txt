@@ -86,16 +86,7 @@ if(NOT USE_MOCK_SENSORS)
         tmp1075
     )
 endif()
-if(USE_MOCK_SENSORS)
-    target_link_libraries(flight_computer PUBLIC
-        MockAdxl375
-        MockBmi08
-        MockBmp390
-        MockGps
-        MockIna228
-        MockTmp1075
-    )
-endif()
+
 
 # Enable a macro for conditional compilation in C++ code
 if(USE_MOCK_SENSORS)
