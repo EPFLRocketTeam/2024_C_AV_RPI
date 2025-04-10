@@ -21,7 +21,7 @@ public:
         std::cout << "[MockAdxl375] calibrate() called\n";
     }
 
-    adxl375_data add_noise_to_data(const adxl375_data& input, float stddev) override {
+    adxl375_data add_noise_to_data(adxl375_data input, float stddev) override {
         return {
             input.x + rand_noise(stddev),
             input.y + rand_noise(stddev),
