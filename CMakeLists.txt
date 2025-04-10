@@ -89,3 +89,7 @@ if(ENABLE_COVERAGE)
     target_compile_options(flight_computer PUBLIC --coverage)
     target_link_libraries(flight_computer PUBLIC --coverage)
 endif()
+
+if(USE_MOCK_SENSORS)
+    target_compile_definitions(flight_computer PUBLIC MOCK_SENSORS_ENABLED=1)
+endif()

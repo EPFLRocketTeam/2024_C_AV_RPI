@@ -1,40 +1,32 @@
-// MockAdxl375.h
 #ifndef MOCK_ADXL375_H
 #define MOCK_ADXL375_H
 
-#include <iostream>
+#ifdef MOCK_SENSORS_ENABLED
+
+#include "IAdxl375.h"
 #include <random>
-#include "IAdxl375.h"   
-#include "adxl375.h" 
 
 class Adxl375 : public IAdxl375 {
 public:
+    Adxl375(uint8_t addr) { (void)addr; }  // simulate constructor
+    ~Adxl375() override = default;
+
     adxl375_data get_data() override {
-        return {0.0f + rand_noise(), rand_noise(), 0.2f + rand_noise()};
+        return {}; // dummy return
     }
 
-    uint8_t get_status() override {
-        return 0xFF; // dummy OK status
-    }
+    void calibrate() override {}
+    std::string get_status() override { return "mock"; }
 
-    void calibrate() override {
-        std::cout << "[MockAdxl375] calibrate() called\n";
-    }
-
-    adxl375_data add_noise_to_data(adxl375_data input, float stddev) override {
-        return {
-            input.x + rand_noise(stddev),
-            input.y + rand_noise(stddev),
-            input.z + rand_noise(stddev)
-        };
-    }
+    static void add_noise_to_data(adxl375_data&, float) {}
 
 private:
-    float rand_noise(float stddev = 0.05f) {
+    float randf(float stddev) {
         static std::default_random_engine gen;
         std::normal_distribution<float> dist(0.0f, stddev);
         return dist(gen);
     }
 };
 
+#endif // MOCK_SENSORS_ENABLED
 #endif // MOCK_ADXL375_H

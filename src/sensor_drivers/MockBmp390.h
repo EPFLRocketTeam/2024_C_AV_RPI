@@ -1,6 +1,8 @@
 #ifndef MOCK_BMP390_H
 #define MOCK_BMP390_H
 
+
+#ifdef MOCK_SENSORS_ENABLED
 #include "IBmp390.h"
 
 #include <random>
@@ -32,4 +34,5 @@ private:
     }
 };
 
-#endif
+#endif// MOCK_SENSORS_ENABLED
+#endif // MOCK_BMP390_H

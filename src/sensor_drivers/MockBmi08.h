@@ -1,6 +1,8 @@
 #ifndef MOCK_BMI088_H
 #define MOCK_BMI088_H
 
+
+#ifdef MOCK_SENSORS_ENABLED
 #include "IBmi08.h"
 #include "bmi08x.h"
 #include <random>
@@ -33,5 +35,5 @@ private:
         return dist(gen);
     }
 };
-
-#endif
+#endif // MOCK_SENSORS_ENABLED
+#endif // MOCK_BMI088_H

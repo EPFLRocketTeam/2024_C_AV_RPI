@@ -1,6 +1,8 @@
 #ifndef MOCK_INA228_H
 #define MOCK_INA228_H
 
+
+#ifdef MOCK_SENSORS_ENABLED
 #include "IIna228.h"
 #include <random>
 
@@ -22,4 +24,5 @@ private:
     }
 };
 
-#endif
+#endif // MOCK_SENSORS_ENABLED
+#endif // MOCK_INA228_H
