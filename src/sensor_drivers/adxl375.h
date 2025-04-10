@@ -42,6 +42,7 @@
 
 #ifndef __ADXL375_H__
 #define __ADXL375_H__
+#ifndef MOCK_SENSORS_ENABLED 
 
 #include <stdint.h>
 #include <stddef.h>
@@ -613,4 +614,5 @@ public:
     }
 };
 
+#endif /* MOCK_SENSORS_ENABLED */
 #endif	/* __ADXL375_H__ */
