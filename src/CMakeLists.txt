@@ -38,16 +38,7 @@ set(FIREHORN_FC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.h
 )
 
-if(USE_MOCK_SENSORS)
-    message(STATUS "Using mock sensor drivers in flight_computer")
-    list(APPEND FIREHORN_FC_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockAdxl375.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockBmi08.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockBmp390.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockIna228.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/mock/MockTmp1075.cpp
-    )
-endif()
+
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
