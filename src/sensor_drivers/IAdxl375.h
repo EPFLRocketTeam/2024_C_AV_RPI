@@ -3,7 +3,9 @@
 #define IADXL375_H
 
 #include <cstdint>
-#include "adxl375.h" 
+
+// ✅ Forward declaration of struct
+struct adxl375_data;
 
 class IAdxl375 {
 public:
