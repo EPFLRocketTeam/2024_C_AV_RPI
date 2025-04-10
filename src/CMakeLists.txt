@@ -38,7 +38,6 @@ set(FIREHORN_FC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/mock/tsdb.h
 )
 
-# Append mock sensor drivers if enabled
 if(USE_MOCK_SENSORS)
     message(STATUS "Using mock sensor drivers in flight_computer")
     list(APPEND FIREHORN_FC_SOURCES
@@ -50,7 +49,6 @@ if(USE_MOCK_SENSORS)
     )
 endif()
 
-# Build flight_computer target
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
@@ -63,10 +61,10 @@ target_include_directories(flight_computer PUBLIC
     ${DRIVERS_DIR}
     ${KALMAN_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/mock
-    ${CMAKE_CURRENT_SOURCE_DIR}/ERT_RF_Protocol_Interface  # Make sure this is added for includes
+    ${CMAKE_CURRENT_SOURCE_DIR}/ERT_RF_Protocol_Interface
+    ${CMAKE_CURRENT_SOURCE_DIR}/2024_C_AV_INTRANET
 )
 
-# Always link interface libs like Protocol
 target_link_libraries(flight_computer PUBLIC
     ERT_RF_Protocol_Interface
 )
