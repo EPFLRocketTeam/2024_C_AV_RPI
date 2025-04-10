@@ -2,12 +2,11 @@
 #define MOCK_BMI088_H
 
 
-#ifdef MOCK_SENSORS_ENABLED
 #include "IBmi08.h"
 #include "bmi08x.h"
 #include <random>
 
-class Bmi08 : public IBmi088 {
+class MockBmi08 : public IBmi088 {
 public:
     uint8_t get_accel_status() override { return 0xAB; }
     uint8_t get_gyro_status() override { return 0xCD; }
@@ -35,5 +34,4 @@ private:
         return dist(gen);
     }
 };
-#endif // MOCK_SENSORS_ENABLED
 #endif // MOCK_BMI088_H

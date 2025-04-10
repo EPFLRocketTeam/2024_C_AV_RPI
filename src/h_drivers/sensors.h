@@ -47,17 +47,28 @@ public:
     void update_status();
 
 private:
+#ifdef MOCK_SENSORS_ENABLED
+    MockAdxl375 adxl1, adxl2;
 
+    MockBmi08 bmi1, bmi2;
+    MockBmp390 bmp1, bmp2;
+
+    MockTmp1075 tmp1075;
+    MockIna228 ina_lpb;
+    MockIna228 ina_hpb;
+#else
     Adxl375 adxl1, adxl2;
     Bmi088 bmi1, bmi2;
     Bmp390 bmp1, bmp2;
 
-    I2CGPS i2cgps;
-    TinyGPSPlus gps;
-
     TMP1075 tmp1075;
     INA228 ina_lpb;
     INA228 ina_hpb;
+
+#endif
+
+    I2CGPS i2cgps;
+    TinyGPSPlus gps;
 
     Kalman kalman;
 

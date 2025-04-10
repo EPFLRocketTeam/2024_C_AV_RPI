@@ -1,13 +1,11 @@
 #ifndef MOCK_BMP390_H
 #define MOCK_BMP390_H
 
-
-#ifdef MOCK_SENSORS_ENABLED
 #include "IBmp390.h"
 
 #include <random>
 
-class Bmp390 : public IBmp390 {
+class MockBmp390 : public IBmp390 {
 public:
     bmp3_status get_status() override {
         bmp3_status status{};
@@ -34,5 +32,4 @@ private:
     }
 };
 
-#endif// MOCK_SENSORS_ENABLED
 #endif // MOCK_BMP390_H

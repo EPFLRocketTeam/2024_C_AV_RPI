@@ -4,7 +4,7 @@
 #include "ITmp1075.h"
 #include <random>
 
-class Tmp1075 : public ITmp1075 {
+class MockTmp1075 : public ITmp1075 {
 public:
     float getTemperatureCelsius() override {
         return 25.0 + randf(1.0);  // Around room temp
