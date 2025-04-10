@@ -5,6 +5,11 @@ enable_testing()
 cmake_minimum_required(VERSION 3.22.1)
 
 project(flight_computer VERSION 0.1 LANGUAGES C CXX)
+option(ENABLE_TESTING "Enable testing" OFF)
+option(ENABLE_COVERAGE "Enable coverage" OFF)
+option(USE_MOCK_SENSORS "Use mock sensor drivers instead of real hardware ones" OFF)
+
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(ERT_RF_Protocol_Interface INTERFACE)
 target_include_directories(ERT_RF_Protocol_Interface INTERFACE ERT_RF_Protocol_Interface)
