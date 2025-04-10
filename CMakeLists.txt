@@ -62,6 +62,7 @@ target_include_directories(main PUBLIC
     ${DRIVERS_DIR}
     ${KALMAN_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/mock 
+    ${CMAKE_CURRENT_SOURCE_DIR}/2024_C_AV_INTRANET
 )
 
 add_subdirectory(src)
