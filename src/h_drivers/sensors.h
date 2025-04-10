@@ -35,6 +35,7 @@
 #include "I2CGPS.h"
 #include "TinyGPS++.h"
 
+#include <optional>
 class Sensors
 {
 public:
@@ -44,7 +45,6 @@ public:
     void check_policy(const DataDump &dump, uint32_t delta_ms);
     void calibrate();
     bool update();
-    void update_status();
 
 private:
 #ifdef MOCK_SENSORS_ENABLED
@@ -71,6 +71,9 @@ private:
     TinyGPSPlus gps;
 
     Kalman kalman;
+
+    TDB *tdb = nullptr;
+    bool simulation_mode = false;
 
     std::optional<TimeSeries> adxl1_x, adxl1_y, adxl1_z;
     std::optional<TimeSeries> adxl2_x, adxl2_y, adxl2_z;
