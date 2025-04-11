@@ -18,15 +18,15 @@ try
       tmp1075(TMP1075_ADDR_I2C),
       ina_lpb(INA228_ADDRESS_LPB, INA228_LPB_SHUNT, INA228_LPB_MAX_CUR),
       ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR),
-      kalman(INITIAL_COV_GYR_BIAS,
-             INITIAL_COV_ACCEL_BIAS,
-             INITIAL_COV_ORIENTATION,
-             GYRO_COV,
-             GYRO_BIAS_COV,
-             ACCEL_COV,
-             ACCEL_BIAS_COV,
-             GPS_OBS_COV,
-             ALT_OBS_COV)
+    //   kalman(INITIAL_COV_GYR_BIAS,
+    //          INITIAL_COV_ACCEL_BIAS,
+    //          INITIAL_COV_ORIENTATION,
+    //          GYRO_COV,
+    //          GYRO_BIAS_COV,
+    //          ACCEL_COV,
+    //          ACCEL_BIAS_COV,
+    //          GPS_OBS_COV,
+    //          ALT_OBS_COV)
 {
     
     std::cout << "Sensors init\n";
@@ -115,7 +115,7 @@ void Sensors::check_policy(const DataDump &dump, const uint32_t delta_ms)
     // TODO: Implement the logic for the sensors driver
 
     // kalman checks if we are static for calibration
-    kalman.check_static(dump);
+   // kalman.check_static(dump);
     return;
 }
 
@@ -213,11 +213,11 @@ bool Sensors::update()
         nav_sensors.bmp = bmp1_data;
         nav_sensors.bmp_aux = bmp2_data;
 
-        kalman.predict(nav_sensors, Data::get_instance().get().nav);
-        kalman.update(nav_sensors, Data::get_instance().get().nav);
-
-        auto temp_nav_data = kalman.get_nav_data();
-        Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
+        // kalman.predict(nav_sensors, Data::get_instance().get().nav);
+        // kalman.update(nav_sensors, Data::get_instance().get().nav);
+// 
+        // auto temp_nav_data = kalman.get_nav_data();
+        // Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
 
         return true;
     }
@@ -327,11 +327,11 @@ bool Sensors::update()
     }
 
     // Kalmann filter
-    kalman.predict(nav_sensors, Data::get_instance().get().nav);
-    kalman.update(nav_sensors, Data::get_instance().get().nav);
+    // kalman.predict(nav_sensors, Data::get_instance().get().nav);
+    // kalman.update(nav_sensors, Data::get_instance().get().nav);
 
-    auto temp_nav_data(kalman.get_nav_data());
-    Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
+    // auto temp_nav_data(kalman.get_nav_data());
+    // Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
 
     return true;
 }
