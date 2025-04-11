@@ -10,7 +10,7 @@ public:
     MockTmp1075(int) {}
     float getTemperatureCelsius() override
     {
-        return 25.0 + randf(1.0); // Around room temp
+        return 25.0 + randf(1.0); 
     }
 
 private:

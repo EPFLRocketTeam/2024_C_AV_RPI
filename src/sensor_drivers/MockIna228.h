@@ -10,12 +10,12 @@ public:
     MockIna228(int, double, double) {}
     float getBusVoltage() override
     {
-        return 12.0 + randf(0.1); // Simulated 12V system
+        return 12.0 + randf(0.1);
     }
 
     int setMaxCurrentShunt(float, float) override
     {
-        return 0; // Always success
+        return 0;
     }
 
 private:

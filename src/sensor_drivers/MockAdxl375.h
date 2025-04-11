@@ -11,13 +11,12 @@ public:
 
     adxl375_data get_data() override
     {
-        // Return dummy data
         return adxl375_data{1.0f, 2.0f, 3.0f};
     }
 
     uint8_t get_status() override
     {
-        return 0x42; // Dummy status
+        return 0x42; 
     }
 
     adxl375_data add_noise_to_data(adxl375_data input, float stddev) override
@@ -32,7 +31,7 @@ public:
 
     void calibrate() override
     {
-        // No-op for mock
+        
     }
 
 private:

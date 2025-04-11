@@ -19,7 +19,7 @@ public:
 
     bmp3_data get_sensor_data(uint8_t = BMP3_PRESS_TEMP) override
     {
-        return {101325.0 + randf(100), 25.0 + randf(1)}; // pressure in Pa, temp in C
+        return {101325.0 + randf(100), 25.0 + randf(1)}; 
     }
 
     bmp3_data add_noise_to_data(bmp3_data original, double stddev) override
