@@ -72,7 +72,7 @@ private:
     I2CGPS i2cgps;
     TinyGPSPlus gps;
 
-    // Kalman kalman;
+    //  Kalman kalman;
 
     TDB *tdb = nullptr;
     bool simulation_mode = false;

@@ -17,7 +17,9 @@ try
       gps(),
       tmp1075(TMP1075_ADDR_I2C),
       ina_lpb(INA228_ADDRESS_LPB, INA228_LPB_SHUNT, INA228_LPB_MAX_CUR),
-      ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR),
+      ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR)
+    //   ,
+
     //   kalman(INITIAL_COV_GYR_BIAS,
     //          INITIAL_COV_ACCEL_BIAS,
     //          INITIAL_COV_ORIENTATION,
@@ -28,7 +30,7 @@ try
     //          GPS_OBS_COV,
     //          ALT_OBS_COV)
 {
-    
+
     std::cout << "Sensors init\n";
 
     tdb = TDB::from_csv("../tests/NavigationSensors.csv");
@@ -115,7 +117,7 @@ void Sensors::check_policy(const DataDump &dump, const uint32_t delta_ms)
     // TODO: Implement the logic for the sensors driver
 
     // kalman checks if we are static for calibration
-   // kalman.check_static(dump);
+    // kalman.check_static(dump);
     return;
 }
 
@@ -194,7 +196,7 @@ bool Sensors::update()
         bmp3_data bmp1_data = {
             bmp1_p.value().get(),
             bmp1_t.value().get()};
-        bmp1_data = bmp1.add_noise_to_data(bmp1_data, 0.5); 
+        bmp1_data = bmp1.add_noise_to_data(bmp1_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &bmp1_data);
 
         bmp3_data bmp2_data = {
@@ -215,7 +217,7 @@ bool Sensors::update()
 
         // kalman.predict(nav_sensors, Data::get_instance().get().nav);
         // kalman.update(nav_sensors, Data::get_instance().get().nav);
-// 
+        //
         // auto temp_nav_data = kalman.get_nav_data();
         // Data::get_instance().write(Data::NAV_KALMAN_DATA, &temp_nav_data);
 
