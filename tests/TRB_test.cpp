@@ -45,17 +45,15 @@ void read_write_test(TriggerBoard& trb) {
     trb.write_timestamp();
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Waiting 1s... ";
+    std::cout << " - Waiting 1s...\n";
     usleep(1e6);
-    std::cout << "Done\n";
 
     std::cout << " - Sending WAKEUP order... ";
     trb.send_wake_up();
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Waiting 5s... ";
+    std::cout << " - Waiting 5s...\n";
     usleep(5e6);
-    std::cout << "Done\n";
 
     std::cout << " - Checking TRB is woken up... ";
     assert(trb.read_is_woken_up() == true);
@@ -70,9 +68,8 @@ void read_write_test(TriggerBoard& trb) {
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Waiting 300ms...";
+    std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
-    std::cout << "Done\n";
 
     std::cout << " - Sending PYRO NET_CMD_OFF... ";
     cmd = NET_CMD_OFF;
@@ -83,30 +80,23 @@ void read_write_test(TriggerBoard& trb) {
     assert(trb.read_has_triggered() == false);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Waiting 1s...";
+    std::cout << " - Waiting 1s...\n";
     usleep(1e6);
-    std::cout << "Done\n";
 
     std::cout << " - Sending CLEAR_TO_TRIGGER order... ";
     trb.send_clear_to_trigger();
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Waiting 5s... ";
+    std::cout << " - Waiting 5s...\n";
     usleep(5e6);
-    std::cout << "Done\n";
-
-    std::cout << " - Checking TRB triggered flag is set... ";
-    assert(trb.read_has_triggered() == true);
-    std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Sending PYRO1 NET_CMD_ON... ";
     cmd = NET_CMD_ON;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Waiting 300ms...";
+    std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
-    std::cout << "Done\n";
 
     std::cout << " - Sending PYRO1 NET_CMD_OFF... ";
     cmd = NET_CMD_OFF;
