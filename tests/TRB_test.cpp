@@ -12,73 +12,80 @@
 #include "intranet_commands.h"
 #include "trigger_board.h"
 #include "logger.h"
+#include <fstream>
 
 void read_write_test(TriggerBoard& trb);
 void check_policy_test(TriggerBoard& trb);
 
 int main() {
+    std::ofstream log("/boot/av_log/trb_main_test.log", std::ios::app);
+    log << "init test" << std::endl;
+
     DataLogger::getInstance().eventConv("TRB test", 0);
-    std::cout << "\x1b[7m" "Avionics Trigger Board I2C Tests" "\x1b[0m\n\n";
+    log << "\x1b[7m" "Avionics Trigger Board I2C Tests" "\x1b[0m\n\n";
 
     TriggerBoard trb;
     DataLogger::getInstance().eventConv("TRB init", 0);
-    std::cout << "Testing R/W op. and TRB behavior\n";
+    log << "Testing R/W op. and TRB behavior\n";
     read_write_test(trb);
 
     //std::cout << "Testing driver policy\n";
     //check_policy_test(trb);
+    log.close();
 }
 
 void read_write_test(TriggerBoard& trb) {
+    std::ofstream log("/boot/av_log/trb_write_test.log", std::ios::app);
     // TRB is in SLEEP mode until we send WAKEUP
     DataLogger::getInstance().eventConv(" - Checking TRB is in SLEEP mode...", 0);
-    std::cout << " - Checking TRB is in SLEEP mode... ";
+    log << " - Checking TRB is in SLEEP mode... ";
     assert(trb.read_is_woken_up() == false);
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
     DataLogger::getInstance().eventConv(" - Checking TRB triggered flag is not set ...", 0);
-    std::cout << " - Checking TRB triggered flag is not set... ";
+    log << " - Checking TRB triggered flag is not set... ";
     assert(trb.read_has_triggered() == false);
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Writing FSM timestamp to TRB... ";
+    log << " - Writing FSM timestamp to TRB... ";
     trb.send_wake_up();
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Sending WAKEUP order... ";
+    log << " - Sending WAKEUP order... ";
     trb.send_wake_up();
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Waiting 100ms... ";
+    log << " - Waiting 100ms... ";
     usleep(100e3);
-    std::cout << "Done\n";
+    log << "Done\n";
 
-    std::cout << " - Checking TRB is woken up... ";
+    log << " - Checking TRB is woken up... ";
     assert(trb.read_is_woken_up() == true);
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Checking TRB triggered flag is not set... ";
+    log << " - Checking TRB triggered flag is not set... ";
     assert(trb.read_has_triggered() == false);
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Sending PYRO NET_CMD_ON... ";
+    log << " - Sending PYRO NET_CMD_ON... ";
     uint32_t cmd(NET_CMD_ON);
     trb.write_pyros(cmd);
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Waiting 300ms...";
+    log << " - Waiting 300ms...";
     usleep(300e3);
-    std::cout << "Done\n";
+    log << "Done\n";
 
-    std::cout << " - Sending PYRO NET_CMD_OFF... ";
+    log << " - Sending PYRO NET_CMD_OFF... ";
     cmd = NET_CMD_OFF;
     trb.write_pyros(cmd);
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Checking TRB has triggered... ";
+    log << " - Checking TRB has triggered... ";
     assert(trb.read_has_triggered() == true);
-    std::cout << "\x1b[32mOK\x1b[0m\n";
+    log << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << "\x1b[32m\x1b[7mI2C R/W SUCCESS\x1b[0m\n\n";
+    log << "\x1b[32m\x1b[7mI2C R/W SUCCESS\x1b[0m\n\n";
+    log.close();
 }
 
 void check_policy_test(TriggerBoard& trb) {

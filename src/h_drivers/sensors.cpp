@@ -58,7 +58,8 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             // TODO: calibration + low polling rate
             // update();
             if (!dump.event.calibrated) {
-                calibrate();
+                //calibrate();
+                
             }
             break;
         case State::READY:

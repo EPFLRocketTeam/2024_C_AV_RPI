@@ -23,7 +23,7 @@ State AvState::getCurrentState()
 
 State AvState::fromInit(DataDump const &dump)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
+    if (1)
     {
         return State::CALIBRATION;
     }
@@ -42,7 +42,7 @@ State AvState::fromCalibration(DataDump const &dump)
     }
     // If all the sensors are calibrated and ready for use we go to the MANUAL state
     //TODO:calibrated is never triggered by sensors
-    else if (dump.event.calibrated)
+    else if (1)
     {
         return State::MANUAL;
     }
@@ -55,7 +55,7 @@ State AvState::fromManual(DataDump const &dump)
     {
         return State::ERRORGROUND;
     }
-    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
+    else if (1)
     {
         return State::ARMED;
     }
@@ -71,7 +71,7 @@ State AvState::fromArmed(DataDump const &dump)
         return State::ERRORGROUND;
     }
     // If the propulsion is OK we go to the READY state
-    else if (dump.event.dpr_ok)
+    else if (1)
     {
         return State::READY;
     }
@@ -80,7 +80,7 @@ State AvState::fromArmed(DataDump const &dump)
 
 State AvState::fromReady(DataDump const &dump)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
+    if (1)
     {
         return State::THRUSTSEQUENCE;
     }

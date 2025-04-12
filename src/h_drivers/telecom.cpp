@@ -41,15 +41,12 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         }
     }
 
-    // Policy regarding downlink
-    switch (dump.av_state) {
-        case State::INIT:
-            // TODO: try establishing communication with GS
-            break;
-        default:
-            send_telemetry();
-            break;
-    }
+ 
+    
+    send_telemetry();
+    
+        
+    
 
     // Write incoming packets to buffer
     // TODO: see if this can be called in handle_uplink during callback instead of polling
