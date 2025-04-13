@@ -38,6 +38,7 @@
 #include "h_driver.h"
 
 #include <optional>
+#include <memory> 
 class Sensors
 {
 public:

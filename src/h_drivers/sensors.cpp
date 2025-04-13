@@ -210,7 +210,7 @@ bool Sensors::update()
         Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &bmp2_data);
 
         float tmp1075_data = tmp1075_temp->value().get();
-        float tmp1075_data = tmp1075.add_noise_to_data(tmp1075_data, 0.1f);
+        tmp1075_data = tmp1075.add_noise_to_data(tmp1075_data, 0.1f);
         Data::get_instance().write(Data::AV_FC_TEMPERATURE, &tmp1075_data);
 
         float lpb = ina_lpb_voltage->value().get();
