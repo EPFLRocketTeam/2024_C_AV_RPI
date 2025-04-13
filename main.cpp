@@ -23,7 +23,7 @@ int main()
         std::cout << "[INFO] Beginning simulation loop...\n";
 
         // === Simulation Loop ===
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 100; ++i)
         {
             std::cout << "\n[INFO] --- Loop iteration " << i + 1 << " ---\n";
 
@@ -74,9 +74,11 @@ int main()
             std::cout << "[BMP2] Pressure: " << dump.sens.bmp_aux.pressure
                       << ", Temp: " << dump.sens.bmp_aux.temperature << "\n";
 
-            // === Voltages & Temperature ===
+            // === Voltages & Temperature === //TODO: to uncomment once they are integrated 
             std::cout << "[TMP1075] FC Temperature: " << dump.av_fc_temp << " °C\n";
-
+            std::cout << "[INA228] LPB Voltage: " << dump.bat.lpb_voltage << " V\n";
+            std::cout << "[INA228] HPB Voltage: " << dump.bat.hpb_voltage << " V\n";
+            
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
