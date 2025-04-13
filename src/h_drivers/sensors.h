@@ -88,10 +88,10 @@ private:
     std::optional<TimeSeries> bmi2_gyro_x, bmi2_gyro_y, bmi2_gyro_z;
     std::optional<TimeSeries> bmp2_p, bmp2_t;
 
-    std::shared_ptr<TimeSeries> tmp1075_temp;
-    std::shared_ptr<TimeSeries> ina_lpb_voltage;
-    std::shared_ptr<TimeSeries> ina_hpb_voltage;
-
+    std::optional<TimeSeries> tmp1075_temp;
+    std::optional<TimeSeries> ina_lpb_voltage;
+    std::optional<TimeSeries> ina_hpb_voltage;
+    
     // SensStatus status;
     // SensRaw raw_data;
     // SensFiltered clean_data;
