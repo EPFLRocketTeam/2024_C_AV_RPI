@@ -18,17 +18,17 @@ try
       tmp1075(TMP1075_ADDR_I2C),
       ina_lpb(INA228_ADDRESS_LPB, INA228_LPB_SHUNT, INA228_LPB_MAX_CUR),
       ina_hpb(INA228_ADDRESS_HPB, INA228_HPB_SHUNT, INA228_HPB_MAX_CUR)
-    //   ,
+//   ,
 
-    //   kalman(INITIAL_COV_GYR_BIAS,
-    //          INITIAL_COV_ACCEL_BIAS,
-    //          INITIAL_COV_ORIENTATION,
-    //          GYRO_COV,
-    //          GYRO_BIAS_COV,
-    //          ACCEL_COV,
-    //          ACCEL_BIAS_COV,
-    //          GPS_OBS_COV,
-    //          ALT_OBS_COV)
+//   kalman(INITIAL_COV_GYR_BIAS,
+//          INITIAL_COV_ACCEL_BIAS,
+//          INITIAL_COV_ORIENTATION,
+//          GYRO_COV,
+//          GYRO_BIAS_COV,
+//          ACCEL_COV,
+//          ACCEL_BIAS_COV,
+//          GPS_OBS_COV,
+//          ALT_OBS_COV)
 {
 
     std::cout << "Sensors init\n";
@@ -68,6 +68,10 @@ try
 
         bmp2_p = tdb->get_time_series("bmp2_p");
         bmp2_t = tdb->get_time_series("bmp2_t");
+
+        tmp1075_temp = tdb->get_time_series("tmp1075_temp");
+        ina_lpb_voltage = tdb->get_time_series("ina_lpb_v");
+        ina_hpb_voltage = tdb->get_time_series("ina_hpb_v");
 
         std::cout << "start\n";
     }
@@ -204,6 +208,18 @@ bool Sensors::update()
             bmp2_t.value().get()};
         bmp2_data = bmp2.add_noise_to_data(bmp2_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &bmp2_data);
+
+        float tmp1075_data = tmp1075_temp->value().get();
+        float tmp1075_data = tmp1075.add_noise_to_data(tmp1075_data, 0.1f);
+        Data::get_instance().write(Data::AV_FC_TEMPERATURE, &tmp1075_data);
+
+        float lpb = ina_lpb_voltage->value().get();
+        lpb = ina_lpb.add_noise_to_data(lpb, 0.05f);
+        Data::get_instance().write(Data::BAT_LPB_VOLTAGE, &lpb);
+
+        float hpb = ina_hpb_voltage->value().get();
+        hpb = ina_hpb.add_noise_to_data(hpb, 0.05f);
+        Data::get_instance().write(Data::BAT_HPB_VOLTAGE, &hpb);
 
         NavSensors nav_sensors{};
         nav_sensors.adxl = adxl1_data;
