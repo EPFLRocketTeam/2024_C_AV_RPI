@@ -5,48 +5,82 @@
 #include "sensors.h"
 #include "data.h"
 #include "av_state.h"
-
 int main()
 {
     try
     {
-        // Set the AV state to READY
-        DataDump dump = Data::get_instance().get();
-        dump.av_state = State::READY;
+        // === Initialization ===
         std::cout << "[INFO] Setting AV state to READY.\n";
-        Data::get_instance().write(Data::AV_STATE, &dump.av_state);
+        DataDump init_dump = Data::get_instance().get();
+        init_dump.av_state = State::READY;
+        Data::get_instance().write(Data::AV_STATE, &init_dump.av_state);
         std::cout << "[INFO] AV state set to READY.\n";
-        // Initialize the sensor system
+
         std::cout << "[INFO] Initializing sensors...\n";
         std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
         std::cout << "[INFO] Sensors initialized.\n";
-        // Check if we're in simulation mode or hardware mode
-        // if (sensors->is_simulation_mode())
-        //     std::cout << "[INFO] Simulation mode: CSV data source active.\n";
-        // else
-        //     std::cout << "[INFO] Hardware mode: Accessing real sensors.\n";
 
-        std::cout << "[INFO] Sensors initialized. Beginning simulation loop...\n";
+        std::cout << "[INFO] Beginning simulation loop...\n";
 
-        // Simulation loop
+        // === Simulation Loop ===
         for (int i = 0; i < 10; ++i)
         {
-            auto now = std::chrono::steady_clock::now();
-            auto timestamp_gen = static_cast<uint32_t>(
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    now.time_since_epoch())
-                    .count());
-            Data::get_instance().write(Data::AV_TIMESTAMP, &timestamp_gen);
+            std::cout << "\n[INFO] --- Loop iteration " << i + 1 << " ---\n";
 
+            // Timestamp
+            auto now = std::chrono::steady_clock::now();
+            uint32_t timestamp_gen = static_cast<uint32_t>(
+                std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
+            Data::get_instance().write(Data::AV_TIMESTAMP, &timestamp_gen);
+            std::cout << "[DEBUG] Timestamp written: " << timestamp_gen << "\n";
+
+            // Sensor update
+            DataDump dump = Data::get_instance().get();
             sensors->check_policy(dump, 100);
 
-            adxl375_data adxl_data = Data::get_instance().get().sens.adxl;
-            std::cout << "[ADXL1] X: " << adxl_data.x
-                      << ", Y: " << adxl_data.y
-                      << ", Z: " << adxl_data.z << std::endl;
+            // Fetch updated values
+            dump = Data::get_instance().get();
+
+            // === ADXL375 ===
+            std::cout << "[ADXL1] X: " << dump.sens.adxl.x
+                      << ", Y: " << dump.sens.adxl.y
+                      << ", Z: " << dump.sens.adxl.z << "\n";
+
+            std::cout << "[ADXL2] X: " << dump.sens.adxl_aux.x
+                      << ", Y: " << dump.sens.adxl_aux.y
+                      << ", Z: " << dump.sens.adxl_aux.z << "\n";
+
+            // === BMI088 ===
+            std::cout << "[BMI1 ACC] X: " << dump.sens.bmi_accel.x
+                      << ", Y: " << dump.sens.bmi_accel.y
+                      << ", Z: " << dump.sens.bmi_accel.z << "\n";
+
+            std::cout << "[BMI2 ACC] X: " << dump.sens.bmi_aux_accel.x
+                      << ", Y: " << dump.sens.bmi_aux_accel.y
+                      << ", Z: " << dump.sens.bmi_aux_accel.z << "\n";
+
+            std::cout << "[BMI1 GYRO] X: " << dump.sens.bmi_gyro.x
+                      << ", Y: " << dump.sens.bmi_gyro.y
+                      << ", Z: " << dump.sens.bmi_gyro.z << "\n";
+
+            std::cout << "[BMI2 GYRO] X: " << dump.sens.bmi_aux_gyro.x
+                      << ", Y: " << dump.sens.bmi_aux_gyro.y
+                      << ", Z: " << dump.sens.bmi_aux_gyro.z << "\n";
+
+            // === Barometric Pressure ===
+            std::cout << "[BMP1] Pressure: " << dump.sens.bmp.pressure
+                      << ", Temp: " << dump.sens.bmp.temperature << "\n";
+
+            std::cout << "[BMP2] Pressure: " << dump.sens.bmp_aux.pressure
+                      << ", Temp: " << dump.sens.bmp_aux.temperature << "\n";
+
+            // === Voltages & Temperature ===
+            std::cout << "[TMP1075] FC Temperature: " << dump.av_fc_temp << " °C\n";
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+
+        std::cout << "\n[INFO] Sensor test loop completed successfully.\n";
     }
     catch (const std::exception &e)
     {
