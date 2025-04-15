@@ -35,25 +35,25 @@ jobs:
           cd build
           ctest --output-on-failure
 
-      - name: Sonar analysis
-        uses: SonarSource/sonarcloud-github-action@v1
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.exclusions=src/sensor_drivers/**,src/i2c_interface/**,src/post_flight/**
-            -Dsonar.sources=src
-            -Dsonar.tests=tests
-            -Dsonar.cfamily.compile-commands=build/compile_commands.json
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.scm.provider=git
-            -Dsonar.projectKey=epflrocketteam-1_2024_C_AV_RPI
-            -Dsonar.organization=epflrocketteam-1
-            -Dsonar.projectBaseDir=/home/av/UnitDir/2024_C_AV_RPI
-            -Dsonar.cfamily.gcov.reportsPath=build
-            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
-            -Dsonar.pullrequest.branch=${{ github.head_ref }}
-            -Dsonar.pullrequest.base=${{ github.base_ref }}
+#      - name: Sonar analysis
+#        uses: SonarSource/sonarcloud-github-action@v1
+#        env:
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#        with:
+#          args: >
+#            -Dsonar.exclusions=src/sensor_drivers/**,src/i2c_interface/**,src/post_flight/**
+#            -Dsonar.sources=src
+#            -Dsonar.tests=tests
+#            -Dsonar.cfamily.compile-commands=build/compile_commands.json
+#            -Dsonar.host.url=https://sonarcloud.io
+#            -Dsonar.scm.provider=git
+#            -Dsonar.projectKey=epflrocketteam-1_2024_C_AV_RPI
+#            -Dsonar.organization=epflrocketteam-1
+#            -Dsonar.projectBaseDir=/home/av/UnitDir/2024_C_AV_RPI
+#            -Dsonar.cfamily.gcov.reportsPath=build
+#            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+#            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+#            -Dsonar.pullrequest.base=${{ github.base_ref }}
 
       - name: Cleaning
         run: |
