@@ -37,7 +37,7 @@ int main()
             // Sensor update
             DataDump dump = Data::get_instance().get();
             sensors->check_policy(dump, 100);
-
+                
             // Fetch updated values
             dump = Data::get_instance().get();
 
