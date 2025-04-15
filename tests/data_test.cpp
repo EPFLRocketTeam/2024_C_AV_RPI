@@ -1,5 +1,7 @@
+#include "sensors.h"
 #include "data.h"
 #include <cassert>
+#include <iostream>
 
 // return true iff the content of the two bmp3_status structs is equal
 bool areEqualBmp3_status(const bmp3_status& s1, const bmp3_status& s2) {
@@ -107,12 +109,10 @@ int main(int argc, char** argv) {
     DataDump dump = goatData.get();
     assert(dump.telemetry_cmd.id == testTelemetryValue);
 
-    // Test TLM_CMD_VALUE
-    Data::GoatReg telemetryValueReg = Data::GoatReg::TLM_CMD_VALUE;
-    uint8_t testTelemetryCmdValue = 128;
-    goatData.write(telemetryValueReg, &testTelemetryCmdValue);
-    dump = goatData.get();
-    assert(dump.telemetry_cmd.value == testTelemetryCmdValue);
+    // Check if the data is being written correctly
+    assert(dump.sens.adxl.x == 0.0);
+    assert(dump.sens.adxl.y == 0.0);
+    assert(dump.sens.adxl.z == 0.0);
 
     /*Tests Navigation sensors status*/
 

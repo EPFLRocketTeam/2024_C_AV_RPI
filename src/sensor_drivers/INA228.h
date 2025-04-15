@@ -12,6 +12,7 @@
 //
 //  Read the datasheet for the details
 
+#include "IIna228.h"
 #include <stdint.h>
 #include <math.h>
 #include <exception>
@@ -132,7 +133,9 @@ typedef int8_t (*ina228_write_fptr_t)(uint8_t reg_addr, const uint8_t *read_data
  */
 typedef void (*ina228_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
 
-class INA228 {
+#ifndef MOCK_SENSORS_ENABLED 
+class INA228 : public IIna228
+ {
 public:
         //  address between 0x40 and 0x4F
     explicit INA228(const uint8_t address, float shunt=0.015, float maxCurrent=10.0);
@@ -335,5 +338,5 @@ public:
 private:
     std::string message;
 };
-
+#endif //  MOCK_SENSORS_ENABLED
 #endif /* INA228_H */
