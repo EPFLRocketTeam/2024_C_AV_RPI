@@ -145,7 +145,7 @@ void Telecom::send_telemetry() {
 
     av_downlink_t compressed_packet(encode_downlink(packet));
 
-    send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packet, av_downlink_size);
+    send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size);
 }
 
 void Telecom::update() {
