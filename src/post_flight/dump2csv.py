@@ -5,7 +5,10 @@ to properly show the scheme of the files.
 
 
 import os
+import subprocess
 import sys
+import tempfile
+import time
 from typing import Dict, List, Tuple
 import clang.cindex
 def get_qualified_enum_name(enum_node):
@@ -151,7 +154,7 @@ BASE_HEADER = [
     f"#include <iostream>",
     f"#include <fstream>",
     f"#include <sstream>",
-    f"#include \"dump2csv.h\"",
+    f"#include <cstdint>",
     f"{generate_dumper_function_definition('int')};",
     f"{generate_dumper_function_definition('unsigned int')};",
     f"{generate_dumper_function_definition('unsigned')};",
@@ -178,6 +181,40 @@ def generate_xmacros (structs: Dict[str, List[Tuple[str, str]]], enums: Dict[str
     headers = list(BASE_HEADER)
     defines = list(BASE_DEFINE)
 
+    top_sort = []
+    top_sort_set = set()
+
+    def topological_sort (node: str):
+        nonlocal top_sort, top_sort_set
+        if node in top_sort_set: return
+        if node not in structs: return
+        top_sort_set.add(node)
+
+        for name, type in structs[node]:
+            if type.startswith("struct "):
+                type = type[7:]
+            topological_sort(type)
+
+        top_sort.append(node)
+    for key in structs:
+        topological_sort(key)
+
+    for key in enums:
+        headers.append("enum " + key + " {")
+
+        params, size, _key = enums[key]
+        for name, value in params:
+            headers.append(f"\t{name} = {value},")
+        headers.append("};")
+    for key in top_sort:
+        headers.append("struct " + key + "{")
+
+        for name, type in structs[key]:
+            if type.startswith("struct "):
+                type = type[7:]
+            headers.append(f"\t{type} {name};")
+        headers.append("};")
+
     for key in structs:
         header, define = generate_csv_dumper_struct(key, structs[key])
 
@@ -189,19 +226,16 @@ def generate_xmacros (structs: Dict[str, List[Tuple[str, str]]], enums: Dict[str
         headers.append(header)
         defines.append(define)
 
-    print("\n".join(headers))
-    print("\n".join(defines))
+    return "\n".join(headers + defines)
 
 def compile_csv_header (struct: str, structs: Dict[str, List[Tuple[str, str]]], codename: str = "", result = []):
     def accumulate (field: str):
         if codename == "":
             return field
         return codename + "." + field
-    
     if struct not in structs:
         result.append(codename)
         return result
-    
     for fname, ftype in structs[struct]:
         compile_csv_header(ftype, structs, accumulate(fname), result)
     return result
@@ -210,7 +244,7 @@ TEMPLATE = """
 int main (void) {
     %(typename)s dump;
 	char* buffer = (char*) (&dump);
-	std::ifstream stream("log.txt");
+	std::ifstream stream("%(file)s", std::ios_base::binary);
 
 	std::cout << "%(scheme)s\\n";
 
@@ -229,13 +263,14 @@ int main (void) {
 	stream.close();
 }
 """
-def generate_main (struct: str, structs: Dict[str, List[Tuple[str, str]]]):
+def generate_main (struct: str, structs: Dict[str, List[Tuple[str, str]]], file: str):
     scheme = csv_header = ",".join(compile_csv_header( struct, structs ))
 
     return TEMPLATE.replace( "%(typename)s", struct ) \
-        .replace( "%(scheme)s", scheme )
+        .replace( "%(scheme)s", scheme ) \
+        .replace( "%(file)s", file )
 
-def main (target: str, struct_name: str):
+def main (target: str, struct_name: str, file: str):
     headers = find_all_headers(target)
 
     all_structs: Dict[str, List[Tuple[str, str]]]             = {}
@@ -251,13 +286,40 @@ def main (target: str, struct_name: str):
     
     filter_useful(struct_name, all_structs, all_enums)
 
-    generate_xmacros(all_structs, all_enums)
+    xmacros = generate_xmacros(all_structs, all_enums)
+    main = generate_main( struct_name, all_structs, file )
 
-    print(generate_main( struct_name, structs ))
+    code = xmacros + "\n" + main
 
+    def printcerr (*args, **kwargs):
+        print(*args, **kwargs, file=sys.stderr)
+
+    printcerr(" [+] Setting up temporary directory...")
+    with tempfile.TemporaryDirectory(prefix = os.getcwd() + os.path.sep) as dir:
+        target = os.path.basename(dir)
+
+        main_file = os.path.join(".", target, "main")
+        code_file = os.path.join(".", target, "code.cpp")
+
+        printcerr("   [+] Using directory", target)
+        printcerr(" [+] Dumping macro code...")
+        with open(code_file, "w") as file:
+            file.write(code)
+        
+        printcerr(" [+] Compiling dump2csv...")
+        subprocess.run([ "g++", "-o", main_file, code_file ])
+        
+        printcerr(" [+] Running dump2csv")
+        subprocess.run([ main_file ])
+        
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python generate_macros_clang.py <header | folder> <struct>")
+    if len(sys.argv) != 3 and len(sys.argv) != 4:
+        print("Usage: python dump2csv.py <header | folder> <struct> <dump>")
+        print("  If dump isn't defined then dump will be log.txt")
+        print("  The dump is written into the standard output")
+        print()
+        print("  For example, if you are in folder src/post_flight, you may want to do")
+        print("    python3 dump2csv.py ../../ DataDump ~/log.txt > res.csv")
         sys.exit(1)
 
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) >= 4 else "log.txt")
