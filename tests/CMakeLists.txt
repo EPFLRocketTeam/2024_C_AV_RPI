@@ -42,6 +42,12 @@ add_test(NAME DataTest COMMAND data_test)
 add_executable(trb_test TRB_test.cpp)
 target_link_libraries(trb_test flight_computer)
 
+add_executable(buzzer_test buzzer_test.cpp)
+target_link_libraries(buzzer_test flight_computer)
+
+add_executable(telecom_test telecom_test.cpp)
+target_link_libraries(telecom_test flight_computer)
+
 
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})
