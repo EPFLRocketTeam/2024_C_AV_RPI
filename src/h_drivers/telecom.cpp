@@ -5,6 +5,8 @@
 #include <Protocol.h>
 #include <capsule.h>
 #include <pigpio.h>
+#include "DownlinkCompression_Firehorn.h"
+#include "PacketDefinition_Firehorn.h"
 #include "telecom.h"
 #include "data.h"
 #include "h_driver.h"
@@ -115,28 +117,33 @@ bool Telecom::begin() {
 void Telecom::send_telemetry() {
     const DataDump data = Data::get_instance().get();
 
-    av_downlink_t packet;
-    packet.gnss_lat = data.nav.position.lat;
+    av_downlink_unpacked packet;
+    packet.packet_nbr = data.av_timestamp;
     packet.gnss_lon = data.nav.position.lng;
+    packet.gnss_lat = data.nav.position.lat;
     packet.gnss_alt = data.nav.position.alt;
-
+    packet.gnss_vertical_speed = 0;
+    
     packet.N2_pressure = data.prop.N2_pressure;
     packet.fuel_pressure = data.prop.fuel_pressure;
     packet.LOX_pressure = data.prop.LOX_pressure;
-    packet.igniter_pressure = data.prop.igniter_pressure;
-    packet.LOX_inj_pressure = data.prop.LOX_inj_pressure;
-    packet.fuel_inj_pressure = data.prop.fuel_inj_pressure;
-    packet.chamber_pressure = data.prop.chamber_pressure;
     packet.fuel_level = data.prop.fuel_level;
     packet.LOX_level = data.prop.LOX_level;
     packet.N2_temp = data.prop.N2_temperature;
-    packet.fuel_temp = data.prop.fuel_temperature;
     packet.LOX_temp = data.prop.LOX_temperature;
-    packet.igniter_temp = data.prop.igniter_temperature;
-    packet.fuel_inj_temp = data.prop.fuel_inj_temperature;
-    packet.fuel_inj_cool_temp = data.prop.fuel_inj_cooling_temperature;
     packet.LOX_inj_temp = data.prop.LOX_inj_temperature;
-    packet.engine_temp = data.prop.chamber_temperature;
+
+    packet.lpb_voltage = data.bat.lpb_voltage;
+    packet.hpb_voltage = data.bat.hpb_voltage;
+
+    packet.av_fc_temp = data.av_fc_temp;
+    packet.ambient_temp = 0;
+    packet.engine_state = 0;
+
+    packet.av_state = (uint8_t)data.av_state;
+    packet.cam_rec = 0;
+
+    av_downlink_t compressed_packet(encode_downlink(packet));
 
     send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&packet, av_downlink_size);
 }
