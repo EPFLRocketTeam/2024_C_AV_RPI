@@ -48,6 +48,10 @@ add_executable(telecom_test telecom_test.cpp)
 target_link_libraries(telecom_test flight_computer)
 
 
+set (I2CARDUINO_TEST src/I2CArduino_test/I2CArduino_RaspberryPi.cpp)
+add_executable(i2c_arduino_test ${I2CARDUINO_TEST})
+target_link_libraries(i2c_arduino_test PUBLIC I2CInterface)
+
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})
 #target_include_directories(mock_sensor PUBLIC include)
