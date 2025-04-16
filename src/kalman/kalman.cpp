@@ -42,6 +42,7 @@ Kalman::Kalman( float estimate_covariance_gyro,
     
 
     // Initialize covariance matrices
+    initial_estimate_covariance = Eigen::MatrixXf::Zero(15, 15);
     initial_estimate_covariance.setZero();
     initial_estimate_covariance(0, 0) = estimate_covariance_orientation;
     initial_estimate_covariance(1, 1) = estimate_covariance_orientation;
