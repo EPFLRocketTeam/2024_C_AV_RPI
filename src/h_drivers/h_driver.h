@@ -1,16 +1,18 @@
 #ifndef H_DRIVER_H
 #define H_DRIVER_H
 
-#include "data.h"
 #include "av_state.h"
+#include "intranet_commands.h"
 
 class HDriver {
-    public:
-        HDriver() = default;
-        virtual ~HDriver() = default;
-    
-        virtual void check_policy(Data::GoatReg reg, const DataDump& dump) = 0; // Pure virtual
+public:
+    virtual ~HDriver() = default;
+    /**
+     *  @param dump:        Goat struct
+     *  @param delta_ms:    Delta time (time difference between last call and current call, in ms) 
+     */
+    virtual void check_policy(const DataDump& dump, const uint32_t delta_ms) = 0;
 };
-    
+
 
 #endif /* H_DRIVER_H */

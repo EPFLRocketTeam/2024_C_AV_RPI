@@ -9,6 +9,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(ERT_RF_Protocol_Interface INTERFACE)
 target_include_directories(ERT_RF_Protocol_Interface INTERFACE ERT_RF_Protocol_Interface)
 
+
+add_library(2024_C_AV_INTRANET INTERFACE)
+target_include_directories(2024_C_AV_INTRANET INTERFACE 2024_C_AV_INTRANET)
+
+
 add_library(Capsule INTERFACE)
 target_include_directories(Capsule INTERFACE 2024_C_AV-GS_CAPSULE/src)
 
