@@ -1,54 +1,58 @@
 
-#ifndef DPR_DRIVER_H
-#define DPR_DRIVER_H
+#ifndef DPR_H
+#define DPR_H
 
+#include <exception>
 #include "h_driver.h"
 
-// TODO change the DPR Address
-#define DPR_ADDRESS 0xFF
-
-#define DPR_FAIL_I2C_OPEN  -1
-#define DPR_FAIL_I2C_CLOSE -2
-#define DPR_FAIL_I2C_NOT_OPEN -3
-#define DPR_FAIL_I2C_READ -4
-#define DPR_FAIL_I2C_WRITE -5
-
-enum class DPR_Commands : uint8_t {
-    // WRITE
-    TIMESTAMP_MAIN_FSM,
-    WAKE_UP,
-    PRESSURIZE,
-    ABORT,
-
-    // READ
-    INTERNAL_FSM_STATUS,
-    PRESSURE,
-    DN_NC
-};
-
-class DPR_Driver : public HDriver {
+class DPR : public HDriver {
 public:
-    DPR_Driver  () = default;
-    ~DPR_Driver () = default;
+    DPR(const uint8_t address);
+    virtual ~DPR();
 
-    uint8_t init  ();
-    uint8_t close ();
+    void write_timestamp();
+    void wake_up();
+    bool read_is_woken_up();
+    void send_pressurize();
+    void send_abort();
+    void read_tank_level();
+    void read_tank_pressure();
+    void read_tank_temperature();
+    void read_copv_pressure();
+    void read_copv_temperature();
+    void write_tank_valve(const uint8_t cmd);
+    void write_copv_valve(const uint8_t cmd);
 
-    void check_policy(Data::GoatReg reg, const DataDump& dump) override;
-
-    float read_pressure ();
-    bool  read_dn_nc ();
+    virtual void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 private:
-    void *intf_ptr = nullptr;
+    uint8_t m_address;
+    std::string m_code;
+    uint32_t delta_ms;
 
-    uint8_t  read_reg (uint8_t reg_addr, uint8_t* reg_data, uint32_t len);
-    uint8_t write_reg (uint8_t reg_addr, const uint8_t* reg_data, uint32_t len);
-
-    void processManualMode(const DataDump& dump);
-
-    void wakeUp ();
-    void abort  ();
-    void pressurize ();
+    void handle_init();
+    void handle_calibration();
+    void handle_manual(const DataDump& dump);
+    void handle_armed(const DataDump& dump);
+    void handle_ready();
+    void handle_thrustsequence();
+    void handle_liftoff();
+    void handle_ascent();
+    void handle_descent();
+    void handle_landed();
+    void handle_errorground();
+    void handle_errorflight();
 };
 
-#endif
+class DPRException : public std::exception {
+public:
+    DPRException(const std::string& msg_) : msg(msg_) {}
+
+    virtual const char* what() const throw() {
+        return msg.c_str();
+    }
+
+private:
+    std::string msg;
+};
+
+#endif /* DPR_H */
