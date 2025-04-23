@@ -206,6 +206,12 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             handle_errorground(dump);
             break;
     }
+
+    read_tank_level();
+    read_tank_pressure();
+    read_tank_temperature();
+    read_copv_pressure();
+    read_copv_temperature();
 }
 
 void DPR::handle_init(const DataDump& dump) {
