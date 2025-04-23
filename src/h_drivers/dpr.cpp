@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include "PacketDefinition_Firehorn.h"
+#include "data.h"
 #include "dpr.h"
 #include "i2c_interface.h"
 #include "intranet_commands.h"
@@ -22,10 +24,9 @@ DPR::~DPR() {
     }
 }
 
-void DPR::write_timestamp() {
-    const uint32_t timestamp(Data::get_instance().get().av_timestamp);
+void DPR::write_timestamp(const uint32_t tmsp) {
     try {
-        I2CInterface::getInstance().write(m_address, DPR_TIMESTAMP_MAIN, (uint8_t*)&timestamp,
+        I2CInterface::getInstance().write(m_address, DPR_TIMESTAMP_MAIN, (uint8_t*)&tmsp,
         NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("DPR " + m_code + " write_timestamp error: ");
@@ -163,9 +164,13 @@ void DPR::write_copv_valve(const uint8_t cmd) {
 
 void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     this->delta_ms = delta_ms;
+    count_ms += delta_ms;
     switch (dump.av_state) {
         case State::INIT:
+            handle_init(dump);
+            break;
         case State::CALIBRATION:
+            handle_calibration(dump);
             break;
         case State::MANUAL:
             handle_manual(dump);
@@ -174,55 +179,45 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             handle_armed(dump);
             break ;
         case State::READY:
-            handle_ready();
+            handle_ready(dump);
             break;
         case State::THRUSTSEQUENCE:
-            handle_thrustsequence();
+            handle_thrustsequence(dump);
             break;
         case State::LIFTOFF:
-            handle_liftoff();
+            handle_liftoff(dump);
             break;
         case State::ASCENT:
-            handle_ascent();
+            handle_ascent(dump);
             break;
         case State::DESCENT:
-            handle_descent();
+            handle_descent(dump);
             break;
         case State::LANDED:
-            handle_landed();
+            handle_landed(dump);
             break;
         case State::ERRORGROUND:
-            handle_errorground();
+            handle_errorground(dump);
             break;
         case State::ERRORFLIGHT:
-            handle_errorflight();
+            handle_errorflight(dump);
             break;
         default:
-            handle_errorground();
+            handle_errorground(dump);
             break;
     }
 }
 
-void DPR::handle_init() {
-
-}
-
-void DPR::handle_calibration() {
-
-}
-
-void DPR::handle_manual(const DataDump& dump) {
-    if (dump.event.command_updated) {
-        switch (dump.telemetry_cmd.id) {
-            // TODO: add PE, PO and DN valves to RF_Protocol_Interface CMD_ID enum
-            default:
-                break;
-        }
+void DPR::handle_init(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
     }
-}
 
-void DPR::handle_armed(const DataDump& dump) {
-    if (m_address == NET_ADDR_DPR_ETH ? dump.event.dpr_eth_ready : dump.event.dpr_lox_ready) {
+    // Wake up DPR at power on for sensors polling
+    const bool dpr_ready(m_address == NET_ADDR_DPR_ETH ? dump.event.dpr_eth_ready : dump.event.dpr_lox_ready);
+    if (!dpr_ready) {
         static uint32_t count_wkp(0);
         static uint8_t wkp_attempts(0);
         count_wkp += delta_ms;
@@ -241,34 +236,105 @@ void DPR::handle_armed(const DataDump& dump) {
     }
 }
 
-void DPR::handle_ready() {
-
+void DPR::handle_calibration(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
 }
 
-void DPR::handle_thrustsequence() {
+void DPR::handle_manual(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
 
+    if (dump.event.command_updated) {
+        switch (dump.telemetry_cmd.id) {
+            // TODO: add PE, PO and DN valves to RF_Protocol_Interface CMD_ID enum
+            default:
+                break;
+        }
+    }
 }
 
-void DPR::handle_liftoff() {
+void DPR::handle_armed(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
 
+    const bool dpr_ready(m_address == NET_ADDR_DPR_ETH ? dump.event.dpr_eth_ready : dump.event.dpr_lox_ready);
+    if (dpr_ready && dump.event.command_updated) {
+        if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_PRESSURIZE) {
+            send_pressurize();
+        }
+    }
 }
 
-void DPR::handle_ascent() {
-
+void DPR::handle_ready(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
 }
 
-void DPR::handle_descent() {
-
+void DPR::handle_thrustsequence(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
 }
 
-void DPR::handle_landed() {
-
+void DPR::handle_liftoff(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
 }
 
-void DPR::handle_errorground() {
-
+void DPR::handle_ascent(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
 }
 
-void DPR::handle_errorflight() {
+void DPR::handle_descent(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
+}
 
+void DPR::handle_landed(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
+}
+
+void DPR::handle_errorground(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
+}
+
+void DPR::handle_errorflight(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    if (count_ms >= 1000) {
+        write_timestamp(dump.av_timestamp);
+        count_ms = 0;
+    }
 }

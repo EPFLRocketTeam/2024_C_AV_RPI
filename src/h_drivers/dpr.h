@@ -3,6 +3,7 @@
 #define DPR_H
 
 #include <exception>
+#include "data.h"
 #include "h_driver.h"
 
 class DPR : public HDriver {
@@ -10,7 +11,7 @@ public:
     DPR(const uint8_t address);
     virtual ~DPR();
 
-    void write_timestamp();
+    void write_timestamp(const uint32_t tmsp);
     void wake_up();
     bool read_is_woken_up();
     void send_pressurize();
@@ -28,19 +29,20 @@ private:
     uint8_t m_address;
     std::string m_code;
     uint32_t delta_ms;
+    uint32_t count_ms;
 
-    void handle_init();
-    void handle_calibration();
+    void handle_init(const DataDump& dump);
+    void handle_calibration(const DataDump& dump);
     void handle_manual(const DataDump& dump);
     void handle_armed(const DataDump& dump);
-    void handle_ready();
-    void handle_thrustsequence();
-    void handle_liftoff();
-    void handle_ascent();
-    void handle_descent();
-    void handle_landed();
-    void handle_errorground();
-    void handle_errorflight();
+    void handle_ready(const DataDump& dump);
+    void handle_thrustsequence(const DataDump& dump);
+    void handle_liftoff(const DataDump& dump);
+    void handle_ascent(const DataDump& dump);
+    void handle_descent(const DataDump& dump);
+    void handle_landed(const DataDump& dump);
+    void handle_errorground(const DataDump& dump);
+    void handle_errorflight(const DataDump& dump);
 };
 
 class DPRException : public std::exception {
