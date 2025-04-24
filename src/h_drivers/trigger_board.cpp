@@ -170,7 +170,7 @@ void TriggerBoard::handle_armed(const DataDump& dump) {
     }
 
     // After DPR GO, send wake_up each 500ms until is_woken_up is true
-    if (dump.event.dpr_eth_pressure_ok && !dump.event.trb_ready) {
+    if (dump.event.dpr_eth_pressure_ok && dump.event.dpr_lox_pressure_ok && !dump.event.trb_ready) {
         static uint32_t count_wkp(0);
         static uint8_t wkp_attempts(0);
         count_wkp += delta_ms;
