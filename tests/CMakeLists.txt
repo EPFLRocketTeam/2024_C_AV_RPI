@@ -1,5 +1,3 @@
-
-
 add_executable(adxl375_test ADXL375_test.cpp)
 target_link_libraries(adxl375_test adxl375)
 
@@ -28,16 +26,31 @@ target_link_libraries(gps_test gps)
 
 add_executable(lora_test LoRa_test.cpp)
 target_link_libraries(lora_test LoRa4Raspi)
+target_include_directories(lora_test PUBLIC ${CMAKE_SOURCE_DIR}/src/)
 
 add_executable(main_test main_test.cpp)
 target_link_libraries(main_test flight_computer)
 
+add_executable(ina228_test INA228_test.cpp)
+target_link_libraries(ina228_test ina228)
+
+add_executable(TMP1075_test TMP1075_test.cpp)
+target_link_libraries(TMP1075_test PRIVATE tmp1075)
 
 add_executable(data_test data_test.cpp)
 target_link_libraries(data_test flight_computer)
 target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
 # Register the test with CTest
 add_test(NAME DataTest COMMAND data_test)
+
+add_executable(trb_test TRB_test.cpp)
+target_link_libraries(trb_test flight_computer)
+
+add_executable(buzzer_test buzzer_test.cpp)
+target_link_libraries(buzzer_test flight_computer)
+
+add_executable(telecom_test telecom_test.cpp)
+target_link_libraries(telecom_test flight_computer)
 
 
 #set(MOCK_SENSOR src/MockSensor.cpp)
