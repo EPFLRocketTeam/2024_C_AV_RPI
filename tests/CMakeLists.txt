@@ -22,6 +22,7 @@ target_link_libraries(gps_test gps)
 
 add_executable(lora_test LoRa_test.cpp)
 target_link_libraries(lora_test LoRa4Raspi)
+target_include_directories(lora_test PUBLIC ${CMAKE_SOURCE_DIR}/src/)
 
 add_executable(main_test main_test.cpp)
 target_link_libraries(main_test flight_computer)
@@ -43,6 +44,9 @@ target_link_libraries(trb_test flight_computer)
 
 add_executable(buzzer_test buzzer_test.cpp)
 target_link_libraries(buzzer_test flight_computer)
+
+add_executable(telecom_test telecom_test.cpp)
+target_link_libraries(telecom_test flight_computer)
 
 
 #set(MOCK_SENSOR src/MockSensor.cpp)
