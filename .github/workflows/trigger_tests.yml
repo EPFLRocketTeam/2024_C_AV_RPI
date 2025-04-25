@@ -13,48 +13,7 @@ on:
 
 
 
-jobs:
-##  trigger:
-##    runs-on: ubuntu-latest
-##
-##    steps:
-##      - name: Trigger tests repository
-##        id: trigger
-##        uses: peter-evans/repository-dispatch@v1
-##        with:
-##          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-##          repository: EPFLRocketTeam/C_AV_SIL
-##          event-type: run-tests
-##          client-payload: |
-##            {
-##              "branch": "${{ github.head_ref }}",
-##              "baseref" : "${{github.base_ref}}",
-##              "commit": "${{ github.sha }}",
-##              "repo": "${{ github.repository }}",
-##              "key": "${{github.event.pull_request.number}}"
-##            }
-##  checking:
-##    runs-on: ubuntu-latest
-##    needs: trigger
-##    steps:
-##      - name: Wait for workflow to complete
-##        run: |
-##          sleep 80
-##          while true; do
-##            sleep 10
-##            STATUS=$(curl -s -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" \
-##              "https://api.github.com/repos/EPFLRocketTeam/C_AV_SIL/actions/runs?event=repository_dispatch&status=completed" | \
-##              jq -r '.workflow_runs[0].conclusion')
-##            echo "Status: $STATUS"
-##            if [ "$STATUS" == "success" ]; then
-##              echo "Dispatched workflow succeeded"
-##              break
-##            elif [ "$STATUS" == "failure" ]; then
-##              echo "Dispatched workflow failed"
-##              exit 1
-##            fi
-##          done
-          
+jobs:          
 
   unit_tests:
     runs-on: ubuntu-latest
@@ -69,46 +28,62 @@ jobs:
           port: ${{ secrets.SECRET_PORT }}
           script: |
             # Initialize a variable to indicate if any command failed
+            #To stop the script if any command fails
+            set -e
+
             failed=false
             ls
             cd ./UnitDir
-            git clone git@github.com:EPFLRocketTeam/2024_C_AV_RPI.git
-            cd ./2024_C_AV_RPI
-            git checkout ${{ github.head_ref }}
-            git submodule update --init --recursive --remote
-            mkdir build
-            cd build
-            cmake -DENABLE_TESTING_SOFT=ON -DENABLE_COVERAGE=ON ..
-            make
 
-            if [ $? -ne 0 ]; then
-              failed=true
+            # Get the branch name 
+            branch="${{ github.head_ref }}"
+            if [ -z "$branch" ]; then
+              branch="${{ github.ref }}"
+              branch="${branch#refs/heads/}"
             fi
-            ctest --output-on-failure   
-            if [ $? -ne 0 ]; then
-              failed=true
+            echo "Testing branch: $branch"
+
+            # Clone the repository for the branch
+            REPO_DIR="2024_C_AV_RPI_${branch}"
+            if [ ! -d "$REPO_DIR" ]; then
+              echo "Cloning repository for branch $branch..."
+              git clone git@github.com:EPFLRocketTeam/2024_C_AV_RPI.git "$REPO_DIR"
             fi
-            
+
+            # Change to the repository directory
+            cd "$REPO_DIR"
+            echo "Fetching updates for branch $branch..."
+            git fetch origin
+            echo "Resetting to origin/$branch..."
+            git reset --hard "origin/$branch"
+            git submodule update --init --recursive --remote
+
+            # Create a temporary build directory for this test run
+            BUILD_DIR="build_$(date +%s)"
+            echo "Creating temporary build directory: $BUILD_DIR"
+            mkdir "$BUILD_DIR"
+            cd "$BUILD_DIR"
+            echo "Running CMake configuration..."
+            cmake -DENABLE_TESTING=ON -DENABLE_COVERAGE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+            echo "Building project..."
+            make || failed=true
+
+            echo "Running tests..."
+            ctest --output-on-failure || failed=true
+
+            echo "Generating coverage data..."
             find . -name "*.gcda" -exec gcov {} \;
+
+            # Run sonarcloud
             source ~/.bashrc
             cd ..
-            /opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=${{ secrets.SONAR_TOKEN }} -Dsonar.exclusions=src/sensor_drivers/**,src/i2c_interface/**,src/post_flight/**  -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.cfamily.compile-commands=build/compile_commands.json -Dsonar.host.url=https://sonarcloud.io -Dsonar.scm.provider=git -Dsonar.projectKey=epflrocketteam-1_2024_C_AV_RPI -Dsonar.organization=epflrocketteam-1 -Dsonar.projectBaseDir=/home/av/UnitDir/2024_C_AV_RPI -Dsonar.cfamily.gcov.reportsPath=build -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.head_ref }} -Dsonar.pullrequest.base=${{ github.base_ref }}
-        
+            /opt/sonar-scanner/bin/sonar-scanner -Dsonar.token=${{ secrets.SONAR_TOKEN }} -Dsonar.exclusions=src/sensor_drivers/**,src/i2c_interface/**,src/post_flight/**  -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.cfamily.compile-commands="${BUILD_DIR}/compile_commands.json" -Dsonar.host.url=https://sonarcloud.io -Dsonar.scm.provider=git -Dsonar.projectKey=epflrocketteam-1_2024_C_AV_RPI -Dsonar.organization=epflrocketteam-1 -Dsonar.projectBaseDir="/home/av/UnitDir/${REPO_DIR}" -Dsonar.cfamily.gcov.reportsPath=build -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.head_ref }} -Dsonar.pullrequest.base=${{ github.base_ref }}
+
+    
             cd ..
-            rm -rf 2024_C_AV_RPI
+            rm -rf "$BUILD_DIR"
+
             if [ "$failed" = true ]; then
               exit 1
             fi
-            
-            
-            
-  
-
-    
-      
-
-
-  
-
-            
-            
+            echo "All tests passed successfully!"
