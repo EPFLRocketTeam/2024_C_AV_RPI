@@ -17,6 +17,7 @@
 #include <math.h>
 #include <exception>
 #include <string>
+#include <random>
 
 #define INA228_LIB_VERSION (F("0.2.0"))
 #define INA228_ADDRESS_LPB 0x40
@@ -287,6 +288,10 @@ public:
     //  ERROR HANDLING
     //
     int getLastError();
+
+
+    // add noise to data
+    float add_noise_to_data(float original_value, float stddev);
 
 private:
     //  max 4 bytes

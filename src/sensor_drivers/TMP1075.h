@@ -24,7 +24,9 @@
 #include <stdint.h> // uint16_t, etc.
 #include <exception>
 #include <string>
+#include <random>
 #include "ITmp1075.h"
+
 
 #define TMP1075_ADDR_I2C 0x4E
 
@@ -123,6 +125,7 @@ public:
     float getHighTemperatureLimitCelsius();
     void setHighTemperatureLimitRaw(int16_t value = 0x5000);
     void setHighTemperatureLimitCelsius(float value = 80.f);
+    float add_noise_to_data(float original_value, float stddev);
 
     uint16_t getDeviceId();
     

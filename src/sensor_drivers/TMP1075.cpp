@@ -198,6 +198,15 @@ void TMP1075::setHighTemperatureLimitCelsius(const float value)
     this->setHighTemperatureLimitRaw(TMP1075::convertFromCelsius(value));
 }
 
+float TMP1075::add_noise_to_data(float original_value, float stddev)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<float> noise(0.0f, stddev);
+    double noise_value = noise(gen);
+    return original_value +  noise_value;
+}
+
 uint16_t TMP1075::getDeviceId()
 {
     return (uint16_t)(this->readRegister(0x0F));
