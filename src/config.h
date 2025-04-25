@@ -22,4 +22,19 @@
 #define LED_LORA_TX 18
 
 
+
+#define USE_ADXL1     1
+#define USE_ADXL2     1
+#define USE_BMI1      1
+#define USE_BMI2      1
+#define USE_BMP1      1
+#define USE_BMP2      1
+#define USE_GPS       1
+#define USE_TMP1075   1
+#define USE_INA_LPB   1
+#define USE_INA_HPB   1
+#define USE_KALMAN    1
+
+
+
 #endif /* CONFIG_H */
