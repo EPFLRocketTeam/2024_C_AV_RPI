@@ -7,14 +7,15 @@
 #include <iostream>
 #include <LoRa.h>
 #include <pigpio.h>
+#include "config.h"
 
-#define LORA_BRAVO_SS_PIN     LORA_DEFAULT_SPI_CE0
-#define LORA_BRAVO_RST_PIN    LORA_DEFAULT_RESET_PIN
-#define LORA_BRAVO_DIO0_PIN   LORA_DEFAULT_DIO0_PIN
+#define LORA_BRAVO_SS_PIN     LORA_UPLINK_CS
+#define LORA_BRAVO_RST_PIN    LORA_UPLINK_RST
+#define LORA_BRAVO_DIO0_PIN   LORA_UPLINK_DI0
 
-#define LORA_ALPHA_SS_PIN     LORA_DEFAULT_SPI_CE1
-#define LORA_ALPHA_RST_PIN    24
-#define LORA_ALPHA_DIO0_PIN   6
+#define LORA_ALPHA_SS_PIN     LORA_DOWNLINK_CS
+#define LORA_ALPHA_RST_PIN    LORA_DOWNLINK_RST
+#define LORA_ALPHA_DIO0_PIN   LORA_DOWNLINK_DI0
 
 #define lora_bravo LoRa
 LoRaClass lora_alpha;
@@ -28,11 +29,12 @@ void uplink_receive(int packet_size);
 int main(void) {
     gpioInitialise();
 
-    std::cout << "***RFM95 LoRa testbench***\n\n";
+    std::cout << "\x1b[7m***RFM95 LoRa testbench***\x1b[0m\n\n";
 
     lora_alpha.setPins(LORA_ALPHA_SS_PIN, LORA_ALPHA_RST_PIN, LORA_ALPHA_DIO0_PIN);
     if (!lora_alpha.begin(LORA_FREQUENCY, SPI1)) {
         std::cout << "LoRa Alpha init failed!\n";
+        return 1;
     }else {
         std::cout << "LoRa Alpha init succeeded!\n";
     }
