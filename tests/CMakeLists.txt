@@ -23,6 +23,7 @@ target_link_libraries(gps_test gps)
 
 add_executable(lora_test LoRa_test.cpp)
 target_link_libraries(lora_test LoRa4Raspi)
+target_include_directories(lora_test PUBLIC ${CMAKE_SOURCE_DIR}/src/)
 
 add_executable(main_test main_test.cpp)
 target_link_libraries(main_test flight_computer)
