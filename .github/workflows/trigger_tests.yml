@@ -86,4 +86,4 @@ jobs:
             if [ "$failed" = true ]; then
               exit 1
             fi
-            
+            echo "All tests passed successfully!"
