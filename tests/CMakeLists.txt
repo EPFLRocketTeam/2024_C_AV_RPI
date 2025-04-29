@@ -51,6 +51,8 @@ target_link_libraries(buzzer_test flight_computer)
 add_executable(telecom_test telecom_test.cpp)
 target_link_libraries(telecom_test flight_computer)
 
+add_executable(kalman_mock kalman_mock.cpp)
+target_link_libraries(kalman_mock flight_computer)
 
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})

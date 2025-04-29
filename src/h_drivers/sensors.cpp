@@ -81,8 +81,8 @@ void Sensors::calibrate() {
 
     //must have counter ro return an error if too much
     //Redo calibration
-    adxl1.calibrate();
-    adxl2.calibrate();
+    // adxl1.calibrate(); // DON'T USE THIS CALLIBRATION FUNCTION
+    // adxl2.calibrate();
 
     try {
         ina_lpb.setMaxCurrentShunt(INA228_LPB_MAX_CUR, INA228_LPB_SHUNT);

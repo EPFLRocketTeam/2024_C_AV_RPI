@@ -43,4 +43,3 @@ if(ENABLE_COVERAGE)
     target_compile_options(flight_computer PUBLIC --coverage)
     target_link_libraries(flight_computer PUBLIC --coverage)
 endif()
-
