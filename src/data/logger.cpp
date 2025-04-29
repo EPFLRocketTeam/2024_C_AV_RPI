@@ -14,11 +14,11 @@ std::string template_based_path (std::string path) {
     
     bool uses_extension = ext_dot != -1 && ext_dot > base_sl;
 
-    std::string base = uses_extension ? path.substr(ext_dot) : path;
+    std::string base = uses_extension ? path.substr(0, ext_dot) : path;
+    std::string suff = uses_extension ? path.substr(ext_dot) : "";
     for (int i = 0; i < MAX_TEMPLATE_COUNT; i ++) {
-        std::string target = base + "_" + std::to_string(i);
+        std::string target = base + "_" + std::to_string(i) + suff;
         if (std::filesystem::exists(target)) continue ;
-        std::cout << "Found target " << target << std::endl;
 
         return target;
     }
