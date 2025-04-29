@@ -5,7 +5,7 @@
 #include <iostream>
 
 // If the folder contains more than 10^6 files, throw an error
-const int MAX_TEMPLATE_COUNT = 1_000_000;
+const int MAX_TEMPLATE_COUNT = 1'000'000;
 
 std::string template_based_path (std::string path) {
     int base_sl = path.find_last_of('/');
