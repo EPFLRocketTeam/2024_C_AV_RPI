@@ -3,6 +3,7 @@
 #include "data.h"
 #include <unistd.h>
 #include <iostream>
+#include <filesystem>
 
 // If the folder contains more than 10^6 files, throw an error
 const int MAX_TEMPLATE_COUNT = 1'000'000;
