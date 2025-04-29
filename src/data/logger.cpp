@@ -18,6 +18,7 @@ std::string template_based_path (std::string path) {
     for (int i = 0; i < MAX_TEMPLATE_COUNT; i ++) {
         std::string target = base + "_" + std::to_string(i);
         if (std::filesystem::exists(target)) continue ;
+        std::cout << "Found target " << target << std::endl;
 
         return target;
     }
