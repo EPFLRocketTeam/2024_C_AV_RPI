@@ -79,3 +79,6 @@ void DataLogger::eventConv(std::string event,uint32_t ts){
    ::fsync(fdStream);
 
 }
+
+std::string DataLogger::getPath      () { return path; }
+std::string DataLogger::getEventPath () { return eventPath; }
