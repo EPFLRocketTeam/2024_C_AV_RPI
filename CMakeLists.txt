@@ -73,16 +73,6 @@ target_include_directories(main PUBLIC
 add_subdirectory(src)
 add_subdirectory(LoRa4Raspi)
 
-# Testing support
-if(ENABLE_TESTING)
-    set(CMAKE_BUILD_TYPE Debug)
-    message(STATUS "Testing is enabled")
-    enable_testing()
-    find_package(GTest REQUIRED)
-    include(GoogleTest)
-    add_subdirectory(tests)
-endif()
-
 # Coverage support
 if(ENABLE_COVERAGE)
     message(STATUS "Coverage is enabled")
@@ -92,4 +82,14 @@ endif()
 
 if(USE_MOCK_SENSORS)
     target_compile_definitions(flight_computer PUBLIC MOCK_SENSORS_ENABLED=1)
+endif()
+
+# Testing support
+if(ENABLE_TESTING)
+    set(CMAKE_BUILD_TYPE Debug)
+    message(STATUS "Testing is enabled")
+    enable_testing()
+    find_package(GTest REQUIRED)
+    include(GoogleTest)
+    add_subdirectory(tests)
 endif()

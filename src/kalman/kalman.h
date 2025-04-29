@@ -53,10 +53,10 @@ private:
     Eigen::Vector3f accel_static_sum = Eigen::Vector3f::Zero();
     Eigen::Vector3f accel_static_avg = Eigen::Vector3f::Zero();
     int static_counter = 0;
-    unsigned long static_calib_start_time = 0;
-    unsigned long last_static_calib_time = 0;
-    const unsigned long static_calib_duration = 5000; // 5 second
-    const unsigned long static_recalibration_interval = 120000; // 2 minutes between two static calibrations
+    uint32_t static_calib_start_time = 0;
+    const uint32_t static_calib_duration = 5000; // 5 second
+    const uint32_t static_recalibration_interval = 120000; // 2 minutes between two static calibrations
+    uint32_t last_static_calib_time = -static_recalibration_interval; // this ensures calibration at startup
 
     // Initial position (to set the coordinates origin)
     double initial_lon = 0;
@@ -84,7 +84,7 @@ public:
     Eigen::MatrixXf process_covariance();
 
     void check_static(const DataDump& dump);
-
+    void set_is_static(bool is_static) { this->is_static = is_static; }
     // takes the NavSensors data and outputs a single fused IMU measurement for all IMUs
     void fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gyro_meas, Eigen::Vector3f& output_acc_meas);
 

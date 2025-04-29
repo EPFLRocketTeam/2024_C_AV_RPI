@@ -158,28 +158,28 @@ bool Sensors::update()
             adxl1_x.value().get(),
             adxl1_y.value().get(),
             adxl1_z.value().get()};
-        adxl1_data = adxl1.add_noise_to_data(adxl1_data, 0.5);
+        // adxl1_data = adxl1.add_noise_to_data(adxl1_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &adxl1_data);
 
         adxl375_data adxl2_data = {
             adxl2_x.value().get(),
             adxl2_y.value().get(),
             adxl2_z.value().get()};
-        adxl2_data = adxl2.add_noise_to_data(adxl2_data, 0.5);
+        // adxl2_data = adxl2.add_noise_to_data(adxl2_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_ADXL2_DATA, &adxl2_data);
 
         bmi08_sensor_data_f bmi1_acc_data = {
             bmi1_acc_x.value().get(),
             bmi1_acc_y.value().get(),
             bmi1_acc_z.value().get()};
-        bmi1_acc_data = bmi1.add_noise_to_data(bmi1_acc_data, 0.5);
+        // bmi1_acc_data = bmi1.add_noise_to_data(bmi1_acc_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMI1_ACCEL_DATA, &bmi1_acc_data);
 
         bmi08_sensor_data_f bmi1_gyro_data = {
             bmi1_gyro_x.value().get(),
             bmi1_gyro_y.value().get(),
             bmi1_gyro_z.value().get()};
-        bmi1_gyro_data = bmi1.add_noise_to_data(bmi1_gyro_data, 0.5);
+        // bmi1_gyro_data = bmi1.add_noise_to_data(bmi1_gyro_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMI1_GYRO_DATA, &bmi1_gyro_data);
 
         bmi08_sensor_data_f bmi2_acc_data = {
@@ -187,38 +187,38 @@ bool Sensors::update()
             bmi2_acc_y.value().get(),
             bmi2_acc_z.value().get()};
 
-        bmi1_acc_data = bmi2.add_noise_to_data(bmi2_acc_data, 0.5);
+        // bmi1_acc_data = bmi2.add_noise_to_data(bmi2_acc_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMI2_ACCEL_DATA, &bmi2_acc_data);
 
         bmi08_sensor_data_f bmi2_gyro_data = {
             bmi2_gyro_x.value().get(),
             bmi2_gyro_y.value().get(),
             bmi2_gyro_z.value().get()};
-        bmi2_gyro_data = bmi2.add_noise_to_data(bmi2_gyro_data, 0.5);
+        // bmi2_gyro_data = bmi2.add_noise_to_data(bmi2_gyro_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMI2_GYRO_DATA, &bmi2_gyro_data);
 
         bmp3_data bmp1_data = {
             bmp1_p.value().get(),
             bmp1_t.value().get()};
-        bmp1_data = bmp1.add_noise_to_data(bmp1_data, 0.5);
+        // bmp1_data = bmp1.add_noise_to_data(bmp1_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMP1_DATA, &bmp1_data);
 
         bmp3_data bmp2_data = {
             bmp2_p.value().get(),
             bmp2_t.value().get()};
-        bmp2_data = bmp2.add_noise_to_data(bmp2_data, 0.5);
+        // bmp2_data = bmp2.add_noise_to_data(bmp2_data, 0.5);
         Data::get_instance().write(Data::NAV_SENSOR_BMP2_DATA, &bmp2_data);
 
         float tmp1075_data = tmp1075_temp.value().get();
-        tmp1075_data = tmp1075.add_noise_to_data(tmp1075_data, 0.1f);
+        // tmp1075_data = tmp1075.add_noise_to_data(tmp1075_data, 0.1f);
         Data::get_instance().write(Data::AV_FC_TEMPERATURE, &tmp1075_data);
 
         float lpb = ina_lpb_voltage.value().get();
-        lpb = ina_lpb.add_noise_to_data(lpb, 0.05f);
+        // lpb = ina_lpb.add_noise_to_data(lpb, 0.05f);
         Data::get_instance().write(Data::BAT_LPB_VOLTAGE, &lpb);
 
         float hpb = ina_hpb_voltage.value().get();
-        hpb = ina_hpb.add_noise_to_data(hpb, 0.05f);
+        // hpb = ina_hpb.add_noise_to_data(hpb, 0.05f);
         Data::get_instance().write(Data::BAT_HPB_VOLTAGE, &hpb);
 
         NavSensors nav_sensors{};
