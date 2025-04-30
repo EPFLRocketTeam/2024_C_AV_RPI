@@ -30,6 +30,7 @@
 #define USE_BMP1      1
 #define USE_BMP2      1
 #define USE_GPS       1
+#define USE_I2CGPS    1
 #define USE_TMP1075   1
 #define USE_INA_LPB   1
 #define USE_INA_HPB   1

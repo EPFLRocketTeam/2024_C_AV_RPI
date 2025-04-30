@@ -32,7 +32,7 @@ int main(void) {
     std::cout << "\x1b[7m***RFM95 LoRa testbench***\x1b[0m\n\n";
 
     lora_alpha.setPins(LORA_ALPHA_SS_PIN, LORA_ALPHA_RST_PIN, LORA_ALPHA_DIO0_PIN);
-    if (!lora_alpha.begin(LORA_FREQUENCY, SPI1)) {
+    if (!lora_alpha.begin(LORA_FREQUENCY, SPI0)) {
         std::cout << "LoRa Alpha init failed!\n";
         return 1;
     }else {
