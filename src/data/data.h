@@ -142,9 +142,12 @@ struct Batteries {
 struct Event {
     bool command_updated;
     bool calibrated;
-    bool dpr_ok;
-    bool prb_ok;
-    bool trb_ok;
+    bool dpr_eth_ready;
+    bool dpr_eth_pressure_ok;
+    bool dpr_lox_ready;
+    bool dpr_lox_pressure_ok;
+    bool prb_ready;
+    bool trb_ready;
     bool ignited;
     bool seperated;
     bool chute_unreefed;
@@ -261,14 +264,16 @@ public:
         /* Events */
         EVENT_CMD_RECEIVED,
         EVENT_CALIBRATED,
-        EVENT_DPR_OK,
-        EVENT_PRB_OK,
-        EVENT_TRB_OK,
+        EVENT_DPR_ETH_READY,
+        EVENT_DPR_ETH_PRESSURE_OK,
+        EVENT_DPR_LOX_READY,
+        EVENT_DPR_LOX_PRESSURE_OK,
+        EVENT_PRB_READY,
+        EVENT_TRB_READY,
         EVENT_IGNITED,
         EVENT_SEPERATED,
         EVENT_CHUTE_OPENED,
         EVENT_CHUTE_UNREEFED
-          
     };
 
     static inline Data& get_instance() {
