@@ -47,8 +47,12 @@
 #ifndef _BMI08X_H
 #define _BMI08X_H
 
+#ifdef __cplusplus
 #include <stdexcept>
 #include <string>
+#include <random>
+#endif
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -314,8 +318,10 @@ int8_t bmi08_i2c_deinit(uint8_t acc_dev_add, uint8_t gyro_dev_add);
 #ifdef __cplusplus
 }
 #endif
+#ifdef __cplusplus
 
-class Bmi088 {
+#ifndef MOCK_SENSORS_ENABLED 
+class Bmi088:public IBmi088 {
 private:
     uint8_t accel_addr;
     uint8_t gyro_addr;
@@ -334,6 +340,7 @@ public:
     uint8_t get_gyro_status();
     bmi08_sensor_data_f get_accel_data();
     bmi08_sensor_data_f get_gyro_data();
+    bmi08_sensor_data_f add_noise_to_data(bmi08_sensor_data_f data, float noise_level);
 } ;
 
 class Bmi088Exception : public std::runtime_error {
@@ -344,5 +351,6 @@ public:
     explicit Bmi088Exception(int error_code)
         : std::runtime_error("BMI088 Error: " + std::to_string(error_code)) {}
 };
-
+#endif /* MOCK_SENSORS_ENABLED */
+#endif // __cplusplus
 #endif /* _BMI08X_H */
