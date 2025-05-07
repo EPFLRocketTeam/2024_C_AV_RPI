@@ -60,9 +60,18 @@ void ConfigManager::init (std::string path) {
 int main () {
     ConfigManager::initConfig("example_config.conf");
 
+    std::cout << "kalman        : " << ConfigManager::isEnabled("kalman")        << std::endl;
     std::cout << "sensors.adxl1 : " << ConfigManager::isEnabled("sensors.adxl1") << std::endl;
     std::cout << "sensors.adxl2 : " << ConfigManager::isEnabled("sensors.adxl2") << std::endl;
     std::cout << "sensors.bmi1  : " << ConfigManager::isEnabled("sensors.bmi1")  << std::endl;
     std::cout << "sensors.bmi2  : " << ConfigManager::isEnabled("sensors.bmi2")  << std::endl;
 }
+
+// The result of the following main function is
+// 
+// kalman        : 1
+// sensors.adxl1 : 0
+// sensors.adxl2 : 1
+// sensors.bmi1  : 1
+// sensors.bmi2  : 0
 */
