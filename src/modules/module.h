@@ -38,3 +38,19 @@ public:
      */
     void check_policy (const DataDump& dump, const uint32_t delta_ms);
 };
+
+class SensorModule : public Module {
+private:
+    uint32_t last_polling_time = 0;
+
+    virtual bool run_update () = 0;
+    virtual bool run_calibration () = 0;
+
+    virtual int low_polling_time  () = 0;
+    virtual int high_polling_time () = 0;
+    
+    bool run_check_policy (const DataDump& dump, const uint32_t delta_ms) override;
+public:
+    SensorModule (std::string name, std::string config_target) 
+    : Module(name, config_target) {}
+};
