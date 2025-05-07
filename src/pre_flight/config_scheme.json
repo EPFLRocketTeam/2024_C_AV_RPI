@@ -1,0 +1,19 @@
+[
+    {
+        "type": "all",
+        "name": "all",
+        "items": [
+            "kalman"
+        ]
+    },
+    {
+        "type": "section",
+        "name": "sensors",
+        "items": [
+            "adxl1",
+            "adxl2",
+            "bmi1",
+            "bmi2"
+        ]
+    }
+]
