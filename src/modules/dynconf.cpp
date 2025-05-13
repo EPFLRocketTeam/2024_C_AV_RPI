@@ -1,5 +1,5 @@
 
-#include "config.h"
+#include "dynconf.h"
 
 #include <iostream>
 #include <fstream>
