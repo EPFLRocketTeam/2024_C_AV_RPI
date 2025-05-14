@@ -18,15 +18,20 @@ public:
     void send_wake_up();
     bool read_is_woken_up();
     bool read_is_recording();
-    void start_recording();
-    void stop_recording();
+    void send_start_recording();
+    void send_stop_recording();
 
 private:
     uint8_t m_address;
     std::string m_id;
+    bool m_recording;
+    uint32_t delta_ms;
+    uint32_t count_ms;
 
     void read_register(const uint8_t reg_addr, uint8_t* data);
     void write_register(const uint8_t reg_addr, const uint8_t* value);
+    void handle_ready(); 
+    void handle_landed();
 };
 
 class CameraException : public std::exception {

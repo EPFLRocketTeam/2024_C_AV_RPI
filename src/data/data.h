@@ -138,10 +138,10 @@ struct Batteries {
     float hpb_voltage;
 };
 
-struct CamsRecStatus {
-    bool cam_sep_rec;
-    bool cam_up_rec;
-    bool cam_down_rec;
+struct CamsRecording {
+    bool cam_sep;
+    bool cam_up;
+    bool cam_down;
 };
 
 struct Event {
@@ -178,7 +178,7 @@ struct DataDump {
     Valves valves;
     NavigationData nav;
     Batteries bat;
-    CamsRecStatus cams_rec_status;
+    CamsRecording cams_recording;
     Event event;
 
     // TODO: move to PR_board.check_policy
@@ -268,9 +268,9 @@ public:
         BAT_HPB_VOLTAGE,
 
         /* Cameras recording status */
-        CAM_SEP_RECORDING,
-        CAM_UP_RECORDING,
-        CAM_DOWN_RECORDING,
+        CAM_RECORDING_SEP,
+        CAM_RECORDING_UP,
+        CAM_RECORDING_DOWN,
 
         /* Events */
         EVENT_CMD_RECEIVED,
@@ -324,7 +324,7 @@ private:
     Valves valves;
     NavigationData nav;
     Batteries bat;
-    CamsRecStatus cams_rec_status;
+    CamsRecording cams_rec_status;
     Event event;
 };
 

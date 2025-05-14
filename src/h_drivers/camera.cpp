@@ -5,7 +5,7 @@
 #include "i2c_interface.h"
 #include "intranet_commands.h"
 
-Camera::Camera(const uint8_t address) noexcept : m_address(address) {
+Camera::Camera(const uint8_t address) noexcept : m_address(address), m_recording(0) {
     switch (m_address) {
         case 0x1C:
             m_id = "SEP";
@@ -60,27 +60,29 @@ void Camera::write_timestamp(const DataDump& dump) {
 bool Camera::read_is_recording() {
     uint32_t rslt(0);
     read_register(CAM_RECORDING, (uint8_t*)&rslt);
-    bool recording(rslt == NET_CMD_ON);
+    m_recording = (rslt == NET_CMD_ON);
 
     // Cameras status are stored in the same order as I2C addresses (SEP, UP, DOWN)
-    uint8_t gr(Data::CAM_SEP_RECORDING + ((m_address - NET_ADDR_CAM_SEP) >> 4));
-    Data::get_instance().write((Data::GoatReg)gr, &recording);
+    uint8_t gr(Data::CAM_RECORDING_SEP + ((m_address - NET_ADDR_CAM_SEP) >> 4));
+    Data::get_instance().write((Data::GoatReg)gr, &m_recording);
 
-    return recording;
+    return m_recording;
 }
 
-void Camera::start_recording() {
+void Camera::send_start_recording() {
     const uint32_t cmd(NET_CMD_ON);
     write_register(CAM_RECORDING, (uint8_t*)&cmd);
 }
 
-void Camera::stop_recording() {
+void Camera::send_stop_recording() {
     const uint32_t cmd(NET_CMD_OFF);
     write_register(CAM_RECORDING, (uint8_t*)&cmd);
 }
 
 // TODO
 void Camera::check_policy(const DataDump& dump, const uint32_t delta_ms) {
+    this->delta_ms = delta_ms;
+    count_ms += delta_ms;
     switch (dump.av_state) {
         case State::INIT:
         case State::CALIBRATION:
@@ -88,7 +90,7 @@ void Camera::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::ARMED:
             break;
         case State::READY:
-            start_recording();
+            handle_ready();
             break;
         case State::THRUSTSEQUENCE:
         case State::LIFTOFF:
@@ -98,5 +100,31 @@ void Camera::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::ERRORGROUND:
         case State::ERRORFLIGHT:
             break;
+    }
+}
+
+void Camera::handle_ready() {
+    // Send 'start recording' command every 100ms until camera acks it's recording 
+    if (count_ms >= 100 && !m_recording) {
+        static unsigned attempts(0);
+        send_start_recording();
+
+        if (attempts >= 100) {
+            // TODO: log error message and/or throw exception
+        }
+
+        read_is_recording();
+
+        ++attempts;
+        count_ms = 0;
+    }
+}
+
+void Camera::handle_landed() {
+    if (count_ms >= 500 && m_recording) {
+        send_stop_recording();
+        read_is_recording();
+
+        count_ms = 0;
     }
 }

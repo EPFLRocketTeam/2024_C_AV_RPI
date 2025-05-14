@@ -228,13 +228,13 @@ void Data::write(GoatReg reg, void* data) {
         case BAT_HPB_VOLTAGE:
             bat.hpb_voltage = *reinterpret_cast<float*>(data);
             break;
-        case CAM_SEP_RECORDING:
+        case CAM_RECORDING_SEP:
             cams_rec_status.cam_sep_rec = *reinterpret_cast<uint8_t*>(data);
             break;
-        case CAM_UP_RECORDING:
+        case CAM_RECORDING_UP:
             cams_rec_status.cam_up_rec = *reinterpret_cast<uint8_t*>(data);
             break;
-        case CAM_DOWN_RECORDING:
+        case CAM_RECORDING_DOWN:
             cams_rec_status.cam_down_rec = *reinterpret_cast<uint8_t*>(data);
             break;
         case EVENT_CMD_RECEIVED:

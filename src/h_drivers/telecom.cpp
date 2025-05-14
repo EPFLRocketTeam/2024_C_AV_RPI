@@ -141,7 +141,10 @@ void Telecom::send_telemetry() {
     packet.engine_state = 0;
 
     packet.av_state = (uint8_t)data.av_state;
-    packet.cam_rec = 0;
+
+    packet.cam_rec = data.cams_recording.cam_sep * CAMERA_REC_PARACHUTE
+                     | data.cams_recording.cam_up * CAMERA_REC_AIRFRAME_UP
+                     | data.cams_recording.cam_down * CAMERA_REC_AIRFRAME_DN;
 
     av_downlink_t compressed_packet(encode_downlink(packet));
 
