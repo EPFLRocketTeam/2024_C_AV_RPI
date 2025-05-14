@@ -1,10 +1,9 @@
 #ifndef TRIGGER_BOARD_H
 #define TRIGGER_BOARD_H
 
-#include "data.h"
-#include "h_driver.h"
 #include <exception>
 #include <string>
+#include "h_driver.h"
 
 class TriggerBoard : public HDriver {
 public:

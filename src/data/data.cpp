@@ -228,6 +228,15 @@ void Data::write(GoatReg reg, void* data) {
         case BAT_HPB_VOLTAGE:
             bat.hpb_voltage = *reinterpret_cast<float*>(data);
             break;
+        case CAM_RECORDING_SEP:
+            cams_recording.cam_sep = *reinterpret_cast<bool*>(data);
+            break;
+        case CAM_RECORDING_UP:
+            cams_recording.cam_up = *reinterpret_cast<bool*>(data);
+            break;
+        case CAM_RECORDING_DOWN:
+            cams_recording.cam_down = *reinterpret_cast<bool*>(data);
+            break;
         case EVENT_CMD_RECEIVED:
             event.command_updated = *reinterpret_cast<bool*>(data);
             break;
@@ -287,6 +296,7 @@ DataDump Data::get() const {
         valves,
         nav,
         bat,
+        cams_recording,
         event
     };
 }
