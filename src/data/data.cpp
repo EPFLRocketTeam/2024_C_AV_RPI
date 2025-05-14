@@ -296,6 +296,7 @@ DataDump Data::get() const {
         valves,
         nav,
         bat,
+        cams_recording,
         event
     };
 }
