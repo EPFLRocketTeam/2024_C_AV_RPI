@@ -229,13 +229,13 @@ void Data::write(GoatReg reg, void* data) {
             bat.hpb_voltage = *reinterpret_cast<float*>(data);
             break;
         case CAM_RECORDING_SEP:
-            cams_rec_status.cam_sep_rec = *reinterpret_cast<uint8_t*>(data);
+            cams_recording.cam_sep = *reinterpret_cast<bool*>(data);
             break;
         case CAM_RECORDING_UP:
-            cams_rec_status.cam_up_rec = *reinterpret_cast<uint8_t*>(data);
+            cams_recording.cam_up = *reinterpret_cast<bool*>(data);
             break;
         case CAM_RECORDING_DOWN:
-            cams_rec_status.cam_down_rec = *reinterpret_cast<uint8_t*>(data);
+            cams_recording.cam_down = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_CMD_RECEIVED:
             event.command_updated = *reinterpret_cast<bool*>(data);

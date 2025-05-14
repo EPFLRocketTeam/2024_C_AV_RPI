@@ -324,7 +324,7 @@ private:
     Valves valves;
     NavigationData nav;
     Batteries bat;
-    CamsRecording cams_rec_status;
+    CamsRecording cams_recording;
     Event event;
 };
 
