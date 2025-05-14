@@ -9,7 +9,7 @@ struct DataDump;
 
 class Camera : public HDriver {
 public:
-    Camera(const uint8_t address);
+    Camera(const uint8_t address) noexcept;
     virtual ~Camera();
 
     void check_policy(const DataDump& dump, const uint32_t delta_ms);
@@ -18,10 +18,15 @@ public:
     void send_wake_up();
     bool read_is_woken_up();
     bool read_is_recording();
-    void write_recording();
+    void start_recording();
+    void stop_recording();
 
 private:
     uint8_t m_address;
+    std::string m_id;
+
+    void read_register(const uint8_t reg_addr, uint8_t* data);
+    void write_register(const uint8_t reg_addr, const uint8_t* value);
 };
 
 class CameraException : public std::exception {
