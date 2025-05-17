@@ -1,6 +1,6 @@
 
 #include "module.h"
-#include "config.h"
+#include "dynconf.h"
 
 Module::Module (std::string name, std::string config_target) {
     this->name = name;
@@ -10,13 +10,21 @@ Module::Module (std::string name, std::string config_target) {
 
 void Module::init () {
     if (this->_M_is_enabled) {
-        this->_M_is_failure = !this->run_init();
+        try {
+            this->_M_is_failure = !this->run_init();
+        } catch (std::exception &exc) {
+            this->_M_is_failure = true;
+        }
     }
 }
 
 void Module::check_policy (const DataDump& dump, const uint32_t delta_ms) {
     if (this->_M_is_enabled && !this->_M_is_failure) {
-        this->_M_is_failure = !run_check_policy(dump, delta_ms);
+        try {
+            this->_M_is_failure = !run_check_policy(dump, delta_ms);
+        } catch (std::exception &exc) {
+            this->_M_is_failure = true;
+        }
     }
 }
 
@@ -46,8 +54,13 @@ bool SensorModule::run_check_policy (const DataDump& dump, const uint32_t delta_
     if (last_polling_time + polling_time <= dump.av_timestamp) {
         last_polling_time = dump.av_timestamp;
 
-        if (!run_update()) {
-            return false;
+        try {
+            if (!run_update()) {
+                return false;
+            }
+        } catch (std::exception &exc) {
+            // TODO log that the update failed
+            throw exc;
         }
     }
 
@@ -55,5 +68,10 @@ bool SensorModule::run_check_policy (const DataDump& dump, const uint32_t delta_
         return true;
     }
 
-    return run_calibration();
+    try {
+        return run_calibration();
+    } catch (std::exception &exc) {
+        // TODO log a callibration exception
+        throw exc;
+    }
 }
