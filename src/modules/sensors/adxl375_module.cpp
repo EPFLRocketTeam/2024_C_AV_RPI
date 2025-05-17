@@ -21,27 +21,49 @@ bool Adxl375Module::run_update()
     uint8_t status = adxl->get_status();
     auto data = adxl->get_data();
 
-    if (sensor_kind == Adxl375SensorKind::PRIMARY)
-    {
-        Data::get_instance().write(Data::NAV_SENSOR_ADXL1_STAT, &status);
-        Data::get_instance().write(Data::NAV_SENSOR_ADXL1_DATA, &data);
-    }
-    else
-    {
-        Data::get_instance().write(Data::NAV_SENSOR_ADXL2_STAT, &status);
-        Data::get_instance().write(Data::NAV_SENSOR_ADXL2_DATA, &data);
-    }
+    Data::get_instance().write(stat_reg, &status);
+    Data::get_instance().write(data_reg, &data);
 
     return true;
 };
 bool Adxl375Module::run_calibration()
 {
+    if (adxl == NULL) {
+        return false;
+    }
     adxl->calibrate();
 
     return true;
 };
-Adxl375Module::Adxl375Module(Adxl375SensorKind kind)
+Adxl375Module::Adxl375Module(
+        const char* module_name, 
+        const char* module_config, 
+        uint32_t i2c_address,
+        Data::GoatReg stat_reg,
+        Data::GoatReg data_reg
+    )
     : SensorModule(
-          adxl_modules_names[kind],
-          adxl_modules_config[kind]),
-      sensor_kind(kind) {}
+          module_name,
+          module_config),
+      i2c_address(i2c_address),
+      stat_reg(stat_reg),
+      data_reg(data_reg) {}
+
+Adxl375Module* Adxl375Module::make_primary () {
+    return new Adxl375Module(
+        "Sensors::Adxl375.primary",
+        "sensors.adxl1",
+        ADXL375_ADDR_I2C_PRIM,
+        Data::GoatReg::NAV_SENSOR_ADXL1_STAT,
+        Data::GoatReg::NAV_SENSOR_ADXL1_DATA
+    );
+}
+Adxl375Module* Adxl375Module::make_secondary () {
+    return new Adxl375Module(
+        "Sensors::Adxl375.secondary",
+        "sensors.adxl2",
+        ADXL375_ADDR_I2C_SEC,
+        Data::GoatReg::NAV_SENSOR_ADXL2_STAT,
+        Data::GoatReg::NAV_SENSOR_ADXL2_DATA
+    );
+}
