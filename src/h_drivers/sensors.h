@@ -30,6 +30,8 @@ public:
 
     void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
+    void init_sensors ();
+
     // inline SensStatus get_status() const { return status; }
     // inline SensRaw get_raw() const { return raw_data; }
     // inline SensFiltered get_clean() const { return clean_data; }
@@ -41,8 +43,6 @@ private:
     // SensFiltered clean_data;
 
     Kalman kalman;
-
-    void init_sensors ();
 };
 
 #endif /* SENSORS_H */

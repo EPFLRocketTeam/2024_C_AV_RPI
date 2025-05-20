@@ -39,6 +39,9 @@ void Sensors::init_sensors () {
     sensors.push_back( GPSModule::make_gps() );
 
     sensors.push_back( Tmp1075Module::make_tmp() );
+
+    for (SensorModule* module : sensors)
+        module->init();
 }
 
 Sensors::~Sensors() {}

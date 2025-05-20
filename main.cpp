@@ -8,6 +8,7 @@
 #include "gps_module.h"
 #include "ina228_module.h"
 #include "tmp1075_module.h"
+#include "sensors.h"
 
 using namespace std;
 
@@ -76,6 +77,14 @@ int main(void){
         cout << " - enabled " << module->is_enabled() << endl;
         cout << " - failure " << module->is_failure() << endl;
     }
+
+    cout << endl;
+    cout << endl;
+    cout << "=== Init Sensors HDriver ===" << endl;
+    cout << endl;
+
+    Sensors* driver = new Sensors();
+    driver->init_sensors();
 
     return 0;
 }
