@@ -18,7 +18,7 @@ bool Tmp1075Module::run_update()
         return false;
     }
 
-    float fc_temperature (tmp1075->getTemperatureCelsius())
+    float fc_temperature (tmp1075->getTemperatureCelsius());
 
     Data::get_instance().write(Data::AV_FC_TEMPERATURE, &fc_temperature);
 
