@@ -15,10 +15,10 @@
 int main() {
     try
     {
-        INA228 ina(INA228_ADDRESS_LPB);
+        INA228 ina(INA228_ADDRESS_HPB);
     
         if (!ina.isConnected()){
-            std::cerr << "INA228 not connected." << std::endl;
+            std::cerr << "INA228 High Power 24V not connected." << std::endl;
             return -1;
         }
         

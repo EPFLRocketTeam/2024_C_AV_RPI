@@ -1,3 +1,4 @@
+#include <iostream>
 #include "sensors.h"
 #include "INA228.h"
 #include "TMP1075.h"

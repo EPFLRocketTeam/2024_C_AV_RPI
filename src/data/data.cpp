@@ -46,12 +46,18 @@ NavigationData::NavigationData()
 {}
 
 Event::Event()
-:   dpr_ok{false},
-    ignited{false},
-    calibrated{false},
-    seperated{false},
-    chute_unreefed{false},
-    ignition_failed{false}
+:   command_updated(false),
+    calibrated(false),
+    dpr_eth_ready(false),
+    dpr_eth_pressure_ok(false),
+    dpr_lox_ready(false),
+    dpr_lox_pressure_ok(false),
+    prb_ready(false),
+    trb_ready(false),
+    ignited(false),
+    seperated(false),
+    chute_unreefed(false),
+    ignition_failed(false)
 {}
 
 
@@ -222,20 +228,38 @@ void Data::write(GoatReg reg, void* data) {
         case BAT_HPB_VOLTAGE:
             bat.hpb_voltage = *reinterpret_cast<float*>(data);
             break;
+        case CAM_RECORDING_SEP:
+            cams_recording.cam_sep = *reinterpret_cast<bool*>(data);
+            break;
+        case CAM_RECORDING_UP:
+            cams_recording.cam_up = *reinterpret_cast<bool*>(data);
+            break;
+        case CAM_RECORDING_DOWN:
+            cams_recording.cam_down = *reinterpret_cast<bool*>(data);
+            break;
         case EVENT_CMD_RECEIVED:
             event.command_updated = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_CALIBRATED:
             event.calibrated = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_DPR_OK:
-            event.dpr_ok = *reinterpret_cast<bool*>(data);
+        case EVENT_DPR_ETH_READY:
+            event.dpr_eth_ready = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_PRB_OK:
-            event.prb_ok = *reinterpret_cast<bool*>(data);
+        case EVENT_DPR_ETH_PRESSURE_OK:
+            event.dpr_eth_pressure_ok = *reinterpret_cast<bool*>(data);
             break;
-        case EVENT_TRB_OK:
-            event.trb_ok = *reinterpret_cast<bool*>(data);
+        case EVENT_DPR_LOX_READY:
+            event.dpr_lox_ready = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_DPR_LOX_PRESSURE_OK:
+            event.dpr_lox_pressure_ok = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_PRB_READY:
+            event.prb_ready = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_TRB_READY:
+            event.trb_ready = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_IGNITED:
             event.ignited = *reinterpret_cast<bool*>(data);
@@ -272,6 +296,7 @@ DataDump Data::get() const {
         valves,
         nav,
         bat,
+        cams_recording,
         event
     };
 }
