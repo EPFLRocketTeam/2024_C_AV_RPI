@@ -1,8 +1,9 @@
 #ifndef H_DRIVER_H
 #define H_DRIVER_H
 
-#include "av_state.h"
-#include "intranet_commands.h"
+#include <cstdint>
+
+struct DataDump;
 
 class HDriver {
 public:
