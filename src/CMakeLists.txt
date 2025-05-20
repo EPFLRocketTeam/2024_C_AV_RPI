@@ -66,8 +66,8 @@ target_include_directories(flight_computer PUBLIC
     ${I2C_INTERFACE_DIR}
     ${DRIVERS_DIR}
     ${KALMAN_DIR}
-    ${MODULE_DIR}
-    ${MODULE_SENSORS_DIR}
+    ${MODULES_DIR}
+    ${MODULES_SENSORS_DIR}
 )
 
 target_link_libraries(flight_computer PUBLIC
