@@ -24,6 +24,8 @@ add_compile_definitions(RF_PROTOCOL_FIREHORN)
 
 add_executable(main main.cpp)
 
+target_link_libraries(main flight_computer)
+
 add_subdirectory(src)
 add_subdirectory(LoRa4Raspi)
 if(ENABLE_TESTING)
