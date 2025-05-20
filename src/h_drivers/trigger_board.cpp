@@ -1,5 +1,6 @@
 // TODO: log events
 
+#include <iostream>
 #include <string>
 #include <unistd.h>
 #include "data.h"
@@ -54,7 +55,7 @@ bool TriggerBoard::read_is_woken_up() {
     }
 
     bool trb_woken_up(rslt == NET_CMD_ON);
-    Data::get_instance().write(Data::EVENT_TRB_OK, &trb_woken_up);
+    Data::get_instance().write(Data::EVENT_TRB_READY, &trb_woken_up);
 
     return trb_woken_up;
 }
@@ -170,7 +171,7 @@ void TriggerBoard::handle_armed(const DataDump& dump) {
     }
 
     // After DPR GO, send wake_up each 500ms until is_woken_up is true
-    if (dump.event.dpr_ok && !dump.event.trb_ok) {
+    if (dump.event.dpr_eth_pressure_ok && dump.event.dpr_lox_pressure_ok && !dump.event.trb_ready) {
         static uint32_t count_wkp(0);
         static uint8_t wkp_attempts(0);
         count_wkp += delta_ms;

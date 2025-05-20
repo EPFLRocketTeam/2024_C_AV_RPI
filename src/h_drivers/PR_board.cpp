@@ -65,8 +65,8 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             break;
         case State::ARMED: {
             // FIXME: this logic is only valid for the FT
-            bool dpr_ok = true;
-            Data::get_instance().write(Data::EVENT_DPR_OK, &dpr_ok);
+            bool prb_ready = true;
+            Data::get_instance().write(Data::EVENT_PRB_READY, &prb_ready);
             // For the ARMED state we do nothing
             break;
         }

@@ -26,6 +26,10 @@ set(FIREHORN_FC_SOURCES
     ${H_DRIVERS_DIR}/sensors.h
     ${H_DRIVERS_DIR}/telecom.cpp
     ${H_DRIVERS_DIR}/telecom.h
+    ${H_DRIVERS_DIR}/dpr.cpp
+    ${H_DRIVERS_DIR}/dpr.h
+    ${H_DRIVERS_DIR}/camera.cpp
+    ${H_DRIVERS_DIR}/camera.h
     ${FLIGHT_CONTROL_DIR}/av_state.cpp
     ${FLIGHT_CONTROL_DIR}/av_state.h
     ${FLIGHT_CONTROL_DIR}/thresholds.h
