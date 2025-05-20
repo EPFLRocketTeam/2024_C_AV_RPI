@@ -20,14 +20,14 @@ bool GPSModule::run_update()
     }
 
     while (i2c_gps->available()) {
-        tiny_gps->encode(i2c_gps.read());
+        tiny_gps->encode(i2c_gps->read());
     }
 
     if (tiny_gps->time.isUpdated()) {
         if (tiny_gps->date.isValid()) {
             unsigned year  (tiny_gps->date.year());
-            unsigned month (tiny_gps->data.month());
-            unsigned day   (tiny_gps->data.day());
+            unsigned month (tiny_gps->date.month());
+            unsigned day   (tiny_gps->date.day());
 
             Data::get_instance().write(Data::NAV_GNSS_TIME_YEAR,  &year);
             Data::get_instance().write(Data::NAV_GNSS_TIME_MONTH, &month);
