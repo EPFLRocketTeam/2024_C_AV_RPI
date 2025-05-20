@@ -3,7 +3,7 @@
 
 bool Adxl375Module::run_init()
 {
-    adxl = new Adxl375(adxl_modules_i2c_address[sensor_kind]);
+    adxl = new Adxl375(i2c_address);
     if (adxl == NULL)
     {
         return false;
