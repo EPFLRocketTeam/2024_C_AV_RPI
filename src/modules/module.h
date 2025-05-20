@@ -24,6 +24,8 @@ public:
     bool is_enabled () { return _M_is_enabled; }
     bool is_failure () { return _M_is_failure; }
 
+    std::string get_name () { return name; }
+
     Module (std::string name, std::string config_target);
 
     /**

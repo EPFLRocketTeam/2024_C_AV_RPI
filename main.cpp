@@ -1,6 +1,13 @@
 #include <iostream>
 #include "dynconf.h"
 #include <vector>
+#include "module.h"
+#include "adxl375_module.h"
+#include "bmi088_module.h"
+#include "bmp390_module.h"
+#include "gps_module.h"
+#include "ina228_module.h"
+#include "tmp1075_module.h"
 
 using namespace std;
 
@@ -32,6 +39,42 @@ int main(void){
         } else {
             cout << " - " << target << ": missing entry in config." << endl;
         }
+    }
+
+    vector<SensorModule*> sensors;
+
+    sensors.push_back( Adxl375Module::make_primary() );
+    sensors.push_back( Adxl375Module::make_secondary() );
+
+    sensors.push_back( Bmi088Module::make_primary() );
+    sensors.push_back( Bmi088Module::make_secondary() );
+
+    sensors.push_back( Bmp390Module::make_primary() );
+    sensors.push_back( Bmp390Module::make_secondary() );
+
+    sensors.push_back( INA228Module::make_lpb() );
+    sensors.push_back( INA228Module::make_hpb() );
+
+    sensors.push_back( GPSModule::make_gps() );
+
+    sensors.push_back( Tmp1075Module::make_tmp() );
+
+    for (SensorModule* module : sensors) {
+        cout << endl;
+        if (module == NULL) {
+            cout << "NULL module" << endl;
+            continue ;
+        }
+
+        cout << "Module " << module->get_name() << endl;
+        cout << " - enabled " << module->is_enabled() << endl;
+        cout << " - failure " << module->is_failure() << endl;
+
+        cout << endl;
+        cout << "Init module..." << endl;
+        module->init();
+        cout << " - enabled " << module->is_enabled() << endl;
+        cout << " - failure " << module->is_failure() << endl;
     }
 
     return 0;
