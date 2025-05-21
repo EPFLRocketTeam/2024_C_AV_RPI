@@ -188,13 +188,25 @@ def generate_csv_dumper_struct (typename: str, struct: List[Tuple[str, str]]):
 def generate_csv_dumper_enum (typename: str, enum: Tuple[int, List[Tuple[str, int]]]):
     values, typesize, qualname = enum
 
+    is_first = True
+
     def generate_value_check (name, value):
-        return f"\tif (((int) value) == {value}) stream << \"{name},\";"
+        nonlocal is_first
+        prefix = "" if is_first else "else "
+        is_first = False
+        return f"\t{prefix}if (((int) value) == {value}) stream << \"{name},\";"
     def generate_define ():
         name = generate_dumper_function_definition(typename, qualname)
+
+        if len(values) == 0:
+            return f"{name} " + "{\n" + "\tstream << \"<EMPTY>,\";\n}"; 
+
         lines = [
             f"{name} " + "{",
-        ] + list(map(lambda x : generate_value_check(x[0], x[1]), values)) + [ "}" ]
+        ] + list(map(lambda x : generate_value_check(x[0], x[1]), values)) + [
+            "\telse stream << \"<UNKNOWN>\";",
+            "}"
+        ]
         return "\n".join(lines)
 
     header = f"{generate_dumper_function_definition(typename, qualname)};"
@@ -363,6 +375,8 @@ def main (target: str, struct_name: str, file: str):
         printcerr("   [+] Using directory", target)
         printcerr(" [+] Dumping macro code...")
         with open(code_file, "w") as file:
+            file.write(code)
+        with open("code.cpp", "w") as file:
             file.write(code)
         
         printcerr(" [+] Compiling dump2csv...")
