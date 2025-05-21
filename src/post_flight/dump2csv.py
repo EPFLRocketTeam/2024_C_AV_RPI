@@ -3,6 +3,9 @@ The purpose of this file is to generate the X-Macros for the data logger
 to properly show the scheme of the files.
 """
 
+def printcerr (*args, **kwargs):
+    print(*args, **kwargs, file=sys.stderr)
+
 
 import os
 import subprocess
@@ -30,6 +33,9 @@ def traverse_ast(ast_node, structs, enums):
                     token_spellings = []
                     for token in child.get_tokens():
                         token_spellings.append(token.spelling)
+
+                    if len(token_spellings) == 0:
+                        return
                     
                     field_type = " ".join(token_spellings[:-1])
                     field_name = token_spellings[-1]
@@ -68,6 +74,7 @@ def find_all_headers (target: str, result = [], maxdepth = 10):
     
     return result
 def find_dumpable_of_header (filename: str):
+    printcerr("   [+] Generate payload of", filename)
     index = clang.cindex.Index.create()
     tu = index.parse(filename, args=['-std=c++17', '-x', 'c++-header'])
     
@@ -271,6 +278,7 @@ def generate_main (struct: str, structs: Dict[str, List[Tuple[str, str]]], file:
         .replace( "%(file)s", file )
 
 def main (target: str, struct_name: str, file: str):
+    printcerr(" [+] Finding all headers")
     headers = find_all_headers(target)
 
     all_structs: Dict[str, List[Tuple[str, str]]]             = {}
@@ -290,9 +298,6 @@ def main (target: str, struct_name: str, file: str):
     main = generate_main( struct_name, all_structs, file )
 
     code = xmacros + "\n" + main
-
-    def printcerr (*args, **kwargs):
-        print(*args, **kwargs, file=sys.stderr)
 
     printcerr(" [+] Setting up temporary directory...")
     with tempfile.TemporaryDirectory(prefix = os.getcwd() + os.path.sep) as dir:
