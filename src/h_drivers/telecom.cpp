@@ -145,7 +145,7 @@ void Telecom::send_telemetry() {
     packet.cam_rec = data.cams_recording.cam_sep * CAMERA_REC_PARACHUTE
                      | data.cams_recording.cam_up * CAMERA_REC_AIRFRAME_UP
                      | data.cams_recording.cam_down * CAMERA_REC_AIRFRAME_DN;
-
+    
     av_downlink_t compressed_packet(encode_downlink(packet));
 
     send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size);
@@ -177,7 +177,7 @@ void Telecom::handle_uplink(int packet_size) {
 
 void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_t len) {
     switch (packet_id) {
-        case CAPSULE_ID::GS_CMD:
+        case CAPSULE_ID::GSC_CMD:
             gpioWrite(LED_LORA_RX, 1);
 
             memcpy(&last_packet, data_in, len);
