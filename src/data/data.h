@@ -3,10 +3,9 @@
 
 #include <cstdint>
 #include <Protocol.h>
-#include "bmi08x.h"
-#include "bmp3.h"
+#include "bmi08_defs.h"
+#include "bmp3_defs.h"
 #include "adxl375.h"
-#include "rotation_utils.h"
 
 enum class State
 {
@@ -139,6 +138,12 @@ struct Batteries {
     float hpb_voltage;
 };
 
+struct CamsRecording {
+    bool cam_sep;
+    bool cam_up;
+    bool cam_down;
+};
+
 struct Event {
     bool command_updated;
     bool calibrated;
@@ -173,6 +178,7 @@ struct DataDump {
     Valves valves;
     NavigationData nav;
     Batteries bat;
+    CamsRecording cams_recording;
     Event event;
 
     // TODO: move to PR_board.check_policy
@@ -261,6 +267,11 @@ public:
         BAT_LPB_VOLTAGE,
         BAT_HPB_VOLTAGE,
 
+        /* Cameras recording status */
+        CAM_RECORDING_SEP,
+        CAM_RECORDING_UP,
+        CAM_RECORDING_DOWN,
+
         /* Events */
         EVENT_CMD_RECEIVED,
         EVENT_CALIBRATED,
@@ -313,6 +324,7 @@ private:
     Valves valves;
     NavigationData nav;
     Batteries bat;
+    CamsRecording cams_recording;
     Event event;
 };
 
