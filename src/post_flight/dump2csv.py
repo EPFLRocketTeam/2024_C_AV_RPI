@@ -302,7 +302,7 @@ int main (void) {
 
 	while (1) {
 		stream.read(buffer, sizeof(%(typename)s));
-		if (stream.eof()) break ;
+		if (stream.eof() || stream.fail()) break ;
 
 		std::ostringstream strm;
 		dump_csv_%(typename)s(dump, strm);
