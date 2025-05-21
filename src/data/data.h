@@ -6,6 +6,7 @@
 #include "bmi08_defs.h"
 #include "bmp3_defs.h"
 #include "adxl375.h"
+#include "math.h"
 
 enum class State
 {
