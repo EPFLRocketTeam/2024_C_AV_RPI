@@ -7,13 +7,54 @@ def printcerr (*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
 
+import hashlib
 import os
 import subprocess
 import sys
 import tempfile
 import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, Set, Tuple
 import clang.cindex
+
+class CacheDB:
+    @staticmethod
+    def mkentries (files: List[str]):
+        payload = set()
+
+        for file in files:
+            with open(file, "r") as _f:
+                text = _f.read()
+            payload.add(file + ":" + hashlib.sha256(text.encode()).hexdigest())
+        
+        return sorted(list(payload))
+    
+    @staticmethod
+    def cache_file ():
+        return os.path.join(os.path.dirname(__file__), "cache")
+    @staticmethod
+    def load (files: List[str]):
+        try:
+            with open(CacheDB.cache_file(), "r") as file:
+                import json
+                data = json.loads(file.read())
+                if data["key"] == CacheDB.mkentries(files):
+                    return data["content"]
+                return None
+        except Exception:
+            return None
+
+    @staticmethod
+    def save (files: List[str], content):
+        try:
+            import json
+            with open(CacheDB.cache_file(), "w") as file:
+                file.write(json.dumps({
+                    "key": CacheDB.mkentries( files ),
+                    "content": content
+                }))
+        except Exception:
+            pass
+
 def get_qualified_enum_name(enum_node):
     parent = enum_node.semantic_parent
     if parent.kind == clang.cindex.CursorKind.STRUCT_DECL or parent.kind == clang.cindex.CursorKind.CLASS_DECL:
@@ -75,6 +116,10 @@ def find_all_headers (target: str, result = [], maxdepth = 10):
     return result
 def find_dumpable_of_header (filename: str):
     printcerr("   [+] Generate payload of", filename)
+
+    def get_cache_index ():
+        return 
+
     index = clang.cindex.Index.create()
     tu = index.parse(filename, args=['-std=c++17', '-x', 'c++-header'])
     
@@ -281,16 +326,25 @@ def main (target: str, struct_name: str, file: str):
     printcerr(" [+] Finding all headers")
     headers = find_all_headers(target)
 
+    cached = CacheDB.load(headers)
+
     all_structs: Dict[str, List[Tuple[str, str]]]             = {}
     all_enums  : Dict[str, Tuple[int, List[Tuple[str, int]]]] = {}
-    for header in headers:
-        structs, enums = find_dumpable_of_header(header)
 
-        for key in structs.keys():
-            all_structs[key] = structs[key]
-        
-        for key in enums.keys():
-            all_enums[key] = enums[key]
+    if cached is None:
+        for header in headers:
+            structs, enums = find_dumpable_of_header(header)
+
+            for key in structs.keys():
+                all_structs[key] = structs[key]
+            
+            for key in enums.keys():
+                all_enums[key] = enums[key]
+
+        CacheDB.save( headers, [ all_structs, all_enums ] )
+    else:
+        printcerr(" [+] Cache hit on headers")
+        all_structs, all_enums = cached
     
     filter_useful(struct_name, all_structs, all_enums)
 
