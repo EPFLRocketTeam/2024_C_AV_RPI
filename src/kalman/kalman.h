@@ -29,6 +29,7 @@ private:
     Eigen::Vector3f position_estimate;      // position of the rocket in the earth frame
     Eigen::Vector3f gyro_bias;              // (estimated) bias of the gyroscope
     Eigen::Vector3f accelerometer_bias;     // (estimated) bias of the accelerometer
+    Eigen::Vector3f estimated_world_acceleration; // Estimated acceleration in the world frame
     Eigen::VectorXf state;                  // error state
     Eigen::MatrixXf estimate_covariance;    // covariance matrix of the error state
     Eigen::MatrixXf initial_estimate_covariance; // initial covariance matrix of the error state (used for callibration reset)
@@ -63,10 +64,19 @@ private:
     double initial_lat = 0;
     double initial_alt = 0;
 
-
     // Last gps observation (to check if we should update)
     double last_gps_lat = 0;
     double last_gps_lon = 0;
+    
+    // High acceleration GPS filtering
+    bool high_acceleration = false;
+    uint32_t last_high_accel_time = 0;
+    const float high_accel_threshold = 4.0f * 9.81f; // 4g threshold
+    const uint32_t gps_recovery_time = 5000; // 5 seconds in ms
+
+    // GPS azimuth update
+    bool first_gps_update_received = false;
+    bool gps_azimuth_updated = false;
 
 public:
     Kalman( float estimate_covariance_gyro, 

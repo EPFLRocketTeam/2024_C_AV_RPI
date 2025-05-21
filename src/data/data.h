@@ -123,9 +123,9 @@ struct NavigationData {
     //referentiel earth
     Vector3 position_kalman;
     Vector3   speed;
-    //ref of accel TBD !!!!
+    //ref of accel TBD !!!! -> Now: Estimated world-frame acceleration {x, y, z} in m/s^2
     Vector3   accel;
-    Vector3   attitude; // Quaternion vector q = {w, x, y, z} -> {x,y,z}
+    Vector3   attitude; // Quaternion vector q = {w, x, y, z} -> {x,y,z} (w=+-sqrt(1-x^2-y^2-z^2)) // TODO: check or change this
     double    course;
     double    altitude;
     bmp3_data baro;

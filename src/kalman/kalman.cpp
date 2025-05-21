@@ -39,6 +39,7 @@ Kalman::Kalman( float estimate_covariance_gyro,
       position_estimate(Eigen::Vector3f::Zero()),
       gyro_bias(Eigen::Vector3f::Zero()),
       accelerometer_bias(Eigen::Vector3f::Zero()),
+      estimated_world_acceleration(Eigen::Vector3f::Zero()),
       state(Eigen::VectorXf::Zero(15)),
       observation_covariance(Eigen::Matrix3f::Zero()),
       gyro_cov_mat(Eigen::Matrix3f::Identity() * gyro_cov),
@@ -47,10 +48,15 @@ Kalman::Kalman( float estimate_covariance_gyro,
       accel_bias_cov_mat(Eigen::Matrix3f::Identity() * accel_bias_cov),
       G(Eigen::MatrixXf::Zero(15, 15)),
       initial_azimuth(INITIAL_AZIMUTH),
-      g(GRAVITY) {
+      g(GRAVITY),
+      high_acceleration(false),
+      last_high_accel_time(0),
+      first_gps_update_received(false),
+      gps_azimuth_updated(false) {
     
 
     // Initialize covariance matrices
+    initial_estimate_covariance = Eigen::MatrixXf::Zero(15, 15);
     initial_estimate_covariance.setZero();
     initial_estimate_covariance(0, 0) = estimate_covariance_orientation;
     initial_estimate_covariance(1, 1) = estimate_covariance_orientation;
@@ -170,6 +176,71 @@ Eigen::Vector3f compute_c(const Eigen::Vector3f& a, const Eigen::Vector3f& omega
     return a - centripetal;
 }
 
+void Kalman::fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gyro_meas, Eigen::Vector3f& output_acc_meas) {
+    // For gyroscope, always use BMI sensors
+    const Eigen::Vector3f bmi_gyro_vec(nav_sensors.bmi_gyro.x, nav_sensors.bmi_gyro.y, nav_sensors.bmi_gyro.z);
+    const Eigen::Vector3f bmi_aux_gyro_vec(nav_sensors.bmi_aux_gyro.x, nav_sensors.bmi_aux_gyro.y, nav_sensors.bmi_aux_gyro.z);
+    output_gyro_meas = (bmi_gyro_vec + bmi_aux_gyro_vec) / 2.0f * DEG_TO_RAD;
+
+    // Extract accel data into Eigen vectors
+    const Eigen::Vector3f bmi_accel_vec(nav_sensors.bmi_accel.x, nav_sensors.bmi_accel.y, nav_sensors.bmi_accel.z);
+    const Eigen::Vector3f bmi_aux_accel_vec(nav_sensors.bmi_aux_accel.x, nav_sensors.bmi_aux_accel.y, nav_sensors.bmi_aux_accel.z);
+    const Eigen::Vector3f adxl_vec(nav_sensors.adxl.x, nav_sensors.adxl.y, nav_sensors.adxl.z);
+    const Eigen::Vector3f adxl_aux_vec(nav_sensors.adxl_aux.x, nav_sensors.adxl_aux.y, nav_sensors.adxl_aux.z);
+
+    // Calculate acceleration magnitude from BMI sensors to decide which sensors to use
+    // Using average of BMI sensors to decide the threshold
+    const Eigen::Vector3f avg_bmi_accel = (bmi_accel_vec + bmi_aux_accel_vec) / 2.0f;
+    const float accel_magnitude = avg_bmi_accel.norm();
+    const float threshold_16g = 16.0f * 9.81f; // 16g in m/s²
+
+    if (accel_magnitude < threshold_16g) {
+        // Low acceleration: Use only BMI sensors with position consideration
+        const Eigen::Vector3f bmi_pos_vec(BMI_POS_X, BMI_POS_Y, BMI_POS_Z);
+        const Eigen::Vector3f bmi_aux_pos_vec(BMI_AUX_POS_X, BMI_AUX_POS_Y, BMI_AUX_POS_Z);
+        const Eigen::Vector3f fused_accel_pos_vec(FUSED_IMU_POS_X, FUSED_IMU_POS_Y, FUSED_IMU_POS_Z);
+        
+        // Use the fused angular velocity for calculations
+        const Eigen::Vector3f& omega = output_gyro_meas;
+
+        // Compute c_i for each BMI accelerometer
+        const Eigen::Vector3f c_bmi = compute_c(bmi_accel_vec, omega, bmi_pos_vec - fused_accel_pos_vec);
+        const Eigen::Vector3f c_bmi_aux = compute_c(bmi_aux_accel_vec, omega, bmi_aux_pos_vec - fused_accel_pos_vec);
+
+        // Construct matrix M for BMIs only
+        Eigen::MatrixXf M(6, 6);
+        
+        // M1 for BMI
+        Eigen::MatrixXf M1(3, 6);
+        M1.block<3, 3>(0, 0) = Eigen::Matrix3f::Identity();
+        M1.block<3, 3>(0, 3) = -skew_symmetric(bmi_pos_vec - fused_accel_pos_vec);
+
+        // M2 for BMI aux
+        Eigen::MatrixXf M2(3, 6);
+        M2.block<3, 3>(0, 0) = Eigen::Matrix3f::Identity();
+        M2.block<3, 3>(0, 3) = -skew_symmetric(bmi_aux_pos_vec - fused_accel_pos_vec);
+
+        // Combine M1, M2 into M
+        M.block<3, 6>(0, 0) = M1;
+        M.block<3, 6>(3, 0) = M2;
+
+        // Construct vector c
+        Eigen::VectorXf c(6);
+        c.block<3, 1>(0, 0) = c_bmi;
+        c.block<3, 1>(3, 0) = c_bmi_aux;
+
+        // Solve the system using least squares
+        Eigen::VectorXf X = M.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(c);
+
+        // Extract the fused accelerometer measurement
+        output_acc_meas = X.head<3>();
+    } else {
+        // High acceleration: Use only ADXL sensors with simple averaging
+        output_acc_meas = (adxl_vec + adxl_aux_vec) / 2.0f;
+    }
+}
+
+// simpler version for reference
 // void Kalman::fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gyro_meas, Eigen::Vector3f& output_acc_meas) {
 //     // Important TODO : adapt it if the acceleration is too high to only consider the high-g accelerometers
 
@@ -177,103 +248,13 @@ Eigen::Vector3f compute_c(const Eigen::Vector3f& a, const Eigen::Vector3f& omega
 
 //     // Considering only the primary IMU
 //     // // Extract acceleration data from the primary BMI sensor
-//     // output_acc_meas << nav_sensors.bmi_accel.x, nav_sensors.bmi_accel.y, nav_sensors.bmi_accel.z;
-
+//     output_acc_meas << nav_sensors.bmi_accel.x, nav_sensors.bmi_accel.y, nav_sensors.bmi_accel.z;
 //     // // Extract gyroscope data from the primary BMI sensor
-//     // output_gyro_meas << nav_sensors.bmi_gyro.x, nav_sensors.bmi_gyro.y, nav_sensors.bmi_gyro.z;
+//     output_gyro_meas << nav_sensors.bmi_gyro.x, nav_sensors.bmi_gyro.y, nav_sensors.bmi_gyro.z;
 
+//     output_gyro_meas *= DEG_TO_RAD;
 
-//     // --- Gyroscope Fusion ---
-//     // Extract gyro data into Eigen vectors
-//     const Eigen::Vector3f bmi_gyro_vec(nav_sensors.bmi_gyro.x, nav_sensors.bmi_gyro.y, nav_sensors.bmi_gyro.z);
-//     const Eigen::Vector3f bmi_aux_gyro_vec(nav_sensors.bmi_aux_gyro.x, nav_sensors.bmi_aux_gyro.y, nav_sensors.bmi_aux_gyro.z);
-
-//     // Calculate the simple average for the fused gyro measurement
-//     // TODO? Consider a weighted average if sensor variances are known and different.
-//     output_gyro_meas = (bmi_gyro_vec + bmi_aux_gyro_vec) / 2.0f * DEG_TO_RAD;
-
-//     // --- Accelerometer Fusion ---
-//     // Extract accel data into Eigen vectors
-//     const Eigen::Vector3f bmi_accel_vec(nav_sensors.bmi_accel.x, nav_sensors.bmi_accel.y, nav_sensors.bmi_accel.z);
-//     const Eigen::Vector3f bmi_aux_accel_vec(nav_sensors.bmi_aux_accel.x, nav_sensors.bmi_aux_accel.y, nav_sensors.bmi_aux_accel.z);
-//     const Eigen::Vector3f adxl_vec(nav_sensors.adxl.x, nav_sensors.adxl.y, nav_sensors.adxl.z);
-//     const Eigen::Vector3f adxl_aux_vec(nav_sensors.adxl_aux.x, nav_sensors.adxl_aux.y, nav_sensors.adxl_aux.z);
-
-//     // Define sensor positions in the rocket body frame (ensure these are defined in kalman_params.h or similar)
-//     const Eigen::Vector3f bmi_pos_vec(BMI_POS_X, BMI_POS_Y, BMI_POS_Z);
-//     const Eigen::Vector3f bmi_aux_pos_vec(BMI_AUX_POS_X, BMI_AUX_POS_Y, BMI_AUX_POS_Z);
-//     const Eigen::Vector3f adxl_pos_vec(ADXL_POS_X, ADXL_POS_Y, ADXL_POS_Z);
-//     const Eigen::Vector3f adxl_aux_pos_vec(ADXL_AUX_POS_X, ADXL_AUX_POS_Y, ADXL_AUX_POS_Z);
-
-//     // Define the desired fused position in the rocket body frame
-//     const Eigen::Vector3f fused_accel_pos_vec(FUSED_IMU_POS_X, FUSED_IMU_POS_Y, FUSED_IMU_POS_Z);
-
-//     // Use the fused angular velocity for calculations
-//     const Eigen::Vector3f& omega = output_gyro_meas; // Use reference for clarity
-
-//     // Compute c_i for each accelerometer
-//     const Eigen::Vector3f c_bmi = compute_c(bmi_accel_vec, omega, bmi_pos_vec - fused_accel_pos_vec);
-//     const Eigen::Vector3f c_bmi_aux = compute_c(bmi_aux_accel_vec, omega, bmi_aux_pos_vec - fused_accel_pos_vec);
-//     const Eigen::Vector3f c_adxl = compute_c(adxl_vec, omega, adxl_pos_vec - fused_accel_pos_vec);
-//     const Eigen::Vector3f c_adxl_aux = compute_c(adxl_aux_vec, omega, adxl_aux_pos_vec - fused_accel_pos_vec);
-
-//     // Construct matrix M
-//     Eigen::MatrixXf M(12, 6);
-
-//     // M1
-//     Eigen::MatrixXf M1(3, 6);
-//     M1.block<3, 3>(0, 0) = Eigen::Matrix3f::Identity();
-//     M1.block<3, 3>(0, 3) = -skew_symmetric(bmi_pos_vec - fused_accel_pos_vec);
-
-//     // M2
-//     Eigen::MatrixXf M2(3, 6);
-//     M2.block<3, 3>(0, 0) = Eigen::Matrix3f::Identity();
-//     M2.block<3, 3>(0, 3) = -skew_symmetric(bmi_aux_pos_vec - fused_accel_pos_vec);
-
-//     // M3
-//     Eigen::MatrixXf M3(3, 6);
-//     M3.block<3, 3>(0, 0) = Eigen::Matrix3f::Identity();
-//     M3.block<3, 3>(0, 3) = -skew_symmetric(adxl_pos_vec - fused_accel_pos_vec);
-
-//     // M4
-//     Eigen::MatrixXf M4(3, 6);
-//     M4.block<3, 3>(0, 0) = Eigen::Matrix3f::Identity();
-//     M4.block<3, 3>(0, 3) = -skew_symmetric(adxl_aux_pos_vec - fused_accel_pos_vec);
-
-//     // Combine M1, M2, M3, M4 into M
-//     M.block<3, 6>(0, 0) = M1;
-//     M.block<3, 6>(3, 0) = M2;
-//     M.block<3, 6>(6, 0) = M3;
-//     M.block<3, 6>(9, 0) = M4;
-
-//     // Construct vector c
-//     Eigen::VectorXf c(12);
-//     c.block<3, 1>(0, 0) = c_bmi;
-//     c.block<3, 1>(3, 0) = c_bmi_aux;
-//     c.block<3, 1>(6, 0) = c_adxl;
-//     c.block<3, 1>(9, 0) = c_adxl_aux;
-
-//     // Solve the overdetermined system using least squares
-//     Eigen::VectorXf X = M.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(c);
-
-//     // Extract the fused accelerometer measurement
-//     output_acc_meas = X.head<3>();
 // }
-
-void Kalman::fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gyro_meas, Eigen::Vector3f& output_acc_meas) {
-    // Important TODO : adapt it if the acceleration is too high to only consider the high-g accelerometers
-
-
-
-    // Considering only the primary IMU
-    // // Extract acceleration data from the primary BMI sensor
-    output_acc_meas << nav_sensors.bmi_accel.x, nav_sensors.bmi_accel.y, nav_sensors.bmi_accel.z;
-    // // Extract gyroscope data from the primary BMI sensor
-    output_gyro_meas << nav_sensors.bmi_gyro.x, nav_sensors.bmi_gyro.y, nav_sensors.bmi_gyro.z;
-
-    output_gyro_meas *= DEG_TO_RAD;
-
-}
 
 
 // Convert atmospheric pressure (hPa) to altitude (m) using the barometric formula
@@ -378,6 +359,7 @@ void Kalman::predict(const NavSensors& nav_sensors, const NavigationData& nav_da
     if(!is_static){
         position_estimate += velocity_estimate * time_delta;
         velocity_estimate += acc_world * time_delta;
+        estimated_world_acceleration = acc_world;
 
         // Update the error state Jacobian blocks
         const Eigen::Matrix3f gyroSkew = skew_symmetric(gyro_meas_corrected);
@@ -399,16 +381,68 @@ void Kalman::predict(const NavSensors& nav_sensors, const NavigationData& nav_da
         estimate_covariance = F * estimate_covariance * F.transpose() + process_covariance();
     }
     
+    // Check for high acceleration condition
+    float accel_norm = estimated_world_acceleration.norm();
+    if (accel_norm > high_accel_threshold) {
+        high_acceleration = true;
+        last_high_accel_time = micros();
+    } else if (high_acceleration && 
+              (micros() - last_high_accel_time) > gps_recovery_time * 1000) {
+        // Only reset high_acceleration flag after recovery time has passed
+        high_acceleration = false;
+    }
 }
 
 void Kalman::update(const NavSensors& nav_sensors, const NavigationData& nav_data) {
-    if(!is_static && nav_data.position.lat!=last_gps_lat && nav_data.position.lat!=last_gps_lon) {
+    if(!is_static && 
+       nav_data.position.lat != last_gps_lat && 
+       nav_data.position.lng != last_gps_lon && 
+       !high_acceleration) {
+        
         last_gps_lat = nav_data.position.lat;
         last_gps_lon = nav_data.position.lng;
 
         Eigen::Vector3f gps_meas;
         float alt_meas;
         gps_pressure_to_obs(nav_sensors, nav_data, gps_meas, alt_meas);
+
+        // Handle azimuth update at first GPS update after liftoff
+        #if USE_GPS_AZIMUTH_UPDATE
+        if (!first_gps_update_received && !is_static && !gps_azimuth_updated) {
+            first_gps_update_received = true;
+            
+            // Compute the angle between our estimated position vector and GPS position vector
+            Eigen::Vector2f est_pos_xy(position_estimate(0), position_estimate(1));
+            Eigen::Vector2f gps_pos_xy(gps_meas(0), gps_meas(1));
+            
+            // Only update azimuth if we have significant horizontal movement
+            if (est_pos_xy.norm() > 5.0f && gps_pos_xy.norm() > 5.0f) {
+                // Calculate the angle between the two position vectors
+                float azimuth_correction = atan2(gps_pos_xy(1), gps_pos_xy(0)) - atan2(est_pos_xy(1), est_pos_xy(0));
+                
+                // Rotation matrix around Z axis
+                Eigen::Matrix3f R_correction = Eigen::Matrix3f::Identity();
+                R_correction << cos(azimuth_correction), -sin(azimuth_correction), 0,
+                                sin(azimuth_correction), cos(azimuth_correction), 0,
+                                0, 0, 1;
+                
+                // Convert current orientation to matrix, apply correction, convert back to quaternion
+                Eigen::Matrix3f R_current = quat_to_matrix(orientation_estimate);
+                Eigen::Matrix3f R_updated = R_correction * R_current;
+                orientation_estimate = rot_matrix_to_quat(R_updated);
+                
+                // Also correct the position and velocity estimates
+                Eigen::Vector3f position_rotated = R_correction * position_estimate;
+                Eigen::Vector3f velocity_rotated = R_correction * velocity_estimate;
+                
+                position_estimate = position_rotated;
+                velocity_estimate = velocity_rotated;
+                
+                gps_azimuth_updated = true;
+                std::cout << "Azimuth updated using GPS. Correction angle: " << azimuth_correction * 180.0f / M_PI << " degrees" << std::endl;
+            }
+        }
+        #endif
 
         Eigen::MatrixXf H = Eigen::MatrixXf::Zero(3, 15);
         
@@ -488,7 +522,7 @@ NavigationData Kalman::get_nav_data() const {
     NavigationData nav_data;
     nav_data.position_kalman = {position_estimate(0), position_estimate(1), position_estimate(2)};
     nav_data.speed = {velocity_estimate(0), velocity_estimate(1), velocity_estimate(2)};
-    nav_data.accel = current_accel;
+    nav_data.accel = {estimated_world_acceleration(0), estimated_world_acceleration(1), estimated_world_acceleration(2)};
     nav_data.attitude = {orientation_estimate.vector[0], orientation_estimate.vector[1], orientation_estimate.vector[2]};
     nav_data.altitude = position_estimate(2) + initial_alt;
     return nav_data;

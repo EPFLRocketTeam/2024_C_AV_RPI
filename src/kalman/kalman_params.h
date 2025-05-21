@@ -45,4 +45,8 @@
 #define GPS_OBS_COV             25.0f // Variance of the GPS (in meters) // TODO : separate lat and lon
 #define ALT_OBS_COV             25.0f // Variance of the altimeter (in meters)
 
+// Azimuth initialization method
+#define USE_GPS_AZIMUTH_UPDATE true  // Set to true to update azimuth at first GPS update after takeoff
+                                     // Set to false to use INITIAL_AZIMUTH directly
+
 #endif // KALMAN_PARAMS_H
