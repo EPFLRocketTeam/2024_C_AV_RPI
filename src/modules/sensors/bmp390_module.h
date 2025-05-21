@@ -1,0 +1,29 @@
+
+#include "module.h"
+#include "bmp3.h"
+#include "dynconf.h"
+
+struct Bmp390Module : public SensorModule {
+private:
+    Bmp390* bmp = NULL;
+
+    Data::GoatReg stat_reg;
+    Data::GoatReg data_reg;
+    
+    uint32_t i2c_address;
+    
+    bool run_init () override;
+    bool run_update () override;
+    bool run_calibration () override;
+public:
+    Bmp390Module (
+        const char* module_name, 
+        const char* module_config, 
+        uint32_t i2c_address, 
+        Data::GoatReg stat_reg,
+        Data::GoatReg data_reg
+    );
+    
+    static Bmp390Module* make_primary ();
+    static Bmp390Module* make_secondary ();
+};
