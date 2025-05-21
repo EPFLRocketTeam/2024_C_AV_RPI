@@ -128,7 +128,7 @@ int main(void){
     for (size_t i = 0; i < 10; i ++) {
         useTimestamp();
         const DataDump dump = Data::get_instance().get();
-        sensors->check_policy(dump, dump.av_timestamp);
+        driver->check_policy(dump, dump.av_timestamp);
         conv();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
