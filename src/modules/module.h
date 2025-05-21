@@ -1,4 +1,4 @@
-
+#pragma once
 #include <string>
 
 #include "data.h"
@@ -24,6 +24,8 @@ public:
     bool is_enabled () { return _M_is_enabled; }
     bool is_failure () { return _M_is_failure; }
 
+    std::string get_name () { return name; }
+
     Module (std::string name, std::string config_target);
 
     /**
@@ -46,8 +48,9 @@ private:
     virtual bool run_update () = 0;
     virtual bool run_calibration () = 0;
 
-    virtual int low_polling_time  () = 0;
-    virtual int high_polling_time () = 0;
+    // No cooldown.
+    virtual int low_polling_time  () { return 0; };
+    virtual int high_polling_time () { return 0; };
     
     bool run_check_policy (const DataDump& dump, const uint32_t delta_ms) override;
 public:
