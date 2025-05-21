@@ -69,9 +69,6 @@ int main(void){
 
         cout << "Module " << module->get_name() << endl;
         cout << " - enabled " << module->is_enabled() << endl;
-        cout << " - failure " << module->is_failure() << endl;
-
-        cout << endl;
         cout << "Init module..." << endl;
         module->init();
         cout << " - enabled " << module->is_enabled() << endl;
