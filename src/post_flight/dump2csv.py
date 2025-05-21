@@ -204,7 +204,7 @@ def generate_csv_dumper_enum (typename: str, enum: Tuple[int, List[Tuple[str, in
         lines = [
             f"{name} " + "{",
         ] + list(map(lambda x : generate_value_check(x[0], x[1]), values)) + [
-            "\telse stream << \"<UNKNOWN>\";",
+            "\telse stream << \"<UNKNOWN>,\";",
             "}"
         ]
         return "\n".join(lines)
