@@ -297,6 +297,8 @@ def compile_csv_header (struct: str, structs: Dict[str, List[Tuple[str, str]]], 
         if codename == "":
             return field
         return codename + "." + field
+    if struct.startswith("struct "):
+        struct = struct[7:]
     if struct not in structs:
         result.append(codename)
         return result
