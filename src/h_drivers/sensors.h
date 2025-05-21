@@ -42,7 +42,7 @@ private:
     // SensRaw raw_data;
     // SensFiltered clean_data;
 
-    Kalman kalman;
+    // Kalman kalman;
 };
 
 #endif /* SENSORS_H */
