@@ -9,14 +9,43 @@
 #include "ina228_module.h"
 #include "tmp1075_module.h"
 #include "sensors.h"
+#include "logger.h"
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
 int main(void){
+    DataLogger &instance = DataLogger::getInstance();
+
+    auto conv = [&instance]() -> void {
+        DataDump dump = Data::get_instance().get();
+
+        instance.conv(dump);
+        return ;
+    };
+    uint64_t start_time = 0;
+    auto time = [&start_time]() -> uint64_t {
+        auto now    = std::chrono::system_clock::now();
+        auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+        return now_ms.time_since_epoch().count() - start_time;
+    };
+    start_time = time();
+    auto useTimestamp = [&time]() -> void {
+        Data& data = Data::get_instance();
+
+        uint32_t timestamp(time());
+        data.write(Data::GoatReg::AV_TIMESTAMP, &timestamp);
+    };
+
+    useTimestamp();
+    conv();
+
     cout << "=== FC TEST ===" << endl;
 
     cout << "Load config..." << endl;
     ConfigManager::initConfig("./config.conf");
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     vector<string> module_targets = {
         "sensors.adxl1",
@@ -59,6 +88,9 @@ int main(void){
     sensors.push_back( GPSModule::make_gps() );
 
     sensors.push_back( Tmp1075Module::make_tmp() );
+    
+    useTimestamp();
+    conv();
 
     for (SensorModule* module : sensors) {
         cout << endl;
@@ -82,6 +114,25 @@ int main(void){
 
     Sensors* driver = new Sensors();
     driver->init_sensors();
+    
+    useTimestamp();
+    conv();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    State state = State::LIFTOFF;
+    Data::get_instance().write(Data::GoatReg::AV_STATE, &state);
+
+    useTimestamp();
+    conv();
+
+    for (size_t i = 0; i < 10; i ++) {
+        useTimestamp();
+        const DataDump dump = Data::get_instance().get();
+        sensors->check_policy(dump, dump.av_timestamp);
+        conv();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
     return 0;
 }
