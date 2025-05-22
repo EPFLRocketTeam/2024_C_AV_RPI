@@ -53,9 +53,9 @@ static int counter =0;
 DataLogger::~DataLogger() {
     stream.flush();
     eventStream.flush();
-    ::fsync(fd);::fsync(fd);
-    ::close(fdStream);
-   ::close(fdStream);
+    //::fsync(fd);::fsync(fd);
+    //::close(fdStream);
+    //::close(fdStream);
 
     if (stream.is_open()) stream.close();
     if (eventStream.is_open()) eventStream.close();
@@ -76,8 +76,8 @@ void DataLogger::eventConv(std::string event,uint32_t ts){
     eventStream.write(event.c_str(), str_length*sizeof(char));
     stream.flush();
     eventStream.flush();
-   ::fsync(fd);
-   ::fsync(fdStream);
+    //::fsync(fd);
+    //::fsync(fdStream);
 
 }
 
