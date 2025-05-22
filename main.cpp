@@ -38,7 +38,6 @@ using namespace std;
 
 int main(void){
     DataLogger &instance = DataLogger::getInstance();
-    I2CInterface intf = I2CInterface::getInstance();
 
     auto conv = [&instance]() -> void {
         DataDump dump = Data::get_instance().get();
@@ -99,7 +98,7 @@ int main(void){
         uint32_t start = time();
         if (start >= 10000 && !done_buzzer) {
             done_buzzer = true;
-            std::map<std::string, bool> _mp = sensors->sensors_status();
+            std::map<std::string, bool> _mp = driver->sensors_status();
 
             for (auto u : _mp) {
                 payload.push_back(BuzzerTarget(250, true));
