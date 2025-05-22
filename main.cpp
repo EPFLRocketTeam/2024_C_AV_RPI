@@ -99,8 +99,10 @@ int main(void){
         if (start >= 10000 && !done_buzzer) {
             done_buzzer = true;
             std::map<std::string, bool> _mp = driver->sensors_status();
+            std::cout << "Making buzzer payload\n";
 
             for (auto u : _mp) {
+                std::cout << u.first << ": " << u.second << "\n";
                 payload.push_back(BuzzerTarget(250, true));
                 payload.push_back(BuzzerTarget(750, 0));
 
@@ -110,6 +112,9 @@ int main(void){
 
                 payload.push_back(BuzzerTarget(1000, 0));
             }
+            for (auto u : payload)
+                std::cout << u.duration << " with " << u.enabled << endl;
+            std::cout << endl;
 
             std::reverse(payload.begin(), payload.end());
         }
