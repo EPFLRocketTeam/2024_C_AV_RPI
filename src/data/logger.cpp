@@ -81,5 +81,25 @@ void DataLogger::eventConv(std::string event,uint32_t ts){
 
 }
 
+template <typename ...Args>
+void DataLogger::eventConvf (const char* fmt, uint32_t ts, Args&&... args) {
+    int size = std::snprintf(NULL, 0, fmt, args...);
+    if (size < 0) {
+        throw std::exception();
+    }
+
+    char* buffer = (char*) malloc( (size + 1) * sizeof(char) );
+
+    std::snprintf(buffer, size + 1, fmt, args...);
+
+    std::string result(size, '.');
+    for (size_t off = 0; off < size; off ++)
+        result[off] = buffer[off];
+
+    free(buffer);
+
+    eventConv(result, ts);
+}
+
 std::string DataLogger::getPath      () { return path; }
 std::string DataLogger::getEventPath () { return eventPath; }

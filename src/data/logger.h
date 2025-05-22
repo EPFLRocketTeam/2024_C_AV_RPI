@@ -38,6 +38,9 @@ DataLogger (std::string path, std::string eventPath);
     void conv (DataDump &dump);
     void eventConv(std::string event,uint32_t ts);
 
+    template<typename... Args>
+    void eventConvf (const char* fmt, uint32_t ts, Args&&... args);
+
     std::string getPath ();
     std::string getEventPath ();
 };
