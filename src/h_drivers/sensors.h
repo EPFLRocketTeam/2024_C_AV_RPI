@@ -12,6 +12,7 @@
 #define SENSORS_H
 
 #include <vector>
+#include <map>
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "I2CGPS.h"
