@@ -53,6 +53,8 @@ std::map<std::string, bool> Sensors::sensors_status () {
     for (SensorModule* module : sensors) {
         result[module->get_name()] = module->is_enabled() && !module->is_failure();
     }
+
+    return result;
 }
 
 void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
