@@ -47,6 +47,14 @@ void Sensors::init_sensors () {
 
 Sensors::~Sensors() {}
 
+std::map<std::string, bool> Sensors::sensors_status () {
+    std::map<std::string, bool> result;
+
+    for (SensorModule* module : sensors) {
+        result[module->get_name()] = module->is_enabled() && !module->is_failure();
+    }
+}
+
 void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     for (SensorModule* mod : sensors)
         mod->check_policy(dump, delta_ms);

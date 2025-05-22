@@ -32,6 +32,8 @@ public:
 
     void init_sensors ();
 
+    std::map<std::string, bool> sensors_status ();
+
     // inline SensStatus get_status() const { return status; }
     // inline SensRaw get_raw() const { return raw_data; }
     // inline SensFiltered get_clean() const { return clean_data; }
