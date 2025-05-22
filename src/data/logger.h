@@ -39,7 +39,7 @@ DataLogger (std::string path, std::string eventPath);
     void eventConv(std::string event,uint32_t ts);
 
     template <typename ...Args>
-    void DataLogger::eventConvf (const char* fmt, uint32_t ts, Args&&... args) {
+    void eventConvf (const char* fmt, uint32_t ts, Args&&... args) {
         int size = std::snprintf(NULL, 0, fmt, args...);
         if (size < 0) {
             throw std::exception();
