@@ -10,6 +10,7 @@
 #include "tmp1075_module.h"
 #include "sensors.h"
 #include "logger.h"
+#include "av_state.h"
 #include <thread>
 #include <chrono>
 
@@ -125,13 +126,29 @@ int main(void){
     useTimestamp();
     conv();
 
-    for (size_t i = 0; i < 10; i ++) {
+    AvState fsm;
+
+    const uint32_t freq = 10;
+
+    while (1) {
+        uint32_t start = time();
+
         useTimestamp();
-        const DataDump dump = Data::get_instance().get();
-        driver->check_policy(dump, dump.av_timestamp);
+
+        DataDump state_dump = Data::get_instance().get();        
+        fsm.update(state_dump);
+
+        DataDump sensors_dump = Data::get_instance().get();     
+        driver->check_policy(sensors_dump, sensors_dump.av_timestamp);
         conv();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        uint32_t end = time();
+
+        if (start + freq > end) {
+            uint32_t delta = start + freq - end;
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(delta));
+        }
     }
 
     return 0;
