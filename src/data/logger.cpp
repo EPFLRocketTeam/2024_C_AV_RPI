@@ -35,8 +35,8 @@ DataLogger::DataLogger (std::string _dumpPath, std::string _eventPath) {
     dumpPath  = template_based_path(_dumpPath);
     eventPath = template_based_path(_eventPath);
 
-    dumpFd  = open(dumpPath.c_str(),  O_WRONLY | O_CREAT |  O_APPEND);
-    eventFd = open(eventPath.c_str(), O_WRONLY | O_CREAT |  O_APPEND);
+    dumpFd  = open(dumpPath.c_str(),  O_WRONLY | O_CREAT |  O_APPEND, 0777);
+    eventFd = open(eventPath.c_str(), O_WRONLY | O_CREAT |  O_APPEND, 0777);
     
     if (dumpFd == -1) {
         throw std::runtime_error("Could not open the dump file.\n");
