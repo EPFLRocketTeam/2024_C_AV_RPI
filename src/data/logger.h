@@ -12,13 +12,11 @@
 
 class DataLogger {
 private:
-    std::string   path;
-    std::ofstream stream;
-    int fd;
+    std::string dumpPath;
+    std::string eventPath;
 
-    std::string   eventPath;
-    std::ofstream eventStream;
-    int fdStream;
+    int dumpFd;
+    int eventFd;
 
      // Singleton instance and mutex for thread safety
      static std::unique_ptr<DataLogger> instance;
@@ -26,7 +24,8 @@ private:
  
     
 public:
-DataLogger (std::string path, std::string eventPath);
+    DataLogger (std::string dumpPath, std::string eventPath);
+    
     // Deleted to prevent copying
     DataLogger(const DataLogger&) = delete;
     DataLogger& operator=(const DataLogger&) = delete;
@@ -58,7 +57,7 @@ DataLogger (std::string path, std::string eventPath);
         eventConv(result, ts);
     }
 
-    std::string getPath ();
+    std::string getDumpPath ();
     std::string getEventPath ();
 };
 
