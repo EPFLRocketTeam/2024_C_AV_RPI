@@ -9,82 +9,145 @@
 #include "ina228_module.h"
 #include "tmp1075_module.h"
 #include "sensors.h"
+#include "logger.h"
+#include "av_state.h"
+#include <thread>
+#include <chrono>
+
+#include "pigpio.h"
+#include "config.h"
+#include "i2c_interface.h"
+#include <algorithm>
+
+struct BuzzerTarget {
+public:
+    uint32_t duration;
+    bool enabled;
+
+    BuzzerTarget (uint32_t duration, bool enabled) : duration(duration), enabled(enabled) {}
+    void enable () {
+        gpioWrite(BUZZER, enabled ? 1 : 0);
+    }
+    void disable () {
+        gpioWrite(BUZZER, 0);
+    }
+
+};
 
 using namespace std;
 
 int main(void){
+    DataLogger &instance = DataLogger::getInstance();
+
+    auto conv = [&instance]() -> void {
+        DataDump dump = Data::get_instance().get();
+
+        instance.conv(dump);
+        return ;
+    };
+    uint64_t start_time = 0;
+    auto time = [&start_time]() -> uint64_t {
+        auto now    = std::chrono::system_clock::now();
+        auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+        return now_ms.time_since_epoch().count() - start_time;
+    };
+    start_time = time();
+    auto useTimestamp = [&time]() -> void {
+        Data& data = Data::get_instance();
+
+        uint32_t timestamp(time());
+        data.write(Data::GoatReg::AV_TIMESTAMP, &timestamp);
+    };
+
+    useTimestamp();
+    conv();
+
     cout << "=== FC TEST ===" << endl;
 
     cout << "Load config..." << endl;
     ConfigManager::initConfig("./config.conf");
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    vector<string> module_targets = {
-        "sensors.adxl1",
-        "sensors.adxl2",
-        "sensors.bmi1",
-        "sensors.bmi2",
-        "sensors.bmp1",
-        "sensors.bmp2",
-        "sensors.gps",
-        "sensors.ina228_lpb",
-        "sensors.ina228_hpb",
-        "sensors.tmp1075"
-    };
-
-    for (string &target : module_targets) {
-        bool c1 = ConfigManager::isEnabled(target, false);
-        bool c2 = ConfigManager::isEnabled(target, true);
-        
-        if (c1 == c2) {
-            cout << " - " << target << ": " << c1 << endl;
-        } else {
-            cout << " - " << target << ": missing entry in config." << endl;
-        }
-    }
-
-    vector<SensorModule*> sensors;
-
-    sensors.push_back( Adxl375Module::make_primary() );
-    sensors.push_back( Adxl375Module::make_secondary() );
-
-    sensors.push_back( Bmi088Module::make_primary() );
-    sensors.push_back( Bmi088Module::make_secondary() );
-
-    sensors.push_back( Bmp390Module::make_primary() );
-    sensors.push_back( Bmp390Module::make_secondary() );
-
-    sensors.push_back( INA228Module::make_lpb() );
-    sensors.push_back( INA228Module::make_hpb() );
-
-    sensors.push_back( GPSModule::make_gps() );
-
-    sensors.push_back( Tmp1075Module::make_tmp() );
-
-    for (SensorModule* module : sensors) {
-        cout << endl;
-        if (module == NULL) {
-            cout << "NULL module" << endl;
-            continue ;
-        }
-
-        cout << "Module " << module->get_name() << endl;
-        cout << " - enabled " << module->is_enabled() << endl;
-        cout << " - failure " << module->is_failure() << endl;
-
-        cout << endl;
-        cout << "Init module..." << endl;
-        module->init();
-        cout << " - enabled " << module->is_enabled() << endl;
-        cout << " - failure " << module->is_failure() << endl;
-    }
-
-    cout << endl;
-    cout << endl;
+    useTimestamp();
+    conv();
     cout << "=== Init Sensors HDriver ===" << endl;
     cout << endl;
 
     Sensors* driver = new Sensors();
     driver->init_sensors();
+    
+    useTimestamp();
+    conv();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    State state = State::LIFTOFF;
+    Data::get_instance().write(Data::GoatReg::AV_STATE, &state);
+
+    useTimestamp();
+    conv();
+
+    AvState fsm;
+
+    const uint32_t freq = 10;
+
+    std::vector<BuzzerTarget> payload;
+    bool done_buzzer = false;
+    uint32_t end_target = 0;
+
+    while (1) {
+        uint32_t start = time();
+        if (start >= 10000 && !done_buzzer) {
+            done_buzzer = true;
+            std::map<std::string, bool> _mp = driver->sensors_status();
+            std::cout << "Making buzzer payload\n";
+
+            for (auto u : _mp) {
+                std::cout << u.first << ": " << u.second << "\n";
+                payload.push_back(BuzzerTarget(250, true));
+                payload.push_back(BuzzerTarget(750, 0));
+
+                for (int i = 0; i < 10; i ++) {
+                    payload.push_back(BuzzerTarget(100, u.second && (i % 2 == 1)));
+                }
+
+                payload.push_back(BuzzerTarget(1000, 0));
+            }
+            for (auto u : payload)
+                std::cout << u.duration << " with " << u.enabled << endl;
+            std::cout << endl;
+
+            std::reverse(payload.begin(), payload.end());
+        }
+        if (start >= end_target) {
+            if (payload.size() == 0) {
+                gpioWrite(BUZZER, 0);
+            } else {
+                BuzzerTarget ntar = payload.back();
+
+                end_target = start + ntar.duration;
+                ntar.enable();
+
+                payload.pop_back();
+            }
+        }
+
+        useTimestamp();
+
+        DataDump state_dump = Data::get_instance().get();        
+        fsm.update(state_dump);
+
+        DataDump sensors_dump = Data::get_instance().get();     
+        driver->check_policy(sensors_dump, sensors_dump.av_timestamp);
+        conv();
+
+        uint32_t end = time();
+
+        if (start + freq > end) {
+            uint32_t delta = start + freq - end;
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(delta));
+        }
+    }
 
     return 0;
 }

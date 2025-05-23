@@ -12,13 +12,11 @@
 
 class DataLogger {
 private:
-    std::string   path;
-    std::ofstream stream;
-    int fd;
+    std::string dumpPath;
+    std::string eventPath;
 
-    std::string   eventPath;
-    std::ofstream eventStream;
-    int fdStream;
+    int dumpFd;
+    int eventFd;
 
      // Singleton instance and mutex for thread safety
      static std::unique_ptr<DataLogger> instance;
@@ -26,7 +24,8 @@ private:
  
     
 public:
-DataLogger (std::string path, std::string eventPath);
+    DataLogger (std::string dumpPath, std::string eventPath);
+    
     // Deleted to prevent copying
     DataLogger(const DataLogger&) = delete;
     DataLogger& operator=(const DataLogger&) = delete;
@@ -38,7 +37,27 @@ DataLogger (std::string path, std::string eventPath);
     void conv (DataDump &dump);
     void eventConv(std::string event,uint32_t ts);
 
-    std::string getPath ();
+    template <typename ...Args>
+    void eventConvf (const char* fmt, uint32_t ts, Args&&... args) {
+        int size = std::snprintf(NULL, 0, fmt, args...);
+        if (size < 0) {
+            throw std::exception();
+        }
+
+        char* buffer = (char*) malloc( (size + 1) * sizeof(char) );
+
+        std::snprintf(buffer, size + 1, fmt, args...);
+
+        std::string result(size, '.');
+        for (size_t off = 0; off < size; off ++)
+            result[off] = buffer[off];
+
+        free(buffer);
+
+        eventConv(result, ts);
+    }
+
+    std::string getDumpPath ();
     std::string getEventPath ();
 };
 
