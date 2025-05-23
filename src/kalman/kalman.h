@@ -2,6 +2,7 @@
 #define KALMAN_H
 
 #include <Eigen/Dense>
+#include <limits>      // For std::numeric_limits
 #include "rotation_utils.h"
 #include "data.h"
 
@@ -78,6 +79,11 @@ private:
     bool first_gps_update_received = false;
     bool gps_azimuth_updated = false;
 
+    // Stores the direct output of fuse_IMUs
+    Eigen::Vector3f m_debug_c_bmi;
+    Eigen::Vector3f m_debug_c_bmi_aux;
+    Eigen::Vector3f m_fused_body_acceleration;
+
 public:
     Kalman( float estimate_covariance_gyro, 
             float estimate_covariance_accel,
@@ -114,6 +120,10 @@ public:
     float get_pitch() const;
     float get_roll() const;
     NavigationData get_nav_data() const;
+
+    Eigen::Vector3f get_debug_c_bmi() const;
+    Eigen::Vector3f get_debug_c_bmi_aux() const;
+    Eigen::Vector3f get_fused_body_acceleration() const;
 
 };
 

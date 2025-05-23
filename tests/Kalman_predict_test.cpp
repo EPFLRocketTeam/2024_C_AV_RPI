@@ -2,6 +2,7 @@
 #include <iomanip> // For std::fixed and std::setprecision
 #include <unistd.h> // For usleep
 #include <chrono>   // For millis/micros
+#include <limits>   // For std::numeric_limits for NaN checks if needed for printing
 
 // Project headers
 #include "bmi08x.h"
@@ -34,23 +35,16 @@ int main(void) {
     Adxl375 adxl1(ADXL375_ADDR_I2C_PRIM);
     Adxl375 adxl2(ADXL375_ADDR_I2C_SEC);
 
-    std::cout << "Calibrating ADXL375 sensors..." << std::endl;
-    adxl1.calibrate();
-    adxl2.calibrate();
-    std::cout << "ADXL375 calibration done." << std::endl;
-
     // Kalman Initialization with example parameters
-    Kalman kalman(
-        0.1f,    // estimate_covariance_gyro
-        0.1f,    // estimate_covariance_accel
-        0.01f,   // estimate_covariance_orientation
-        0.001f,  // gyro_cov (process noise for gyro)
-        0.0001f, // gyro_bias_cov (process noise for gyro bias)
-        0.01f,   // accel_proc_cov (process noise for accel)
-        0.001f,  // accel_bias_cov (process noise for accel bias)
-        1.0f,    // gps_obs_cov (not used in this test)
-        1.0f     // alt_obs_cov (not used in this test)
-    );
+    Kalman kalman(INITIAL_COV_GYR_BIAS,
+           INITIAL_COV_ACCEL_BIAS,
+           INITIAL_COV_ORIENTATION,
+           GYRO_COV,
+           GYRO_BIAS_COV,
+           ACCEL_COV,
+           ACCEL_BIAS_COV,
+           GPS_OBS_COV,
+           ALT_OBS_COV);
 
     NavSensors nav_sensors;
     NavigationData nav_data; // Will be mostly empty/default for this predict-only test
@@ -63,22 +57,22 @@ int main(void) {
     nav_sensors.bmp_aux.pressure = 1013.25f;
 
 
-    const int LOOP_DELAY_US = 10000; // 10ms loop time (100 Hz)
     const uint32_t KALMAN_CALIB_DURATION_MS = 5000; // 5 seconds for Kalman static calibration
-    const int TOTAL_DURATION_S = 20; // Run for 20 seconds
-    const int TOTAL_ITERATIONS = (TOTAL_DURATION_S * 1000000) / LOOP_DELAY_US;
+    const uint32_t TOTAL_DURATION_MS = 20 * 1000; // Run for 20 seconds (20000 ms)
 
-    std::cout << "Starting Kalman predict test for " << TOTAL_DURATION_S << " seconds..." << std::endl;
+    std::cout << "Starting Kalman predict test for " << TOTAL_DURATION_MS / 1000 << " seconds..." << std::endl;
     std::cout << "Kalman static calibration will run for the first " << KALMAN_CALIB_DURATION_MS / 1000 << " seconds." << std::endl;
 
     // Print CSV header
     std::cout << std::fixed << std::setprecision(4);
-    std::cout << "Time_ms,Azimuth_deg,Pitch_deg,BMI1_ax,BMI1_ay,BMI1_az,BMI2_ax,BMI2_ay,BMI2_az" << std::endl;
+    std::cout << "Time_ms,Azimuth_deg,Pitch_deg,BMI1_ax,BMI1_ay,BMI1_az,BMI2_ax,BMI2_ay,BMI2_az,Fused_ax,Fused_ay,Fused_az,cBMI_x,cBMI_y,cBMI_z,cBMI_aux_x,cBMI_aux_y,cBMI_aux_z" << std::endl;
 
     // Initialize Kalman's last_measurement_time by calling micros once before the loop
     // This is handled internally by Kalman's first predict call where last_measurement_time is 0.
+    bool switched_to_non_static_printed = false;
+    start_time_chrono = std::chrono::high_resolution_clock::now(); // Reset start time just before the loop
 
-    for (int i = 0; i < TOTAL_ITERATIONS; ++i) {
+    while (millis() < TOTAL_DURATION_MS) {
         uint32_t current_ms = millis();
 
         // Read sensor data
@@ -118,13 +112,14 @@ int main(void) {
         if (current_ms < KALMAN_CALIB_DURATION_MS) {
             kalman.set_is_static(true);
         } else {
-            if (kalman.get_gyro_bias().norm() == 0 && kalman.get_accel_bias().norm() == 0 && current_ms >= KALMAN_CALIB_DURATION_MS && i > 0 && (millis() - KALMAN_CALIB_DURATION_MS < 2* (LOOP_DELAY_US/1000) ) ) { // Check if it just switched
+            if (!switched_to_non_static_printed) {
                  std::cout << "# Info: Switching to non-static mode for Kalman." << std::endl;
                  std::cout << "# Info: Initial Gyro Bias: " << kalman.get_gyro_bias().transpose() << std::endl;
                  std::cout << "# Info: Initial Accel Bias: " << kalman.get_accel_bias().transpose() << std::endl;
                  std::cout << "# Info: Initial Azimuth (deg): " << kalman.get_azimuth() * RAD_TO_DEG << std::endl;
                  std::cout << "# Info: Initial Pitch (deg): " << kalman.get_pitch() * RAD_TO_DEG << std::endl;
                  std::cout << "# Info: Initial Roll (deg): " << kalman.get_roll() * RAD_TO_DEG << std::endl;
+                 switched_to_non_static_printed = true;
             }
             kalman.set_is_static(false);
         }
@@ -132,7 +127,13 @@ int main(void) {
         // Run Kalman predict
         kalman.predict(nav_sensors, nav_data);
 
+        // Get debug values
+        Eigen::Vector3f fused_accel = kalman.get_fused_body_acceleration();
+        Eigen::Vector3f c_bmi_val = kalman.get_debug_c_bmi();
+        Eigen::Vector3f c_bmi_aux_val = kalman.get_debug_c_bmi_aux();
+
         // Print data: Time, Azimuth, Pitch, BMI1_ax, BMI1_ay, BMI1_az, BMI2_ax, BMI2_ay, BMI2_az
+        // Fused_ax, Fused_ay, Fused_az, cBMI_x, cBMI_y, cBMI_z, cBMI_aux_x, cBMI_aux_y, cBMI_aux_z
         std::cout << current_ms << ","
                   << kalman.get_azimuth() * RAD_TO_DEG << ","
                   << kalman.get_pitch() * RAD_TO_DEG << ","
@@ -141,10 +142,13 @@ int main(void) {
                   << nav_sensors.bmi_accel.z << ","
                   << nav_sensors.bmi_aux_accel.x << ","
                   << nav_sensors.bmi_aux_accel.y << ","
-                  << nav_sensors.bmi_aux_accel.z
+                  << nav_sensors.bmi_aux_accel.z << ","
+                  << fused_accel(0) << "," << fused_accel(1) << "," << fused_accel(2) << ","
+                  << c_bmi_val(0) << "," << c_bmi_val(1) << "," << c_bmi_val(2) << ","
+                  << c_bmi_aux_val(0) << "," << c_bmi_aux_val(1) << "," << c_bmi_aux_val(2)
                   << std::endl;
 
-        usleep(LOOP_DELAY_US);
+        // No delay, run as fast as possible
     }
 
     std::cout << "Kalman predict test finished." << std::endl;

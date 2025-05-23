@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include "kalman_params.h"
 #include <iostream>
+#include <limits>
 
 namespace {
     auto start = std::chrono::high_resolution_clock::now();
@@ -52,7 +53,10 @@ Kalman::Kalman( float estimate_covariance_gyro,
       high_acceleration(false),
       last_high_accel_time(0),
       first_gps_update_received(false),
-      gps_azimuth_updated(false) {
+      gps_azimuth_updated(false),
+      m_debug_c_bmi(Eigen::Vector3f::Constant(std::numeric_limits<float>::quiet_NaN())),
+      m_debug_c_bmi_aux(Eigen::Vector3f::Constant(std::numeric_limits<float>::quiet_NaN())),
+      m_fused_body_acceleration(Eigen::Vector3f::Constant(std::numeric_limits<float>::quiet_NaN())) {
     
 
     // Initialize covariance matrices
@@ -206,6 +210,9 @@ void Kalman::fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gy
         // Compute c_i for each BMI accelerometer
         const Eigen::Vector3f c_bmi = compute_c(bmi_accel_vec, omega, bmi_pos_vec - fused_accel_pos_vec);
         const Eigen::Vector3f c_bmi_aux = compute_c(bmi_aux_accel_vec, omega, bmi_aux_pos_vec - fused_accel_pos_vec);
+        
+        m_debug_c_bmi = c_bmi;
+        m_debug_c_bmi_aux = c_bmi_aux;
 
         // Construct matrix M for BMIs only
         Eigen::MatrixXf M(6, 6);
@@ -237,7 +244,10 @@ void Kalman::fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gy
     } else {
         // High acceleration: Use only ADXL sensors with simple averaging
         output_acc_meas = (adxl_vec + adxl_aux_vec) / 2.0f;
+        m_debug_c_bmi.setConstant(std::numeric_limits<float>::quiet_NaN());
+        m_debug_c_bmi_aux.setConstant(std::numeric_limits<float>::quiet_NaN());
     }
+    m_fused_body_acceleration = output_acc_meas;
 }
 
 // simpler version for reference
@@ -516,6 +526,18 @@ float Kalman::get_pitch() const {
 }
 float Kalman::get_roll() const {
     return roll_of_quaternion(orientation_estimate);
+}
+
+Eigen::Vector3f Kalman::get_debug_c_bmi() const {
+    return m_debug_c_bmi;
+}
+
+Eigen::Vector3f Kalman::get_debug_c_bmi_aux() const {
+    return m_debug_c_bmi_aux;
+}
+
+Eigen::Vector3f Kalman::get_fused_body_acceleration() const {
+    return m_fused_body_acceleration;
 }
 
 NavigationData Kalman::get_nav_data() const {
