@@ -54,6 +54,9 @@ target_link_libraries(telecom_test flight_computer)
 add_executable(kalman_mock kalman_mock.cpp)
 target_link_libraries(kalman_mock flight_computer)
 
+add_executable(Kalman_predict_test Kalman_predict_test.cpp)
+target_link_libraries(Kalman_predict_test flight_computer)
+
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})
 #target_include_directories(mock_sensor PUBLIC include)

@@ -5,7 +5,8 @@
 // constants
 #define HALF_PI 1.57079632679
 #define M_PI 3.14159265358979323846
-#define DEG_TO_RAD 0.017453292519943295769236907684886
+#define DEG_TO_RAD M_PI / 180.0f
+#define RAD_TO_DEG 180.0f / M_PI
 #define EARTH_RADIUS 6378137.0
 
 // Positions of the accelerometters relative to the center of the PCB
