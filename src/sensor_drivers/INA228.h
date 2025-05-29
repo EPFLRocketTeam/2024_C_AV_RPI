@@ -12,10 +12,12 @@
 //
 //  Read the datasheet for the details
 
+#include "IIna228.h"
 #include <stdint.h>
 #include <math.h>
 #include <exception>
 #include <string>
+#include <random>
 
 #define INA228_LIB_VERSION (F("0.2.0"))
 #define INA228_ADDRESS_LPB 0x40
@@ -132,7 +134,9 @@ typedef int8_t (*ina228_write_fptr_t)(uint8_t reg_addr, const uint8_t *read_data
  */
 typedef void (*ina228_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
 
-class INA228 {
+#ifndef MOCK_SENSORS_ENABLED 
+class INA228 : public IIna228
+ {
 public:
         //  address between 0x40 and 0x4F
     explicit INA228(const uint8_t address, float shunt=0.015, float maxCurrent=10.0);
@@ -285,6 +289,10 @@ public:
     //
     int getLastError();
 
+
+    // add noise to data
+    float add_noise_to_data(float original_value, float stddev);
+
 private:
     //  max 4 bytes
     uint32_t _readRegister(uint8_t reg, uint8_t bytes);
@@ -335,5 +343,5 @@ public:
 private:
     std::string message;
 };
-
+#endif //  MOCK_SENSORS_ENABLED
 #endif /* INA228_H */

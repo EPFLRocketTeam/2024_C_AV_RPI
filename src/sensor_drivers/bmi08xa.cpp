@@ -1248,4 +1248,21 @@ bmi08_sensor_data_f Bmi088::get_gyro_data() {
 
     return gyro_data;
 }
-
+/*!
+ * @brief Add Gaussian noise to a given data value.
+ *
+ * @param original_value    Original data value.
+ * @param stddev   Standard deviation of the Gaussian noise.
+ *
+ * @return Data value with added Gaussian noise.
+ */
+bmi08_sensor_data_f Bmi088::add_noise_to_data(bmi08_sensor_data_f original_value, float stddev)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<float> noise(0.0f, stddev);
+    float x = original_value.x + noise(gen);
+    float y = original_value.y + noise(gen);
+    float z = original_value.z + noise(gen);
+    return {x,y,z};
+}
