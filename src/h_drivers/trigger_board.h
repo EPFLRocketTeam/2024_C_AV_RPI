@@ -15,6 +15,7 @@ public:
     bool read_is_woken_up();
     void send_clear_to_trigger();
     void write_pyros(const uint32_t pyros);    
+    uint32_t read_pyros();
     bool read_has_triggered();
 
     void check_policy(const DataDump& dump, const uint32_t delta_ms) override;

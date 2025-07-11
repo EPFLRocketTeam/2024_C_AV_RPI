@@ -7,29 +7,65 @@
 #include <iostream>
 #include <cassert>
 #include <unistd.h>
+#include <random>
 #include "av_state.h"
 #include "data.h"
 #include "intranet_commands.h"
 #include "trigger_board.h"
 
-void read_write_test(TriggerBoard& trb);
+void intensive_read_write_test(TriggerBoard& trb);
+void sequential_read_write_test(TriggerBoard& trb);
 void check_policy_test(TriggerBoard& trb);
 
 int main() {
+    srand((unsigned) time(0));
+
     std::cout << "\x1b[7m" "Avionics Trigger Board I2C Tests" "\x1b[0m\n\n";
 
     TriggerBoard trb;
 
     std::cout << "Trigger Board driver initialized successfully\n";
     
-    std::cout << "Testing R/W op. and TRB behavior\n";
-    read_write_test(trb);
+    std::cout << "Testing intensive R/W operations and coherence:\n";
+    intensive_read_write_test(trb);
+    std::cout << "\n\n";
+    std::cout << "Testing R/W op. and TRB behavior:\n";
+    sequential_read_write_test(trb);
 
     //std::cout << "Testing driver policy\n";
     //check_policy_test(trb);
 }
 
-void read_write_test(TriggerBoard& trb) {
+void intensive_read_write_test(TriggerBoard& trb) {
+    const uint8_t iter(128);
+    for (int i(0); i < iter; ++i) {
+	uint32_t tmsp(rand());
+	Data::get_instance().write(Data::AV_TIMESTAMP, &tmsp);
+	trb.write_timestamp();
+	usleep(10e3);
+    }
+    for (int i(0); i < iter; ++i) {
+	trb.read_is_woken_up();
+	usleep(10e3);
+    }
+    for (int i(0); i < iter; ++i) {
+	trb.read_has_triggered();
+	usleep(10e3);
+    }
+    for (int i(0); i < iter; ++i) {
+	const uint32_t val(rand());
+	std::cout << val << "\t";
+	trb.write_pyros(val);
+	usleep(10e3);
+	std::cout << trb.read_pyros() << "\n";
+	//assert(trb.read_pyros() == val);
+	//usleep(10e3);
+	//assert(trb.read_has_triggered() == false);
+	//usleep(10e3);
+    }
+}
+
+void sequential_read_write_test(TriggerBoard& trb) {
     // TRB is in SLEEP mode until we send WAKEUP
     std::cout << " - Checking TRB is in SLEEP mode... ";
     assert(trb.read_is_woken_up() == false);

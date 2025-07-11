@@ -79,6 +79,17 @@ void TriggerBoard::write_pyros(const uint32_t pyros) {
     }
 }
 
+uint32_t TriggerBoard::read_pyros() {
+    uint32_t rslt(0);
+    try {
+	I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&rslt, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+	std::string msg("TRB read_pyros error: ");
+	throw TriggerBoardException(msg + e.what());
+    }
+    return rslt;
+}
+
 bool TriggerBoard::read_has_triggered() {
     uint32_t rslt(0);
     try {
