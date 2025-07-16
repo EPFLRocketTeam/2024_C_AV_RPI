@@ -30,6 +30,7 @@ int main() {
     intensive_read_write_test(trb);
     std::cout << "\n\n";
     std::cout << "Testing R/W op. and TRB behavior:\n";
+    trb.write_clear_to_trigger(0);
     sequential_read_write_test(trb);
 
     //std::cout << "Testing driver policy\n";
@@ -37,32 +38,51 @@ int main() {
 }
 
 void intensive_read_write_test(TriggerBoard& trb) {
-    const uint8_t iter(128);
+    const unsigned iter(128);
+    std::cout << "Writing " << iter << " random timestamps to TRB_TIMESTAMP_MAIN...";
     for (int i(0); i < iter; ++i) {
 	uint32_t tmsp(rand());
 	Data::get_instance().write(Data::AV_TIMESTAMP, &tmsp);
 	trb.write_timestamp();
 	usleep(10e3);
     }
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << "Writing " << iter << " times to TRB_CLEAR_TO_TRIGGER...";
+    for (int i(0); i < iter; ++i) {
+	trb.write_clear_to_trigger(i % 2);
+    	usleep(10e3);
+    }
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << "Reading " << iter << " times from TRB_IS_WOKEN_UP...";
     for (int i(0); i < iter; ++i) {
 	trb.read_is_woken_up();
 	usleep(10e3);
     }
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << "Reading " << iter << " times from TRB_HAS_TRIGGERED...";
     for (int i(0); i < iter; ++i) {
 	trb.read_has_triggered();
 	usleep(10e3);
     }
-    for (int i(0); i < iter; ++i) {
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << "Writing to and reading back from TRB_PYROS...\n";
+    std::cout << "Sent\t\tReceived\n";
+    for (int i(32768); i < 32897; ++i) {
 	const uint32_t val(rand());
 	std::cout << val << "\t";
 	trb.write_pyros(val);
 	usleep(10e3);
 	std::cout << trb.read_pyros() << "\n";
-	//assert(trb.read_pyros() == val);
+	assert(trb.read_pyros() == val);
 	//usleep(10e3);
 	//assert(trb.read_has_triggered() == false);
 	//usleep(10e3);
     }
+    std::cout << "\x1b[32mOK\x1b[0m\n";
 }
 
 void sequential_read_write_test(TriggerBoard& trb) {
@@ -120,7 +140,7 @@ void sequential_read_write_test(TriggerBoard& trb) {
     usleep(1e6);
 
     std::cout << " - Sending CLEAR_TO_TRIGGER order... ";
-    trb.send_clear_to_trigger();
+    trb.write_clear_to_trigger(1);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 5s...\n";

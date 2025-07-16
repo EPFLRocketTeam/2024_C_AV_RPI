@@ -13,7 +13,7 @@ public:
     void write_timestamp();
     void send_wake_up();
     bool read_is_woken_up();
-    void send_clear_to_trigger();
+    void write_clear_to_trigger(const bool go);
     void write_pyros(const uint32_t pyros);    
     uint32_t read_pyros();
     bool read_has_triggered();
