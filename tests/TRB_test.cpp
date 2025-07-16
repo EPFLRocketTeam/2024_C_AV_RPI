@@ -107,8 +107,8 @@ void sequential_read_write_test(TriggerBoard& trb) {
     std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
 
-    std::cout << " - Sending PYRO NET_CMD_OFF... ";
-    cmd = NET_CMD_OFF;
+    std::cout << " - Sending PYRO_2 NET_CMD_OFF... ";
+    cmd = NET_CMD_OFF << 8;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
