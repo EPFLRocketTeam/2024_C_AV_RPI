@@ -13,7 +13,7 @@
 /*********                     Macros                              ******/
 /************************************************************************/
 /* Iteration count to run example code */
-#define ITERATION  UINT8_C(3)
+#define ITERATION  UINT8_C(10)
 
 /************************************************************************/
 /*********                     Test code                           ******/
@@ -22,7 +22,8 @@
 int main(void)
 {
     int loop = 0;
-    Bmp390 bmp1(BMP3_ADDR_I2C_PRIM), bmp2(BMP3_ADDR_I2C_SEC);
+    //Bmp390 bmp1(BMP3_ADDR_I2C_PRIM);
+    Bmp390 bmp2(BMP3_ADDR_I2C_SEC);
     bmp3_data data;
     // Main get data loop
     while (loop < ITERATION)
@@ -34,16 +35,16 @@ int main(void)
             * BMP3_TEMP       : To read only temperature data
             * BMP3_PRESS      : To read only pressure data
             */
-        if (bmp1.get_status().intr.drdy) {
+        /*if (bmp1.get_status().intr.drdy) {
             data = bmp1.get_sensor_data();
 
             std::cout << "Data[" << loop << "] PRIMARY T: " << data.temperature
                 << " deg C, P: " << data.pressure << " Pa\n";
             
-            /* assertions for unit testing. Pretty arbitrary numbers */
+            // assertions for unit testing. Pretty arbitrary numbers
             assert((0 < data.temperature) and (data.temperature < 85));
             assert((80000 < data.pressure) and (data.pressure < 120000));
-        }
+        }*/
 
         if (bmp2.get_status().intr.drdy) {
             data = bmp2.get_sensor_data();
@@ -51,12 +52,12 @@ int main(void)
             std::cout << "Data[" << loop << "] SECONDARY T: " << data.temperature
                 << " deg C, P: " << data.pressure << " Pa\n";
 
-            /* assertions for unit testing. Pretty arbitrary numbers */
+            // assertions for unit testing. Pretty arbitrary numbers 
             assert((0 < data.temperature) and (data.temperature < 85));
             assert((80000 < data.pressure) and (data.pressure < 120000));
         }
 
-        loop = loop + 1;
+        ++loop;
         if (loop < ITERATION) sleep(1);
     }
     return 0;
