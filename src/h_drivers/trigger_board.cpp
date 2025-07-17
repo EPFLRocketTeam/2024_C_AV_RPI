@@ -45,6 +45,16 @@ void TriggerBoard::send_wake_up() {
     }
 }
 
+void TriggerBoard::send_sleep() {
+    const uint32_t order(NET_CMD_OFF);
+    try {
+        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_WAKE_UP, (uint8_t*)&order, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB sleep error: ");
+        throw TriggerBoardException(msg + e.what());
+    }
+}
+
 bool TriggerBoard::read_is_woken_up() {
     unsigned long rslt(0);
     try {
