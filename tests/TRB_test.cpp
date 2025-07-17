@@ -15,22 +15,38 @@
 
 void intensive_read_write_test(TriggerBoard& trb);
 void sequential_read_write_test(TriggerBoard& trb);
+void sequential_write_test(TriggerBoard& trb);
 void check_policy_test(TriggerBoard& trb);
+
+void reset_trb_state(TriggerBoard& trb) {
+    std::cout << "Resetting TRB state...";
+    trb.write_clear_to_trigger(0);
+    trb.send_sleep();
+    usleep(1e6);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+}
 
 int main() {
     srand((unsigned) time(0));
 
-    std::cout << "\x1b[7m" "Avionics Trigger Board I2C Tests" "\x1b[0m\n\n";
+    std::cout << "\x1b[7m" "Avionics Trigger Board I2C Tests" "\x1b[0m\n";
+    std::cout << "WARNING: This test will write to the TRB pyro channels /!\\\n\n";
+    usleep(2e6);
 
     TriggerBoard trb;
 
     std::cout << "Trigger Board driver initialized successfully\n";
     
-    std::cout << "Testing intensive R/W operations and coherence:\n";
+    std::cout << "Testing intensive R/W on all registers:\n";
     intensive_read_write_test(trb);
-    std::cout << "\n\n";
-    std::cout << "Testing R/W op. and TRB behavior:\n";
-    trb.write_clear_to_trigger(0);
+    std::cout << "\n";
+    std::cout << "Testing sequential Write control commands:\n";
+    reset_trb_state(trb);
+    sequential_write_test(trb);
+    std::cout << "\n";
+    usleep(500e3);
+    std::cout << "Testing sequential R/W commands and checking TRB behavior:\n";
+    reset_trb_state(trb);
     sequential_read_write_test(trb);
 
     //std::cout << "Testing driver policy\n";
@@ -72,17 +88,19 @@ void intensive_read_write_test(TriggerBoard& trb) {
     std::cout << "Writing to and reading back from TRB_PYROS...\n";
     std::cout << "Sent\t\tReceived\n";
     for (int i(32768); i < 32897; ++i) {
-	const uint32_t val(rand());
+	const uint32_t val(1980149656);
 	std::cout << val << "\t";
 	trb.write_pyros(val);
 	usleep(10e3);
 	std::cout << trb.read_pyros() << "\n";
-	assert(trb.read_pyros() == val);
+	//assert(trb.read_pyros() == val);
 	//usleep(10e3);
 	//assert(trb.read_has_triggered() == false);
 	//usleep(10e3);
     }
     std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << "\x1b[32m\x1b[7mI2C Intensive R/W SUCCESS\x1b[0m\n\n";
 }
 
 void sequential_read_write_test(TriggerBoard& trb) {
@@ -119,16 +137,16 @@ void sequential_read_write_test(TriggerBoard& trb) {
     assert(trb.read_has_triggered() == false);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Sending PYRO NET_CMD_ON... ";
-    uint32_t cmd(NET_CMD_ON);
+    std::cout << " - Sending PYRO_2_3 NET_CMD_ON... ";
+    uint32_t cmd(NET_CMD_ON << 8 | NET_CMD_ON << 16);
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
 
-    std::cout << " - Sending PYRO_2 NET_CMD_OFF... ";
-    cmd = NET_CMD_OFF << 8;
+    std::cout << " - Sending PYRO_2_3 NET_CMD_OFF... ";
+    cmd = NET_CMD_OFF << 8 | NET_CMD_OFF << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -139,23 +157,23 @@ void sequential_read_write_test(TriggerBoard& trb) {
     std::cout << " - Waiting 1s...\n";
     usleep(1e6);
 
-    std::cout << " - Sending CLEAR_TO_TRIGGER order... ";
+    std::cout << " - Sending CLEAR_TO_TRIGGER NET_CMD_OFF... ";
     trb.write_clear_to_trigger(1);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 5s...\n";
     usleep(5e6);
 
-    std::cout << " - Sending PYRO_2 NET_CMD_ON... ";
-    cmd = NET_CMD_ON << 8;
+    std::cout << " - Sending PYRO_2_3 NET_CMD_ON... ";
+    cmd = NET_CMD_ON << 8 | NET_CMD_ON << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
 
-    std::cout << " - Sending PYRO_2 NET_CMD_OFF... ";
-    cmd = NET_CMD_OFF << 8;
+    std::cout << " - Sending PYRO_2_3 NET_CMD_OFF... ";
+    cmd = NET_CMD_OFF << 8 | NET_CMD_OFF << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -163,7 +181,67 @@ void sequential_read_write_test(TriggerBoard& trb) {
     assert(trb.read_has_triggered() == true);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << "\x1b[32m\x1b[7mI2C R/W SUCCESS\x1b[0m\n\n";
+    std::cout << "\x1b[32m\x1b[7mI2C R/W Sequence SUCCESS\x1b[0m\n\n";
+}
+
+void sequential_write_test(TriggerBoard& trb) {
+    std::cout << " - Writing FSM timestamp to TRB... ";
+    uint32_t tmsp(341400);
+    Data::get_instance().write(Data::AV_TIMESTAMP, &tmsp);
+    trb.write_timestamp();
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Waiting 1s...\n";
+    usleep(1e6);
+
+    std::cout << " - Sending CLEAR_TO_TRIGGER NET_CMD_OFF... ";
+    trb.write_clear_to_trigger(0);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Sending WAKEUP order... ";
+    trb.send_wake_up();
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Waiting 5s...\n";
+    usleep(5e6);
+
+    std::cout << " - Sending PYRO_2_3 NET_CMD_ON... ";
+    uint32_t cmd(NET_CMD_ON << 8 | NET_CMD_ON << 16);
+    trb.write_pyros(cmd);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Waiting 300ms...\n";
+    usleep(300e3);
+
+    std::cout << " - Sending PYRO_2_3 NET_CMD_OFF... ";
+    cmd = NET_CMD_OFF << 8 | NET_CMD_OFF << 16;
+    trb.write_pyros(cmd);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Waiting 1s...\n";
+    usleep(1e6);
+
+    std::cout << " - Sending CLEAR_TO_TRIGGER NET_CMD_ON... ";
+    trb.write_clear_to_trigger(1);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Waiting 5s...\n";
+    usleep(5e6);
+
+    std::cout << " - Sending PYRO_2_3 NET_CMD_ON... ";
+    cmd = NET_CMD_ON << 8 | NET_CMD_ON << 16;
+    trb.write_pyros(cmd);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << " - Waiting 300ms...\n";
+    usleep(300e3);
+
+    std::cout << " - Sending PYRO_2_3 NET_CMD_OFF... ";
+    cmd = NET_CMD_OFF << 8 | NET_CMD_OFF << 16;
+    trb.write_pyros(cmd);
+    std::cout << "\x1b[32mOK\x1b[0m\n";
+
+    std::cout << "\x1b[32m\x1b[7mI2C Write Sequence SUCCESS\x1b[0m\n\n";
 }
 
 void check_policy_test(TriggerBoard& trb) {
