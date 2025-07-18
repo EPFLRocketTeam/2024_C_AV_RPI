@@ -21,5 +21,6 @@
 #define LED_LORA_RX 17
 #define LED_LORA_TX 18
 
+#define DATADUMP_FSYNC_FREQ 50
 
 #endif /* CONFIG_H */

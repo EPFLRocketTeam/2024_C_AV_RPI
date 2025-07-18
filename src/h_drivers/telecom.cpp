@@ -177,7 +177,7 @@ void Telecom::handle_uplink(int packet_size) {
 
 void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_t len) {
     switch (packet_id) {
-        case CAPSULE_ID::GSC_CMD:
+        case CAPSULE_ID::GS_CMD:
             gpioWrite(LED_LORA_RX, 1);
 
             memcpy(&last_packet, data_in, len);

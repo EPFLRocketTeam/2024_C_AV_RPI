@@ -12,6 +12,9 @@ private:
     bool run_init () override;
     bool run_update () override;
     bool run_calibration () override;
+
+    int low_polling_time  () override { return 900; };
+    int high_polling_time () override { return 900; };
 public:
     GPSModule (
         const char* module_name, 
