@@ -146,7 +146,7 @@ void DPR::read_copv_temperature() {
 
 void DPR::write_tank_valve(const uint8_t cmd) {
     try {
-        I2CInterface::getInstance().write(m_address, DPR_VALVE_PX_NC, (uint8_t*)&cmd,NET_XFER_SIZE);
+        //I2CInterface::getInstance().write(m_address, DPR_VALVE_PX_NC, (uint8_t*)&cmd,NET_XFER_SIZE);
     }catch (I2CInterfaceException& e) {
         std::string msg("DPR " + m_code + " write_tank_valve error: ");
         throw DPRException(msg + e.what());
@@ -155,7 +155,7 @@ void DPR::write_tank_valve(const uint8_t cmd) {
 
 void DPR::write_copv_valve(const uint8_t cmd) {
     try {
-        I2CInterface::getInstance().write(m_address, DPR_VALVE_DN_NC, (uint8_t*)&cmd,NET_XFER_SIZE);
+        //I2CInterface::getInstance().write(m_address, DPR_VALVE_DN_NC, (uint8_t*)&cmd,NET_XFER_SIZE);
     }catch (I2CInterfaceException& e) {
         std::string msg("DPR " + m_code + " write_copv_valve error: ");
         throw DPRException(msg + e.what());
