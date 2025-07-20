@@ -1,4 +1,5 @@
 #include "bmp390_module.h"
+#include "bmp3.h"
 
 bool Bmp390Module::run_init() {
     bmp = new Bmp390(i2c_address);

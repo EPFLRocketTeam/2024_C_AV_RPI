@@ -1,4 +1,6 @@
 #include "tmp1075_module.h"
+#include "TMP1075.h"
+#include "data.h"
 
 bool Tmp1075Module::run_init() {
     tmp1075 = new TMP1075(TMP1075_ADDR_I2C);

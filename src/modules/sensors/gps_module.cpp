@@ -1,4 +1,7 @@
 #include "gps_module.h"
+#include "I2CGPS.h"
+#include "TinyGPS++.h"
+#include "data.h"
 
 bool GPSModule::run_init() {
     i2c_gps  = new I2CGPS();

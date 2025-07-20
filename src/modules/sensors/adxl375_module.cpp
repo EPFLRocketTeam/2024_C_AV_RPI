@@ -1,4 +1,5 @@
 #include "adxl375_module.h"
+#include "data.h"
 
 bool Adxl375Module::run_init() {
     adxl = new Adxl375(i2c_address);

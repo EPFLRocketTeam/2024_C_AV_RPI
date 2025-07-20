@@ -1,4 +1,5 @@
 #include "bmi088_module.h"
+#include "bmi08x.h"
 
 bool Bmi088Module::run_init() {
     bmi = new Bmi088(accel_i2c_address, gyro_i2c_address);

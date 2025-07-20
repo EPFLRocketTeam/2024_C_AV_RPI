@@ -2,8 +2,10 @@
 #define INA228_MODULE_H
 
 #include "module.h"
-#include "INA228.h"
 #include "dynconf.h"
+#include "data.h"
+
+class INA228;
 
 struct INA228Module : public SensorModule {
 public:

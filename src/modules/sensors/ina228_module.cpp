@@ -1,5 +1,6 @@
 #include "config.h"
 #include "ina228_module.h"
+#include "INA228.h"
 
 bool INA228Module::run_init() {
     ina = new INA228(i2c_address, shunt, maxCurrent);

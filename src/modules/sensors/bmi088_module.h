@@ -2,8 +2,10 @@
 #define BMI088_MODULE_H
 
 #include "module.h"
-#include "bmi08x.h"
 #include "dynconf.h"
+#include "data.h"
+
+class Bmi088;
 
 struct Bmi088Module : public SensorModule {
 public:

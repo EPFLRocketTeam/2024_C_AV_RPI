@@ -2,9 +2,10 @@
 #define GPS_MODULE_H
 
 #include "module.h"
-#include "I2CGPS.h"
-#include "TinyGPS++.h"
 #include "dynconf.h"
+
+class I2CGPS;
+class TinyGPSPlus;
 
 struct GPSModule : public SensorModule {
 public:

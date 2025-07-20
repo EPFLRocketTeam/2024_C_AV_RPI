@@ -2,7 +2,8 @@
 #define MODULE_H
 
 #include <string>
-#include "data.h"
+
+struct DataDump;
 
 class Module {
 public:

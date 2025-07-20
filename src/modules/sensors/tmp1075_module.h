@@ -2,8 +2,9 @@
 #define TMP1075_MODULE_H
 
 #include "module.h"
-#include "TMP1075.h"
 #include "dynconf.h"
+
+class TMP1075;
 
 struct Tmp1075Module : public SensorModule {
 public:

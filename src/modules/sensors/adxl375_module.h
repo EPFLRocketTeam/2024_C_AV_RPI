@@ -2,8 +2,10 @@
 #define ADXL375_MODULE_H
 
 #include "module.h"
-#include "adxl375.h"
 #include "dynconf.h"
+#include "data.h"
+
+class Adxl375;
 
 struct Adxl375Module : public SensorModule {
 public:

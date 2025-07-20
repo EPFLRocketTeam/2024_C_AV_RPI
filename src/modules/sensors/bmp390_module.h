@@ -2,8 +2,10 @@
 #define BMP390_MODULE_H
 
 #include "module.h"
-#include "bmp3.h"
 #include "dynconf.h"
+#include "data.h"
+
+class Bmp390;
 
 struct Bmp390Module : public SensorModule {
 public:
