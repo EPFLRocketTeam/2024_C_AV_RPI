@@ -1,21 +1,13 @@
-
 #include "gps_module.h"
 
-bool GPSModule::run_init()
-{
+bool GPSModule::run_init() {
     i2c_gps  = new I2CGPS();
     tiny_gps = new TinyGPSPlus();
-    if (i2c_gps == NULL || tiny_gps == NULL)
-    {
-        return false;
-    }
+    return i2c_gps && tiny_gps;
+}
 
-    return true;
-};
-bool GPSModule::run_update()
-{
-    if (i2c_gps == NULL || tiny_gps == NULL)
-    {
+bool GPSModule::run_update() {
+    if (!i2c_gps || !tiny_gps) {
         return false;
     }
 
@@ -64,22 +56,15 @@ bool GPSModule::run_update()
     }
 
     return true;
-};
-bool GPSModule::run_calibration()
-{
-    return true;
-};
-GPSModule::GPSModule(
-        const char* module_name, 
-        const char* module_config
-    )
-    : SensorModule(
-          module_name,
-          module_config) {}
+}
 
-GPSModule* GPSModule::make_gps () {
-    return new GPSModule(
-        "Sensors::GPS",
-        "sensors.gps"
-    );
+bool GPSModule::run_calibration() {
+    return true;
+}
+
+GPSModule::GPSModule(const char* module_name, const char* module_config)
+: SensorModule(module_name, module_config) {}
+
+GPSModule* GPSModule::make_gps() {
+    return new GPSModule("Sensors::GPS", "sensors.gps");
 }

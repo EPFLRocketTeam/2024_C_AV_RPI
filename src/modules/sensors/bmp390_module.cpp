@@ -1,20 +1,12 @@
-
 #include "bmp390_module.h"
 
-bool Bmp390Module::run_init()
-{
+bool Bmp390Module::run_init() {
     bmp = new Bmp390(i2c_address);
-    if (bmp == NULL)
-    {
-        return false;
-    }
+    return bmp != nullptr;
+}
 
-    return true;
-};
-bool Bmp390Module::run_update()
-{
-    if (bmp == NULL)
-    {
+bool Bmp390Module::run_update() {
+    if (!bmp) {
         return false;
     }
 
@@ -25,26 +17,26 @@ bool Bmp390Module::run_update()
     Data::get_instance().write(data_reg, &data);
 
     return true;
-};
-bool Bmp390Module::run_calibration()
-{
-    return true;
-};
-Bmp390Module::Bmp390Module(
-        const char* module_name, 
-        const char* module_config, 
-        uint32_t i2c_address,
-        Data::GoatReg stat_reg,
-        Data::GoatReg data_reg
-    )
-    : SensorModule(
-          module_name,
-          module_config),
-      i2c_address(i2c_address),
-      stat_reg(stat_reg),
-      data_reg(data_reg) {}
+}
 
-Bmp390Module* Bmp390Module::make_primary () {
+bool Bmp390Module::run_calibration() {
+    return true;
+}
+
+Bmp390Module::Bmp390Module(
+    const char* module_name, 
+    const char* module_config, 
+    uint32_t i2c_address,
+    Data::GoatReg stat_reg,
+    Data::GoatReg data_reg
+)
+:   SensorModule(module_name, module_config),
+    i2c_address(i2c_address),
+    stat_reg(stat_reg),
+    data_reg(data_reg)
+{}
+
+Bmp390Module* Bmp390Module::make_primary() {
     return new Bmp390Module(
         "Sensors::Bmp390.primary",
         "sensors.bmp1",
@@ -53,7 +45,8 @@ Bmp390Module* Bmp390Module::make_primary () {
         Data::GoatReg::NAV_SENSOR_BMP1_DATA
     );
 }
-Bmp390Module* Bmp390Module::make_secondary () {
+
+Bmp390Module* Bmp390Module::make_secondary() {
     return new Bmp390Module(
         "Sensors::Bmp390.secondary",
         "sensors.bmp2",
