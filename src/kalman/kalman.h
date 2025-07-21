@@ -2,6 +2,7 @@
 #define KALMAN_H
 
 #include <Eigen/Dense>
+#include <limits>      // For std::numeric_limits
 #include "rotation_utils.h"
 #include "data.h"
 
@@ -29,6 +30,7 @@ private:
     Eigen::Vector3f position_estimate;      // position of the rocket in the earth frame
     Eigen::Vector3f gyro_bias;              // (estimated) bias of the gyroscope
     Eigen::Vector3f accelerometer_bias;     // (estimated) bias of the accelerometer
+    Eigen::Vector3f estimated_world_acceleration; // Estimated acceleration in the world frame
     Eigen::VectorXf state;                  // error state
     Eigen::MatrixXf estimate_covariance;    // covariance matrix of the error state
     Eigen::MatrixXf initial_estimate_covariance; // initial covariance matrix of the error state (used for callibration reset)
@@ -53,20 +55,34 @@ private:
     Eigen::Vector3f accel_static_sum = Eigen::Vector3f::Zero();
     Eigen::Vector3f accel_static_avg = Eigen::Vector3f::Zero();
     int static_counter = 0;
-    unsigned long static_calib_start_time = 0;
-    unsigned long last_static_calib_time = 0;
-    const unsigned long static_calib_duration = 5000; // 5 second
-    const unsigned long static_recalibration_interval = 120000; // 2 minutes between two static calibrations
+    uint32_t static_calib_start_time = 0;
+    const uint32_t static_calib_duration = 5000; // 5 second
+    const uint32_t static_recalibration_interval = 120000; // 2 minutes between two static calibrations
+    uint32_t last_static_calib_time = -static_recalibration_interval; // this ensures calibration at startup
 
     // Initial position (to set the coordinates origin)
     double initial_lon = 0;
     double initial_lat = 0;
     double initial_alt = 0;
 
-
     // Last gps observation (to check if we should update)
     double last_gps_lat = 0;
     double last_gps_lon = 0;
+    
+    // High acceleration GPS filtering
+    bool high_acceleration = false;
+    uint32_t last_high_accel_time = 0;
+    const float high_accel_threshold = 4.0f * 9.81f; // 4g threshold
+    const uint32_t gps_recovery_time = 5000; // 5 seconds in ms
+
+    // GPS azimuth update
+    bool first_gps_update_received = false;
+    bool gps_azimuth_updated = false;
+
+    // Stores the direct output of fuse_IMUs
+    Eigen::Vector3f m_debug_c_bmi;
+    Eigen::Vector3f m_debug_c_bmi_aux;
+    Eigen::Vector3f m_fused_body_acceleration;
 
 public:
     Kalman( float estimate_covariance_gyro, 
@@ -84,7 +100,7 @@ public:
     Eigen::MatrixXf process_covariance();
 
     void check_static(const DataDump& dump);
-
+    void set_is_static(bool is_static) { this->is_static = is_static; }
     // takes the NavSensors data and outputs a single fused IMU measurement for all IMUs
     void fuse_IMUs(const NavSensors& nav_sensors, Eigen::Vector3f& output_gyro_meas, Eigen::Vector3f& output_acc_meas);
 
@@ -104,6 +120,10 @@ public:
     float get_pitch() const;
     float get_roll() const;
     NavigationData get_nav_data() const;
+
+    Eigen::Vector3f get_debug_c_bmi() const;
+    Eigen::Vector3f get_debug_c_bmi_aux() const;
+    Eigen::Vector3f get_fused_body_acceleration() const;
 
 };
 
