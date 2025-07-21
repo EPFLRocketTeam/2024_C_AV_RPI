@@ -1,6 +1,7 @@
 #include "module.h"
 #include "dynconf.h"
 #include "logger.h"
+#include "data.h"
 
 Module::Module(std::string name, std::string config_target) {
     this->name = name;

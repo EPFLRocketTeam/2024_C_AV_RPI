@@ -11,7 +11,7 @@
 // If the folder contains more than 10^6 files, throw an error
 const int MAX_TEMPLATE_COUNT = 1'000'000;
 
-std::string template_based_path (std::string path) {
+std::string template_based_path(std::string path) {
     int base_sl = path.find_last_of('/');
     int ext_dot = path.find_last_of('.');
     
@@ -21,7 +21,8 @@ std::string template_based_path (std::string path) {
     std::string suff = uses_extension ? path.substr(ext_dot) : "";
     for (int i = 0; i < MAX_TEMPLATE_COUNT; i ++) {
         std::string target = base + "_" + std::to_string(i) + suff;
-        if (std::filesystem::exists(target)) continue ;
+        if (std::filesystem::exists(target))
+            continue;
 
         return target;
     }
@@ -31,7 +32,7 @@ std::string template_based_path (std::string path) {
     return "";
 }
 
-DataLogger::DataLogger (std::string _dumpPath, std::string _eventPath) {
+DataLogger::DataLogger(std::string _dumpPath, std::string _eventPath) {
     dumpPath  = template_based_path(_dumpPath);
     eventPath = template_based_path(_eventPath);
 
@@ -50,8 +51,8 @@ std::unique_ptr<DataLogger> DataLogger::instance;
 std::mutex DataLogger::instanceMutex;
 
 
-void DataLogger::conv (DataDump &dump) { 
-    static int counter =0;
+void DataLogger::conv(DataDump &dump) { 
+    static int counter(0);
     char* buffer = reinterpret_cast<char*>(&dump);
     write(dumpFd, buffer, sizeof(DataDump));
     
@@ -91,6 +92,3 @@ void DataLogger::eventConv(std::string event,uint32_t ts){
 
     fsync(eventFd);
 }
-
-std::string DataLogger::getDumpPath  () { return dumpPath; }
-std::string DataLogger::getEventPath () { return eventPath; }
