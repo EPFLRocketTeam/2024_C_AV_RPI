@@ -24,6 +24,9 @@
 #include <stdint.h> // uint16_t, etc.
 #include <exception>
 #include <string>
+#include <random>
+#include "ITmp1075.h"
+
 
 #define TMP1075_ADDR_I2C 0x4E
 
@@ -90,7 +93,8 @@ typedef int8_t (*tmp1075_write_fptr_t)(uint8_t reg, const uint8_t *data, uint32_
 */
 typedef void (*tmp1075_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
 
-class TMP1075
+#ifndef MOCK_SENSORS_ENABLED 
+class TMP1075 : public ITmp1075
 {
 public:
     // i2cAddress is the default address when A0, A1 and A2 is tied low
@@ -121,6 +125,7 @@ public:
     float getHighTemperatureLimitCelsius();
     void setHighTemperatureLimitRaw(int16_t value = 0x5000);
     void setHighTemperatureLimitCelsius(float value = 80.f);
+    float add_noise_to_data(float original_value, float stddev);
 
     uint16_t getDeviceId();
     
@@ -142,18 +147,20 @@ private:
     void *_intf_ptr;
 };
 
+#endif // MOCK_SENSORS_ENABLED
+
+
 class TMP1075Exception : public std::exception {
-public:
-    TMP1075Exception(const std::string& msg) {
-        message = msg;
-    }
+    public:
+        TMP1075Exception(const std::string& msg) {
+            message = msg;
+        }
+        
+        virtual const char *what() const throw() {
+            return message.c_str();
+        }
     
-    virtual const char *what() const throw() {
-        return message.c_str();
-    }
-
-private:
-    std::string message;
-};
-
+    private:
+        std::string message;
+    };
 #endif // TMP1075_H

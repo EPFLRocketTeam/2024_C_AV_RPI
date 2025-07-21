@@ -575,6 +575,15 @@ int INA228::getLastError()
     return e;
 }
 
+float INA228::add_noise_to_data(float original_value, float stddev)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::normal_distribution<float> noise(0.0f, stddev);
+    double noise_value = noise(gen);
+    return original_value + noise_value;
+}
+
 ////////////////////////////////////////////////////////
 //
 //  PRIVATE
