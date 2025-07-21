@@ -1,33 +1,36 @@
-#pragma once
+#ifndef DYNCONF_H
+#define DYNCONF_H
+
 #include <string>
 #include <map>
 
-class ConfigManager {
-private:
-    ConfigManager  () {}
-    ~ConfigManager () {}
-
-    std::map<std::string, bool> content;
-
-    void init (std::string path);
-    
-    
+class ConfigManager {    
 public:
-    static bool isEnabled (std::string module, bool defaultValue = true) {
+    static inline bool isEnabled(std::string module, bool defaultValue = true) {
         auto it = getInstance().content.find(module);
         if (it == getInstance().content.end())
             return defaultValue;
         return (*it).second;
     }
 
-    static void initConfig (std::string path) {
+    static inline void initConfig(std::string path) {
         getInstance().init(path);
     }
-    static ConfigManager& getInstance () {
+    static inline ConfigManager& getInstance() {
         static ConfigManager manager;
         return manager;
     }
 
-    ConfigManager  (ConfigManager const&) = delete; // Prevent copying
-    void operator= (ConfigManager const&) = delete; // Prevent assignment
+    ConfigManager(ConfigManager const&) = delete; // Prevent copying
+    void operator=(ConfigManager const&) = delete; // Prevent assignment
+
+private:
+    ConfigManager() {}
+    ~ConfigManager() {}
+
+    std::map<std::string, bool> content;
+
+    void init(std::string path);
 };
+
+#endif /* DYNCONF_H */

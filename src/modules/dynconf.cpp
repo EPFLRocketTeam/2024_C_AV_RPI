@@ -1,30 +1,28 @@
-
-#include "dynconf.h"
-
 #include <iostream>
 #include <fstream>
 #include <locale>
+#include "dynconf.h"
 
-std::string trim (std::string buffer) {
+std::string trim(std::string buffer) {
     int left  = 0;
     int right = buffer.size() - 1;
-    while (left <= right && std::isspace(buffer[left])) left ++;
-    while (left <= right && std::isspace(buffer[right])) right --;
+    while (left <= right && std::isspace(buffer[left])) left++;
+    while (left <= right && std::isspace(buffer[right])) right--;
 
     if (right < left) return "";
     return buffer.substr(left, right - left + 1);
 }
 
-void ConfigManager::init (std::string path) {
+void ConfigManager::init(std::string path) {
     std::ifstream file(path.c_str());
 
     std::string line_buf;
     std::string section = "";
     while (std::getline(file, line_buf)) {
-        if (file.fail()) break ;
+        if (file.fail()) break;
 
         line_buf = trim(line_buf);
-        if (line_buf == "") continue ;
+        if (line_buf == "") continue;
 
         std::size_t pos = line_buf.find_first_of('=');
 
@@ -42,7 +40,7 @@ void ConfigManager::init (std::string path) {
             if (rhs != "on" && rhs != "off") {
                 std::cout << "ERROR: line '" << line_buf << "' could not be parsed." << std::endl;
                 std::cout << " - The assignment value isn't 'on' or 'off'." << std::endl;
-                continue ;
+                continue;
             }
 
             content[target] = rhs == "on";
@@ -51,7 +49,7 @@ void ConfigManager::init (std::string path) {
             std::cout << " - The line isn't empty." << std::endl;
             std::cout << " - The line isn't of the section form '[section]'." << std::endl;
             std::cout << " - The line isn't an assignment 'a=b'." << std::endl;
-            continue ;
+            continue;
         }
     }
 }

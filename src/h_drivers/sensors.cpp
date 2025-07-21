@@ -14,7 +14,7 @@
 #include "tmp1075_module.h"
 
 Sensors::Sensors()
-:   kalman(INITIAL_COV_GYR_BIAS,
+/* :   kalman(INITIAL_COV_GYR_BIAS,
            INITIAL_COV_ACCEL_BIAS,
            INITIAL_COV_ORIENTATION,
            GYRO_COV,
@@ -22,7 +22,7 @@ Sensors::Sensors()
            ACCEL_COV,
            ACCEL_BIAS_COV,
            GPS_OBS_COV,
-           ALT_OBS_COV) {}
+           ALT_OBS_COV) */ {}
 
 void Sensors::init_sensors () {
     sensors.push_back( Adxl375Module::make_primary() );
@@ -47,6 +47,16 @@ void Sensors::init_sensors () {
 
 Sensors::~Sensors() {}
 
+std::map<std::string, bool> Sensors::sensors_status () {
+    std::map<std::string, bool> result;
+
+    for (SensorModule* module : sensors) {
+        result[module->get_name()] = module->is_enabled() && !module->is_failure();
+    }
+
+    return result;
+}
+
 void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     for (SensorModule* mod : sensors)
         mod->check_policy(dump, delta_ms);
@@ -58,6 +68,6 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     }
 
     // kalman checks if we are static for calibration
-    kalman.check_static(dump);
+    // kalman.check_static(dump);
     return;
 }
