@@ -45,14 +45,26 @@ void TriggerBoard::send_wake_up() {
     }
 }
 
-bool TriggerBoard::read_is_woken_up() {
-    uint32_t rslt(0);
+void TriggerBoard::send_sleep() {
+    const uint32_t order(NET_CMD_OFF);
     try {
-        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_IS_WOKEN_UP, (uint8_t*)&rslt, NET_XFER_SIZE);
+        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_WAKE_UP, (uint8_t*)&order, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB sleep error: ");
+        throw TriggerBoardException(msg + e.what());
+    }
+}
+
+bool TriggerBoard::read_is_woken_up() {
+    unsigned long rslt(0);
+    try {
+        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_IS_WOKEN_UP, (uint8_t*)&rslt, NET_XFER_SIZE+1);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB read_is_woken_up error: ");
         throw TriggerBoardException(msg + e.what());
     }
+
+    rslt = (uint32_t)(rslt >> 8);
 
     bool trb_woken_up(rslt == NET_CMD_ON);
     Data::get_instance().write(Data::EVENT_TRB_READY, &trb_woken_up);
@@ -60,8 +72,8 @@ bool TriggerBoard::read_is_woken_up() {
     return trb_woken_up;
 }
 
-void TriggerBoard::send_clear_to_trigger() {
-    const uint32_t cmd(NET_CMD_ON);
+void TriggerBoard::write_clear_to_trigger(const bool go) {
+    const uint32_t cmd(go ? NET_CMD_ON : NET_CMD_OFF);
     try {
         I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd, NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
@@ -79,15 +91,27 @@ void TriggerBoard::write_pyros(const uint32_t pyros) {
     }
 }
 
-bool TriggerBoard::read_has_triggered() {
-    uint32_t rslt(0);
+uint32_t TriggerBoard::read_pyros() {
+    unsigned long rslt(0);
     try {
-        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_HAS_TRIGGERED, (uint8_t*)&rslt, NET_XFER_SIZE);
+	I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&rslt, NET_XFER_SIZE+1);
+    }catch(I2CInterfaceException& e) {
+	std::string msg("TRB read_pyros error: ");
+	throw TriggerBoardException(msg + e.what());
+    }
+    return (uint32_t)(rslt >> 8);
+}
+
+bool TriggerBoard::read_has_triggered() {
+    unsigned long rslt(0);
+    try {
+        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_HAS_TRIGGERED, (uint8_t*)&rslt, NET_XFER_SIZE+1);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB read_has_triggered error: ");
         throw TriggerBoardException(msg + e.what());
     }
 
+    rslt = (uint32_t)(rslt >> 8);
     bool trb_triggered(rslt == NET_CMD_ON);
     Data::get_instance().write(Data::EVENT_SEPERATED, &trb_triggered);
 
@@ -222,7 +246,7 @@ void TriggerBoard::handle_ascent() {
     count_ms += delta_ms;
     if (count_ms >= 100) {
         write_timestamp();
-        send_clear_to_trigger();
+        write_clear_to_trigger(1);
     }
 }
 
