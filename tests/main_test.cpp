@@ -12,14 +12,14 @@ int main() {
     telecom.begin();
     telecom.send_telemetry();
 
-    sensors.update();
+    //sensors.update();
 
     usleep(500000);
 
     telecom.send_telemetry();
 
-    sensors.calibrate();
-    sensors.update();
+    //sensors.calibrate();
+    //sensors.update();
 
     usleep(500000);
 
