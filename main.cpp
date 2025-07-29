@@ -40,12 +40,12 @@ int main(void){
     */
 
     ConfigManager::initConfig("./config.conf");
-    usleep(100e3);
+    AvTimer::sleep(100);
 
     Sensors driver;
     driver.init_sensors();
     
-    usleep(100e3);
+    AvTimer::sleep(100);
 
     State state = State::LIFTOFF;
     Data::get_instance().write(Data::GoatReg::AV_STATE, &state);
@@ -76,16 +76,16 @@ int main(void){
             for (auto u : _mp) {
                 std::cout << u.first << ": " << u.second << "\n";
                 Buzzer::enable();
-                usleep(250e3);
+                AvTimer::sleep(250);
                 Buzzer::disable();
-                usleep(750e3);
+                AvTimer::sleep(750);
 
                 if (u.second) {
                     for (int i(0); i < 5; ++i) {
                         Buzzer::toggle();
-                        usleep(100e3);
+                        AvTimer::sleep(100);
                         Buzzer::toggle();
-                        usleep(100e3);
+                        AvTimer::sleep(100);
                     }
                 }
             }
@@ -113,7 +113,7 @@ int main(void){
         driver.check_policy(dump, delta_ms);
 
         if (delta_ms < freq) {
-            usleep((freq - delta_ms) * 1000);
+            AvTimer::sleep(freq - delta_ms);
         }
     }
 
