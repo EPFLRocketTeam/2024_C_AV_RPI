@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 #include "dynconf.h"
 #include <vector>
 #include "module.h"
@@ -11,6 +12,7 @@
 #include "sensors.h"
 #include "logger.h"
 #include "av_state.h"
+#include "buzzer.h"
 #include <thread>
 #include <chrono>
 
@@ -19,32 +21,9 @@
 #include "i2c_interface.h"
 #include <algorithm>
 
-struct BuzzerTarget {
-public:
-    uint32_t duration;
-    bool enabled;
-
-    BuzzerTarget (uint32_t duration, bool enabled) : duration(duration), enabled(enabled) {}
-    void enable () {
-        gpioWrite(BUZZER, enabled ? 1 : 0);
-    }
-    void disable () {
-        gpioWrite(BUZZER, 0);
-    }
-
-};
-
-using namespace std;
-
 int main(void){
     DataLogger &instance = DataLogger::getInstance();
 
-    auto conv = [&instance]() -> void {
-        DataDump dump = Data::get_instance().get();
-
-        instance.conv(dump);
-        return ;
-    };
     uint64_t start_time = 0;
     auto time = [&start_time]() -> uint64_t {
         auto now    = std::chrono::system_clock::now();
@@ -60,64 +39,57 @@ int main(void){
     };
 
     useTimestamp();
-    conv();
 
-    cout << "=== FC TEST ===" << endl;
-
-    cout << "Load config..." << endl;
     ConfigManager::initConfig("./config.conf");
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    usleep(100e3);
 
     useTimestamp();
-    conv();
-    cout << "=== Init Sensors HDriver ===" << endl;
-    cout << endl;
 
-    Sensors* driver = new Sensors();
-    driver->init_sensors();
+    Sensors driver;
+    driver.init_sensors();
     
     useTimestamp();
-    conv();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    usleep(100e3);
 
     State state = State::LIFTOFF;
     Data::get_instance().write(Data::GoatReg::AV_STATE, &state);
 
     useTimestamp();
-    conv();
 
     AvState fsm;
 
     const uint32_t freq = 10;
 
-    std::vector<BuzzerTarget> payload;
     bool done_buzzer = false;
-    uint32_t end_target = 0;
+    //uint32_t end_target = 0;
 
     while (1) {
         uint32_t start = time();
         if (start >= 10000 && !done_buzzer) {
             done_buzzer = true;
-            std::map<std::string, bool> _mp = driver->sensors_status();
+            std::map<std::string, bool> _mp = driver.sensors_status();
             std::cout << "Making buzzer payload\n";
 
             for (auto u : _mp) {
                 std::cout << u.first << ": " << u.second << "\n";
-                payload.push_back(BuzzerTarget(250, true));
-                payload.push_back(BuzzerTarget(750, 0));
+                Buzzer::enable();
+                usleep(250e3);
+                Buzzer::disable();
+                usleep(750e3);
 
-                for (int i = 0; i < 10; i ++) {
-                    payload.push_back(BuzzerTarget(100, u.second && (i % 2 == 1)));
+                if (u.second) {
+                    for (int i(0); i < 5; ++i) {
+                        Buzzer::toggle();
+                        usleep(100e3);
+                        Buzzer::toggle();
+                        usleep(100e3);
+                    }
                 }
-
-                payload.push_back(BuzzerTarget(1000, 0));
             }
-            for (auto u : payload)
-                std::cout << u.duration << " with " << u.enabled << endl;
-            std::cout << endl;
-
-            std::reverse(payload.begin(), payload.end());
+        //    std::reverse(payload.begin(), payload.end());
         }
+
+        /*
         if (start >= end_target) {
             if (payload.size() == 0) {
                 gpioWrite(BUZZER, 0);
@@ -130,6 +102,7 @@ int main(void){
                 payload.pop_back();
             }
         }
+        */
 
         useTimestamp();
 
@@ -137,14 +110,11 @@ int main(void){
         fsm.update(state_dump);
 
         DataDump sensors_dump = Data::get_instance().get();     
-        driver->check_policy(sensors_dump, sensors_dump.av_timestamp);
-        conv();
+        driver.check_policy(sensors_dump, sensors_dump.av_timestamp);
 
         uint32_t end = time();
-
         if (start + freq > end) {
             uint32_t delta = start + freq - end;
-
             std::this_thread::sleep_for(std::chrono::milliseconds(delta));
         }
     }
