@@ -57,6 +57,8 @@ set(FIREHORN_FC_SOURCES
     ${MODULES_SENSORS_DIR}/tmp1075_module.h
     ${CMAKE_CURRENT_SOURCE_DIR}/buzzer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/buzzer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/av_timer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/av_timer.h
 )
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})

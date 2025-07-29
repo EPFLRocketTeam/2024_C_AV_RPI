@@ -13,8 +13,7 @@
 #include "logger.h"
 #include "av_state.h"
 #include "buzzer.h"
-#include <thread>
-#include <chrono>
+#include "av_timer.h"
 
 #include "pigpio.h"
 #include "config.h"
@@ -24,6 +23,7 @@
 int main(void){
     DataLogger &instance = DataLogger::getInstance();
 
+    /*
     uint64_t start_time = 0;
     auto time = [&start_time]() -> uint64_t {
         auto now    = std::chrono::system_clock::now();
@@ -37,24 +37,18 @@ int main(void){
         uint32_t timestamp(time());
         data.write(Data::GoatReg::AV_TIMESTAMP, &timestamp);
     };
-
-    useTimestamp();
+    */
 
     ConfigManager::initConfig("./config.conf");
     usleep(100e3);
 
-    useTimestamp();
-
     Sensors driver;
     driver.init_sensors();
     
-    useTimestamp();
     usleep(100e3);
 
     State state = State::LIFTOFF;
     Data::get_instance().write(Data::GoatReg::AV_STATE, &state);
-
-    useTimestamp();
 
     AvState fsm;
 
@@ -63,8 +57,17 @@ int main(void){
     bool done_buzzer = false;
     //uint32_t end_target = 0;
 
+    uint32_t now_ms(AvTimer::tick());
+    uint32_t old_ms(0);
+    uint32_t delta_ms(0);
     while (1) {
-        uint32_t start = time();
+        old_ms = now_ms;
+        now_ms = AvTimer::tick();
+        delta_ms = now_ms - old_ms;
+
+        Data::get_instance().write(Data::AV_TIMESTAMP, &now_ms);
+
+        uint32_t start = AvTimer::tick();
         if (start >= 10000 && !done_buzzer) {
             done_buzzer = true;
             std::map<std::string, bool> _mp = driver.sensors_status();
@@ -104,18 +107,13 @@ int main(void){
         }
         */
 
-        useTimestamp();
+        DataDump dump = Data::get_instance().get();        
+        fsm.update(dump);
 
-        DataDump state_dump = Data::get_instance().get();        
-        fsm.update(state_dump);
+        driver.check_policy(dump, delta_ms);
 
-        DataDump sensors_dump = Data::get_instance().get();     
-        driver.check_policy(sensors_dump, sensors_dump.av_timestamp);
-
-        uint32_t end = time();
-        if (start + freq > end) {
-            uint32_t delta = start + freq - end;
-            std::this_thread::sleep_for(std::chrono::milliseconds(delta));
+        if (delta_ms < freq) {
+            usleep((freq - delta_ms) * 1000);
         }
     }
 
