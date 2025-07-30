@@ -11,6 +11,8 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
+#include <vector>
+#include <map>
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "I2CGPS.h"
@@ -20,6 +22,7 @@
 #include "kalman.h"
 #include "INA228.h"
 #include "TMP1075.h"
+#include "module.h"
 
 class Sensors : public HDriver {
 public:
@@ -28,28 +31,21 @@ public:
 
     void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 
-    void calibrate();
-    bool update();
+    void init_sensors ();
+
+    std::map<std::string, bool> sensors_status ();
+
     // inline SensStatus get_status() const { return status; }
     // inline SensRaw get_raw() const { return raw_data; }
     // inline SensFiltered get_clean() const { return clean_data; }
 private:
-    Adxl375 adxl1, adxl2;
-    Bmi088 bmi1, bmi2;
-    Bmp390 bmp1, bmp2;
-    I2CGPS i2cgps;
-    TinyGPSPlus gps;
-    INA228 ina_lpb, ina_hpb;
-    TMP1075 tmp1075;
+    std::vector<SensorModule*> sensors;
 
     // SensStatus status;
     // SensRaw raw_data;
     // SensFiltered clean_data;
 
-    Kalman kalman;
-
-    // Read sensors status
-    void update_status();
+    // Kalman kalman;
 };
 
 #endif /* SENSORS_H */

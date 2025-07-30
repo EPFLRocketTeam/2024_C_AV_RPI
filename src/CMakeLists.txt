@@ -7,6 +7,8 @@ set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
 set(DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/sensor_drivers)
 set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
 set(KALMAN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/kalman)
+set(MODULES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/modules)
+set(MODULES_SENSORS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/modules/sensors)
 
 add_subdirectory(${I2C_INTERFACE_DIR})
 add_subdirectory(${DRIVERS_DIR})
@@ -37,6 +39,26 @@ set(FIREHORN_FC_SOURCES
     ${KALMAN_DIR}/kalman.h
     ${KALMAN_DIR}/rotation_utils.h
     ${KALMAN_DIR}/rotation_utils.cpp
+    ${MODULES_DIR}/dynconf.cpp
+    ${MODULES_DIR}/module.cpp
+    ${MODULES_DIR}/dynconf.h
+    ${MODULES_DIR}/module.h
+    ${MODULES_SENSORS_DIR}/adxl375_module.cpp
+    ${MODULES_SENSORS_DIR}/bmi088_module.cpp
+    ${MODULES_SENSORS_DIR}/bmp390_module.cpp
+    ${MODULES_SENSORS_DIR}/gps_module.cpp
+    ${MODULES_SENSORS_DIR}/ina228_module.cpp
+    ${MODULES_SENSORS_DIR}/tmp1075_module.cpp
+    ${MODULES_SENSORS_DIR}/adxl375_module.h
+    ${MODULES_SENSORS_DIR}/bmi088_module.h
+    ${MODULES_SENSORS_DIR}/bmp390_module.h
+    ${MODULES_SENSORS_DIR}/gps_module.h
+    ${MODULES_SENSORS_DIR}/ina228_module.h
+    ${MODULES_SENSORS_DIR}/tmp1075_module.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/buzzer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/buzzer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/av_timer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/av_timer.h
 )
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
@@ -50,6 +72,8 @@ target_include_directories(flight_computer PUBLIC
     ${I2C_INTERFACE_DIR}
     ${DRIVERS_DIR}
     ${KALMAN_DIR}
+    ${MODULES_DIR}
+    ${MODULES_SENSORS_DIR}
 )
 
 target_link_libraries(flight_computer PUBLIC

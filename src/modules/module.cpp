@@ -1,34 +1,51 @@
-
 #include "module.h"
 #include "dynconf.h"
+#include "logger.h"
+#include "data.h"
 
-Module::Module (std::string name, std::string config_target) {
+Module::Module(std::string name, std::string config_target) {
     this->name = name;
     this->_M_is_failure = false;
     this->_M_is_enabled = ConfigManager::isEnabled(config_target, true);
+
+    if (this->_M_is_enabled) {
+        DataLogger::getInstance()
+            .eventConvf("Module %s is enabled...", 0, this->get_name().c_str());
+    }else {
+        DataLogger::getInstance()
+            .eventConvf("Module %s is disabled...", 0, this->get_name().c_str());
+    }
 }
 
-void Module::init () {
+void Module::init() {
     if (this->_M_is_enabled) {
         try {
+            DataLogger::getInstance()
+                .eventConvf("Init module %s...", 0, this->get_name().c_str());
+
             this->_M_is_failure = !this->run_init();
-        } catch (std::exception &exc) {
+        }catch (std::exception &exc) {
             this->_M_is_failure = true;
+            
+            DataLogger::getInstance()
+                .eventConvf("Module %s :: init failed", 0, this->get_name().c_str());
         }
     }
 }
 
-void Module::check_policy (const DataDump& dump, const uint32_t delta_ms) {
+void Module::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     if (this->_M_is_enabled && !this->_M_is_failure) {
         try {
             this->_M_is_failure = !run_check_policy(dump, delta_ms);
         } catch (std::exception &exc) {
             this->_M_is_failure = true;
+            DataLogger::getInstance()
+                .eventConvf("Module %s :: checkPolicy failed", delta_ms, this->get_name().c_str());
         }
     }
 }
 
-bool SensorModule::run_check_policy (const DataDump& dump, const uint32_t delta_ms) {
+bool SensorModule::run_check_policy(const DataDump& dump, const uint32_t delta_ms) {
     int polling_time = -1;
     switch (dump.av_state) {
         case State::INIT:
@@ -58,8 +75,10 @@ bool SensorModule::run_check_policy (const DataDump& dump, const uint32_t delta_
             if (!run_update()) {
                 return false;
             }
-        } catch (std::exception &exc) {
-            // TODO log that the update failed
+        }catch (std::exception &exc) {
+            DataLogger::getInstance()
+                .eventConvf("Module %s :: update failed", delta_ms, this->get_name().c_str());
+
             throw exc;
         }
     }
@@ -70,8 +89,10 @@ bool SensorModule::run_check_policy (const DataDump& dump, const uint32_t delta_
 
     try {
         return run_calibration();
-    } catch (std::exception &exc) {
-        // TODO log a callibration exception
+    }catch (std::exception &exc) {
+        DataLogger::getInstance()
+            .eventConvf("Module %s :: calibration failed", delta_ms, this->get_name().c_str());
+
         throw exc;
     }
 }

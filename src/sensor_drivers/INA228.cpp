@@ -588,6 +588,7 @@ uint32_t INA228::_readRegister(uint8_t reg, uint8_t bytes)
     if (_intf_rslt != 0)
     {
         _error = -2;
+        throw INA228Exception("INA228 I2C read error.");
         return 0;
     }
     uint32_t value = 0;
