@@ -3,14 +3,58 @@ The purpose of this file is to generate the X-Macros for the data logger
 to properly show the scheme of the files.
 """
 
+def printcerr (*args, **kwargs):
+    print(*args, **kwargs, file=sys.stderr)
 
+
+import hashlib
 import os
 import subprocess
 import sys
 import tempfile
 import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, Set, Tuple
 import clang.cindex
+
+class CacheDB:
+    @staticmethod
+    def mkentries (files: List[str]):
+        payload = set()
+
+        for file in files:
+            with open(file, "r") as _f:
+                text = _f.read()
+            payload.add(file + ":" + hashlib.sha256(text.encode()).hexdigest())
+        
+        return sorted(list(payload))
+    
+    @staticmethod
+    def cache_file ():
+        return os.path.join(os.path.dirname(__file__), "cache")
+    @staticmethod
+    def load (files: List[str]):
+        try:
+            with open(CacheDB.cache_file(), "r") as file:
+                import json
+                data = json.loads(file.read())
+                if data["key"] == CacheDB.mkentries(files):
+                    return data["content"]
+                return None
+        except Exception:
+            return None
+
+    @staticmethod
+    def save (files: List[str], content):
+        try:
+            import json
+            with open(CacheDB.cache_file(), "w") as file:
+                file.write(json.dumps({
+                    "key": CacheDB.mkentries( files ),
+                    "content": content
+                }))
+        except Exception:
+            pass
+
 def get_qualified_enum_name(enum_node):
     parent = enum_node.semantic_parent
     if parent.kind == clang.cindex.CursorKind.STRUCT_DECL or parent.kind == clang.cindex.CursorKind.CLASS_DECL:
@@ -30,6 +74,9 @@ def traverse_ast(ast_node, structs, enums):
                     token_spellings = []
                     for token in child.get_tokens():
                         token_spellings.append(token.spelling)
+
+                    if len(token_spellings) == 0:
+                        return
                     
                     field_type = " ".join(token_spellings[:-1])
                     field_name = token_spellings[-1]
@@ -68,6 +115,11 @@ def find_all_headers (target: str, result = [], maxdepth = 10):
     
     return result
 def find_dumpable_of_header (filename: str):
+    printcerr("   [+] Generate payload of", filename)
+
+    def get_cache_index ():
+        return 
+
     index = clang.cindex.Index.create()
     tu = index.parse(filename, args=['-std=c++17', '-x', 'c++-header'])
     
@@ -136,13 +188,25 @@ def generate_csv_dumper_struct (typename: str, struct: List[Tuple[str, str]]):
 def generate_csv_dumper_enum (typename: str, enum: Tuple[int, List[Tuple[str, int]]]):
     values, typesize, qualname = enum
 
+    is_first = True
+
     def generate_value_check (name, value):
-        return f"\tif (((int) value) == {value}) stream << \"{name},\";"
+        nonlocal is_first
+        prefix = "" if is_first else "else "
+        is_first = False
+        return f"\t{prefix}if (((int) value) == {value}) stream << \"{name},\";"
     def generate_define ():
         name = generate_dumper_function_definition(typename, qualname)
+
+        if len(values) == 0:
+            return f"{name} " + "{\n" + "\tstream << \"<EMPTY>,\";\n}"; 
+
         lines = [
             f"{name} " + "{",
-        ] + list(map(lambda x : generate_value_check(x[0], x[1]), values)) + [ "}" ]
+        ] + list(map(lambda x : generate_value_check(x[0], x[1]), values)) + [
+            "\telse stream << \"<UNKNOWN>,\";",
+            "}"
+        ]
         return "\n".join(lines)
 
     header = f"{generate_dumper_function_definition(typename, qualname)};"
@@ -233,6 +297,8 @@ def compile_csv_header (struct: str, structs: Dict[str, List[Tuple[str, str]]], 
         if codename == "":
             return field
         return codename + "." + field
+    if struct.startswith("struct "):
+        struct = struct[7:]
     if struct not in structs:
         result.append(codename)
         return result
@@ -250,7 +316,7 @@ int main (void) {
 
 	while (1) {
 		stream.read(buffer, sizeof(%(typename)s));
-		if (stream.eof()) break ;
+		if (stream.eof() || stream.fail()) break ;
 
 		std::ostringstream strm;
 		dump_csv_%(typename)s(dump, strm);
@@ -271,18 +337,28 @@ def generate_main (struct: str, structs: Dict[str, List[Tuple[str, str]]], file:
         .replace( "%(file)s", file )
 
 def main (target: str, struct_name: str, file: str):
+    printcerr(" [+] Finding all headers")
     headers = find_all_headers(target)
+
+    cached = CacheDB.load(headers)
 
     all_structs: Dict[str, List[Tuple[str, str]]]             = {}
     all_enums  : Dict[str, Tuple[int, List[Tuple[str, int]]]] = {}
-    for header in headers:
-        structs, enums = find_dumpable_of_header(header)
 
-        for key in structs.keys():
-            all_structs[key] = structs[key]
-        
-        for key in enums.keys():
-            all_enums[key] = enums[key]
+    if cached is None:
+        for header in headers:
+            structs, enums = find_dumpable_of_header(header)
+
+            for key in structs.keys():
+                all_structs[key] = structs[key]
+            
+            for key in enums.keys():
+                all_enums[key] = enums[key]
+
+        CacheDB.save( headers, [ all_structs, all_enums ] )
+    else:
+        printcerr(" [+] Cache hit on headers")
+        all_structs, all_enums = cached
     
     filter_useful(struct_name, all_structs, all_enums)
 
@@ -290,9 +366,6 @@ def main (target: str, struct_name: str, file: str):
     main = generate_main( struct_name, all_structs, file )
 
     code = xmacros + "\n" + main
-
-    def printcerr (*args, **kwargs):
-        print(*args, **kwargs, file=sys.stderr)
 
     printcerr(" [+] Setting up temporary directory...")
     with tempfile.TemporaryDirectory(prefix = os.getcwd() + os.path.sep) as dir:
@@ -304,6 +377,8 @@ def main (target: str, struct_name: str, file: str):
         printcerr("   [+] Using directory", target)
         printcerr(" [+] Dumping macro code...")
         with open(code_file, "w") as file:
+            file.write(code)
+        with open("code.cpp", "w") as file:
             file.write(code)
         
         printcerr(" [+] Compiling dump2csv...")

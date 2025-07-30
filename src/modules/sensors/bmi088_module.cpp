@@ -1,23 +1,13 @@
-
 #include "bmi088_module.h"
+#include "bmi08x.h"
 
-bool Bmi088Module::run_init()
-{
-    bmi = new Bmi088(
-        accel_i2c_address,
-        gyro_i2c_address
-    );
-    if (bmi == NULL)
-    {
-        return false;
-    }
+bool Bmi088Module::run_init() {
+    bmi = new Bmi088(accel_i2c_address, gyro_i2c_address);
+    return bmi != nullptr;
+}
 
-    return true;
-};
-bool Bmi088Module::run_update()
-{
-    if (bmi == NULL)
-    {
+bool Bmi088Module::run_update() {
+    if (!bmi) {
         return false;
     }
 
@@ -34,32 +24,31 @@ bool Bmi088Module::run_update()
 
     return true;
 };
-bool Bmi088Module::run_calibration()
-{
+
+bool Bmi088Module::run_calibration() {
     return true;
 };
-Bmi088Module::Bmi088Module(
-        const char* module_name, 
-        const char* module_config, 
-        uint32_t gyro_i2c_address, 
-        uint32_t accel_i2c_address,
-        Data::GoatReg gyro_stat_reg,
-        Data::GoatReg gyro_data_reg,
-        Data::GoatReg accel_stat_reg,
-        Data::GoatReg accel_data_reg
-    )
-    : SensorModule(
-          module_name,
-          module_config
-      ),
-      gyro_i2c_address(gyro_i2c_address),
-      accel_i2c_address(accel_i2c_address),
-      gyro_stat_reg(gyro_stat_reg),
-      gyro_data_reg(gyro_data_reg),
-      accel_stat_reg(accel_stat_reg),
-      accel_data_reg(accel_data_reg) {}
 
-Bmi088Module* Bmi088Module::make_primary () {
+Bmi088Module::Bmi088Module(
+    const char* module_name, 
+    const char* module_config, 
+    uint32_t gyro_i2c_address, 
+    uint32_t accel_i2c_address,
+    Data::GoatReg gyro_stat_reg,
+    Data::GoatReg gyro_data_reg,
+    Data::GoatReg accel_stat_reg,
+    Data::GoatReg accel_data_reg
+)
+:   SensorModule(module_name, module_config),
+    gyro_i2c_address(gyro_i2c_address),
+    accel_i2c_address(accel_i2c_address),
+    gyro_stat_reg(gyro_stat_reg),
+    gyro_data_reg(gyro_data_reg),
+    accel_stat_reg(accel_stat_reg),
+    accel_data_reg(accel_data_reg)
+{}
+
+Bmi088Module* Bmi088Module::make_primary() {
     return new Bmi088Module(
         "Sensors::Bmi088.primary",
         "sensors.bmi1",
@@ -71,7 +60,8 @@ Bmi088Module* Bmi088Module::make_primary () {
         Data::GoatReg::NAV_SENSOR_BMI1_ACCEL_DATA
     );
 }
-Bmi088Module* Bmi088Module::make_secondary () {
+
+Bmi088Module* Bmi088Module::make_secondary() {
     return new Bmi088Module(
         "Sensors::Bmi088.secondary",
         "sensors.bmi2",

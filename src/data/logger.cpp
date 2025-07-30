@@ -1,14 +1,17 @@
 
 #include "logger.h"
 #include "data.h"
+#include "config.h"
 #include <unistd.h>
+#include <fcntl.h>
 #include <iostream>
 #include <filesystem>
+#include <exception>
 
 // If the folder contains more than 10^6 files, throw an error
 const int MAX_TEMPLATE_COUNT = 1'000'000;
 
-std::string template_based_path (std::string path) {
+std::string template_based_path(std::string path) {
     int base_sl = path.find_last_of('/');
     int ext_dot = path.find_last_of('.');
     
@@ -18,7 +21,8 @@ std::string template_based_path (std::string path) {
     std::string suff = uses_extension ? path.substr(ext_dot) : "";
     for (int i = 0; i < MAX_TEMPLATE_COUNT; i ++) {
         std::string target = base + "_" + std::to_string(i) + suff;
-        if (std::filesystem::exists(target)) continue ;
+        if (std::filesystem::exists(target))
+            continue;
 
         return target;
     }
@@ -28,37 +32,44 @@ std::string template_based_path (std::string path) {
     return "";
 }
 
-DataLogger::DataLogger (std::string _path, std::string _eventPath) {
-    path = template_based_path(_path);
-    eventPath = template_based_path(eventPath);
-    stream = std::ofstream(path, std::ios::binary | std::ios::app);
-    eventStream = std::ofstream(eventPath, std::ios::binary | std::ios::app);
+DataLogger::DataLogger(std::string _dumpPath, std::string _eventPath) {
+    dumpPath  = template_based_path(_dumpPath);
+    eventPath = template_based_path(_eventPath);
+
+    dumpFd  = open(dumpPath.c_str(),  O_WRONLY | O_CREAT |  O_APPEND, 0777);
+    eventFd = open(eventPath.c_str(), O_WRONLY | O_CREAT |  O_APPEND, 0777);
+    
+    if (dumpFd == -1) {
+        throw std::runtime_error("Could not open the dump file.\n");
+    }
+    if (eventFd == -1) {
+        throw std::runtime_error("Could not open the event file.\n");
+    }
 }
 
 std::unique_ptr<DataLogger> DataLogger::instance;
 std::mutex DataLogger::instanceMutex;
 
 
-void DataLogger::conv (DataDump &dump) { 
-static int counter =0;
+void DataLogger::conv(DataDump &dump) { 
+    static int counter(0);
     char* buffer = reinterpret_cast<char*>(&dump);
-    stream.write(buffer, sizeof(DataDump));
-    if (__glibc_unlikely((counter & 63 )!=0)){
-        counter =0;
-        ::fsync(fd);
-    }
+    write(dumpFd, buffer, sizeof(DataDump));
+    
     counter++;
+
+    if (counter >= DATADUMP_FSYNC_FREQ){
+        counter = 0;
+        fsync(dumpFd);
+    }
 }
 
 DataLogger::~DataLogger() {
-    stream.flush();
-    eventStream.flush();
-    ::fsync(fd);::fsync(fd);
-    ::close(fdStream);
-   ::close(fdStream);
+    fsync(dumpFd);
+    fsync(eventFd);
 
-    if (stream.is_open()) stream.close();
-    if (eventStream.is_open()) eventStream.close();
+    close(dumpFd);
+    close(eventFd);
 }
 
 DataLogger& DataLogger::getInstance(const std::string& path, const std::string& eventPath) {
@@ -71,15 +82,13 @@ DataLogger& DataLogger::getInstance(const std::string& path, const std::string& 
 
 void DataLogger::eventConv(std::string event,uint32_t ts){
     uint32_t str_length = event.size();
-    eventStream.write(reinterpret_cast<char*>(&ts), sizeof(ts));
-    eventStream.write(reinterpret_cast<char*>(&str_length), sizeof(uint32_t));
-    eventStream.write(event.c_str(), str_length*sizeof(char));
-    stream.flush();
-    eventStream.flush();
-   ::fsync(fd);
-   ::fsync(fdStream);
 
+    char* buffer_ts = (char*) &ts;
+    char* buffer_ln = (char*) &str_length;
+
+    write(eventFd, buffer_ts, sizeof(ts));
+    write(eventFd, buffer_ln, sizeof(uint32_t));
+    write(eventFd, event.c_str(), str_length * sizeof(char));
+
+    fsync(eventFd);
 }
-
-std::string DataLogger::getPath      () { return path; }
-std::string DataLogger::getEventPath () { return eventPath; }

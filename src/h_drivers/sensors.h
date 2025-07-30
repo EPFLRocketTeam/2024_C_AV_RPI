@@ -12,6 +12,7 @@
 #define SENSORS_H
 
 #include <vector>
+#include <map>
 #include "bmi08x.h"
 #include "bmp3.h"
 #include "I2CGPS.h"
@@ -32,6 +33,8 @@ public:
 
     void init_sensors ();
 
+    std::map<std::string, bool> sensors_status ();
+
     // inline SensStatus get_status() const { return status; }
     // inline SensRaw get_raw() const { return raw_data; }
     // inline SensFiltered get_clean() const { return clean_data; }
@@ -42,7 +45,7 @@ private:
     // SensRaw raw_data;
     // SensFiltered clean_data;
 
-    Kalman kalman;
+    // Kalman kalman;
 };
 
 #endif /* SENSORS_H */

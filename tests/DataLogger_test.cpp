@@ -11,7 +11,7 @@ int main (void) {
     std::string path;
     {
         DataLogger logger(LOG_FILE, EVT_FILE);
-        path = logger.getPath();
+        path = logger.getDumpPath();
         logger.conv(dump);
 
         assert (path.substr(0, 6) == "./log_");
