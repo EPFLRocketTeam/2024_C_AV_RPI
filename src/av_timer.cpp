@@ -1,6 +1,6 @@
 #include "av_timer.h"
 #include <chrono>
-#include <unistd.h>
+#include <thread>
 
 using namespace std::chrono;
 
@@ -12,9 +12,6 @@ uint32_t AvTimer::tick() {
 }
 
 void AvTimer::sleep(const uint32_t duration_ms) {
-    usleep(duration_ms * 1000);
+    std::this_thread::sleep_for(milliseconds(duration_ms));
 }
 
-void AvTimer::delay(const uint32_t duration_us) {
-    usleep(duration_us);
-}
