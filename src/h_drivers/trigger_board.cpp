@@ -1,6 +1,7 @@
 // TODO: log events
 
 #include <iostream>
+#include <pigpio.h>
 #include <string>
 #include <unistd.h>
 #include "data.h"
@@ -24,35 +25,37 @@ TriggerBoard::~TriggerBoard() {
     }
 }
 
+void TriggerBoard::read_register(const uint8_t reg_addr, uint8_t* data) {
+    try {
+        I2CInterface::getInstance().read(NET_ADDR_TRB, reg_addr, data, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB communication error: failed reading from register ");
+        throw TriggerBoardException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
+    }
+}
+
+void TriggerBoard::write_register(const uint8_t reg_addr, const uint8_t* data) {
+    try {
+        I2CInterface::getInstance().write(NET_ADDR_TRB, reg_addr, data, NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("TRB communication error: failed writing to register ");
+        throw TriggerBoardException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
+    }
+}
+
 void TriggerBoard::write_timestamp() {
     const uint32_t timestamp(Data::get_instance().get().av_timestamp);
-    try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_TIMESTAMP_MAIN, (uint8_t*)&timestamp,
-        NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::string msg("TRB write_timestamp error: ");
-        throw TriggerBoardException(msg + e.what());
-    }
+    write_register(TRB_TIMESTAMP_MAIN, (uint8_t*)&timestamp);
 }
 
 void TriggerBoard::send_wake_up() {
     const uint32_t order(NET_CMD_ON);
-    try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_WAKE_UP, (uint8_t*)&order, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::string msg("TRB wake_up error: ");
-        throw TriggerBoardException(msg + e.what());
-    }
+    write_register(TRB_WAKE_UP, (uint8_t*)&order);
 }
 
 void TriggerBoard::send_sleep() {
     const uint32_t order(NET_CMD_OFF);
-    try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_WAKE_UP, (uint8_t*)&order, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::string msg("TRB sleep error: ");
-        throw TriggerBoardException(msg + e.what());
-    }
+    write_register(TRB_WAKE_UP, (uint8_t*)&order);
 }
 
 bool TriggerBoard::read_is_woken_up() {
@@ -74,30 +77,20 @@ bool TriggerBoard::read_is_woken_up() {
 
 void TriggerBoard::write_clear_to_trigger(const bool go) {
     const uint32_t cmd(go ? NET_CMD_ON : NET_CMD_OFF);
-    try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::string msg("TRB clear_to_trigger error: ");
-        throw TriggerBoardException(msg + e.what());
-    }
+    write_register(TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd);
 }
 
 void TriggerBoard::write_pyros(const uint32_t pyros) {
-    try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&pyros, NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::string msg("TRB write_pyros error: ");
-        throw TriggerBoardException(msg + e.what());
-    }
+    write_register(TRB_PYROS, (uint8_t*)&pyros);
 }
 
 uint32_t TriggerBoard::read_pyros() {
     unsigned long rslt(0);
     try {
-	I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&rslt, NET_XFER_SIZE+1);
+	    I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&rslt, NET_XFER_SIZE+1);
     }catch(I2CInterfaceException& e) {
-	std::string msg("TRB read_pyros error: ");
-	throw TriggerBoardException(msg + e.what());
+	    std::string msg("TRB read_pyros error: ");
+	    throw TriggerBoardException(msg + e.what());
     }
     return (uint32_t)(rslt >> 8);
 }
@@ -251,6 +244,7 @@ void TriggerBoard::handle_ascent() {
 }
 
 // Transition ASCENT->DESCENT is done upon apogee detection
+// TODO: Confirm firing sequence with ST
 void TriggerBoard::handle_descent(const DataDump& dump) {
     static uint32_t trigger_ms(0);
     static uint32_t trigger_ack_ms(0);

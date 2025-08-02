@@ -7,13 +7,13 @@
 
 Camera::Camera(const uint8_t address) noexcept : m_address(address), m_recording(0) {
     switch (m_address) {
-        case 0x1C:
+        case NET_ADDR_CAM_SEP:
             m_id = "SEP";
             break;
-        case 0x2C:
+        case NET_ADDR_CAM_UP:
             m_id = "UP";
             break;
-        case 0x3C:
+        case NET_ADDR_CAM_DOWN:
             m_id = "DOWN";
             break;
     }

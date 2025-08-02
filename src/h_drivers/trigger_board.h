@@ -25,6 +25,9 @@ private:
     uint32_t delta_ms;
     uint32_t count_ms;
 
+    void read_register(const uint8_t  reg_addr, uint8_t* data);
+    void write_register(const uint8_t reg_addr, const uint8_t* data);
+
     void handle_init();
     void handle_calibration();
     void handle_manual();
