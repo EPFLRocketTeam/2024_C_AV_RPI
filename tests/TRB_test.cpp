@@ -137,16 +137,16 @@ void sequential_read_write_test(TriggerBoard& trb) {
     assert(trb.read_has_triggered() == false);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
-    std::cout << " - Sending PYRO_2_3 NET_CMD_ON... ";
-    uint32_t cmd(NET_CMD_ON << 8 | NET_CMD_ON << 16);
+    std::cout << " - Sending PYRO_2_3 CMD_ON... ";
+    uint32_t cmd(AV_NET_CMD_ON << 8 | AV_NET_CMD_ON << 16);
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
 
-    std::cout << " - Sending PYRO_2_3 NET_CMD_OFF... ";
-    cmd = NET_CMD_OFF << 8 | NET_CMD_OFF << 16;
+    std::cout << " - Sending PYRO_2_3 CMD_OFF... ";
+    cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -157,23 +157,23 @@ void sequential_read_write_test(TriggerBoard& trb) {
     std::cout << " - Waiting 1s...\n";
     usleep(1e6);
 
-    std::cout << " - Sending CLEAR_TO_TRIGGER NET_CMD_OFF... ";
+    std::cout << " - Sending CLEAR_TO_TRIGGER CMD_OFF... ";
     trb.write_clear_to_trigger(1);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 5s...\n";
     usleep(5e6);
 
-    std::cout << " - Sending PYRO_2_3 NET_CMD_ON... ";
-    cmd = NET_CMD_ON << 8 | NET_CMD_ON << 16;
+    std::cout << " - Sending PYRO_2_3 CMD_ON... ";
+    cmd = AV_NET_CMD_ON << 8 | AV_NET_CMD_ON << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
 
-    std::cout << " - Sending PYRO_2_3 NET_CMD_OFF... ";
-    cmd = NET_CMD_OFF << 8 | NET_CMD_OFF << 16;
+    std::cout << " - Sending PYRO_2_3 CMD_OFF... ";
+    cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -194,7 +194,7 @@ void sequential_write_test(TriggerBoard& trb) {
     std::cout << " - Waiting 1s...\n";
     usleep(1e6);
 
-    std::cout << " - Sending CLEAR_TO_TRIGGER NET_CMD_OFF... ";
+    std::cout << " - Sending CLEAR_TO_TRIGGER CMD_OFF... ";
     trb.write_clear_to_trigger(0);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -205,39 +205,39 @@ void sequential_write_test(TriggerBoard& trb) {
     std::cout << " - Waiting 5s...\n";
     usleep(5e6);
 
-    std::cout << " - Sending PYRO_2_3 NET_CMD_ON... ";
-    uint32_t cmd(NET_CMD_ON << 8 | NET_CMD_ON << 16);
+    std::cout << " - Sending PYRO_2_3 CMD_ON... ";
+    uint32_t cmd(AV_NET_CMD_ON << 8 | AV_NET_CMD_ON << 16);
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
 
-    std::cout << " - Sending PYRO_2_3 NET_CMD_OFF... ";
-    cmd = NET_CMD_OFF << 8 | NET_CMD_OFF << 16;
+    std::cout << " - Sending PYRO_2_3 CMD_OFF... ";
+    cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 1s...\n";
     usleep(1e6);
 
-    std::cout << " - Sending CLEAR_TO_TRIGGER NET_CMD_ON... ";
+    std::cout << " - Sending CLEAR_TO_TRIGGER CMD_ON... ";
     trb.write_clear_to_trigger(1);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 5s...\n";
     usleep(5e6);
 
-    std::cout << " - Sending PYRO_2_3 NET_CMD_ON... ";
-    cmd = NET_CMD_ON << 8 | NET_CMD_ON << 16;
+    std::cout << " - Sending PYRO_2_3 CMD_ON... ";
+    cmd = AV_NET_CMD_ON << 8 | AV_NET_CMD_ON << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Waiting 300ms...\n";
     usleep(300e3);
 
-    std::cout << " - Sending PYRO_2_3 NET_CMD_OFF... ";
-    cmd = NET_CMD_OFF << 8 | NET_CMD_OFF << 16;
+    std::cout << " - Sending PYRO_2_3 CMD_OFF... ";
+    cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 16;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
