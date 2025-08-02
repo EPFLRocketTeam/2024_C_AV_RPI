@@ -1,12 +1,12 @@
 
-#include "logger.h"
-#include "data.h"
-#include "config.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
 #include <filesystem>
 #include <exception>
+#include "logger.h"
+#include "data.h"
+#include "config.h"
 
 // If the folder contains more than 10^6 files, throw an error
 const int MAX_TEMPLATE_COUNT = 1'000'000;
