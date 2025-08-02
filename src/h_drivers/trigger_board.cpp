@@ -11,7 +11,7 @@
 
 TriggerBoard::TriggerBoard() {
     try {
-        I2CInterface::getInstance().open(NET_ADDR_TRB);
+        I2CInterface::getInstance().open(AV_NET_ADDR_TRB);
     }catch(const I2CInterfaceException& e) {
         std::cout << "Error during TRB I2C initilazation: " << e.what() << "\n";
     }    
@@ -19,7 +19,7 @@ TriggerBoard::TriggerBoard() {
 
 TriggerBoard::~TriggerBoard() {
     try {
-        I2CInterface::getInstance().close(NET_ADDR_TRB);
+        I2CInterface::getInstance().close(AV_NET_ADDR_TRB);
     }catch(I2CInterfaceException& e) {
         std::cout << "Error during TRB I2C deinitialization: " << e.what() << "\n";
     }
@@ -27,7 +27,7 @@ TriggerBoard::~TriggerBoard() {
 
 void TriggerBoard::read_register(const uint8_t reg_addr, uint8_t* data) {
     try {
-        I2CInterface::getInstance().read(NET_ADDR_TRB, reg_addr, data, NET_XFER_SIZE);
+        I2CInterface::getInstance().read(AV_NET_ADDR_TRB, reg_addr, data, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB communication error: failed reading from register ");
         throw TriggerBoardException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
@@ -36,7 +36,7 @@ void TriggerBoard::read_register(const uint8_t reg_addr, uint8_t* data) {
 
 void TriggerBoard::write_register(const uint8_t reg_addr, const uint8_t* data) {
     try {
-        I2CInterface::getInstance().write(NET_ADDR_TRB, reg_addr, data, NET_XFER_SIZE);
+        I2CInterface::getInstance().write(AV_NET_ADDR_TRB, reg_addr, data, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB communication error: failed writing to register ");
         throw TriggerBoardException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
@@ -45,23 +45,23 @@ void TriggerBoard::write_register(const uint8_t reg_addr, const uint8_t* data) {
 
 void TriggerBoard::write_timestamp() {
     const uint32_t timestamp(Data::get_instance().get().av_timestamp);
-    write_register(TRB_TIMESTAMP_MAIN, (uint8_t*)&timestamp);
+    write_register(AV_NET_TRB_TIMESTAMP, (uint8_t*)&timestamp);
 }
 
 void TriggerBoard::send_wake_up() {
-    const uint32_t order(NET_CMD_ON);
-    write_register(TRB_WAKE_UP, (uint8_t*)&order);
+    const uint32_t order(AV_NET_CMD_ON);
+    write_register(AV_NET_TRB_WAKE_UP, (uint8_t*)&order);
 }
 
 void TriggerBoard::send_sleep() {
-    const uint32_t order(NET_CMD_OFF);
-    write_register(TRB_WAKE_UP, (uint8_t*)&order);
+    const uint32_t order(AV_NET_CMD_OFF);
+    write_register(AV_NET_TRB_WAKE_UP, (uint8_t*)&order);
 }
 
 bool TriggerBoard::read_is_woken_up() {
     unsigned long rslt(0);
     try {
-        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_IS_WOKEN_UP, (uint8_t*)&rslt, NET_XFER_SIZE+1);
+        I2CInterface::getInstance().read(AV_NET_ADDR_TRB, AV_NET_TRB_IS_WOKEN_UP, (uint8_t*)&rslt, AV_NET_XFER_SIZE+1);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB read_is_woken_up error: ");
         throw TriggerBoardException(msg + e.what());
@@ -69,25 +69,25 @@ bool TriggerBoard::read_is_woken_up() {
 
     rslt = (uint32_t)(rslt >> 8);
 
-    bool trb_woken_up(rslt == NET_CMD_ON);
+    bool trb_woken_up(rslt == AV_NET_CMD_ON);
     Data::get_instance().write(Data::EVENT_TRB_READY, &trb_woken_up);
 
     return trb_woken_up;
 }
 
 void TriggerBoard::write_clear_to_trigger(const bool go) {
-    const uint32_t cmd(go ? NET_CMD_ON : NET_CMD_OFF);
-    write_register(TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd);
+    const uint32_t cmd(go ? AV_NET_CMD_ON : AV_NET_CMD_OFF);
+    write_register(AV_NET_TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd);
 }
 
 void TriggerBoard::write_pyros(const uint32_t pyros) {
-    write_register(TRB_PYROS, (uint8_t*)&pyros);
+    write_register(AV_NET_TRB_PYROS, (uint8_t*)&pyros);
 }
 
 uint32_t TriggerBoard::read_pyros() {
     unsigned long rslt(0);
     try {
-	    I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_PYROS, (uint8_t*)&rslt, NET_XFER_SIZE+1);
+	    I2CInterface::getInstance().read(AV_NET_ADDR_TRB, AV_NET_TRB_PYROS, (uint8_t*)&rslt, AV_NET_XFER_SIZE+1);
     }catch(I2CInterfaceException& e) {
 	    std::string msg("TRB read_pyros error: ");
 	    throw TriggerBoardException(msg + e.what());
@@ -98,14 +98,14 @@ uint32_t TriggerBoard::read_pyros() {
 bool TriggerBoard::read_has_triggered() {
     unsigned long rslt(0);
     try {
-        I2CInterface::getInstance().read(NET_ADDR_TRB, TRB_HAS_TRIGGERED, (uint8_t*)&rslt, NET_XFER_SIZE+1);
+        I2CInterface::getInstance().read(AV_NET_ADDR_TRB, AV_NET_TRB_HAS_TRIGGERED, (uint8_t*)&rslt, AV_NET_XFER_SIZE+1);
     }catch(I2CInterfaceException& e) {
         std::string msg("TRB read_has_triggered error: ");
         throw TriggerBoardException(msg + e.what());
     }
 
     rslt = (uint32_t)(rslt >> 8);
-    bool trb_triggered(rslt == NET_CMD_ON);
+    bool trb_triggered(rslt == AV_NET_CMD_ON);
     Data::get_instance().write(Data::EVENT_SEPERATED, &trb_triggered);
 
     return trb_triggered;
@@ -258,12 +258,12 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         // Send main pyro order to trigger the sep mech
         if (!pyro_main_fail) {
             if (trigger_ms < 400) {
-                uint32_t order(NET_CMD_ON);
+                uint32_t order(AV_NET_CMD_ON);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {
                 read_has_triggered();
-                uint32_t order(NET_CMD_OFF);
+                uint32_t order(AV_NET_CMD_OFF);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;
@@ -277,12 +277,12 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         // If passed a delay of no trigger ACK, fire on the spare channels
         else if (!pyro_spare1_fail) {
             if (trigger_ms < 400) {
-                uint32_t order(NET_CMD_ON << 8);
+                uint32_t order(AV_NET_CMD_ON << 8);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {
                 read_has_triggered();
-                uint32_t order(NET_CMD_OFF << 8);
+                uint32_t order(AV_NET_CMD_OFF << 8);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;
@@ -296,12 +296,12 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         // Again, if passed a delay of no trigger ACK, fire on the next channel
         else {
             if (trigger_ms < 400) {
-                uint32_t order(NET_CMD_ON << 16);
+                uint32_t order(AV_NET_CMD_ON << 16);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {
                 read_has_triggered();
-                uint32_t order(NET_CMD_OFF << 16);
+                uint32_t order(AV_NET_CMD_OFF << 16);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;
