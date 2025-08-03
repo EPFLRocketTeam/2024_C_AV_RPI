@@ -21,8 +21,10 @@
 #include <algorithm>
 
 int main(void){
-    DataLogger &instance = DataLogger::getInstance();
-
+    if (!DataLogger::init()) {
+        std::cout << "Failed opening log files.\n";
+        return 1;
+    }
     ConfigManager::initConfig("./config.conf");
     AvTimer::sleep(100);
 

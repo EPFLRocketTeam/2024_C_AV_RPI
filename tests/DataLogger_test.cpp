@@ -9,14 +9,14 @@
 int main (void) {
     DataDump dump;
     std::string path;
-    {
-        DataLogger logger(LOG_FILE, EVT_FILE);
-        path = logger.getDumpPath();
-        logger.conv(dump);
 
-        assert (path.substr(0, 6) == "./log_");
-        assert (path.substr(path.size() - 4) == ".txt");
-    }
+    assert(DataLogger::init(LOG_FILE, EVT_FILE));
+    path = DataLogger::get_dump_path();
+    DataLogger::log_dump(dump);
+
+    assert (path.substr(0, 6) == "./log_");
+    assert (path.substr(path.size() - 4) == ".txt");
+    DataLogger::terminate();
 
     char* expects = (char*) (&dump);
 
