@@ -2,6 +2,7 @@
 #include <cassert>
 #include "camera.h"
 #include "data.h"
+#include "logger.h"
 #include "i2c_interface.h"
 #include "intranet_commands.h"
 
@@ -20,7 +21,7 @@ Camera::Camera(const uint8_t address) noexcept : m_address(address), m_recording
     try {
         I2CInterface::getInstance().open(m_address);
     }catch(const I2CInterfaceException& e) {
-        std::cout << "Error during camera " << m_address << " initialization " << e.what() << "\n";
+        Logger::log_eventf("Error during camera %x driver initialization: %s", m_address, e.what());
     }
 }
 
@@ -28,7 +29,7 @@ Camera::~Camera() {
     try {
         I2CInterface::getInstance().close(m_address);
     }catch(const I2CInterfaceException& e) {
-        std::cout << "Error during camera " << m_address << " deinitialization " << e.what() << "\n";
+        Logger::log_eventf("Error during camera %x driver deinitialization: %s", m_address, e.what());
     }
 }
 

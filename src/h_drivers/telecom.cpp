@@ -9,6 +9,7 @@
 #include "PacketDefinition_Firehorn.h"
 #include "telecom.h"
 #include "data.h"
+#include "logger.h"
 #include "h_driver.h"
 #include "config.h"
 
@@ -62,7 +63,7 @@ bool Telecom::begin() {
         throw TelecomException("LoRa uplink init failed\n");
         return false;
     }else {
-        std::cout << "LoRa uplink init succeeded!\n";
+        Logger::log_eventf("LoRa uplink init succeeded!");
     }
 
     lora_uplink.setTxPower(UPLINK_POWER);
@@ -91,7 +92,7 @@ bool Telecom::begin() {
         throw TelecomException("LoRa downlink init failed\n");
         return false;
     }else {
-        std::cout << "LoRa downlink init succeeded!\n";
+        Logger::log_eventf("LoRa downlink init succeeded!");
     }
 
     lora_downlink.setTxPower(AV_DOWNLINK_POWER);
@@ -187,9 +188,13 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
             Data::get_instance().write(Data::TLM_CMD_VALUE, &last_packet.order_value);
             Data::get_instance().write(Data::EVENT_CMD_RECEIVED, &new_cmd_received);
 
+            const int order_id((int)last_packet.order_id);
+            const int order_value((int)last_packet.order_value);
             std::cout << "Command received from GS!\n"
-                      << "ID: " << (int)last_packet.order_id << "\n"
-                      << "Value: " << (int)last_packet.order_value << "\n\n";
+                      << "ID: " << order_id << "\n"
+                      << "Value: " << order_value << "\n\n";
+
+            Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i", order_id, order_value);
 
             gpioWrite(LED_LORA_RX, 0);
             break;

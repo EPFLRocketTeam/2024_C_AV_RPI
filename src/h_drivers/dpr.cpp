@@ -2,6 +2,7 @@
 #include <string>
 #include "PacketDefinition_Firehorn.h"
 #include "data.h"
+#include "logger.h"
 #include "dpr.h"
 #include "i2c_interface.h"
 #include "intranet_commands.h"
@@ -12,7 +13,7 @@ DPR::DPR(const uint8_t address) : m_address(address) {
     try {
         I2CInterface::getInstance().open(m_address);
     }catch(const I2CInterfaceException& e) {
-        std::cout << "Error during DPR " << m_code << " I2C initialization: " << e.what() << "\n";
+        Logger::log_eventf(Logger::ERROR, "Error during DPR %s I2C initialization: %s", m_code, e.what());
     }
 }
 
@@ -20,7 +21,7 @@ DPR::~DPR() {
     try {
         I2CInterface::getInstance().close(m_address);
     }catch(const I2CInterfaceException& e) {
-        std::cout << "Error during DPR " << m_code << " I2C deinitialization: " << e.what() << "\n";
+        Logger::log_eventf(Logger::ERROR, "Error during DPR %s I2C deinitialization: %s", m_code, e.what());
     }
 }
 
