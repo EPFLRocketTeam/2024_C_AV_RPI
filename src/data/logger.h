@@ -7,13 +7,23 @@
 
 struct DataDump;
 
-namespace DataLogger {
+namespace Logger {
+    enum Severity {
+        FATAL,
+        ERROR,
+        WARN,
+        INFO,
+        DEBUG,
+        NB_SEVERITY
+    };
+
     bool init();
     bool init(const std::string dump_path, const std::string event_path);
     void terminate();
     void log_dump(const DataDump& dump);
-    void log_event(const std::string event, const uint32_t timestamp);
+    void log_event(const Severity lvl, const std::string event, const uint32_t timestamp);
 
+    // Default log severity is INFO
     template <typename ...Args>
     inline void log_eventf(const char* fmt, const uint32_t timestamp, Args&&... args) {
         const int size = std::snprintf(NULL, 0, fmt, args...);
@@ -30,7 +40,26 @@ namespace DataLogger {
         }
 
         free(buffer);
-        log_event(result, timestamp);
+        log_event(INFO, result, timestamp);
+    }
+
+    template <typename ...Args>
+    inline void log_eventf(Severity lvl, const char* fmt, const uint32_t timestamp, Args&&... args) {
+        const int size = std::snprintf(NULL, 0, fmt, args...);
+        if (size < 0) {
+            return;
+        }
+
+        char* buffer = (char*) malloc((size + 1) * sizeof(char));
+        std::snprintf(buffer, size + 1, fmt, args...);
+
+        std::string result(size, '.');
+        for (size_t off = 0; off < size; off++) {
+            result[off] = buffer[off];
+        }
+
+        free(buffer);
+        log_event(lvl, result, timestamp);
     }
     
     std::string get_dump_path();

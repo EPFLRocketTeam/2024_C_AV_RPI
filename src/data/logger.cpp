@@ -13,6 +13,7 @@ const int MAX_TEMPLATE_COUNT = 1'000'000;
 
 namespace {
     std::string template_based_path(std::string path);
+    std::string severity_to_str(const Logger::Severity lvl);
     // Log files path
     std::string av_log_dump_path(template_based_path(LOG_DUMP_DEFAULT_PATH));
     std::string av_log_event_path(template_based_path(LOG_EVENT_DEFAULT_PATH));
@@ -21,7 +22,7 @@ namespace {
 }
 
 
-bool DataLogger::init() {
+bool Logger::init() {
     dump_fd = open(av_log_dump_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0777);
     event_fd = open(av_log_event_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0777);
     if (dump_fd == -1) {
@@ -35,7 +36,7 @@ bool DataLogger::init() {
     return true;
 }
 
-bool DataLogger::init(const std::string dump_path, const std::string event_path) {
+bool Logger::init(const std::string dump_path, const std::string event_path) {
     av_log_dump_path = template_based_path(dump_path);
     av_log_event_path = template_based_path(event_path);
     dump_fd = open(av_log_dump_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0777);
@@ -51,7 +52,7 @@ bool DataLogger::init(const std::string dump_path, const std::string event_path)
     return true;
 }
 
-void DataLogger::terminate() {
+void Logger::terminate() {
     fsync(dump_fd);
     fsync(event_fd);
 
@@ -59,7 +60,7 @@ void DataLogger::terminate() {
     close(event_fd);
 }
 
-void DataLogger::log_dump(const DataDump& dump) {
+void Logger::log_dump(const DataDump& dump) {
     static int counter(0);
     DataDump dump_copy(dump);
     char* buffer = reinterpret_cast<char*>(&dump_copy);
@@ -73,24 +74,25 @@ void DataLogger::log_dump(const DataDump& dump) {
     }
 }
 
-void DataLogger::log_event(const std::string event, const uint32_t timestamp) {
-    const uint32_t str_length = event.size();
+void Logger::log_event(const Severity lvl, const std::string event, const uint32_t timestamp) {
+    const std::string event_msg(severity_to_str(lvl) + event);
+    const uint32_t str_length = event_msg.size();
 
     char* buffer_ts = (char*) &timestamp;
     char* buffer_ln = (char*) &str_length;
 
     write(event_fd, buffer_ts, sizeof(timestamp));
     write(event_fd, buffer_ln, sizeof(uint32_t));
-    write(event_fd, event.c_str(), str_length * sizeof(char));
+    write(event_fd, event_msg.c_str(), str_length * sizeof(char));
 
     fsync(event_fd);
 }
 
-std::string DataLogger::get_dump_path() {
+std::string Logger::get_dump_path() {
     return av_log_dump_path;
 }
 
-std::string DataLogger::get_event_path() {
+std::string Logger::get_event_path() {
     return av_log_event_path;
 }
 
@@ -114,6 +116,23 @@ namespace {
         std::cout << "Could not start the logger as all the " << MAX_TEMPLATE_COUNT
                   << " files exist.\n";
         return "";
+    }
+
+    std::string severity_to_str(const Logger::Severity lvl) {
+        switch (lvl) {
+            case Logger::FATAL:
+                return "[FATAL]: ";
+            case Logger::ERROR:
+                return "[ERROR]: ";
+            case Logger::WARN:
+                return "[WARN]: ";
+            case Logger::INFO:
+                return "[INFO]: ";
+            case Logger::DEBUG:
+                return "[DEBUG]: ";
+            default:
+                return "";
+        }
     }
 }
 

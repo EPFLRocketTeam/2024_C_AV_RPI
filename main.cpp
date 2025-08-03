@@ -21,7 +21,7 @@
 #include <algorithm>
 
 int main(void){
-    if (!DataLogger::init()) {
+    if (!Logger::init()) {
         std::cout << "Failed opening log files.\n";
         return 1;
     }

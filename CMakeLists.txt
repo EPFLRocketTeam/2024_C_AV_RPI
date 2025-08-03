@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project(flight_computer VERSION 0.1 LANGUAGES C CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(ENABLE_TESTING ON)
 add_library(ERT_RF_Protocol_Interface INTERFACE)
 target_include_directories(ERT_RF_Protocol_Interface INTERFACE ERT_RF_Protocol_Interface)
 
