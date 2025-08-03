@@ -74,10 +74,11 @@ void Logger::log_dump(const DataDump& dump) {
     }
 }
 
-void Logger::log_event(const Severity lvl, const std::string event, const uint32_t timestamp) {
+void Logger::log_event(const Severity lvl, const std::string event) {
     const std::string event_msg(severity_to_str(lvl) + event);
     const uint32_t str_length = event_msg.size();
 
+    const uint32_t timestamp(Data::get_instance().get().av_timestamp);
     char* buffer_ts = (char*) &timestamp;
     char* buffer_ln = (char*) &str_length;
 

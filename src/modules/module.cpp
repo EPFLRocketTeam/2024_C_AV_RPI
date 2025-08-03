@@ -9,22 +9,22 @@ Module::Module(std::string name, std::string config_target) {
     this->_M_is_enabled = ConfigManager::isEnabled(config_target, true);
 
     if (this->_M_is_enabled) {
-        Logger::log_eventf("Module %s is enabled...", 0, this->get_name().c_str());
+        Logger::log_eventf("Module %s is enabled...", this->get_name().c_str());
     }else {
-        Logger::log_eventf("Module %s is disabled...", 0, this->get_name().c_str());
+        Logger::log_eventf("Module %s is disabled...", this->get_name().c_str());
     }
 }
 
 void Module::init() {
     if (this->_M_is_enabled) {
         try {
-            Logger::log_eventf("Init module %s...", 0, this->get_name().c_str());
+            Logger::log_eventf("Init module %s...", this->get_name().c_str());
 
             this->_M_is_failure = !this->run_init();
         }catch (std::exception &exc) {
             this->_M_is_failure = true;
             
-            Logger::log_eventf(Logger::ERROR, "Module %s :: init failed", 0, this->get_name().c_str());
+            Logger::log_eventf(Logger::ERROR, "Module %s :: init failed", this->get_name().c_str());
         }
     }
 }
@@ -35,7 +35,7 @@ void Module::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             this->_M_is_failure = !run_check_policy(dump, delta_ms);
         } catch (std::exception &exc) {
             this->_M_is_failure = true;
-            Logger::log_eventf(Logger::ERROR, "Module %s :: checkPolicy failed", delta_ms, this->get_name().c_str());
+            Logger::log_eventf(Logger::ERROR, "Module %s :: checkPolicy failed", this->get_name().c_str());
         }
     }
 }
@@ -71,7 +71,7 @@ bool SensorModule::run_check_policy(const DataDump& dump, const uint32_t delta_m
                 return false;
             }
         }catch (std::exception &exc) {
-            Logger::log_eventf(Logger::ERROR, "Module %s :: update failed", delta_ms, this->get_name().c_str());
+            Logger::log_eventf(Logger::ERROR, "Module %s :: update failed", this->get_name().c_str());
 
             throw exc;
         }
@@ -84,7 +84,7 @@ bool SensorModule::run_check_policy(const DataDump& dump, const uint32_t delta_m
     try {
         return run_calibration();
     }catch (std::exception &exc) {
-        Logger::log_eventf(Logger::ERROR, "Module %s :: calibration failed", delta_ms, this->get_name().c_str());
+        Logger::log_eventf(Logger::ERROR, "Module %s :: calibration failed", this->get_name().c_str());
 
         throw exc;
     }

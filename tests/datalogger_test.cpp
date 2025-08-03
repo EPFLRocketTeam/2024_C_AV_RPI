@@ -18,7 +18,8 @@ int main (void) {
     assert (path.substr(path.size() - 4) == ".txt");
 
     for (int i(0); i < Logger::NB_SEVERITY; ++i) {
-        Logger::log_eventf((Logger::Severity)i, "Event log test message (%u)", dump.av_timestamp, i);
+        Data::get_instance().write(Data::AV_TIMESTAMP, &i);
+        Logger::log_eventf((Logger::Severity)i, "Event log test message (%u)", i);
     }
     Logger::terminate();
 

@@ -21,11 +21,11 @@ namespace Logger {
     bool init(const std::string dump_path, const std::string event_path);
     void terminate();
     void log_dump(const DataDump& dump);
-    void log_event(const Severity lvl, const std::string event, const uint32_t timestamp);
+    void log_event(const Severity lvl, const std::string event);
 
     // Default log severity is INFO
     template <typename ...Args>
-    inline void log_eventf(const char* fmt, const uint32_t timestamp, Args&&... args) {
+    inline void log_eventf(const char* fmt, Args&&... args) {
         const int size = std::snprintf(NULL, 0, fmt, args...);
         if (size < 0) {
             return;
@@ -40,11 +40,11 @@ namespace Logger {
         }
 
         free(buffer);
-        log_event(INFO, result, timestamp);
+        log_event(INFO, result);
     }
 
     template <typename ...Args>
-    inline void log_eventf(Severity lvl, const char* fmt, const uint32_t timestamp, Args&&... args) {
+    inline void log_eventf(Severity lvl, const char* fmt, Args&&... args) {
         const int size = std::snprintf(NULL, 0, fmt, args...);
         if (size < 0) {
             return;
@@ -59,7 +59,7 @@ namespace Logger {
         }
 
         free(buffer);
-        log_event(lvl, result, timestamp);
+        log_event(lvl, result);
     }
     
     std::string get_dump_path();
