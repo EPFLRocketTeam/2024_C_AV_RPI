@@ -24,7 +24,7 @@ public:
     ~AvState();
     // this function allows to get the current state of the FSM
     State getCurrentState();
-    void update(DataDump &dump);
+    void update(const DataDump &dump);
     std::string stateToString(State state);
 
 private:

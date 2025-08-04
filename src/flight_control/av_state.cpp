@@ -1,6 +1,7 @@
 #include <Protocol.h>
 #include "av_state.h"
 #include "data.h"
+#include "logger.h"
 #include <iostream>
 
 
@@ -25,6 +26,7 @@ State AvState::fromInit(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
     {
+        Logger::log_eventf("FSM transition INIT->CALIBRATION");
         return State::CALIBRATION;
     }
     return currentState;
@@ -34,15 +36,18 @@ State AvState::fromCalibration(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
+        Logger::log_eventf("FSM transition CALIBRATION->ERROR_GROUND");
         return State::ERRORGROUND;
     }
     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_RECOVER)
     {
+        Logger::log_eventf("FSM transition CALIBRATION->INIT");
         return State::INIT;
     }
     // If all the sensors are calibrated and ready for use we go to the MANUAL state
     else if (dump.event.calibrated)
     {
+        Logger::log_eventf("FSM transition CALIBRATION->MANUAL");
         return State::MANUAL;
     }
     return currentState;
@@ -52,10 +57,12 @@ State AvState::fromManual(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT) 
     {
+        Logger::log_eventf("FSM transition MANUAL->ERROR_GROUND");
         return State::ERRORGROUND;
     }
     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
+        Logger::log_eventf("FSM transition MANUAL->ARMED");
         return State::ARMED;
     }
     return currentState;
@@ -67,11 +74,13 @@ State AvState::fromArmed(DataDump const &dump)
     {
         // print error
         std::cerr << "Catastrophic failure detected" << dump.event.catastrophic_failure << " " << (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT ? "true" : "false") << std::endl;
+        Logger::log_eventf("FSM transition ARMED->ERROR_GROUND");
         return State::ERRORGROUND;
     }
     // If the propulsion is OK we go to the READY state
     else if (dump.event.dpr_eth_pressure_ok)
     {
+        Logger::log_eventf("FSM transition ARMED->READY");
         return State::READY;
     }
     return currentState;
@@ -81,6 +90,7 @@ State AvState::fromReady(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
     {
+        Logger::log_eventf("FSM transition READY->THRUST_SEQUENCE");
         return State::THRUSTSEQUENCE;
     }
     return currentState;
@@ -90,15 +100,18 @@ State AvState::fromThrustSequence(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id== CMD_ID::AV_CMD_ABORT)
     {
+        Logger::log_eventf("FSM transition THRUST_SEQUENCE->ERROR_FLIGHT");
         return State::ERRORFLIGHT;
     }
     else if (dump.event.ignition_failed)
     {
+        Logger::log_eventf("FSM transition THRUST_SEQUENCE->ARMED");
         return State::ARMED;
     }
     // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
     else if (dump.nav.accel.z > ACCEL_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
     {
+        Logger::log_eventf("FSM transition THRUST_SEQUENCE->LIFTOFF");
         return State::LIFTOFF;
     }
     return currentState;
@@ -108,11 +121,13 @@ State AvState::fromLiftoff(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
+        Logger::log_eventf("FSM transition LOFTOFF->ERROR_FLIGHT");
         return State::ERRORFLIGHT;
     }
     // If the altitude threashold is cleared we go to the ASCENT state
     else if (dump.nav.altitude > ALTITUDE_THRESHOLD && dump.nav.speed.z >= SPEED_MIN_ASCENT && dump.nav.accel.z > ACCEL_ZERO)
     {
+        Logger::log_eventf("FSM transition LIFTOFF->ASCENT");
         return State::ASCENT;
     }
     return currentState;
@@ -122,10 +137,12 @@ State AvState::fromAscent(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
+        Logger::log_eventf("FSM transition ASCENT->ERROR_FLIGHT");
         return State::ERRORFLIGHT;
     }
     else if (dump.nav.speed.z < SPEED_ZERO)
     {
+        Logger::log_eventf("FSM transition ASCENT->DESCENT");
         return State::DESCENT;
     }
     return currentState;
@@ -135,10 +152,12 @@ State AvState::fromDescent(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
     {
+        Logger::log_eventf("FSM transition DESCENT->ERROR_FLIGHT");
         return State::ERRORFLIGHT;
     }
     else if (dump.nav.speed.norm() <= SPEED_ZERO && dump.depressurised())
     {
+        Logger::log_eventf("FSM transition DESCENT->LANDED");
         return State::LANDED;
     }
     return currentState;
@@ -153,6 +172,7 @@ State AvState::fromErrorGround(DataDump const &dump)
     //TODO: add pressure verification
     if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_RECOVER && dump.depressurised())
     {
+        Logger::log_eventf("FSM transition ERROR_GROUND->INIT");
         return State::INIT;
     }
     return  currentState;
@@ -163,7 +183,7 @@ State AvState::fromErrorFlight(DataDump const &dump)
     return currentState;
 }
 
-void AvState::update(DataDump &dump)
+void AvState::update(const DataDump &dump)
 {
     switch (currentState)
     {
