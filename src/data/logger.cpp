@@ -13,7 +13,7 @@ const int MAX_TEMPLATE_COUNT = 1'000'000;
 
 namespace {
     std::string template_based_path(std::string path);
-    std::string severity_to_str(const Logger::Severity lvl);
+    std::string fmt_severity_msg(const Logger::Severity lvl, const std::string event);
     // Log files path
     std::string av_log_dump_path(template_based_path(LOG_DUMP_DEFAULT_PATH));
     std::string av_log_event_path(template_based_path(LOG_EVENT_DEFAULT_PATH));
@@ -75,7 +75,7 @@ void Logger::log_dump(const DataDump& dump) {
 }
 
 void Logger::log_event(const Severity lvl, const std::string event) {
-    const std::string event_msg(severity_to_str(lvl) + event);
+    const std::string event_msg(fmt_severity_msg(lvl, event));
     const uint32_t str_length = event_msg.size();
 
     const uint32_t timestamp(Data::get_instance().get().av_timestamp);
@@ -119,21 +119,33 @@ namespace {
         return "";
     }
 
-    std::string severity_to_str(const Logger::Severity lvl) {
+    std::string fmt_severity_msg(const Logger::Severity lvl, const std::string event) {
+        std::string event_msg, lvl_color;
         switch (lvl) {
             case Logger::FATAL:
-                return "[FATAL]: ";
+                lvl_color = "\x1b[41m";
+                event_msg = "FATAL\x1b[0m";
+                break;
             case Logger::ERROR:
-                return "[ERROR]: ";
+                lvl_color = "\x1b[31m";
+                event_msg = "ERROR\x1b[0m";
+                break;
             case Logger::WARN:
-                return "[WARN]: ";
+                lvl_color = "\x1b[33m";
+                event_msg = "WARN\x1b[0m";
+                break;
             case Logger::INFO:
-                return "[INFO]: ";
+                event_msg = "INFO";
+                break;
             case Logger::DEBUG:
-                return "[DEBUG]: ";
+                lvl_color = "\x1b[36m";
+                event_msg = "DEBUG\x1b[0m";
+                break;
             default:
                 return "";
         }
+        event_msg += "\t| " + lvl_color + event + "\x1b[0m";
+        return "\t" + lvl_color + event_msg;
     }
 }
 

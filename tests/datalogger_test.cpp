@@ -1,12 +1,15 @@
-
 #include "data.h"
 #include "logger.h"
 #include <cassert>
+#include <random>
+#include <ctime>
 
 #define LOG_FILE "./log.txt"
 #define EVT_FILE "./event.txt"
 
 int main (void) {
+    srand((unsigned) time(0));
+
     DataDump dump;
     std::string path;
 
@@ -18,7 +21,8 @@ int main (void) {
     assert (path.substr(path.size() - 4) == ".txt");
 
     for (int i(0); i < Logger::NB_SEVERITY; ++i) {
-        Data::get_instance().write(Data::AV_TIMESTAMP, &i);
+        uint32_t ts(rand());
+        Data::get_instance().write(Data::AV_TIMESTAMP, &ts);
         Logger::log_eventf((Logger::Severity)i, "Event log test message (%u)", i);
     }
     Logger::terminate();
