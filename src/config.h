@@ -21,6 +21,8 @@
 #define LED_LORA_RX 17
 #define LED_LORA_TX 18
 
-#define DATADUMP_FSYNC_FREQ 50
+#define LOG_DUMP_DEFAULT_PATH   "/boot/av_log/dump_log.log"
+#define LOG_EVENT_DEFAULT_PATH  "/boot/av_log/event_log.log"
+#define DATADUMP_FSYNC_FREQ     50
 
 #endif /* CONFIG_H */

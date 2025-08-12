@@ -5,6 +5,7 @@
 #include <string>
 #include <unistd.h>
 #include "data.h"
+#include "logger.h"
 #include "trigger_board.h"
 #include "i2c_interface.h"
 #include "intranet_commands.h"
@@ -13,7 +14,7 @@ TriggerBoard::TriggerBoard() {
     try {
         I2CInterface::getInstance().open(AV_NET_ADDR_TRB);
     }catch(const I2CInterfaceException& e) {
-        std::cout << "Error during TRB I2C initilazation: " << e.what() << "\n";
+        Logger::log_eventf("Error during TRB I2C initilazation: %s", e.what());
     }    
 }
 
@@ -21,7 +22,7 @@ TriggerBoard::~TriggerBoard() {
     try {
         I2CInterface::getInstance().close(AV_NET_ADDR_TRB);
     }catch(I2CInterfaceException& e) {
-        std::cout << "Error during TRB I2C deinitialization: " << e.what() << "\n";
+        Logger::log_eventf("Error during TRB I2C deinitialization: %s", e.what());
     }
 }
 
@@ -202,6 +203,7 @@ void TriggerBoard::handle_armed(const DataDump& dump) {
 
         if (wkp_attempts > 10) {
             // Log error msg
+            Logger::log_event(Logger::FATAL, "Trigger Board not responding to WAKE_UP command after 10 attempts.");
             // FSM -> ERRORGROUND ?
         }
     }

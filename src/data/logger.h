@@ -2,63 +2,122 @@
 #define LOGGER_H
 
 #include <string>
-#include <sstream>
 #include <cstdint>
-#include <fstream>
-#include <vector>
-#include <memory>
-#include <mutex>
+#include <exception>
 
 struct DataDump;
 
-class DataLogger {    
-public:
-    DataLogger(std::string dumpPath, std::string eventPath);
-    
-    // Deleted to prevent copying
-    DataLogger(const DataLogger&) = delete;
-    DataLogger& operator=(const DataLogger&) = delete;
+namespace Logger {
+    enum Severity {
+        FATAL,
+        ERROR,
+        WARN,
+        INFO,
+        DEBUG,
+        NB_SEVERITY
+    };
 
-    // Singleton accessor
-    static DataLogger& getInstance(const std::string& path = "/boot/av_log/dump_log.log", const std::string& eventPath = "/boot/av_log/event_log.log");
-    
-    ~DataLogger();
-    void conv(DataDump &dump);
-    void eventConv(std::string event,uint32_t ts);
+    bool init();
+    bool init(const std::string dump_path, const std::string event_path);
+    void terminate();
+    void log_dump(const DataDump& dump);
+    void log_event(const Severity lvl, const std::string event);
 
+    // Default log severity is INFO
     template <typename ...Args>
-    void eventConvf (const char* fmt, uint32_t ts, Args&&... args) {
-        int size = std::snprintf(NULL, 0, fmt, args...);
+    inline void log_eventf(const char* fmt, Args&&... args) {
+        const int size = std::snprintf(NULL, 0, fmt, args...);
         if (size < 0) {
-            throw std::exception();
+            return;
         }
 
         char* buffer = (char*) malloc((size + 1) * sizeof(char));
-
         std::snprintf(buffer, size + 1, fmt, args...);
 
         std::string result(size, '.');
-        for (size_t off = 0; off < size; off++)
+        for (size_t off = 0; off < size; off++) {
             result[off] = buffer[off];
+        }
 
         free(buffer);
-
-        eventConv(result, ts);
+        log_event(INFO, result);
     }
 
-    inline std::string getDumpPath() const { return dumpPath; }
-    inline std::string getEventPath() const { return eventPath; }
+    template <typename ...Args>
+    inline void log_eventf(Severity lvl, const char* fmt, Args&&... args) {
+        const int size = std::snprintf(NULL, 0, fmt, args...);
+        if (size < 0) {
+            return;
+        }
 
-private:
-    std::string dumpPath;
-    std::string eventPath;
+        char* buffer = (char*) malloc((size + 1) * sizeof(char));
+        std::snprintf(buffer, size + 1, fmt, args...);
 
-    int dumpFd;
-    int eventFd;
+        std::string result(size, '.');
+        for (size_t off = 0; off < size; off++) {
+            result[off] = buffer[off];
+        }
 
-     // Singleton instance and mutex for thread safety
-     static std::unique_ptr<DataLogger> instance;
-     static std::mutex instanceMutex;
-};
+        free(buffer);
+        log_event(lvl, result);
+    }
+    
+    std::string get_dump_path();
+    std::string get_event_path();
+}
+
+// class DataLoggerException : public std::exception {
+// public:
+//     DataLoggerException(const std::string msg_) : msg(msg_) {}
+
+//     virtual const char* what() const throw() {
+//         return msg.c_str();
+//     }
+
+// private:
+//     std::string msg;
+// };
+
+// class DataLogger {    
+// public:
+//     DataLogger(std::string dumpPath, std::string eventPath);
+    
+//     // Deleted to prevent copying
+//     DataLogger(const DataLogger&) = delete;
+//     DataLogger& operator=(const DataLogger&) = delete;
+
+//     Singleton accessor
+//     static DataLogger& getInstance(const std::string& path = "/boot/av_log/dump_log.log", const std::string& eventPath = "/boot/av_log/event_log.log");
+    
+//     ~DataLogger();
+//     void conv(DataDump &dump);
+//     void eventConv(std::string event,uint32_t ts);
+
+//     template <typename ...Args>
+//     void eventConvf (const char* fmt, uint32_t ts, Args&&... args) {
+//         int size = std::snprintf(NULL, 0, fmt, args...);
+//         if (size < 0) {
+//             // throw std::exception();
+//             return;
+//         }
+
+//         char* buffer = (char*) malloc((size + 1) * sizeof(char));
+
+//         std::snprintf(buffer, size + 1, fmt, args...);
+
+//         std::string result(size, '.');
+//         for (size_t off = 0; off < size; off++)
+//             result[off] = buffer[off];
+
+//         free(buffer);
+
+//         eventConv(result, ts);
+//     }
+
+// private:
+
+//     int dumpFd;
+//     int eventFd;
+// };
 
 #endif /* LOGGER_H */
