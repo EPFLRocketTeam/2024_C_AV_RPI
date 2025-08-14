@@ -59,7 +59,7 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 
 bool Telecom::begin() {
     lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
-    if (!lora_uplink.begin(AV_DOWNLINK_FREQUENCY, SPI0)) {
+    if (!lora_uplink.begin(UPLINK_FREQUENCY, SPI0)) {
         throw TelecomException("LoRa uplink init failed\n");
         return false;
     }else {
