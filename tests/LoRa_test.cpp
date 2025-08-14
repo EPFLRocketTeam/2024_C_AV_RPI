@@ -8,6 +8,7 @@
 #include <LoRa.h>
 #include <pigpio.h>
 #include "config.h"
+#include <Protocol.h>
 
 #define LORA_BRAVO_SS_PIN     LORA_UPLINK_CS
 #define LORA_BRAVO_RST_PIN    LORA_UPLINK_RST
@@ -20,7 +21,7 @@
 #define lora_bravo LoRa
 LoRaClass lora_alpha;
 
-constexpr unsigned long LORA_FREQUENCY(868e6);
+constexpr unsigned long LORA_FREQUENCY(866.34e6);
 
 void dump_registers();
 void alpha_send(String outgoing, int& count);
@@ -39,6 +40,24 @@ int main(void) {
         std::cout << "LoRa Alpha init succeeded!\n";
     }
 
+    lora_alpha.setTxPower(AV_DOWNLINK_POWER);
+    lora_alpha.setSignalBandwidth(AV_DOWNLINK_BW);
+    lora_alpha.setSpreadingFactor(AV_DOWNLINK_SF);
+    lora_alpha.setCodingRate4(AV_DOWNLINK_CR);
+    lora_alpha.setPreambleLength(AV_DOWNLINK_PREAMBLE_LEN);
+
+#if (DOWNLINK_CRC)
+    lora_alpha.enableCrc();
+#else
+    lora_alpha.disableCrc();
+#endif
+#if (DOWNLINK_INVERSE_IQ)
+//    lora_alpha.enableInvertIQ();
+#else
+ //   lora_alpha.disableInvertIQ();
+#endif
+
+
     lora_bravo.setPins(LORA_BRAVO_SS_PIN, LORA_BRAVO_RST_PIN, LORA_BRAVO_DIO0_PIN);
     if (!lora_bravo.begin(LORA_FREQUENCY, SPI0)) {
         std::cout << "LoRa Bravo init failed!\n";
@@ -46,14 +65,32 @@ int main(void) {
         std::cout << "LoRa Bravo init succeeded!\n";
     }
 
+    lora_bravo.setTxPower(UPLINK_POWER);
+    lora_bravo.setSignalBandwidth(UPLINK_BW);
+    lora_bravo.setSpreadingFactor(UPLINK_SF);
+    lora_bravo.setCodingRate4(UPLINK_CR);
+    lora_bravo.setPreambleLength(UPLINK_PREAMBLE_LEN);
+
+#if (UPLINK_CRC)
+    lora_bravo.enableCrc();
+#else
+    lora_bravo.disableCrc();
+#endif
+#if (UPLINK_INVERSE_IQ)
+//    lora_bravo.enableInvertIQ();
+#else
+//    lora_bravo.disableInvertIQ();
+#endif
+
     lora_bravo.receive();
     lora_bravo.onReceive(uplink_receive);
 
-    dump_registers();
+    //dump_registers();
 
     unsigned long last_send_time(0);
     int count(0);
     unsigned interval(2000);
+    
     while (1) {
         if (gpioTick() / 1000 - last_send_time > interval) {
             String message("Alpha to Bravo");

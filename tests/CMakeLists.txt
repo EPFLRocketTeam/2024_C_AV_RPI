@@ -21,7 +21,7 @@ add_executable(gps_test I2CGPS_test.cpp)
 target_link_libraries(gps_test gps)
 
 add_executable(lora_test LoRa_test.cpp)
-target_link_libraries(lora_test LoRa4Raspi)
+target_link_libraries(lora_test LoRa4Raspi ERT_RF_Protocol_Interface)
 target_include_directories(lora_test PUBLIC ${CMAKE_SOURCE_DIR}/src/)
 
 add_executable(main_test main_test.cpp)
