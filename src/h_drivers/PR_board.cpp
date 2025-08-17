@@ -265,7 +265,7 @@ void PR_board::handleDescent(const DataDump& dump) {
 
     if(dump.event.ignited){
     write_trigger(AV_NET_CMD_OFF);
-    uint8_t trigger_off = AV_NET_CMD_OFF;
+    uint8_t trigger_off = 0;
     Data::get_instance().write(Data::EVENT_IGNITED, &trigger_off);
     }
 
