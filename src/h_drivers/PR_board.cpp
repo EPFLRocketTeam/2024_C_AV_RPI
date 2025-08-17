@@ -147,7 +147,7 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             // For the INIT state we do nothing
             break;
         case State::ERRORGROUND:
-            handleErrorGround(dump);
+            executeAbort();
             break;
         case State::CALIBRATION:
             // Handle calibration logic
@@ -160,7 +160,7 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             processManualMode(dump);
             break;
         case State::ERRORFLIGHT:
-            handleErrorFlight(dump);
+            executeAbort()
             break;
         case State::ARMED: {
             handleArmed(dump);
@@ -289,6 +289,7 @@ void PR_board::processManualMode(const DataDump& dump) {
             case AV_CMD_VENT_LOX:
                 // Handle vent oxidizer valve commands
                 break;
+
             //TODO: check GSE commands and map from number to actual valve commands
         }
     }
@@ -318,6 +319,7 @@ void PR_board::handleReady(const DataDump& dump) {
     }
 }
 void PR_board::executeAbort() {
-    // Code to abort
+    uint8_t abort_value = AV_NET_CMD_ON
+    write_register(AV_NET_PRB_ABORT, &abort_value);
 }
 
