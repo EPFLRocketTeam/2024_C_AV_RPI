@@ -77,6 +77,8 @@ struct PropSensors {
     double    fuel_inj_cooling_temperature;
     double    LOX_inj_temperature;
     double    chamber_temperature;
+    //TODO: should be changed ounce intranet with PRB_STATE is resolved
+    uint32_t  PR_state;
 
     PropSensors();
 };
@@ -261,6 +263,7 @@ public:
         PR_SENSOR_T_EIN_CF, // Ethanol Injector Cooling Fluid Tempreature (PT1000)
         PR_SENSOR_T_OIN, // Lox Injector Temperature
         PR_SENSOR_T_CCC,  // Combustion Chamber Temperature
+        PR_SENSOR_FSM_STATE, // Finite State Machine State
 
         VALVES,
 
@@ -285,7 +288,8 @@ public:
         EVENT_IGNITED,
         EVENT_SEPERATED,
         EVENT_CHUTE_OPENED,
-        EVENT_CHUTE_UNREEFED
+        EVENT_CHUTE_UNREEFED,
+        EVENT_IGNITION_FAILED
     };
 
     static inline Data& get_instance() {
