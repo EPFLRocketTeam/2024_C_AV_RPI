@@ -112,6 +112,7 @@ State AvState::fromThrustSequence(DataDump const &dump)
     else if (dump.nav.accel.z > ACCEL_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
     {
         Logger::log_eventf("FSM transition THRUST_SEQUENCE->LIFTOFF");
+        //TODO: for VSFT must be abort
         return State::LIFTOFF;
     }
     return currentState;

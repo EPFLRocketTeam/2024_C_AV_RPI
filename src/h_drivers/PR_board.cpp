@@ -160,7 +160,7 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             processManualMode(dump);
             break;
         case State::ERRORFLIGHT:
-            executeAbort()
+            executeAbort();
             break;
         case State::ARMED: {
             handleArmed(dump);
@@ -183,7 +183,7 @@ void PR_board::handleErrorGround(const DataDump& dump) {
 }
 void PR_board::handleCalibration(const DataDump& dump) {
         // Write timestamp at a freq of 1Hz
-    none_init_baseHandler(1000, delta_ms);
+    none_init_baseHandler(HIGH_PERIOD, delta_ms);
 
     // After DPR GO, send wake_up each 500ms until is_woken_up is true
     if (!dump.event.prb_ready) {
@@ -245,6 +245,7 @@ void PR_board::handleThrustSequence(const DataDump& dump) {
             if (trigger_ack_ms >= TIMEOUT_MS) {
                 // Handle trigger acknowledgment timeout
                 Logger::log_event(Logger::ERROR, "Ignition acknowledgment timeout");
+                clear_to_ignite(0);
                 //back to ready state, write failed in
                 bool trigger_failed(true);
                 Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &trigger_failed);
@@ -260,7 +261,7 @@ void PR_board::handleThrustSequence(const DataDump& dump) {
 void PR_board::handleDescent(const DataDump& dump) {
     // Handle logic for descent phase
     //TODO: not final as not needed for VSFT
-    count_time(HIGH_PERIOD, delta_ms);
+    none_init_baseHandler(LOW_PERIOD, delta_ms);
 
     if(dump.event.ignited){
     write_trigger(AV_NET_CMD_OFF);
@@ -275,6 +276,7 @@ void PR_board::handleDescent(const DataDump& dump) {
 // TODO: eteindre et allumer chacune des valves
 void PR_board::processManualMode(const DataDump& dump) {
     // Process commands in manual mode
+    none_init_baseHandler(LOW_PERIOD, delta_ms);
     if (dump.event.command_updated) {
         switch (dump.telemetry_cmd.id) {
             case AV_CMD_MAIN_LOX:
@@ -297,9 +299,7 @@ void PR_board::processManualMode(const DataDump& dump) {
 
 // message groupe av pour les fonctions 
 // si pas de reponse, message groupe interface av pr
-void PR_board::handleErrorFlight(const DataDump& dump) {
-    // Handle in-flight error
-}
+
 
 void PR_board::clear_to_ignite(uint8_t value) {
     write_register(AV_NET_PRB_CLEAR_TO_IGNITE, &value);
@@ -307,19 +307,18 @@ void PR_board::clear_to_ignite(uint8_t value) {
 
 void PR_board::handleReady(const DataDump& dump) {
     // Write timestamp + clear to trigger at 10Hz
+    
+    none_init_baseHandler(LOW_PERIOD, delta_ms);
     if(dump.event.ignition_failed) {
         bool trigger_failed = false;
         Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &trigger_failed);
     }
-    count_ms += delta_ms;
-    if (count_ms >= LOW_PERIOD) {
-        write_timestamp();
+    clear_to_ignite(1);
 
-        clear_to_ignite(1);
-    }
 }
 void PR_board::executeAbort() {
-    uint8_t abort_value = AV_NET_CMD_ON
+    none_init_baseHandler(HIGH_PERIOD,delta_ms);
+    uint8_t abort_value = AV_NET_CMD_ON;
     write_register(AV_NET_PRB_ABORT, &abort_value);
 }
 
