@@ -21,8 +21,8 @@ public:
     void read_tank_temperature();
     void read_copv_pressure();
     void read_copv_temperature();
-    void write_tank_valve(const uint8_t cmd);
-    void write_copv_valve(const uint8_t cmd);
+    void write_valves(const uint32_t cmd);
+    void read_valves();
 
     virtual void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 private:

@@ -32,7 +32,7 @@ Telecom::Telecom()
 
 void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     if (new_cmd_received) {
-        new_cmd_received = false;
+        //new_cmd_received = false;
         switch (last_packet.order_id) {
             case CMD_ID::AV_CMD_ABORT:
                 reset_cmd();
@@ -63,7 +63,7 @@ bool Telecom::begin() {
         throw TelecomException("LoRa uplink init failed\n");
         return false;
     }else {
-        Logger::log_eventf("LoRa uplink init succeeded!");
+        Logger::log_eventf("LoRa uplink init succeeded!\n");
     }
 
     lora_uplink.setTxPower(UPLINK_POWER);
@@ -94,7 +94,7 @@ bool Telecom::begin() {
         throw TelecomException("LoRa downlink init failed\n");
         return false;
     }else {
-        Logger::log_eventf("LoRa downlink init succeeded!");
+        Logger::log_eventf("LoRa downlink init succeeded!\n");
     }
 
     lora_downlink.setTxPower(AV_DOWNLINK_POWER);
@@ -142,7 +142,7 @@ void Telecom::send_telemetry() {
 
     packet.av_fc_temp = data.av_fc_temp;
     packet.ambient_temp = 0;
-    packet.engine_state = 1 | 1 << 3 | 1 << 1;
+    packet.engine_state = data.valves.valve_prb_main_lox << 1 | data.valves.valve_prb_main_fuel;
 
     packet.av_state = (uint8_t)data.av_state;
 
@@ -193,11 +193,11 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
 	    {
             	const int order_id((int)last_packet.order_id);
             	const int order_value((int)last_packet.order_value);
-            	std::cout << "Command received from GS!\n"
-                	      << "ID: " << order_id << "\n"
-                      	<< "Value: " << order_value << "\n\n";
+            	//std::cout << "Command received from GS!\n"
+                //	      << "ID: " << last_packet.order_id << "\n"
+                //      	<< "Value: " << last_packet.order_value << "\n\n";
 
-            	Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i", order_id, order_value);
+            	Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i\n", last_packet.order_id, last_packet.order_value);
 	    }
 
             gpioWrite(LED_LORA_RX, 0);

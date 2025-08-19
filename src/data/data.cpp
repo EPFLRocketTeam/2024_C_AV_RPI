@@ -79,7 +79,7 @@ void Data::write(GoatReg reg, void* data) {
             av_timestamp = *reinterpret_cast<uint32_t*>(data);
             break;
         case TLM_CMD_ID:
-            telemetry_cmd.id = *reinterpret_cast<CMD_ID*>(data);
+            telemetry_cmd.id = *reinterpret_cast<uint8_t*>(data);
             break;
         case TLM_CMD_VALUE:
             telemetry_cmd.value = *reinterpret_cast<uint8_t*>(data);

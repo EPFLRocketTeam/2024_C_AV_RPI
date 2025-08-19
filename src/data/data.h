@@ -30,7 +30,7 @@ enum class State
  * cast from uint8_t to CMD_ID to facilitate switch statements.
  */
 struct UplinkCmd {
-    CMD_ID id;
+    uint8_t id;
     uint8_t value;
 };
 
