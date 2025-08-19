@@ -310,11 +310,3 @@ bool DataDump::depressurised() const {
         && prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
 }
 
-bool Valves::ValvesForIgnition() const {
-    //TODO:must change to fit real wanted state of valves
-    return valve1 && valve2 && vent3 && vent4;
-}
-
-bool Valves::ValvesManual() const {
-    return valve1 && valve2 && vent3 && vent4;
-}

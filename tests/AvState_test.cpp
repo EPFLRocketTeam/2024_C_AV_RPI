@@ -69,10 +69,13 @@ void calibrationToInit(AvState &fsm, DataDump &dump) {
 // Function to trigger the MANUAL -> ARMED transition
 void manualToArmed(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ARM;
-    dump.valves.valve1 = 1; 
-    dump.valves.valve2 = 1; 
-    dump.valves.vent3 = 1; 
-    dump.valves.vent4 = 1; 
+    dump.valves.valve_dpr_pressure_copv = 1; 
+    dump.valves.valve_dpr_pressure_lox = 1; 
+    dump.valves.valve_dpr_pressure_fuel = 1; 
+    dump.valves.valve_dpr_vent_lox = 1; 
+    dump.valves.valve_dpr_vent_fuel = 1;
+    dump.valves.valve_prb_main_lox = 1;
+    dump.valves.valve_prb_main_fuel = 1;
     fsm.update(dump);
     assert_s(State::ARMED, fsm);
     //sameState(fsm, dump);
