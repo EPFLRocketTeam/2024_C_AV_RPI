@@ -262,8 +262,8 @@ public:
         PR_SENSOR_T_EIN_CF, // Ethanol Injector Cooling Fluid Tempreature (PT1000)
         PR_SENSOR_T_OIN, // Lox Injector Temperature
         PR_SENSOR_T_CCC,  // Combustion Chamber Temperature
-        PR_SENSOR_FSM_STATE, // Finite State Machine State
 
+        PR_BOARD_FSM_STATE, // PRB Finite State Machine State
         VALVES,
 
         /* Batteries status */

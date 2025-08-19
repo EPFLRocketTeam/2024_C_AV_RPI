@@ -21,6 +21,19 @@ public:
     // Valve control functions
     // void write_valve(uint8_t valve_id, ValveOpenDegree degree);
     // ValveOpenDegree read_valve(uint8_t valve_id) const;
+    void write_timestamp(); 
+    void send_wake_up();
+    void send_sleep();
+    bool read_is_woken_up();
+    void clear_to_ignite(uint8_t value);
+    void read_igniter_oxygen();
+    void read_igniter_fuel();
+    void read_combution_chamber();
+    void write_igniter(uint32_t cmd);
+    void write_valves(const uint32_t cmd);
+    void read_valves();
+    void read_trigger_ack();
+    void execute_abort();
 
 private:
     // Each element is 4 bits (we store in uint8_t for simplicity, masking the 4 LSB)
@@ -29,25 +42,16 @@ private:
     uint32_t delta_ms;
     uint32_t count_ms;
 
-    void handleErrorFlight(const DataDump& dump);
-    void handleErrorGround(const DataDump& dump);
-    void handleDescent(const DataDump& dump);
-    void processManualMode(const DataDump& dump);
-    void handleReady(const DataDump& dump);
-    void handleThrustSequence(const DataDump& dump);
-    void handleArmed(const DataDump& dump);
-    void handleCalibration(const DataDump& dump);
+    void handle_error_flight(const DataDump& dump);
+    void handle_error_ground(const DataDump& dump);
+    void handle_descent(const DataDump& dump);
+    void handle_manual(const DataDump& dump);
+    void handle_ready(const DataDump& dump);
+    void handle_thrust_sequence(const DataDump& dump);
+    void handle_armed(const DataDump& dump);
+    void handle_calibration(const DataDump& dump);
     void read_register(const uint8_t reg_addr, uint8_t* data);
     void write_register(const uint8_t reg_addr, const uint8_t* data);
-    void write_timestamp(); 
-    void send_wake_up();
-    void send_sleep();
-    bool read_is_woken_up();
-    void clear_to_ignite(uint8_t value);
-    void write_trigger(uint32_t trigger);
-    void read_trigger_ack();
-    void executeAbort();
-    void deployRecoverySystem();
     inline void count_time(uint32_t period,uint32_t delta_ms);
     inline void none_init_baseHandler(uint32_t period,uint32_t delta_ms);
 };

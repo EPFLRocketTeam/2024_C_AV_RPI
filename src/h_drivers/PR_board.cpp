@@ -45,12 +45,11 @@ inline void PR_board::none_init_baseHandler(uint32_t period,uint32_t delta_ms){
     if (count_ms >= period) {
         write_timestamp();
         count_ms = 0;
-            uint8_t state(0);
-    read_register(AV_NET_PRB_FSM_PRB, &state);
-    //TODO probably write all
-    Data::get_instance().write(Data::PR_SENSOR_FSM_STATE, &state);
+        uint8_t state(0);
+        read_register(AV_NET_PRB_FSM_PRB, &state);
+        //TODO probably write all
+        Data::get_instance().write(Data::PR_BOARD_FSM_STATE, &state);
     }
-
 }
 
 // fixme: implement the valve logic later on 
@@ -124,22 +123,106 @@ void PR_board::send_sleep() {
 
 
 bool PR_board::read_is_woken_up() {
-    unsigned long rslt(0);
-    try {
-        I2CInterface::getInstance().read(AV_NET_ADDR_PRB, AV_NET_PRB_IS_WOKEN_UP, (uint8_t*)&rslt, AV_NET_XFER_SIZE+1);
-    }catch(I2CInterfaceException& e) {
-        std::string msg("PRB read_is_woken_up error: ");
-        throw PRBoardException(msg + e.what());
-    }
+    uint32_t rslt(0);
+    read_register(AV_NET_PRB_IS_WOKEN_UP, (uint8_t*)&rslt);
 
-    rslt = (uint32_t)(rslt >> 8);
 
     bool prb_woken_up(rslt == AV_NET_CMD_ON);
     Data::get_instance().write(Data::EVENT_PRB_READY, &prb_woken_up);
     return prb_woken_up;
 }
 
+void PR_board::clear_to_ignite(uint8_t value) {
+    write_register(AV_NET_PRB_CLEAR_TO_IGNITE, &value);
+}
 
+
+void PR_board::read_igniter_oxygen() {
+    float pressure(0);
+    float temperature(0);
+
+    read_register(AV_NET_PRB_P_OIN, (uint8_t*)&pressure);
+    read_register(AV_NET_PRB_T_OIN, (uint8_t*)&temperature);
+
+    Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
+    Data::get_instance().write(Data::PR_SENSOR_T_OIN, &temperature);
+}
+
+void PR_board::read_igniter_fuel() {
+    float pressure(0);
+    float temperature(0);
+
+    read_register(AV_NET_PRB_P_EIN, (uint8_t*)&pressure);
+    read_register(AV_NET_PRB_T_EIN, (uint8_t*)&temperature);
+
+    Data::get_instance().write(Data::PR_SENSOR_P_EIN, &pressure);
+    Data::get_instance().write(Data::PR_SENSOR_T_EIN, &temperature);
+}
+
+void PR_board::read_combution_chamber() {
+    float pressure(0);
+    float temperature(0);
+
+    read_register(AV_NET_PRB_P_CCC, (uint8_t*)&pressure);
+    read_register(AV_NET_PRB_T_CCC, (uint8_t*)&temperature);
+
+    Data::get_instance().write(Data::PR_SENSOR_P_CCC, &pressure);
+    Data::get_instance().write(Data::PR_SENSOR_T_CCC, &temperature);
+}
+
+void PR_board::write_igniter(uint32_t cmd) {
+    write_register(AV_NET_PRB_IGNITER, (uint8_t*)&cmd);
+}
+
+void PR_board::write_valves(const uint32_t cmd) {
+    write_register(AV_NET_PRB_VALVES_STATE, (uint8_t*)&cmd);
+}
+
+void PR_board::read_valves() {
+    uint32_t rslt(0);
+    read_register(AV_NET_PRB_VALVES_STATE, (uint8_t*)&rslt);
+
+    uint8_t main_lox((rslt & AV_NET_PRB_VALVE_MO_BC) >> 8);
+    uint8_t main_fuel(rslt & AV_NET_PRB_VALVE_ME_B);
+
+    Valves valves(Data::get_instance().get().valves);
+
+    if (main_lox == AV_NET_CMD_ON) {
+        valves.valve_prb_main_lox = 1;
+    }else if (main_lox == AV_NET_CMD_OFF) {
+        valves.valve_prb_main_lox = 0;
+    }
+    
+    if (main_fuel == AV_NET_CMD_ON) {
+        valves.valve_prb_main_fuel = 1;
+    }else if (main_fuel == AV_NET_CMD_OFF) {
+        valves.valve_prb_main_fuel = 0;
+    }
+
+    Data::get_instance().write(Data::VALVES, &valves);
+}
+
+void PR_board::read_trigger_ack() {
+    //uint32_t ack(0);
+    //read_register(AV_NET_PRB_IGNITER_ACK, (uint8_t*)&ack);
+    //if (ack == AV_NET_CMD_ON) {
+    //    // Acknowledgment received
+    //}
+
+    //TODO: what should I check for ack ?
+    //We could maybe add a Intanet field to PRB to give us feedback on the ignition status
+    bool ack(true);
+    Data::get_instance().write(Data::EVENT_IGNITED, &ack);
+
+}
+
+void PR_board::execute_abort() {
+    none_init_baseHandler(HIGH_PERIOD,delta_ms);
+    uint8_t abort_value = AV_NET_CMD_ON;
+    write_register(AV_NET_PRB_ABORT, &abort_value);
+}
+
+// TODO: Review check policy FLIGHT LOGIC
 void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     this->delta_ms = delta_ms;
     switch (dump.av_state) {
@@ -147,30 +230,29 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             // For the INIT state we do nothing
             break;
         case State::ERRORGROUND:
-            executeAbort();
+            execute_abort();
             break;
         case State::CALIBRATION:
             // Handle calibration logic
-            handleCalibration(dump);
+            handle_calibration(dump);
             break;
         case State::DESCENT:
-            handleDescent(dump);
+            handle_descent(dump);
             break;
         case State::MANUAL:
-            processManualMode(dump);
+            handle_manual(dump);
             break;
         case State::ERRORFLIGHT:
-            executeAbort();
+            execute_abort();
             break;
-        case State::ARMED: {
-            handleArmed(dump);
+        case State::ARMED:
+            handle_armed(dump);
             break;
-        }
         case State::READY:
-            handleReady(dump);
+            handle_ready(dump);
             break;
         case State::THRUSTSEQUENCE:
-            handleThrustSequence(dump);
+            handle_thrust_sequence(dump);
             break;
         default:
             none_init_baseHandler(HIGH_PERIOD, delta_ms);
@@ -178,10 +260,10 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     }
 }
 
-void PR_board::handleErrorGround(const DataDump& dump) {
+void PR_board::handle_error_ground(const DataDump& dump) {
     // Handle errors on the ground
 }
-void PR_board::handleCalibration(const DataDump& dump) {
+void PR_board::handle_calibration(const DataDump& dump) {
         // Write timestamp at a freq of 1Hz
     none_init_baseHandler(HIGH_PERIOD, delta_ms);
 
@@ -208,37 +290,32 @@ void PR_board::handleCalibration(const DataDump& dump) {
     }
 }
 
-void PR_board::write_trigger(uint32_t trigger) {
-    write_register(AV_NET_PRB_IGNITER, (uint8_t*)&trigger);
-}
-
-void PR_board::read_trigger_ack() {
-    //uint32_t ack(0);
-    //read_register(AV_NET_PRB_IGNITER_ACK, (uint8_t*)&ack);
-    //if (ack == AV_NET_CMD_ON) {
-    //    // Acknowledgment received
-    //}
-
-    //TODO: what should I check for ack ?
-    bool ack(true);
-    Data::get_instance().write(Data::EVENT_IGNITED, &ack);
+void PR_board::handle_ready(const DataDump& dump) {
+    // Write timestamp + clear to trigger at 10Hz
+    
+    none_init_baseHandler(LOW_PERIOD, delta_ms);
+    if(dump.event.ignition_failed) {
+        bool trigger_failed = false;
+        Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &trigger_failed);
+    }
+    clear_to_ignite(1);
 
 }
 
-void PR_board::handleThrustSequence(const DataDump& dump) {
+
+void PR_board::handle_thrust_sequence(const DataDump& dump) {
      static uint32_t trigger_ms(0);
     static uint32_t trigger_ack_ms(0);
     
-
     if(!dump.event.ignited){
         if (trigger_ms < TIME_ATTEMPT_MS){
             uint32_t trigger(AV_NET_CMD_ON);
-            write_trigger(trigger);
+            write_igniter(trigger);
             trigger_ms += delta_ms;
         }else{
             //TODO: verify expected to turn off igniter once ignition detected
             uint32_t trigger(AV_NET_CMD_OFF);
-            write_trigger(trigger);
+            write_igniter(trigger);
             read_trigger_ack();
             trigger_ack_ms += delta_ms;
             //TODO: check ack wait time in Defines (for reviewer)
@@ -258,67 +335,53 @@ void PR_board::handleThrustSequence(const DataDump& dump) {
 
 
 
-void PR_board::handleDescent(const DataDump& dump) {
+void PR_board::handle_descent(const DataDump& dump) {
     // Handle logic for descent phase
     //TODO: not final as not needed for VSFT
     none_init_baseHandler(LOW_PERIOD, delta_ms);
 
     if(dump.event.ignited){
-    write_trigger(AV_NET_CMD_OFF);
-    uint8_t trigger_off = 0;
-    Data::get_instance().write(Data::EVENT_IGNITED, &trigger_off);
+        write_igniter(AV_NET_CMD_OFF);
+        uint8_t trigger_off = 0;
+        Data::get_instance().write(Data::EVENT_IGNITED, &trigger_off);
     }
-
-
 }
 
 
 // TODO: eteindre et allumer chacune des valves
-void PR_board::processManualMode(const DataDump& dump) {
+void PR_board::handle_manual(const DataDump& dump) {
     // Process commands in manual mode
     none_init_baseHandler(LOW_PERIOD, delta_ms);
     if (dump.event.command_updated) {
+        const uint8_t value(dump.telemetry_cmd.value);
         switch (dump.telemetry_cmd.id) {
             case AV_CMD_MAIN_LOX:
-                // Handle main LOX valve commands
+                {
+                    // Handle main LOX valve commands
+                    uint32_t cmd(0);
+                    if (value) {
+                        cmd = AV_NET_CMD_ON << 8;
+                    }else {
+                        cmd = AV_NET_CMD_OFF << 8;
+                    }
+                    write_valves(cmd); 
+                }
                 break;
             case AV_CMD_MAIN_FUEL:
-                // Handle main fuel valve commands
+                {
+                    // Handle main Fuel valve commands
+                    uint32_t cmd(0);
+                    if (value) {
+                        cmd = AV_NET_CMD_ON;
+                    }else {
+                        cmd = AV_NET_CMD_OFF;
+                    }
+                    write_valves(cmd); 
+                }
                 break;
-            case AV_CMD_VENT_FUEL:
-                // Handle main oxidizer valve commands
+            default:
                 break;
-            case AV_CMD_VENT_LOX:
-                // Handle vent oxidizer valve commands
-                break;
-
-            //TODO: check GSE commands and map from number to actual valve commands
         }
     }
-}
-
-// message groupe av pour les fonctions 
-// si pas de reponse, message groupe interface av pr
-
-
-void PR_board::clear_to_ignite(uint8_t value) {
-    write_register(AV_NET_PRB_CLEAR_TO_IGNITE, &value);
-}
-
-void PR_board::handleReady(const DataDump& dump) {
-    // Write timestamp + clear to trigger at 10Hz
-    
-    none_init_baseHandler(LOW_PERIOD, delta_ms);
-    if(dump.event.ignition_failed) {
-        bool trigger_failed = false;
-        Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &trigger_failed);
-    }
-    clear_to_ignite(1);
-
-}
-void PR_board::executeAbort() {
-    none_init_baseHandler(HIGH_PERIOD,delta_ms);
-    uint8_t abort_value = AV_NET_CMD_ON;
-    write_register(AV_NET_PRB_ABORT, &abort_value);
 }
 

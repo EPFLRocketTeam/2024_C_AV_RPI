@@ -186,7 +186,7 @@ void Data::write(GoatReg reg, void* data) {
         case PR_SENSOR_T_CCC:
             prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
             break;
-        case PR_SENSOR_FSM_STATE:
+        case PR_BOARD_FSM_STATE:
             prop_sensors.PR_state = *reinterpret_cast<uint32_t*>(data);
             break;
         case VALVES:
