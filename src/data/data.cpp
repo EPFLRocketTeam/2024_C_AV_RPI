@@ -79,7 +79,7 @@ void Data::write(GoatReg reg, void* data) {
             av_timestamp = *reinterpret_cast<uint32_t*>(data);
             break;
         case TLM_CMD_ID:
-            telemetry_cmd.id = *reinterpret_cast<CMD_ID*>(data);
+            telemetry_cmd.id = *reinterpret_cast<uint8_t*>(data);
             break;
         case TLM_CMD_VALUE:
             telemetry_cmd.value = *reinterpret_cast<uint8_t*>(data);
@@ -316,11 +316,3 @@ bool DataDump::depressurised() const {
         && prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
 }
 
-bool Valves::ValvesForIgnition() const {
-    //TODO:must change to fit real wanted state of valves
-    return valve1 && valve2 && vent3 && vent4;
-}
-
-bool Valves::ValvesManual() const {
-    return valve1 && valve2 && vent3 && vent4;
-}

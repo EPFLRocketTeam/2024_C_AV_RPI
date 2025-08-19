@@ -30,7 +30,7 @@ enum class State
  * cast from uint8_t to CMD_ID to facilitate switch statements.
  */
 struct UplinkCmd {
-    CMD_ID id;
+    uint8_t id;
     uint8_t value;
 };
 
@@ -84,14 +84,13 @@ struct PropSensors {
 };
 
 struct Valves{
-    bool valve1;
-    bool valve2;
-    bool vent3;
-    bool vent4;
-
-    bool ValvesForIgnition() const;
-    bool ValvesForAbort() const;
-    bool ValvesManual() const;
+    bool valve_dpr_pressure_lox;
+    bool valve_dpr_pressure_fuel;
+    bool valve_dpr_vent_copv;
+    bool valve_dpr_vent_lox;
+    bool valve_dpr_vent_fuel;
+    bool valve_prb_main_lox;
+    bool valve_prb_main_fuel;
 };
 
 struct Vector3 {

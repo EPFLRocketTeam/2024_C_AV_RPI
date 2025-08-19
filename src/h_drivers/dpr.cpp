@@ -145,24 +145,52 @@ void DPR::read_copv_temperature() {
     Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
 }
 
-// TODO: replace those functions by a single write_valves function
-// Use the mapping of the valves defined in intranet_commands.h
-void DPR::write_tank_valve(const uint8_t cmd) {
+void DPR::write_valves(const uint32_t cmd) {
+	uint32_t valves_state(cmd);
     try {
-        //I2CInterface::getInstance().write(m_address, DPR_VALVE_PX_NC, (uint8_t*)&cmd,NET_XFER_SIZE);
+        I2CInterface::getInstance().write(m_address, AV_NET_DPR_VALVES_STATE, (uint8_t*)&valves_state,AV_NET_XFER_SIZE);
     }catch (I2CInterfaceException& e) {
-        std::string msg("DPR " + m_code + " write_tank_valve error: ");
+        std::string msg("DPR " + m_code + " write_valves error: ");
         throw DPRException(msg + e.what());
     }
+    Logger::log_eventf(Logger::DEBUG, "Writing DPR valves: %x", valves_state);
 }
 
-void DPR::write_copv_valve(const uint8_t cmd) {
-    try {
-        //I2CInterface::getInstance().write(m_address, DPR_VALVE_DN_NC, (uint8_t*)&cmd,NET_XFER_SIZE);
-    }catch (I2CInterfaceException& e) {
-        std::string msg("DPR " + m_code + " write_copv_valve error: ");
-        throw DPRException(msg + e.what());
-    }
+void DPR::read_valves() {
+	uint32_t dpr_valves(0);
+	try {
+		I2CInterface::getInstance().read(m_address, AV_NET_DPR_VALVES_STATE, (uint8_t*)&dpr_valves, AV_NET_XFER_SIZE);
+	}catch (I2CInterfaceException& e) {
+		std::string msg("DPR " + m_code + " read_valves error: ");
+		throw DPRException(msg + e.what());
+	}
+	uint8_t vent_copv((dpr_valves & 0xFF0000) >> 16);
+	uint8_t pressure_tank((dpr_valves & 0x00FF00) >> 8);
+	uint8_t vent_tank(dpr_valves & 0xFF);
+
+	Valves valves(Data::get_instance().get().valves);
+
+	if (vent_copv == AV_NET_CMD_ON) {
+		valves.valve_dpr_vent_copv = 1;
+	}else if (vent_copv == AV_NET_CMD_OFF) {
+		valves.valve_dpr_vent_copv = 0;
+	}
+
+	if (m_address == AV_NET_ADDR_DPR_LOX) {
+		if (pressure_tank == AV_NET_CMD_ON) {
+			valves.valve_dpr_pressure_lox = 1;
+		}else if (pressure_tank == AV_NET_CMD_OFF) {
+			valves.valve_dpr_pressure_lox = 0;
+		}
+		if (vent_tank == AV_NET_CMD_ON) {
+			valves.valve_dpr_vent_lox = 1;
+		}else if (vent_tank == AV_NET_CMD_OFF) {
+			valves.valve_dpr_vent_lox = 0;
+		}
+	}
+
+	Logger::log_eventf(Logger::DEBUG, "Reading DPR valves: %x", dpr_valves);
+	Data::get_instance().write(Data::VALVES, &valves);
 }
 
 void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
@@ -210,11 +238,12 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             break;
     }
 
-    read_tank_level();
-    read_tank_pressure();
-    read_tank_temperature();
-    read_copv_pressure();
-    read_copv_temperature();
+    //read_tank_level();
+    //read_tank_pressure();
+    //read_tank_temperature();
+    //read_copv_pressure();
+    //read_copv_temperature();
+    read_valves();
 }
 
 void DPR::handle_init(const DataDump& dump) {
@@ -255,14 +284,32 @@ void DPR::handle_calibration(const DataDump& dump) {
 
 void DPR::handle_manual(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
-    if (count_ms >= 1000) {
-        write_timestamp(dump.av_timestamp);
-        count_ms = 0;
-    }
+    // if (count_ms >= 1000) {
+    //    write_timestamp(dump.av_timestamp);
+    //    count_ms = 0;
+    //}
 
     if (dump.event.command_updated) {
         switch (dump.telemetry_cmd.id) {
             // TODO: add PE, PO and DN valves to RF_Protocol_Interface CMD_ID enum
+		case CMD_ID::AV_CMD_P_LOX:
+			if (m_address == AV_NET_ADDR_DPR_LOX) {
+				std::cout << "Command AV_CMD_P_LOX\n";
+				uint32_t cmd(0);
+				if (dump.telemetry_cmd.value) {
+					cmd = AV_NET_CMD_ON << 8;
+				}else {
+					cmd = AV_NET_CMD_OFF << 8;
+				}
+				write_valves(cmd);
+			}
+			break;
+		case CMD_ID::AV_CMD_P_FUEL:
+			if (m_address == AV_NET_ADDR_DPR_ETH) {
+				uint32_t cmd(dump.telemetry_cmd.value);
+				write_valves(cmd);
+			}
+			break;
             default:
                 break;
         }
