@@ -2,9 +2,11 @@
 #include "i2c_interface.h"
 #include "av_timer.h"
 #include "dpr.h"
+#include "logger.h"
 #include <iostream>
 
 int main() {
+	Logger::init();
 	/*
 	I2CInterface::getInstance().open(AV_NET_ADDR_DPR_LOX);
 	uint32_t timestamp(12345);

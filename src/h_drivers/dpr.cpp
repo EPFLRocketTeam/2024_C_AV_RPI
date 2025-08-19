@@ -153,7 +153,7 @@ void DPR::write_valves(const uint32_t cmd) {
         std::string msg("DPR " + m_code + " write_valves error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf("Writing DPR valves: %x\n", valves_state);
+    Logger::log_eventf(Logger::DEBUG, "Writing DPR valves: %x", valves_state);
 }
 
 void DPR::read_valves() {
@@ -189,7 +189,7 @@ void DPR::read_valves() {
 		}
 	}
 
-	Logger::log_eventf("Reading DPR valves: %x\n", dpr_valves);
+	Logger::log_eventf(Logger::DEBUG, "Reading DPR valves: %x", dpr_valves);
 	Data::get_instance().write(Data::VALVES, &valves);
 }
 
