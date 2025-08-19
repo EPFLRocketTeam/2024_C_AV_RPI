@@ -84,7 +84,7 @@ struct PropSensors {
 struct Valves{
     bool valve_dpr_pressure_lox;
     bool valve_dpr_pressure_fuel;
-    bool valve_dpr_pressure_copv;
+    bool valve_dpr_vent_copv;
     bool valve_dpr_vent_lox;
     bool valve_dpr_vent_fuel;
     bool valve_prb_main_lox;

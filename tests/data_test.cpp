@@ -37,7 +37,7 @@ bool areEqualbmi08_sensor_data_f(const bmi08_sensor_data_f& s1, const bmi08_sens
 
 bool areEqualValves(const Valves& s1, const Valves& s2) {
     return (
-        s1.valve_dpr_pressure_copv == s2.valve_dpr_pressure_copv &&
+        s1.valve_dpr_vent_copv == s2.valve_dpr_vent_copv &&
         s1.valve_dpr_pressure_lox == s2.valve_dpr_pressure_lox &&
         s1.valve_dpr_pressure_fuel == s2.valve_dpr_pressure_fuel &&
         s1.valve_dpr_vent_lox == s2.valve_dpr_vent_lox &&
