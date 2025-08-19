@@ -186,6 +186,9 @@ void Data::write(GoatReg reg, void* data) {
         case PR_SENSOR_T_CCC:
             prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
             break;
+        case PR_BOARD_FSM_STATE:
+            prop_sensors.PR_state = *reinterpret_cast<uint32_t*>(data);
+            break;
         case VALVES:
             valves = *reinterpret_cast<Valves*>(data);
             break;
@@ -269,6 +272,9 @@ void Data::write(GoatReg reg, void* data) {
             break;
         case EVENT_CHUTE_UNREEFED:
             event.chute_unreefed = *reinterpret_cast<bool*>(data);
+            break;
+            case EVENT_IGNITION_FAILED:
+            event.ignition_failed = *reinterpret_cast<bool*>(data);
             break;
 
         case NAV_KALMAN_DATA:
