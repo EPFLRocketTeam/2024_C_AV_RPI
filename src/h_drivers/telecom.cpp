@@ -121,7 +121,7 @@ bool Telecom::begin() {
 void Telecom::send_telemetry() {
     const DataDump data = Data::get_instance().get();
 
-    av_downlink_unpacked packet;
+    av_downlink_unpacked_t packet;
     packet.packet_nbr = data.av_timestamp;
     packet.gnss_lon = data.nav.position.lng;
     packet.gnss_lat = data.nav.position.lat;
@@ -131,8 +131,6 @@ void Telecom::send_telemetry() {
     packet.N2_pressure = data.prop.N2_pressure;
     packet.fuel_pressure = data.prop.fuel_pressure;
     packet.LOX_pressure = data.prop.LOX_pressure;
-    packet.fuel_level = data.prop.fuel_level;
-    packet.LOX_level = data.prop.LOX_level;
     packet.N2_temp = data.prop.N2_temperature;
     packet.LOX_temp = data.prop.LOX_temperature;
     packet.LOX_inj_temp = data.prop.LOX_inj_temperature;
@@ -204,7 +202,7 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
             break;
 	case CAPSULE_ID::AV_TELEMETRY:
 	    av_downlink_t radio_packet;
-	    av_downlink_unpacked packet;
+	    av_downlink_unpacked_t packet;
 	    memcpy(&radio_packet, data_in, len);
 	    packet = decode_downlink(radio_packet);
 	    
