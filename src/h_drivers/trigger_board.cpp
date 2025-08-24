@@ -260,12 +260,12 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         // Send main pyro order to trigger the sep mech
         if (!pyro_main_fail) {
             if (trigger_ms < 400) {
-                uint32_t order(AV_NET_CMD_ON);
+                uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO1);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {
                 read_has_triggered();
-                uint32_t order(AV_NET_CMD_OFF);
+                uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO1);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;
@@ -279,12 +279,12 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         // If passed a delay of no trigger ACK, fire on the spare channels
         else if (!pyro_spare1_fail) {
             if (trigger_ms < 400) {
-                uint32_t order(AV_NET_CMD_ON << 8);
+                uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO2);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {
                 read_has_triggered();
-                uint32_t order(AV_NET_CMD_OFF << 8);
+                uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO2);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;
@@ -298,12 +298,12 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
         // Again, if passed a delay of no trigger ACK, fire on the next channel
         else {
             if (trigger_ms < 400) {
-                uint32_t order(AV_NET_CMD_ON << 16);
+                uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3);
                 write_pyros(order);
                 trigger_ms += delta_ms;
             }else {
                 read_has_triggered();
-                uint32_t order(AV_NET_CMD_OFF << 16);
+                uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3);
                 write_pyros(order);
 
                 trigger_ack_ms += delta_ms;

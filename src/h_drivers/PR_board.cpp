@@ -182,8 +182,8 @@ void PR_board::read_valves() {
     uint32_t rslt(0);
     read_register(AV_NET_PRB_VALVES_STATE, (uint8_t*)&rslt);
 
-    uint8_t main_lox((rslt & AV_NET_PRB_VALVE_MO_BC) >> 8);
-    uint8_t main_fuel(rslt & AV_NET_PRB_VALVE_ME_B);
+    uint8_t main_lox((rslt & AV_NET_PRB_VALVE_MO_BC) >> AV_NET_SHIFT_MO_BC);
+    uint8_t main_fuel((rslt & AV_NET_PRB_VALVE_ME_B) >> AV_NET_SHIFT_ME_B);
 
     Valves valves(Data::get_instance().get().valves);
 
@@ -303,6 +303,7 @@ void PR_board::handle_ready(const DataDump& dump) {
 }
 
 
+// TODO: Verify the logic with PR
 void PR_board::handle_thrust_sequence(const DataDump& dump) {
      static uint32_t trigger_ms(0);
     static uint32_t trigger_ack_ms(0);
@@ -360,9 +361,9 @@ void PR_board::handle_manual(const DataDump& dump) {
                     // Handle main LOX valve commands
                     uint32_t cmd(0);
                     if (value) {
-                        cmd = AV_NET_CMD_ON << 8;
+                        cmd = AV_NET_CMD_ON << AV_NET_SHIFT_MO_BC;
                     }else {
-                        cmd = AV_NET_CMD_OFF << 8;
+                        cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC;
                     }
                     write_valves(cmd); 
                 }
@@ -372,9 +373,9 @@ void PR_board::handle_manual(const DataDump& dump) {
                     // Handle main Fuel valve commands
                     uint32_t cmd(0);
                     if (value) {
-                        cmd = AV_NET_CMD_ON;
+                        cmd = AV_NET_CMD_ON << AV_NET_SHIFT_ME_B;
                     }else {
-                        cmd = AV_NET_CMD_OFF;
+                        cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B;
                     }
                     write_valves(cmd); 
                 }

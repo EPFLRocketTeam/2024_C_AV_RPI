@@ -164,9 +164,9 @@ void DPR::read_valves() {
 		std::string msg("DPR " + m_code + " read_valves error: ");
 		throw DPRException(msg + e.what());
 	}
-	uint8_t vent_copv((dpr_valves & 0xFF0000) >> 16);
-	uint8_t pressure_tank((dpr_valves & 0x00FF00) >> 8);
-	uint8_t vent_tank(dpr_valves & 0xFF);
+	uint8_t vent_copv((dpr_valves & AV_NET_DPR_VALVE_DN_NC) >> AV_NET_SHIFT_DN_NC);
+	uint8_t pressure_tank((dpr_valves & AV_NET_DPR_VALVE_PX_NC) >> AV_NET_SHIFT_PX_NC);
+	uint8_t vent_tank((dpr_valves & AV_NET_DPR_VALVE_VX_NO) >> AV_NET_SHIFT_VX_NO);
 
 	Valves valves(Data::get_instance().get().valves);
 
