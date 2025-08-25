@@ -78,7 +78,7 @@ State AvState::fromArmed(DataDump const &dump)
         return State::ERRORGROUND;
     }
     // If the propulsion is OK we go to the READY state
-    else if (dump.event.dpr_eth_pressure_ok)
+    else if (dump.event.dpr_eth_pressure_ok && dump.event.dpr_lox_pressure_ok)
     {
         Logger::log_eventf("FSM transition ARMED->READY");
         return State::READY;
