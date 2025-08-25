@@ -130,8 +130,9 @@ bool PR_board::read_is_woken_up() {
     return prb_woken_up;
 }
 
-void PR_board::clear_to_ignite(uint8_t value) {
-    write_register(AV_NET_PRB_CLEAR_TO_IGNITE, &value);
+void PR_board::clear_to_ignite(bool value) {
+    uint32_t cmd(value ? AV_NET_CMD_ON : AV_NET_CMD_OFF);
+    write_register(AV_NET_PRB_CLEAR_TO_IGNITE, (uint8_t*)&cmd);
 }
 
 
@@ -288,6 +289,10 @@ void PR_board::handle_calibration(const DataDump& dump) {
     }
 }
 
+void PR_board::handle_armed(const DataDump& dump) {
+    // TODO
+}
+
 void PR_board::handle_ready(const DataDump& dump) {
     // Write timestamp + clear to trigger at 10Hz
     none_init_baseHandler(LOW_PERIOD, delta_ms);
@@ -297,7 +302,6 @@ void PR_board::handle_ready(const DataDump& dump) {
     }
     clear_to_ignite(1);
 }
-
 
 // TODO: Verify the logic with PR
 void PR_board::handle_thrust_sequence(const DataDump& dump) {
