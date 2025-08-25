@@ -78,7 +78,7 @@ struct PropSensors {
     double    LOX_inj_temperature;
     double    chamber_temperature;
     //TODO: should be changed ounce intranet with PRB_STATE is resolved
-    uint32_t  PR_state;
+    uint32_t  PRB_state;
 
     PropSensors();
 };

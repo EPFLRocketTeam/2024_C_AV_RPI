@@ -1,45 +1,52 @@
 #include <iostream>
 #include <unistd.h>
-#include "dynconf.h"
+#include <pigpio.h>
 #include <vector>
+#include "dynconf.h"
 #include "module.h"
-#include "adxl375_module.h"
-#include "bmi088_module.h"
-#include "bmp390_module.h"
-#include "gps_module.h"
-#include "ina228_module.h"
-#include "tmp1075_module.h"
 #include "sensors.h"
 #include "logger.h"
 #include "av_state.h"
 #include "buzzer.h"
 #include "av_timer.h"
-
-#include "pigpio.h"
 #include "config.h"
-#include "i2c_interface.h"
-#include <algorithm>
+#include "trigger_board.h"
+#include "PR_board.h"
+#include "dpr.h"
+#include "telecom.h"
+#include "intranet_commands.h"
 
-int main(void){
+int main() {
     if (!Logger::init()) {
         std::cout << "Failed opening log files.\n";
         return 1;
     }
+
     ConfigManager::initConfig("./config.conf");
     AvTimer::sleep(100);
 
-    Sensors driver;
-    driver.init_sensors();
+    AvState fsm;
+    State fsm_state(fsm.getCurrentState());
+    Data::get_instance().write(Data::GoatReg::AV_STATE, &fsm_state);
+
+    Sensors sensors;
+    sensors.init_sensors();
     
     AvTimer::sleep(100);
 
-    State state = State::LIFTOFF;
-    Data::get_instance().write(Data::GoatReg::AV_STATE, &state);
+    // HDrivers
+    //TriggerBoard trigger_board;
+    PR_board prop_board;
+    DPR dpr_ethanol(AV_NET_ADDR_DPR_ETH);
+    DPR dpr_lox(AV_NET_ADDR_DPR_LOX);
 
-    AvState fsm;
+    AvTimer::sleep(100);
 
-    const uint32_t freq = 10;
+    // Telecom
+    Telecom telecom;
+    telecom.begin();
 
+    const uint32_t inv_freq = 1000 * (float)(1.0 / MAIN_LOOP_MAX_FREQUENCY);
     bool done_buzzer = false;
 
     uint32_t now_ms(AvTimer::tick());
@@ -55,11 +62,11 @@ int main(void){
         uint32_t start = AvTimer::tick();
         if (start >= 10000 && !done_buzzer) {
             done_buzzer = true;
-            std::map<std::string, bool> _mp = driver.sensors_status();
-            std::cout << "Making buzzer payload\n";
+            std::map<std::string, bool> _mp = sensors.sensors_status();
+            Logger::log_eventf("Making buzzer payload");
 
             for (auto u : _mp) {
-                std::cout << u.first << ": " << u.second << "\n";
+                Logger::log_eventf("%s: %b", u.first, u.second);
                 Buzzer::enable();
                 AvTimer::sleep(250);
                 Buzzer::disable();
@@ -95,10 +102,32 @@ int main(void){
         DataDump dump = Data::get_instance().get();        
         fsm.update(dump);
 
-        driver.check_policy(dump, delta_ms);
+        // Retrieve sensors data
+        sensors.check_policy(dump, delta_ms);
 
-        if (delta_ms < freq) {
-            AvTimer::sleep(freq - delta_ms);
+        // Execute PRB
+        try {
+            prop_board.check_policy(dump, delta_ms);
+        }catch(PRBoardException& e) {
+            Logger::log_eventf(Logger::ERROR, "%s", e.what());
+        }
+        // Execute DPRs
+        try {
+            dpr_ethanol.check_policy(dump, delta_ms);
+            dpr_lox.check_policy(dump, delta_ms);
+        }catch(DPRException& e) {
+            Logger::log_eventf(Logger::ERROR, "%s", e.what());
+        }
+        // Execute telemetry
+        try {
+            telecom.check_policy(dump, delta_ms);
+        }catch(TelecomException& e) {
+            Logger::log_eventf(Logger::ERROR, "%s", e.what());
+        }
+
+        // If loop finished early, compensate
+        if (delta_ms < inv_freq) {
+            AvTimer::sleep(inv_freq - delta_ms);
         }
     }
 

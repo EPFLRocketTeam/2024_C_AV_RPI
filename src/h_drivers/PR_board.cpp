@@ -1,15 +1,13 @@
+#include <iostream>
+#include <string>
 #include "PR_board.h"
 #include "data.h"
 #include "av_state.h"
-#include <iostream>
-#include <pigpio.h>
-#include <string>
 #include "i2c_interface.h"
 #include "logger.h"
 #include "intranet_commands.h"
+#include "config.h"
 
-#define TIMEOUT_MS 1000
-#define TIME_ATTEMPT_MS 100
 #define HIGH_PERIOD 1000
 #define LOW_PERIOD 100
 
@@ -20,7 +18,7 @@ PR_board::PR_board() {
       try {
         I2CInterface::getInstance().open(AV_NET_ADDR_PRB);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf("Error during PRB I2C initilazation: %s", e.what());
+        Logger::log_eventf(Logger::FATAL, "Error during PRB I2C initilazation: %s", e.what());
     }    
 }
 
@@ -28,7 +26,7 @@ PR_board::~PR_board() {
     try {
         I2CInterface::getInstance().close(AV_NET_ADDR_PRB);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf("Error during PRB I2C deinitialization: %s", e.what());
+        Logger::log_eventf(Logger::ERROR, "Error during PRB I2C deinitialization: %s", e.what());
     }
 }
 
@@ -292,24 +290,22 @@ void PR_board::handle_calibration(const DataDump& dump) {
 
 void PR_board::handle_ready(const DataDump& dump) {
     // Write timestamp + clear to trigger at 10Hz
-    
     none_init_baseHandler(LOW_PERIOD, delta_ms);
     if(dump.event.ignition_failed) {
         bool trigger_failed = false;
         Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &trigger_failed);
     }
     clear_to_ignite(1);
-
 }
 
 
 // TODO: Verify the logic with PR
 void PR_board::handle_thrust_sequence(const DataDump& dump) {
-     static uint32_t trigger_ms(0);
+    static uint32_t trigger_ms(0);
     static uint32_t trigger_ack_ms(0);
     
     if(!dump.event.ignited){
-        if (trigger_ms < TIME_ATTEMPT_MS){
+        if (trigger_ms < IGNITION_SEND_TIMEOUT_MS){
             uint32_t trigger(AV_NET_CMD_ON);
             write_igniter(trigger);
             trigger_ms += delta_ms;
@@ -320,7 +316,7 @@ void PR_board::handle_thrust_sequence(const DataDump& dump) {
             read_trigger_ack();
             trigger_ack_ms += delta_ms;
             //TODO: check ack wait time in Defines (for reviewer)
-            if (trigger_ack_ms >= TIMEOUT_MS) {
+            if (trigger_ack_ms >= IGNITION_ACK_TIMEOUT_MS) {
                 // Handle trigger acknowledgment timeout
                 Logger::log_event(Logger::ERROR, "Ignition acknowledgment timeout");
                 clear_to_ignite(0);
