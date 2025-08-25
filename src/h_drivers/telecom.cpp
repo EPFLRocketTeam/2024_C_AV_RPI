@@ -148,12 +148,12 @@ void Telecom::send_telemetry() {
                         | valves.valve_prb_main_fuel * ENGINE_STATE_MAIN_FUEL;
 
     packet.lpb_voltage = data.bat.lpb_voltage;
-    packet.lpb_current = 0;
+    packet.lpb_current = data.bat.lpb_current;
     packet.hpb_voltage = data.bat.hpb_voltage;
-    packet.hpb_current = 0;
+    packet.hpb_current = data.bat.hpb_current;
 
     packet.av_fc_temp = data.av_fc_temp;
-    packet.ambient_temp = 0;
+    packet.ambient_temp = data.nav.baro.temperature;
 
     packet.av_state = (uint8_t)data.av_state;
 

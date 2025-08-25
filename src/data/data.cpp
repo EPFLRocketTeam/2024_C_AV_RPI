@@ -228,8 +228,14 @@ void Data::write(GoatReg reg, void* data) {
         case BAT_LPB_VOLTAGE:
             bat.lpb_voltage = *reinterpret_cast<float*>(data);
             break;
+        case BAT_LPB_CURRENT:
+            bat.lpb_current = *reinterpret_cast<float*>(data);
+            break;
         case BAT_HPB_VOLTAGE:
             bat.hpb_voltage = *reinterpret_cast<float*>(data);
+            break;
+        case BAT_HPB_CURRENT:
+            bat.hpb_current = *reinterpret_cast<float*>(data);
             break;
         case CAM_RECORDING_SEP:
             cams_recording.cam_sep = *reinterpret_cast<bool*>(data);
