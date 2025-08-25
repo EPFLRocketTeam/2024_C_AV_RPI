@@ -25,7 +25,7 @@ public:
     void send_wake_up();
     void send_sleep();
     bool read_is_woken_up();
-    void clear_to_ignite(uint8_t value);
+    void clear_to_ignite(bool value);
     void read_igniter_oxygen();
     void read_igniter_fuel();
     void read_combution_chamber();
@@ -50,8 +50,10 @@ private:
     void handle_thrust_sequence(const DataDump& dump);
     void handle_armed(const DataDump& dump);
     void handle_calibration(const DataDump& dump);
+
     void read_register(const uint8_t reg_addr, uint8_t* data);
     void write_register(const uint8_t reg_addr, const uint8_t* data);
+
     inline void count_time(uint32_t period,uint32_t delta_ms);
     inline void none_init_baseHandler(uint32_t period,uint32_t delta_ms);
 };

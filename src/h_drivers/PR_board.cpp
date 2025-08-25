@@ -132,8 +132,9 @@ bool PR_board::read_is_woken_up() {
     return prb_woken_up;
 }
 
-void PR_board::clear_to_ignite(uint8_t value) {
-    write_register(AV_NET_PRB_CLEAR_TO_IGNITE, &value);
+void PR_board::clear_to_ignite(bool value) {
+    uint32_t cmd(value ? AV_NET_CMD_ON : AV_NET_CMD_OFF);
+    write_register(AV_NET_PRB_CLEAR_TO_IGNITE, (uint8_t*)&cmd);
 }
 
 
@@ -290,6 +291,10 @@ void PR_board::handle_calibration(const DataDump& dump) {
     }
 }
 
+void PR_board::handle_armed(const DataDump& dump) {
+    // TODO
+}
+
 void PR_board::handle_ready(const DataDump& dump) {
     // Write timestamp + clear to trigger at 10Hz
     
@@ -299,17 +304,15 @@ void PR_board::handle_ready(const DataDump& dump) {
         Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &trigger_failed);
     }
     clear_to_ignite(1);
-
 }
-
 
 // TODO: Verify the logic with PR
 void PR_board::handle_thrust_sequence(const DataDump& dump) {
      static uint32_t trigger_ms(0);
     static uint32_t trigger_ack_ms(0);
     
-    if(!dump.event.ignited){
-        if (trigger_ms < TIME_ATTEMPT_MS){
+    if(!dump.event.ignited) {
+        if (trigger_ms < TIME_ATTEMPT_MS) {
             uint32_t trigger(AV_NET_CMD_ON);
             write_igniter(trigger);
             trigger_ms += delta_ms;
