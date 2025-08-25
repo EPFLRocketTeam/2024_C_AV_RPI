@@ -78,7 +78,7 @@ struct PropSensors {
     double    LOX_inj_temperature;
     double    chamber_temperature;
     //TODO: should be changed ounce intranet with PRB_STATE is resolved
-    uint32_t  PR_state;
+    uint32_t  PRB_state;
 
     PropSensors();
 };
@@ -123,7 +123,7 @@ struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
     //referentiel earth
-    Vector3 position_kalman;
+    Vector3   position_kalman;
     Vector3   speed;
     //ref of accel TBD !!!!
     Vector3   accel;
@@ -137,7 +137,9 @@ struct NavigationData {
 
 struct Batteries {
     float lpb_voltage;
+    float lpb_current;
     float hpb_voltage;
+    float hpb_current;
 };
 
 struct CamsRecording {
@@ -268,7 +270,9 @@ public:
 
         /* Batteries status */
         BAT_LPB_VOLTAGE,
+        BAT_LPB_CURRENT,
         BAT_HPB_VOLTAGE,
+        BAT_HPB_CURRENT,
 
         /* Cameras recording status */
         CAM_RECORDING_SEP,

@@ -187,7 +187,7 @@ void Data::write(GoatReg reg, void* data) {
             prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
             break;
         case PR_BOARD_FSM_STATE:
-            prop_sensors.PR_state = *reinterpret_cast<uint32_t*>(data);
+            prop_sensors.PRB_state = *reinterpret_cast<uint8_t*>(data);
             break;
         case VALVES:
             valves = *reinterpret_cast<Valves*>(data);
@@ -228,8 +228,14 @@ void Data::write(GoatReg reg, void* data) {
         case BAT_LPB_VOLTAGE:
             bat.lpb_voltage = *reinterpret_cast<float*>(data);
             break;
+        case BAT_LPB_CURRENT:
+            bat.lpb_current = *reinterpret_cast<float*>(data);
+            break;
         case BAT_HPB_VOLTAGE:
             bat.hpb_voltage = *reinterpret_cast<float*>(data);
+            break;
+        case BAT_HPB_CURRENT:
+            bat.hpb_current = *reinterpret_cast<float*>(data);
             break;
         case CAM_RECORDING_SEP:
             cams_recording.cam_sep = *reinterpret_cast<bool*>(data);

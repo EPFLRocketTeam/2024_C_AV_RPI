@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+/* PINOUTS / CONFIGS */
 #define LORA_UPLINK_CS      8
 #define LORA_UPLINK_RST     24
 #define LORA_UPLINK_DI0     5
@@ -21,6 +22,12 @@
 #define LED_LORA_RX 17
 #define LED_LORA_TX 18
 
+/* TIMINGS */
+#define MAIN_LOOP_MAX_FREQUENCY  100
+#define IGNITION_SEND_TIMEOUT_MS 5000
+#define IGNITION_ACK_TIMEOUT_MS  500
+
+/* LOGGING */
 #define LOG_DUMP_DEFAULT_PATH   "/boot/av_log/dump_log.log"
 #define LOG_EVENT_DEFAULT_PATH  "/boot/av_log/event_log.log"
 #define DATADUMP_FSYNC_FREQ     50
