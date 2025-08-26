@@ -187,11 +187,7 @@ void PR_board::handle_error_ground(const DataDump& dump) {
 }
 void PR_board::handle_calibration(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
-    count_ms += delta_ms;
-    if (count_ms >= 1000) {
-        write_timestamp();
-        count_ms = 0;
-    }
+    periodic_timestamp(1000);
 
     // PRB will be in idle mode (ready)
     if (!dump.event.prb_ready) {

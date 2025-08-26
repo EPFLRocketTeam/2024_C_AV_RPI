@@ -11,7 +11,7 @@ public:
     DPR(const uint8_t address);
     virtual ~DPR();
 
-    void write_timestamp(const uint32_t tmsp);
+    void write_timestamp();
     void wake_up();
     bool read_is_woken_up();
     void send_pressurize();
@@ -43,6 +43,8 @@ private:
     void handle_landed(const DataDump& dump);
     void handle_errorground(const DataDump& dump);
     void handle_errorflight(const DataDump& dump);
+
+    inline void periodic_timestamp(const uint32_t period);
 };
 
 class DPRException : public std::exception {
