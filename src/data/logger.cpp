@@ -86,7 +86,9 @@ void Logger::log_event(const Severity lvl, const std::string event) {
     write(event_fd, buffer_ln, sizeof(uint32_t));
     write(event_fd, event_msg.c_str(), str_length * sizeof(char));
 
+#if (CONSOLE_LOG)
     std::cout << timestamp << event_msg << "\n";
+#endif
     fsync(event_fd);
 }
 

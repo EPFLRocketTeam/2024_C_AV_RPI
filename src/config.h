@@ -32,4 +32,7 @@
 #define LOG_EVENT_DEFAULT_PATH  "/boot/av_log/event_log.log"
 #define DATADUMP_FSYNC_FREQ     50
 
+#define CONSOLE_LOG 1
+#define DEBUG_LOG   1
+
 #endif /* CONFIG_H */
