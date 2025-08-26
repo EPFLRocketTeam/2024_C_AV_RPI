@@ -42,8 +42,8 @@ int main() {
 
 	float rslt(0);
     prb.read_combustion_chamber();
-    prb.read_igniter_oxygen();
-    prb.read_igniter_fuel();
+    prb.read_injector_oxygen();
+    prb.read_injector_fuel();
 
 	uint32_t valves_write(AV_NET_CMD_OFF << 0 | AV_NET_CMD_OFF << 8);
     prb.write_valves(valves_write);
