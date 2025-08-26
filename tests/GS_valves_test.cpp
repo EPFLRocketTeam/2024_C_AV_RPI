@@ -8,6 +8,7 @@
 #include "logger.h"
 
 int main() {
+    Logger::init();
 	State av_state(State::MANUAL);
 	Data::get_instance().write(Data::AV_STATE, &av_state);
 
@@ -31,15 +32,15 @@ int main() {
 		radio.check_policy(data, delta_ms);
 		//dpr_lox.check_policy(Data::get_instance().get(), delta_ms);
 		//
-		Logger::log_eventf("cmd_updated: %i\n", data.event.command_updated);
-		Logger::log_eventf("cmd_id: %i\n", data.telemetry_cmd.id);
+		Logger::log_eventf("cmd_updated: %i", data.event.command_updated);
+		Logger::log_eventf("cmd_id: %i", data.telemetry_cmd.id);
 
 		
 		if (data.event.command_updated) {
 			uint32_t cmd(0);
 			switch (data.telemetry_cmd.id) {
 				case CMD_ID::AV_CMD_MAIN_LOX:
-					Logger::log_eventf("Command AV_CMD_MAIN_LOX\n");
+					Logger::log_eventf("Command AV_CMD_MAIN_LOX");
 					if (data.telemetry_cmd.value) {
 						cmd = AV_NET_CMD_ON << 8;
 					}else {
@@ -81,7 +82,7 @@ int main() {
 			valves.valve_prb_main_fuel = 0;
 		}
 
-		Logger::log_eventf("Reading PRB valves: %x\n", prb_valves);
+		Logger::log_eventf("Reading PRB valves: %x", prb_valves);
 		Data::get_instance().write(Data::VALVES, &valves);
 
 		AvTimer::sleep(100);
