@@ -160,7 +160,7 @@ void PR_board::read_igniter_fuel() {
     Data::get_instance().write(Data::PR_SENSOR_T_EIN, &temperature);
 }
 
-void PR_board::read_combution_chamber() {
+void PR_board::read_combustion_chamber() {
     float pressure(0);
     float temperature(0);
 

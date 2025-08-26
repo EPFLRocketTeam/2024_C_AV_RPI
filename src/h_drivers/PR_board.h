@@ -28,7 +28,7 @@ public:
     void clear_to_ignite(bool value);
     void read_igniter_oxygen();
     void read_igniter_fuel();
-    void read_combution_chamber();
+    void read_combustion_chamber();
     void write_igniter(uint32_t cmd);
     void write_valves(const uint32_t cmd);
     void read_valves();
