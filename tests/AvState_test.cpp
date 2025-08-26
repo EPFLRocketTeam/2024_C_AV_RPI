@@ -2,6 +2,7 @@
 #include "av_state.h"
 #include <cassert>
 #include <string.h>
+#include "logger.h"
 
 #define assert_s(expectedState,fsm)                                                           \
     do {                                                                                   \
@@ -10,9 +11,10 @@
                       << ", but got state: " << fsm.stateToString(fsm.getCurrentState()) << std::endl;\
             assert(fsm.getCurrentState() == expectedState);                                      \
         }                                          \
+        /*
         else {                                                                                \
             std::cout << "Current state is " << fsm.stateToString(fsm.getCurrentState()) << std::endl; \
-        }                                        \
+        } */                                       \
     } while (0) 
 
 // ================== Transition functions ==================
@@ -39,6 +41,13 @@ void errorGroundToInit(AvState &fsm, DataDump &dump) {
     fsm.update(dump);
     assert_s(State::INIT, fsm);
     //sameState(fsm, dump);
+}
+
+// Function to trigger ERRORGROUND -> ARMED upon receiving ARM command from GS
+void errorGroundToArmed(AvState& fsm, DataDump& dump) {
+    dump.telemetry_cmd.id = CMD_ID::AV_CMD_ARM;
+    fsm.update(dump);
+    assert_s(State::ARMED, fsm);
 }
 
 // Function to trigger the CALIBRATION -> MANUAL transition
@@ -93,11 +102,18 @@ void armedToErrorGround(AvState &fsm, DataDump &dump) {
 // Function to trigger the ARMED -> READY transition
 void armedToReady(AvState &fsm, DataDump &dump) {
     dump.event.dpr_eth_pressure_ok = true;
+    dump.event.dpr_lox_pressure_ok = true;
     dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED;
     dump.prop.LOX_pressure = LOX_PRESSURE_WANTED;
     fsm.update(dump);
     assert_s(State::READY, fsm);
     //sameState(fsm, dump);
+}
+
+void armedToReadyBypassed(AvState& fsm, DataDump dump) {
+    dump.telemetry_cmd.id = CMD_ID::AV_CMD_BYPASS_DPR_CHECK;
+    fsm.update(dump);
+    assert_s(State::READY, fsm);
 }
 
 // Function to trigger the READY -> THRUSTSEQUENCE transition
@@ -220,6 +236,30 @@ void flightWithoutError() {
     calibrationToManual(fsm, dump);
     manualToArmed(fsm, dump);
     armedToReady(fsm, dump);
+    readyToThrustSequence(fsm, dump);
+    thrustSequenceToLiftoff(fsm, dump);
+    liftoffToAscent(fsm, dump);
+    ascentToDescent(fsm, dump);
+    descentToLanded(fsm, dump);
+    
+    return;
+}
+
+// Function to test if the bypass_dpr command triggers the transition from ARMED to READY
+void flightWithDPRBypass() {
+    // Instantiate AvState
+    AvState fsm;
+
+    // Initialize a DataDump object to simulate different inputs
+    DataDump dump;
+    memset(&dump, 0, sizeof(dump));
+    dump.av_state = State::INIT;
+
+    assert_s(State::INIT, fsm);
+    initToCalibration(fsm, dump);
+    calibrationToManual(fsm, dump);
+    manualToArmed(fsm, dump);
+    armedToReadyBypassed(fsm, dump);
     readyToThrustSequence(fsm, dump);
     thrustSequenceToLiftoff(fsm, dump);
     liftoffToAscent(fsm, dump);
@@ -393,6 +433,26 @@ memset(&dump, 0, sizeof(dump));
     return;
 }
 
+// Function to test re-arming from ERRORGROUND
+void armFromErrorGround() {
+    // Instantiate AvState
+    AvState fsm;
+
+    // Initialize a DataDump object to simulate different inputs
+    DataDump dump;
+    memset(&dump, 0, sizeof(dump));
+    dump.av_state = State::INIT;
+
+    assert_s(State::INIT, fsm);
+    initToCalibration(fsm, dump);
+    calibrationToManual(fsm, dump);
+    manualToArmed(fsm, dump);
+    armedToErrorGround(fsm, dump);
+    errorGroundToArmed(fsm, dump);
+    
+    return;
+}
+
 // Function to test whether recovering from calibration works
 void recoverFromCalibration() {
     // Instantiate AvState
@@ -440,14 +500,18 @@ void recoverFromErrorGroundAndFly() {
 }
 
 
-
-
 // Add more test cases as needed
 
 int main(int argc, char** argv) {
+    Logger::init();
+
     // We test that all transitions are working as expected in the case of a flight without errors
     flightWithoutError();
     std::cout << "Flight without error: OK\n"<<std::endl;
+
+    // We test that we can bypass the automatic transition from ARMED to READY
+    flightWithDPRBypass();
+    std::cout << "Flight with DPR check bypass: OK\n\n";
 
     // We test that the ERRORGROUND state can be triggered from the ARMED state
     errorOnGroundFromArmed();
@@ -481,6 +545,10 @@ int main(int argc, char** argv) {
     recoverFromErrorGround();
     std::cout << "Recover from error on ground: OK\n"<<std::endl;
 
+    // We test that we can re-arm the rocket from error on ground
+    armFromErrorGround();
+    std::cout << "Arm from error on ground: OK\n\n";
+
     // We test that we can recover from calibration
     recoverFromCalibration();
     std::cout << "Recover from calibration: OK\n"<<std::endl;
@@ -489,6 +557,7 @@ int main(int argc, char** argv) {
     recoverFromErrorGroundAndFly();
     std::cout << "Recover from error on ground and fly: OK\n"<<std::endl;
     
+    Logger::terminate();
     return 0;
 
 } 

@@ -1,4 +1,5 @@
 #include <Protocol.h>
+#include "PacketDefinition_Firehorn.h"
 #include "av_state.h"
 #include "data.h"
 #include "logger.h"
@@ -70,19 +71,26 @@ State AvState::fromManual(DataDump const &dump)
 
 State AvState::fromArmed(DataDump const &dump)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.event.catastrophic_failure)
+    // Switch to fault state ERROR_GROUND when receiving ABORT from ground operators
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        // print error
-        std::cerr << "Catastrophic failure detected" << dump.event.catastrophic_failure << " " << (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT ? "true" : "false") << std::endl;
-        Logger::log_eventf("FSM transition ARMED->ERROR_GROUND");
+        Logger::log_eventf(Logger::WARN, "ABORT command received. FSM transition ARMED->ERROR_GROUND");
         return State::ERRORGROUND;
     }
-    // If the propulsion is OK we go to the READY state
+
+    // Automatic check of the tank pressurization
     else if (dump.event.dpr_eth_pressure_ok && dump.event.dpr_lox_pressure_ok)
     {
         Logger::log_eventf("FSM transition ARMED->READY");
         return State::READY;
     }
+
+    // Transition to READY can be bypassed by ground operators
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_BYPASS_DPR_CHECK) {
+        Logger::log_eventf(Logger::WARN, "Bypassing automatic pressurization check. FSM transition ARMED->READY");
+        return State::READY;
+    }
+
     return currentState;
 }
 
@@ -176,6 +184,13 @@ State AvState::fromErrorGround(DataDump const &dump)
         Logger::log_eventf("FSM transition ERROR_GROUND->INIT");
         return State::INIT;
     }
+
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
+    {
+        Logger::log_eventf(Logger::WARN, "Recovering from ERROR_GROUND. FSM transition ERROR_GROUND->ARMED");
+        return State::ARMED;
+    }
+
     return  currentState;
 }
 
