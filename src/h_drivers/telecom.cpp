@@ -121,7 +121,7 @@ bool Telecom::begin() {
 void Telecom::send_telemetry() {
     const DataDump data = Data::get_instance().get();
 
-    av_downlink_unpacked packet;
+    av_downlink_unpacked_t packet;
     packet.packet_nbr = data.av_timestamp;
     packet.gnss_lon = data.nav.position.lng;
     packet.gnss_lat = data.nav.position.lat;
@@ -129,20 +129,31 @@ void Telecom::send_telemetry() {
     packet.gnss_vertical_speed = 0;
     
     packet.N2_pressure = data.prop.N2_pressure;
+    packet.N2_temp = data.prop.N2_temperature;
     packet.fuel_pressure = data.prop.fuel_pressure;
     packet.LOX_pressure = data.prop.LOX_pressure;
-    packet.fuel_level = data.prop.fuel_level;
-    packet.LOX_level = data.prop.LOX_level;
-    packet.N2_temp = data.prop.N2_temperature;
     packet.LOX_temp = data.prop.LOX_temperature;
+    packet.LOX_inj_pressure = data.prop.LOX_inj_pressure;
     packet.LOX_inj_temp = data.prop.LOX_inj_temperature;
+    packet.fuel_inj_pressure = data.prop.fuel_inj_pressure;
+    packet.chamber_pressure = data.prop.chamber_pressure;
+
+    const Valves valves(data.valves);
+    packet.engine_state = valves.valve_dpr_vent_copv * ENGINE_STATE_VENT_N2 
+                        | valves.valve_dpr_vent_lox * ENGINE_STATE_VENT_LOX 
+                        | valves.valve_dpr_vent_fuel * ENGINE_STATE_VENT_FUEL 
+                        | valves.valve_dpr_pressure_lox * ENGINE_STATE_P_LOX
+                        | valves.valve_dpr_pressure_fuel * ENGINE_STATE_P_FUEL
+                        | valves.valve_prb_main_lox * ENGINE_STATE_MAIN_LOX
+                        | valves.valve_prb_main_fuel * ENGINE_STATE_MAIN_FUEL;
 
     packet.lpb_voltage = data.bat.lpb_voltage;
+    packet.lpb_current = 0;
     packet.hpb_voltage = data.bat.hpb_voltage;
+    packet.hpb_current = 0;
 
     packet.av_fc_temp = data.av_fc_temp;
     packet.ambient_temp = 0;
-    packet.engine_state = data.valves.valve_prb_main_lox << 1 | data.valves.valve_prb_main_fuel;
 
     packet.av_state = (uint8_t)data.av_state;
 
@@ -204,7 +215,7 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
             break;
 	case CAPSULE_ID::AV_TELEMETRY:
 	    av_downlink_t radio_packet;
-	    av_downlink_unpacked packet;
+	    av_downlink_unpacked_t packet;
 	    memcpy(&radio_packet, data_in, len);
 	    packet = decode_downlink(radio_packet);
 	    

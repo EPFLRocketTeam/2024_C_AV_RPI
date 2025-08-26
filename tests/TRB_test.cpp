@@ -57,46 +57,46 @@ void intensive_read_write_test(TriggerBoard& trb) {
     const unsigned iter(128);
     std::cout << "Writing " << iter << " random timestamps to TRB_TIMESTAMP_MAIN...";
     for (int i(0); i < iter; ++i) {
-	uint32_t tmsp(rand());
-	Data::get_instance().write(Data::AV_TIMESTAMP, &tmsp);
-	trb.write_timestamp();
-	usleep(10e3);
+        uint32_t tmsp(rand());
+        Data::get_instance().write(Data::AV_TIMESTAMP, &tmsp);
+        trb.write_timestamp();
+        usleep(10e3);
     }
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << "Writing " << iter << " times to TRB_CLEAR_TO_TRIGGER...";
     for (int i(0); i < iter; ++i) {
-	trb.write_clear_to_trigger(i % 2);
-    	usleep(10e3);
+        trb.write_clear_to_trigger(i % 2);
+        usleep(10e3);
     }
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << "Reading " << iter << " times from TRB_IS_WOKEN_UP...";
     for (int i(0); i < iter; ++i) {
-	trb.read_is_woken_up();
-	usleep(10e3);
+        trb.read_is_woken_up();
+        usleep(10e3);
     }
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << "Reading " << iter << " times from TRB_HAS_TRIGGERED...";
     for (int i(0); i < iter; ++i) {
-	trb.read_has_triggered();
-	usleep(10e3);
+        trb.read_has_triggered();
+        usleep(10e3);
     }
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << "Writing to and reading back from TRB_PYROS...\n";
     std::cout << "Sent\t\tReceived\n";
     for (int i(32768); i < 32897; ++i) {
-	const uint32_t val(1980149656);
-	std::cout << val << "\t";
-	trb.write_pyros(val);
-	usleep(10e3);
-	std::cout << trb.read_pyros() << "\n";
-	//assert(trb.read_pyros() == val);
-	//usleep(10e3);
-	//assert(trb.read_has_triggered() == false);
-	//usleep(10e3);
+        const uint32_t val(1980149656);
+        std::cout << val << "\t";
+        trb.write_pyros(val);
+        usleep(10e3);
+        std::cout << trb.read_pyros() << "\n";
+        //assert(trb.read_pyros() == val);
+        //usleep(10e3);
+        //assert(trb.read_has_triggered() == false);
+        //usleep(10e3);
     }
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -138,7 +138,7 @@ void sequential_read_write_test(TriggerBoard& trb) {
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
     std::cout << " - Sending PYRO_2_3 CMD_ON... ";
-    uint32_t cmd(AV_NET_CMD_ON << 8 | AV_NET_CMD_ON << 16);
+    uint32_t cmd(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3);
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -146,7 +146,7 @@ void sequential_read_write_test(TriggerBoard& trb) {
     usleep(300e3);
 
     std::cout << " - Sending PYRO_2_3 CMD_OFF... ";
-    cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 16;
+    cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -165,7 +165,7 @@ void sequential_read_write_test(TriggerBoard& trb) {
     usleep(5e6);
 
     std::cout << " - Sending PYRO_2_3 CMD_ON... ";
-    cmd = AV_NET_CMD_ON << 8 | AV_NET_CMD_ON << 16;
+    cmd = AV_NET_CMD_ON << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -173,7 +173,7 @@ void sequential_read_write_test(TriggerBoard& trb) {
     usleep(300e3);
 
     std::cout << " - Sending PYRO_2_3 CMD_OFF... ";
-    cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 16;
+    cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -206,7 +206,7 @@ void sequential_write_test(TriggerBoard& trb) {
     usleep(5e6);
 
     std::cout << " - Sending PYRO_2_3 CMD_ON... ";
-    uint32_t cmd(AV_NET_CMD_ON << 8 | AV_NET_CMD_ON << 16);
+    uint32_t cmd(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3);
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -214,7 +214,7 @@ void sequential_write_test(TriggerBoard& trb) {
     usleep(300e3);
 
     std::cout << " - Sending PYRO_2_3 CMD_OFF... ";
-    cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 16;
+    cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -229,7 +229,7 @@ void sequential_write_test(TriggerBoard& trb) {
     usleep(5e6);
 
     std::cout << " - Sending PYRO_2_3 CMD_ON... ";
-    cmd = AV_NET_CMD_ON << 8 | AV_NET_CMD_ON << 16;
+    cmd = AV_NET_CMD_ON << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
@@ -237,7 +237,7 @@ void sequential_write_test(TriggerBoard& trb) {
     usleep(300e3);
 
     std::cout << " - Sending PYRO_2_3 CMD_OFF... ";
-    cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 16;
+    cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3;
     trb.write_pyros(cmd);
     std::cout << "\x1b[32mOK\x1b[0m\n";
 
