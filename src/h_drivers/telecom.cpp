@@ -60,10 +60,10 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 bool Telecom::begin() {
     lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
     if (!lora_uplink.begin(UPLINK_FREQUENCY, SPI0)) {
-        throw TelecomException("LoRa uplink init failed\n");
+        throw TelecomException("LoRa uplink init failed. Aborting LoRa downlink init.");
         return false;
     }else {
-        Logger::log_eventf("LoRa uplink init succeeded!\n");
+        Logger::log_eventf("LoRa uplink init succeeded!");
     }
 
     lora_uplink.setTxPower(UPLINK_POWER);
@@ -91,10 +91,10 @@ bool Telecom::begin() {
 
     lora_downlink.setPins(LORA_DOWNLINK_CS, LORA_DOWNLINK_RST, LORA_DOWNLINK_DI0);
     if (!lora_downlink.begin(AV_DOWNLINK_FREQUENCY, SPI1)) {
-        throw TelecomException("LoRa downlink init failed\n");
+        throw TelecomException("LoRa downlink init failed");
         return false;
     }else {
-        Logger::log_eventf("LoRa downlink init succeeded!\n");
+        Logger::log_eventf("LoRa downlink init succeeded!");
     }
 
     lora_downlink.setTxPower(AV_DOWNLINK_POWER);

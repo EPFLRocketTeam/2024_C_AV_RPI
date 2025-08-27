@@ -315,7 +315,7 @@ void PR_board::read_register(const uint8_t reg_addr, uint8_t* data) {
         I2CInterface::getInstance().read(AV_NET_ADDR_PRB, reg_addr, data, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("PRB communication error: failed reading from register ");
-        throw PRBoardException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
+        throw PRBoardException(msg + std::to_string(reg_addr) + "\t(" + e.what() + ")");
     }
 }
 
@@ -324,7 +324,7 @@ void PR_board::write_register(const uint8_t reg_addr, const uint8_t* data) {
         I2CInterface::getInstance().write(AV_NET_ADDR_PRB, reg_addr, data, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("PRB communication error: failed writing to register ");
-        throw PRBoardException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
+        throw PRBoardException(msg + std::to_string(reg_addr) + "\t(" + e.what() + ")");
     }
 }
 

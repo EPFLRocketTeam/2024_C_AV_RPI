@@ -44,11 +44,32 @@ int main() {
 
     // Telecom
     Telecom telecom;
-    telecom.begin();
+    try {
+        telecom.begin();
+    }catch(TelecomException& e) {
+        Logger::log_eventf(Logger::ERROR, "%s", e.what());
+    }
+
+    std::map<std::string, bool> _mp = sensors.sensors_status();
+    Logger::log_eventf("Verifying sensors status...");
+    for (auto u : _mp) {
+        Logger::log_eventf("%s: %b", u.first, u.second);
+        Buzzer::enable();
+        AvTimer::sleep(250);
+        Buzzer::disable();
+        AvTimer::sleep(750);
+
+        if (u.second) {
+            for (int i(0); i < 5; ++i) {
+                Buzzer::toggle();
+                AvTimer::sleep(100);
+                Buzzer::toggle();
+                AvTimer::sleep(100);
+            }
+        }
+    }
 
     const uint32_t inv_freq = 1000 * (float)(1.0 / MAIN_LOOP_MAX_FREQUENCY);
-    bool done_buzzer = false;
-
     uint32_t now_ms(AvTimer::tick());
     uint32_t old_ms(0);
     uint32_t delta_ms(0);
@@ -57,50 +78,11 @@ int main() {
         now_ms = AvTimer::tick();
         delta_ms = now_ms - old_ms;
 
+        // Write timestamp and retreive GOAT object 
         Data::get_instance().write(Data::AV_TIMESTAMP, &now_ms);
-
-        uint32_t start = AvTimer::tick();
-        if (start >= 10000 && !done_buzzer) {
-            done_buzzer = true;
-            std::map<std::string, bool> _mp = sensors.sensors_status();
-            Logger::log_eventf("Making buzzer payload");
-
-            for (auto u : _mp) {
-                Logger::log_eventf("%s: %b", u.first, u.second);
-                Buzzer::enable();
-                AvTimer::sleep(250);
-                Buzzer::disable();
-                AvTimer::sleep(750);
-
-                if (u.second) {
-                    for (int i(0); i < 5; ++i) {
-                        Buzzer::toggle();
-                        AvTimer::sleep(100);
-                        Buzzer::toggle();
-                        AvTimer::sleep(100);
-                    }
-                }
-            }
-        //    std::reverse(payload.begin(), payload.end());
-        }
-
-        /*
-        if (start >= end_target) {
-            if (payload.size() == 0) {
-                gpioWrite(BUZZER, 0);
-            } else {
-                BuzzerTarget ntar = payload.back();
-
-                end_target = start + ntar.duration;
-                ntar.enable();
-
-                payload.pop_back();
-            }
-        }
-        */
-
         DataDump dump = Data::get_instance().get();        
         fsm.update(dump);
+
 
         // Retrieve sensors data
         sensors.check_policy(dump, delta_ms);
@@ -131,5 +113,6 @@ int main() {
         }
     }
 
+    Logger::terminate();
     return 0;
 }
