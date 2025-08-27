@@ -53,19 +53,22 @@ int main() {
     std::map<std::string, bool> _mp = sensors.sensors_status();
     Logger::log_eventf("Verifying sensors status...");
     for (auto u : _mp) {
-        Logger::log_eventf("%s: %b", u.first, u.second);
+        Logger::log_eventf("%s: %b", u.first.c_str(), u.second);
+        /*
         Buzzer::enable();
         AvTimer::sleep(250);
         Buzzer::disable();
         AvTimer::sleep(750);
-
+        */
         if (u.second) {
             for (int i(0); i < 5; ++i) {
+                /*
                 Buzzer::toggle();
                 AvTimer::sleep(100);
                 Buzzer::toggle();
                 AvTimer::sleep(100);
-            }
+                */
+                }
         }
     }
 
@@ -101,11 +104,13 @@ int main() {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
         // Execute telemetry
+        /*
         try {
             telecom.check_policy(dump, delta_ms);
         }catch(TelecomException& e) {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
+        */
 
         // If loop finished early, compensate
         if (delta_ms < inv_freq) {

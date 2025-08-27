@@ -33,6 +33,8 @@ int main() {
     prb.read_is_woken_up();
     prb.write_igniter(cmd);
     prb.clear_to_ignite(cmd);
+    AvTimer::sleep(1e3);
+    prb.write_igniter(AV_NET_CMD_ON);
 
 /*
 	AvTimer::sleep(500);

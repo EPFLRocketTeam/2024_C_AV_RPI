@@ -30,6 +30,7 @@ PR_board::~PR_board() {
 void PR_board::write_timestamp() {
     const uint32_t timestamp(Data::get_instance().get().av_timestamp);
     write_register(AV_NET_PRB_TIMESTAMP, (uint8_t*)&timestamp);
+    Logger::log_eventf(Logger::DEBUG, "Writing TIMESTAMP to PRB: %u", timestamp);
 }
 
 void PR_board::send_wake_up() {
@@ -54,12 +55,14 @@ bool PR_board::read_is_woken_up() {
 void PR_board::clear_to_ignite(bool value) {
     uint32_t cmd(value ? AV_NET_CMD_ON : AV_NET_CMD_OFF);
     write_register(AV_NET_PRB_CLEAR_TO_IGNITE, (uint8_t*)&cmd);
+    Logger::log_eventf(Logger::DEBUG, "Writing CLEAR_TO_IGNITE to PRB");
 }
 
 void PR_board::read_fsm() {
     uint32_t state(0);
     read_register(AV_NET_PRB_FSM_PRB, (uint8_t*)&state);
     Data::get_instance().write(Data::PR_BOARD_FSM_STATE, &state);
+    Logger::log_eventf(Logger::DEBUG, "Reading FSM from PRB: %u", state);
 }
 
 void PR_board::read_injector_oxygen() {
@@ -71,6 +74,9 @@ void PR_board::read_injector_oxygen() {
 
     Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
     Data::get_instance().write(Data::PR_SENSOR_T_OIN, &temperature);
+
+    Logger::log_eventf(Logger::DEBUG, "Reading P_OIN from PRB: %f", pressure);
+    Logger::log_eventf(Logger::DEBUG, "Reading T_OIN from PRB: %f", temperature);
 }
 
 void PR_board::read_injector_fuel() {
@@ -82,6 +88,9 @@ void PR_board::read_injector_fuel() {
 
     Data::get_instance().write(Data::PR_SENSOR_P_EIN, &pressure);
     Data::get_instance().write(Data::PR_SENSOR_T_EIN, &temperature);
+
+    Logger::log_eventf(Logger::DEBUG, "Reading P_EIN from PRB: %f", pressure);
+    Logger::log_eventf(Logger::DEBUG, "Reading T_EIN from PRB: %f", temperature);
 }
 
 void PR_board::read_combustion_chamber() {
@@ -93,14 +102,19 @@ void PR_board::read_combustion_chamber() {
 
     Data::get_instance().write(Data::PR_SENSOR_P_CCC, &pressure);
     Data::get_instance().write(Data::PR_SENSOR_T_CCC, &temperature);
+
+    Logger::log_eventf(Logger::DEBUG, "Reading P_CCC from PRB: %f", pressure);
+    Logger::log_eventf(Logger::DEBUG, "Reading T_CCC from PRB: %f", temperature);
 }
 
 void PR_board::write_igniter(uint32_t cmd) {
     write_register(AV_NET_PRB_IGNITER, (uint8_t*)&cmd);
+    Logger::log_eventf(Logger::DEBUG, "Writing IGNITER to PRB: %u", cmd);
 }
 
 void PR_board::write_valves(const uint32_t cmd) {
     write_register(AV_NET_PRB_VALVES_STATE, (uint8_t*)&cmd);
+    Logger::log_eventf(Logger::DEBUG, "Writing valves to PRB: %x", cmd);
 }
 
 void PR_board::read_valves() {
@@ -125,12 +139,15 @@ void PR_board::read_valves() {
     }
 
     Data::get_instance().write(Data::VALVES, &valves);
+
+    Logger::log_eventf(Logger::DEBUG, "Reading valves from PRB: %x", rslt);
 }
 
 void PR_board::execute_abort() {
     periodic_timestamp(1000);
     uint8_t abort_value = AV_NET_CMD_ON;
     write_register(AV_NET_PRB_ABORT, &abort_value);
+    Logger::log_eventf(Logger::DEBUG, "Writing ABORT to PRB");
 }
 
 // TODO: Review check policy FLIGHT LOGIC
@@ -272,7 +289,7 @@ void PR_board::handle_thrust_sequence(const DataDump& dump) {
         // After some delay, check the PRB FSM for ignition status
         if (ignition_sq_started && ignition_ack_ms > IGNITION_ACK_DELAY_MS) {
             static bool ignited(true);
-            if (prb_state == PRB_FSM::ABORT) {
+            if (prb_state == PRB_FSM::ABORT_PRB) {
                 ignited = false;
             }
             Data::get_instance().write(Data::EVENT_IGNITED, &ignited);

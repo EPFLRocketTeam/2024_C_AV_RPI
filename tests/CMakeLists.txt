@@ -18,7 +18,7 @@ add_executable(bmp390_test BMP390_test.cpp)
 target_link_libraries(bmp390_test bmp3)
 
 add_executable(gps_test I2CGPS_test.cpp)
-target_link_libraries(gps_test gps)
+target_link_libraries(gps_test gps flight_computer)
 
 add_executable(lora_test LoRa_test.cpp)
 target_link_libraries(lora_test LoRa4Raspi ERT_RF_Protocol_Interface)
@@ -56,6 +56,9 @@ target_link_libraries(avtimer_test flight_computer)
 
 add_executable(prb_test prb_test.cpp)
 target_link_libraries(prb_test flight_computer)
+
+add_executable(dpr_test dpr_test.cpp)
+target_link_libraries(dpr_test flight_computer)
 
 add_executable(dpr_test_sequence dpr_test_sequence.cpp)
 target_link_libraries(dpr_test_sequence flight_computer)

@@ -71,7 +71,7 @@ int main() {
 
 	ttc.update();
 
-	AvTimer::sleep(1e3);
+	AvTimer::sleep(1e2);
     }
     gpioTerminate();
 }

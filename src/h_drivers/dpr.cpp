@@ -35,7 +35,7 @@ void DPR::write_timestamp() {
         std::string msg("DPR " + m_code + " write_timestamp error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Writing TIMESTAMP to DPR_%s: %f", m_code, tmsp);
+    Logger::log_eventf(Logger::DEBUG, "Writing TIMESTAMP to DPR_%s: %f", m_code.c_str(), tmsp);
 }
 
 void DPR::wake_up() {
@@ -73,7 +73,7 @@ void DPR::send_pressurize() {
         std::string msg("DPR " + m_code + " send_pressurize error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending PRESSURIZE to DPR %s", m_code);
+    Logger::log_eventf(Logger::DEBUG, "Sending PRESSURIZE to DPR %s", m_code.c_str());
 }
 
 void DPR::send_abort() {
@@ -84,7 +84,7 @@ void DPR::send_abort() {
         std::string msg("DPR " + m_code + " send_abort error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending ABORT to DPR %s", m_code);
+    Logger::log_eventf(Logger::DEBUG, "Sending ABORT to DPR %s", m_code.c_str());
 }
 
 void DPR::read_tank_level() {
@@ -99,7 +99,7 @@ void DPR::read_tank_level() {
     Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_L_ETA : Data::PR_SENSOR_L_OTA);
     Data::get_instance().write(gr, &rslt);
 
-    Logger::log_eventf(Logger::DEBUG, "Reading %s tank level from DPR_%s: %f", m_code, rslt, m_code);
+    Logger::log_eventf(Logger::DEBUG, "Reading %s tank level from DPR_%s: %f", m_code.c_str(), m_code.c_str(), rslt);
 }
 
 void DPR::read_tank_pressure() {
@@ -114,7 +114,7 @@ void DPR::read_tank_pressure() {
     Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_P_ETA : Data::PR_SENSOR_P_OTA);
     Data::get_instance().write(gr, &rslt);
 
-    Logger::log_eventf(Logger::DEBUG, "Reading %s tank pressure from DPR_%s: %f", m_code, m_code, rslt);
+    Logger::log_eventf(Logger::DEBUG, "Reading %s tank pressure from DPR_%s: %f", m_code.c_str(), m_code.c_str(), rslt);
 }
 
 void DPR::read_tank_temperature() {
@@ -129,7 +129,7 @@ void DPR::read_tank_temperature() {
     Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_T_ETA : Data::PR_SENSOR_T_OTA);
     Data::get_instance().write(gr, &rslt);
 
-    Logger::log_eventf(Logger::DEBUG, "Reading %s tank temperature from DPR_%s: %f", m_code, m_code, rslt);
+    Logger::log_eventf(Logger::DEBUG, "Reading %s tank temperature from DPR_%s: %f", m_code.c_str(), m_code.c_str(), rslt);
 }
 
 void DPR::read_copv_pressure() {
@@ -143,7 +143,7 @@ void DPR::read_copv_pressure() {
 
     Data::get_instance().write(Data::PR_SENSOR_P_NCO, &rslt);
 
-    Logger::log_eventf(Logger::DEBUG, "Reading COPV temperature from DPR_%s: %f", m_code, rslt);
+    Logger::log_eventf(Logger::DEBUG, "Reading COPV pressure from DPR_%s: %f", m_code.c_str(), rslt);
 }
 
 void DPR::read_copv_temperature() {
@@ -157,7 +157,7 @@ void DPR::read_copv_temperature() {
 
     Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
 
-    Logger::log_eventf(Logger::DEBUG, "Reading COPV temperature from DPR_%s: %f", m_code, rslt);
+    Logger::log_eventf(Logger::DEBUG, "Reading COPV temperature from DPR_%s: %f", m_code.c_str(), rslt);
 }
 
 void DPR::write_valves(const uint32_t cmd) {
@@ -168,7 +168,7 @@ void DPR::write_valves(const uint32_t cmd) {
         std::string msg("DPR " + m_code + " write_valves error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Writing valves to DPR_%s: %x", m_code, valves_state);
+    Logger::log_eventf(Logger::DEBUG, "Writing valves to DPR_%s: %x", m_code.c_str(), valves_state);
 }
 
 void DPR::read_valves() {
@@ -204,7 +204,7 @@ void DPR::read_valves() {
 		}
 	}
 
-	Logger::log_eventf(Logger::DEBUG, "Reading valves from DPR_%s: %x", m_code, dpr_valves);
+	Logger::log_eventf(Logger::DEBUG, "Reading valves from DPR_%s: %x", m_code.c_str(), dpr_valves);
 	Data::get_instance().write(Data::VALVES, &valves);
 }
 

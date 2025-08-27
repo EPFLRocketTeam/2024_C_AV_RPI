@@ -4,12 +4,13 @@
 #include <iomanip>
 #include "TinyGPS++.h"
 #include "I2CGPS.h"
+#include "av_timer.h"
 
 /************************************************************************/
 /*********                     Test code                           ******/
 /************************************************************************/
 /* Iteration count to run example code */
-#define ITERATION  UINT8_C(3)
+#define ITERATION  UINT8_C(100)
 
 static void displayInfo(TinyGPSPlus& gps) {
     //We have new GPS data to deal with!
@@ -67,6 +68,7 @@ static void displayInfo(TinyGPSPlus& gps) {
     } else {
         std::cout << "Speed not yet valid" << std::endl;
     }
+    std::cout << "\n";
 }
 
 int main(void) {
@@ -85,6 +87,7 @@ int main(void) {
             displayInfo(gps);
         }
         loop++;
+        AvTimer::sleep(10);
     }
 }
 
