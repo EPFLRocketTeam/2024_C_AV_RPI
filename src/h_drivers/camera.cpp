@@ -87,24 +87,24 @@ void Camera::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     switch (dump.av_state) {
         case State::INIT:
         case State::CALIBRATION:
-        case State::MANUAL:
+        case State::FILLING:
         case State::ARMED:
             break;
-        case State::READY:
-            handle_ready();
+        case State::PRESSURIZED:
+            handle_pressurized();
             break;
-        case State::THRUSTSEQUENCE:
-        case State::LIFTOFF:
+        case State::IGNITION:
+        case State::BURN:
         case State::ASCENT:
         case State::DESCENT:
         case State::LANDED:
-        case State::ERRORGROUND:
-        case State::ERRORFLIGHT:
+        case State::ABORT_ON_GROUND:
+        case State::ABORT_IN_FLIGHT:
             break;
     }
 }
 
-void Camera::handle_ready() {
+void Camera::handle_pressurized() {
     // Send 'start recording' command every 100ms until camera acks it's recording 
     if (count_ms >= 100 && !m_recording) {
         static unsigned attempts(0);

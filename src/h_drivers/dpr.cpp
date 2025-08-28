@@ -14,7 +14,7 @@ DPR::DPR(const uint8_t address) : m_address(address) {
     try {
         I2CInterface::getInstance().open(m_address);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf(Logger::ERROR, "Error during DPR %s I2C initialization: %s", m_code, e.what());
+        Logger::log_eventf(Logger::ERROR, "Error during DPR %s I2C initialization: %s", m_code.c_str(), e.what());
     }
 }
 
@@ -22,7 +22,7 @@ DPR::~DPR() {
     try {
         I2CInterface::getInstance().close(m_address);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf(Logger::ERROR, "Error during DPR %s I2C deinitialization: %s", m_code, e.what());
+        Logger::log_eventf(Logger::ERROR, "Error during DPR %s I2C deinitialization: %s", m_code.c_str(), e.what());
     }
 }
 
@@ -226,20 +226,20 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::CALIBRATION:
             handle_calibration(dump);
             break;
-        case State::MANUAL:
-            handle_manual(dump);
+        case State::FILLING:
+            handle_filling(dump);
             break;
         case State::ARMED:
             handle_armed(dump);
             break ;
-        case State::READY:
-            handle_ready(dump);
+        case State::PRESSURIZED:
+            handle_pressurized(dump);
             break;
-        case State::THRUSTSEQUENCE:
+        case State::IGNITION:
             handle_thrustsequence(dump);
             break;
-        case State::LIFTOFF:
-            handle_liftoff(dump);
+        case State::BURN:
+            handle_burn(dump);
             break;
         case State::ASCENT:
             handle_ascent(dump);
@@ -250,14 +250,14 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::LANDED:
             handle_landed(dump);
             break;
-        case State::ERRORGROUND:
-            handle_errorground(dump);
+        case State::ABORT_ON_GROUND:
+            handle_abort_ground(dump);
             break;
-        case State::ERRORFLIGHT:
-            handle_errorflight(dump);
+        case State::ABORT_IN_FLIGHT:
+            handle_abort_flight(dump);
             break;
         default:
-            handle_errorground(dump);
+            handle_abort_ground(dump);
             break;
     }
 
@@ -283,7 +283,7 @@ void DPR::handle_calibration(const DataDump& dump) {
     Data::get_instance().write(gr, &dpr_ready);
 }
 
-void DPR::handle_manual(const DataDump& dump) {
+void DPR::handle_filling(const DataDump& dump) {
     periodic_timestamp(500);
 
     if (dump.event.command_updated) {
@@ -325,7 +325,7 @@ void DPR::handle_armed(const DataDump& dump) {
     }
 }
 
-void DPR::handle_ready(const DataDump& dump) {
+void DPR::handle_pressurized(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
 }
@@ -335,7 +335,7 @@ void DPR::handle_thrustsequence(const DataDump& dump) {
     periodic_timestamp(1000);
 }
 
-void DPR::handle_liftoff(const DataDump& dump) {
+void DPR::handle_burn(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
 }
@@ -355,12 +355,12 @@ void DPR::handle_landed(const DataDump& dump) {
     periodic_timestamp(1000);
 }
 
-void DPR::handle_errorground(const DataDump& dump) {
+void DPR::handle_abort_ground(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
 }
 
-void DPR::handle_errorflight(const DataDump& dump) {
+void DPR::handle_abort_flight(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
 }

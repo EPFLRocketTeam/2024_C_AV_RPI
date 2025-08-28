@@ -28,18 +28,18 @@ public:
     std::string stateToString(State state);
 
 private:
-    State fromInit(DataDump const &dump);
-    State fromDescent(DataDump const &dump);
-    State fromAscent(DataDump const &dump);
-    State fromCalibration(DataDump const &dump);
-    State fromErrorGround(DataDump const &dump);
-    State fromErrorFlight(DataDump const &dump);
-    State fromThrustSequence(DataDump const &dump);
-    State fromManual(DataDump const &dump);
-    State fromArmed(DataDump const &dump);
-    State fromLanded(DataDump const &dump);
-    State fromLiftoff(DataDump const &dump);
-    State fromReady(DataDump const &dump);
+    State from_init(DataDump const &dump);
+    State from_calibration(DataDump const &dump);
+    State from_filling(DataDump const &dump);
+    State from_armed(DataDump const &dump);
+    State from_pressurized(DataDump const &dump);
+    State from_abort_ground(DataDump const &dump);
+    State from_ignition(DataDump const &dump);
+    State from_landed(DataDump const &dump);
+    State from_burn(DataDump const &dump);
+    State from_ascent(DataDump const &dump);
+    State from_descent(DataDump const &dump);
+    State from_abort_flight(DataDump const &dump);
     State currentState;
 };
 

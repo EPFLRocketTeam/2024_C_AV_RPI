@@ -55,6 +55,7 @@ Event::Event()
     prb_ready(false),
     trb_ready(false),
     ignited(false),
+    engine_cut_off(false),
     seperated(false),
     chute_unreefed(false),
     ignition_failed(false)
@@ -272,6 +273,9 @@ void Data::write(GoatReg reg, void* data) {
             break;
         case EVENT_IGNITED:
             event.ignited = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_ENGINE_CUT_OFF:
+            event.engine_cut_off = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_SEPERATED:
             event.seperated = *reinterpret_cast<bool*>(data);

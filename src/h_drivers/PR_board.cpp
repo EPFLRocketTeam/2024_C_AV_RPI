@@ -157,27 +157,27 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::INIT:
             // For the INIT state we do nothing
             break;
-        case State::ERRORGROUND:
+        case State::ABORT_ON_GROUND:
             execute_abort();
             break;
         case State::CALIBRATION:
             // Handle calibration logic
             handle_calibration(dump);
             break;
-        case State::MANUAL:
-            handle_manual(dump);
+        case State::FILLING:
+            handle_filling(dump);
             break;
         case State::ARMED:
             handle_armed(dump);
             break;
-        case State::READY:
-            handle_ready(dump);
+        case State::PRESSURIZED:
+            handle_pressurized(dump);
             break;
-        case State::THRUSTSEQUENCE:
-            handle_thrust_sequence(dump);
+        case State::IGNITION:
+            handle_ignition(dump);
             break;
-        case State::LIFTOFF:
-            handle_liftoff(dump);
+        case State::BURN:
+            handle_burn(dump);
             break;
         case State::ASCENT:
             handle_ascent(dump);
@@ -185,7 +185,7 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::DESCENT:
             handle_descent(dump);
             break;
-        case State::ERRORFLIGHT:
+        case State::ABORT_IN_FLIGHT:
             execute_abort();
             break;
         default:
@@ -213,7 +213,7 @@ void PR_board::handle_calibration(const DataDump& dump) {
     }
 }
 
-void PR_board::handle_manual(const DataDump& dump) {
+void PR_board::handle_filling(const DataDump& dump) {
     // Process commands in manual mode
     periodic_timestamp(100);
     if (dump.event.command_updated) {
@@ -253,7 +253,7 @@ void PR_board::handle_armed(const DataDump& dump) {
     periodic_timestamp(100);
 }
 
-void PR_board::handle_ready(const DataDump& dump) {
+void PR_board::handle_pressurized(const DataDump& dump) {
     // Write timestamp + clear to trigger at 10Hz
     periodic_timestamp(100);
     if (dump.event.ignition_failed) {
@@ -263,7 +263,7 @@ void PR_board::handle_ready(const DataDump& dump) {
     clear_to_ignite(1);
 }
 
-void PR_board::handle_thrust_sequence(const DataDump& dump) {
+void PR_board::handle_ignition(const DataDump& dump) {
     static uint32_t ignition_send_ms(0);
     static uint32_t ignition_ack_ms(0);
     
@@ -289,7 +289,7 @@ void PR_board::handle_thrust_sequence(const DataDump& dump) {
         // After some delay, check the PRB FSM for ignition status
         if (ignition_sq_started && ignition_ack_ms > IGNITION_ACK_DELAY_MS) {
             static bool ignited(true);
-            if (prb_state == PRB_FSM::ABORT_PRB) {
+            if (prb_state == PRB_FSM::ABORT_ON_FLIGHT) {
                 ignited = false;
             }
             Data::get_instance().write(Data::EVENT_IGNITED, &ignited);
@@ -306,7 +306,7 @@ void PR_board::handle_thrust_sequence(const DataDump& dump) {
     }
 }
 
-void PR_board::handle_liftoff(const DataDump& dump) {
+void PR_board::handle_burn(const DataDump& dump) {
     periodic_timestamp(100);
 }
 

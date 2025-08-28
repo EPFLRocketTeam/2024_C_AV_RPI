@@ -30,16 +30,16 @@ private:
 
     void handle_init();
     void handle_calibration();
-    void handle_manual();
+    void handle_filling();
     void handle_armed(const DataDump& dump);
-    void handle_ready();
-    void handle_thrustsequence();
-    void handle_liftoff();
+    void handle_pressurized();
+    void handle_ignition();
+    void handle_burn();
     void handle_ascent();
     void handle_descent(const DataDump& dump);
     void handle_landed();
-    void handle_errorground();
-    void handle_errorflight();
+    void handle_abort_ground();
+    void handle_abort_flight();
 };
 
 class TriggerBoardException : public std::exception {

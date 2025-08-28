@@ -36,16 +36,16 @@ private:
     uint32_t delta_ms;
     uint32_t count_ms;
 
-    void handle_error_flight(const DataDump& dump);
-    void handle_error_ground(const DataDump& dump);
     void handle_calibration(const DataDump& dump);
-    void handle_manual(const DataDump& dump);
+    void handle_filling(const DataDump& dump);
     void handle_armed(const DataDump& dump);
-    void handle_ready(const DataDump& dump);
-    void handle_thrust_sequence(const DataDump& dump);
-    void handle_liftoff(const DataDump& dump);
+    void handle_pressurized(const DataDump& dump);
+    void handle_ignition(const DataDump& dump);
+    void handle_burn(const DataDump& dump);
     void handle_ascent(const DataDump& dump);
     void handle_descent(const DataDump& dump);
+    void handle_error_flight(const DataDump& dump);
+    void handle_error_ground(const DataDump& dump);
 
     void read_register(const uint8_t reg_addr, uint8_t* data);
     void write_register(const uint8_t reg_addr, const uint8_t* data);

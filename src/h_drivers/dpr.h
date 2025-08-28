@@ -33,16 +33,16 @@ private:
 
     void handle_init(const DataDump& dump);
     void handle_calibration(const DataDump& dump);
-    void handle_manual(const DataDump& dump);
+    void handle_filling(const DataDump& dump);
     void handle_armed(const DataDump& dump);
-    void handle_ready(const DataDump& dump);
+    void handle_pressurized(const DataDump& dump);
     void handle_thrustsequence(const DataDump& dump);
-    void handle_liftoff(const DataDump& dump);
+    void handle_burn(const DataDump& dump);
     void handle_ascent(const DataDump& dump);
     void handle_descent(const DataDump& dump);
     void handle_landed(const DataDump& dump);
-    void handle_errorground(const DataDump& dump);
-    void handle_errorflight(const DataDump& dump);
+    void handle_abort_ground(const DataDump& dump);
+    void handle_abort_flight(const DataDump& dump);
 
     inline void periodic_timestamp(const uint32_t period);
 };

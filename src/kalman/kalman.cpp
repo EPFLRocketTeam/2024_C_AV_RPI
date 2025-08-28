@@ -73,14 +73,14 @@ void Kalman::check_static(const DataDump& dump) {
     switch (dump.av_state)
     {
         case State::INIT:
-        case State::MANUAL:
+        case State::FILLING:
         case State::ARMED:
         case State::CALIBRATION:
              is_static = true;
                 break;
-        case State::READY:
-        case State::THRUSTSEQUENCE:
-        case State::LIFTOFF:
+        case State::PRESSURIZED:
+        case State::IGNITION:
+        case State::BURN:
         case State::ASCENT:
         case State::DESCENT:
         case State::LANDED:

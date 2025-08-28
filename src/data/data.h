@@ -12,16 +12,16 @@ enum class State
 {
     INIT,
     CALIBRATION,
-    MANUAL,
+    FILLING,
     ARMED,
-    READY,
-    LIFTOFF,
-    ERRORGROUND,
-    THRUSTSEQUENCE,
+    PRESSURIZED,
+    ABORT_ON_GROUND,
+    IGNITION,
+    BURN,
     ASCENT,
     LANDED,
     DESCENT,
-    ERRORFLIGHT
+    ABORT_IN_FLIGHT
 };
 
 /**
@@ -158,9 +158,10 @@ struct Event {
     bool prb_ready;
     bool trb_ready;
     bool ignited;
+    bool engine_cut_off;
     bool seperated;
     bool chute_unreefed;
-    //armed state this resets to 0
+    // FILLING state this resets to 0
     bool ignition_failed;
 
     // will have to be discussed in interface meeting w/ prop
@@ -289,6 +290,7 @@ public:
         EVENT_PRB_READY,
         EVENT_TRB_READY,
         EVENT_IGNITED,
+        EVENT_ENGINE_CUT_OFF,
         EVENT_SEPERATED,
         EVENT_CHUTE_OPENED,
         EVENT_CHUTE_UNREEFED,
