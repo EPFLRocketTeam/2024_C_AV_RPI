@@ -9,7 +9,7 @@
 
 int main() {
     Logger::init();
-	State av_state(State::MANUAL);
+	State av_state(State::FILLING);
 	Data::get_instance().write(Data::AV_STATE, &av_state);
 
 	//DPR dpr_lox(AV_NET_ADDR_DPR_LOX);

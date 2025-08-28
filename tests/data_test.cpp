@@ -411,7 +411,7 @@ int main(int argc, char** argv) {
 
     // Test AV_STATE
     Data::GoatReg avStateReg = Data::GoatReg::AV_STATE;
-    State testAvState = State::LIFTOFF;
+    State testAvState = State::BURN;
     goatData.write(avStateReg, &testAvState);
     dump = goatData.get();
     assert(dump.av_state == testAvState);

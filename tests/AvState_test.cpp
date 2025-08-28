@@ -54,7 +54,7 @@ void errorGroundToArmed(AvState& fsm, DataDump& dump) {
 void calibrationToManual(AvState &fsm, DataDump &dump) {
     dump.event.calibrated = true;
     fsm.update(dump);
-    assert_s(State::MANUAL, fsm);
+    assert_s(State::FILLING, fsm);
     //sameState(fsm, dump);
 }
 
@@ -63,7 +63,7 @@ void calibrationToManual(AvState &fsm, DataDump &dump) {
 void calibrationToErrorGround(AvState fsm, DataDump dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
-    assert_s(State::ERRORGROUND, fsm);
+    assert_s(State::ABORT_ON_GROUND, fsm);
     //sameState(fsm, dump);
 }
 
@@ -95,7 +95,7 @@ void armedToErrorGround(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     dump.event.calibrated = false;
     fsm.update(dump);
-    assert_s(State::ERRORGROUND, fsm);
+    assert_s(State::ABORT_ON_GROUND, fsm);
     //sameState(fsm, dump);
 }
 
@@ -106,21 +106,21 @@ void armedToReady(AvState &fsm, DataDump &dump) {
     dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED;
     dump.prop.LOX_pressure = LOX_PRESSURE_WANTED;
     fsm.update(dump);
-    assert_s(State::READY, fsm);
+    assert_s(State::PRESSURIZED, fsm);
     //sameState(fsm, dump);
 }
 
 void armedToReadyBypassed(AvState& fsm, DataDump dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_BYPASS_DPR_CHECK;
     fsm.update(dump);
-    assert_s(State::READY, fsm);
+    assert_s(State::PRESSURIZED, fsm);
 }
 
 // Function to trigger the READY -> THRUSTSEQUENCE transition
 void readyToThrustSequence(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_IGNITION;
     fsm.update(dump);
-    assert_s(State::THRUSTSEQUENCE, fsm);
+    assert_s(State::IGNITION, fsm);
     //TODO check that this is correct
     //sameState(fsm, dump);
 }
@@ -138,7 +138,7 @@ void thrustSequenceToArmed(AvState &fsm, DataDump &dump) {
 void thrustSequenceToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
-    assert_s(State::ERRORFLIGHT, fsm);
+    assert_s(State::ABORT_IN_FLIGHT, fsm);
     //sameState(fsm, dump);
 }
 
@@ -156,7 +156,7 @@ void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
     dump.prop.LOX_pressure = LOX_PRESSURE_WANTED + 1;
     dump.prop.N2_pressure = N2_PRESSURE_ZERO + 1;
     fsm.update(dump);
-    assert_s(State::LIFTOFF, fsm);
+    assert_s(State::BURN, fsm);
     //sameState(fsm, dump);
 }
 
@@ -164,7 +164,7 @@ void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
 void liftoffToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
-    assert_s(State::ERRORFLIGHT, fsm);
+    assert_s(State::ABORT_IN_FLIGHT, fsm);
     //sameState(fsm, dump);
 }
 
@@ -180,7 +180,7 @@ void liftoffToAscent(AvState &fsm, DataDump &dump) {
 void ascentToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
     fsm.update(dump);
-    assert_s(State::ERRORFLIGHT, fsm);
+    assert_s(State::ABORT_IN_FLIGHT, fsm);
     //sameState(fsm, dump);
 }
 
@@ -195,9 +195,8 @@ void ascentToDescent(AvState &fsm, DataDump &dump) {
 // Function to trigger the DESCENT -> ERRORFLIGHT transition
 void descentToErrorFlight(AvState &fsm, DataDump &dump) {
     dump.telemetry_cmd.id = CMD_ID::AV_CMD_ABORT;
-    dump.telemetry_cmd.id =  CMD_ID::AV_CMD_MANUAL_DEPLOY;
     fsm.update(dump);
-    assert_s(State::ERRORFLIGHT, fsm);
+    assert_s(State::ABORT_IN_FLIGHT, fsm);
     //sameState(fsm, dump);
 }
 
