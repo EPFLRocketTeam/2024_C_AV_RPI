@@ -16,13 +16,13 @@ public:
     bool read_is_woken_up();
     void send_pressurize();
     void send_abort();
-    void read_tank_level();
-    void read_tank_pressure();
-    void read_tank_temperature();
-    void read_copv_pressure();
-    void read_copv_temperature();
+    // void read_tank_level();
+    float read_tank_pressure();
+    float read_tank_temperature();
+    float read_copv_pressure();
+    float read_copv_temperature();
     void write_valves(const uint32_t cmd);
-    void read_valves();
+    uint32_t read_valves();
 
     virtual void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
 private:

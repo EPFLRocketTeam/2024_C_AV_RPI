@@ -87,6 +87,7 @@ void DPR::send_abort() {
     Logger::log_eventf(Logger::DEBUG, "Sending ABORT to DPR %s", m_code.c_str());
 }
 
+/*
 void DPR::read_tank_level() {
     float rslt(0);
     try {
@@ -101,8 +102,9 @@ void DPR::read_tank_level() {
 
     Logger::log_eventf(Logger::DEBUG, "Reading %s tank level from DPR_%s: %f", m_code.c_str(), m_code.c_str(), rslt);
 }
+*/
 
-void DPR::read_tank_pressure() {
+float DPR::read_tank_pressure() {
     float rslt(0);
     try {
         I2CInterface::getInstance().read(m_address, AV_NET_DPR_P_XTA, (uint8_t*)&rslt, AV_NET_XFER_SIZE);
@@ -113,11 +115,12 @@ void DPR::read_tank_pressure() {
 
     Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_P_ETA : Data::PR_SENSOR_P_OTA);
     Data::get_instance().write(gr, &rslt);
-
     Logger::log_eventf(Logger::DEBUG, "Reading %s tank pressure from DPR_%s: %f", m_code.c_str(), m_code.c_str(), rslt);
+
+    return rslt;
 }
 
-void DPR::read_tank_temperature() {
+float DPR::read_tank_temperature() {
     float rslt(0);
     try {
         I2CInterface::getInstance().read(m_address, AV_NET_DPR_T_XTA, (uint8_t*)&rslt, AV_NET_XFER_SIZE);
@@ -128,11 +131,12 @@ void DPR::read_tank_temperature() {
 
     Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_T_ETA : Data::PR_SENSOR_T_OTA);
     Data::get_instance().write(gr, &rslt);
-
     Logger::log_eventf(Logger::DEBUG, "Reading %s tank temperature from DPR_%s: %f", m_code.c_str(), m_code.c_str(), rslt);
+
+    return rslt;
 }
 
-void DPR::read_copv_pressure() {
+float DPR::read_copv_pressure() {
     float rslt(0);
     try {
         I2CInterface::getInstance().read(m_address, AV_NET_DPR_P_NCO, (uint8_t*)&rslt, AV_NET_XFER_SIZE);
@@ -142,11 +146,12 @@ void DPR::read_copv_pressure() {
     }
 
     Data::get_instance().write(Data::PR_SENSOR_P_NCO, &rslt);
-
     Logger::log_eventf(Logger::DEBUG, "Reading COPV pressure from DPR_%s: %f", m_code.c_str(), rslt);
+
+    return rslt;
 }
 
-void DPR::read_copv_temperature() {
+float DPR::read_copv_temperature() {
     float rslt(0);
     try {
         I2CInterface::getInstance().read(m_address, AV_NET_DPR_T_NCO, (uint8_t*)&rslt, AV_NET_XFER_SIZE);
@@ -156,8 +161,9 @@ void DPR::read_copv_temperature() {
     }
 
     Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
-
     Logger::log_eventf(Logger::DEBUG, "Reading COPV temperature from DPR_%s: %f", m_code.c_str(), rslt);
+
+    return rslt;
 }
 
 void DPR::write_valves(const uint32_t cmd) {
@@ -171,7 +177,7 @@ void DPR::write_valves(const uint32_t cmd) {
     Logger::log_eventf(Logger::DEBUG, "Writing valves to DPR_%s: %x", m_code.c_str(), valves_state);
 }
 
-void DPR::read_valves() {
+uint32_t DPR::read_valves() {
 	uint32_t dpr_valves(0);
 	try {
 		I2CInterface::getInstance().read(m_address, AV_NET_DPR_VALVES_STATE, (uint8_t*)&dpr_valves, AV_NET_XFER_SIZE);
@@ -206,6 +212,8 @@ void DPR::read_valves() {
 
 	Logger::log_eventf(Logger::DEBUG, "Reading valves from DPR_%s: %x", m_code.c_str(), dpr_valves);
 	Data::get_instance().write(Data::VALVES, &valves);
+
+    return dpr_valves;
 }
 
 void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
@@ -253,7 +261,6 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             break;
     }
 
-    read_tank_level();
     read_tank_pressure();
     read_tank_temperature();
     read_copv_pressure();
