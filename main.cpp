@@ -104,17 +104,17 @@ int main() {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
         // Execute telemetry
-        /*
+        
         try {
             telecom.check_policy(dump, delta_ms);
         }catch(TelecomException& e) {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
-        */
+        
 
         // If loop finished early, compensate
-        if (delta_ms < inv_freq) {
-            AvTimer::sleep(inv_freq - delta_ms);
+        if (delta_ms < 100) {
+            AvTimer::sleep(100 - delta_ms);
         }
     }
 
