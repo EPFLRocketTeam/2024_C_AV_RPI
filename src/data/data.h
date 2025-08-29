@@ -91,6 +91,8 @@ struct Valves{
     bool valve_dpr_vent_fuel;
     bool valve_prb_main_lox;
     bool valve_prb_main_fuel;
+
+    Valves();
 };
 
 struct Vector3 {

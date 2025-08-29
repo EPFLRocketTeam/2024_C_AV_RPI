@@ -26,6 +26,7 @@ namespace {
 Telecom::Telecom()
 :   new_cmd_received(false),
     last_packet{0, 0},
+    packet_number(0),
     capsule_uplink(&Telecom::handle_capsule_uplink, this),
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
 {}
@@ -51,6 +52,8 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             send_telemetry();
             break;
     }
+
+    send_telemetry();
 
     // Write incoming packets to buffer
     // TODO: see if this can be called in handle_uplink during callback instead of polling
@@ -122,7 +125,7 @@ void Telecom::send_telemetry() {
     const DataDump data = Data::get_instance().get();
 
     av_downlink_unpacked_t packet;
-    packet.packet_nbr = data.av_timestamp;
+    packet.packet_nbr = packet_number;
     packet.gnss_lon = data.nav.position.lng;
     packet.gnss_lat = data.nav.position.lat;
     packet.gnss_alt = data.nav.position.alt;
@@ -163,7 +166,11 @@ void Telecom::send_telemetry() {
     
     av_downlink_t compressed_packet(encode_downlink(packet));
 
+    Logger::log_eventf("Sending packet on downlink: %u", packet_number);
+
     send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size);
+
+    ++packet_number;
 }
 
 void Telecom::update() {

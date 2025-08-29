@@ -289,7 +289,7 @@ void PR_board::handle_ignition(const DataDump& dump) {
         // After some delay, check the PRB FSM for ignition status
         if (ignition_sq_started && ignition_ack_ms > IGNITION_ACK_DELAY_MS) {
             static bool ignited(true);
-            if (prb_state == PRB_FSM::ABORT_ON_FLIGHT) {
+            if (prb_state == PRB_FSM::ABORT) {
                 ignited = false;
             }
             Data::get_instance().write(Data::EVENT_IGNITED, &ignited);

@@ -4,7 +4,6 @@
 #include <string>
 #include <cstdint>
 #include <exception>
-#include "config.h"
 
 struct DataDump;
 
@@ -46,12 +45,6 @@ namespace Logger {
 
     template <typename ...Args>
     inline void log_eventf(Severity lvl, const char* fmt, Args&&... args) {
-#if !(DEBUG_LOG)
-        if (lvl == DEBUG) {
-            return;
-        }
-#endif
-
         const int size = std::snprintf(NULL, 0, fmt, args...);
         if (size < 0) {
             return;
