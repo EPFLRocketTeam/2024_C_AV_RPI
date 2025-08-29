@@ -230,7 +230,7 @@ void AvState::update(const DataDump &dump)
         case State::LANDED:
             currentState = from_landed(dump);
             break;
-        case State::ABORT_ON_GROUND:
+        case State::ABORT_IN_FLIGHT:
             currentState = from_abort_flight(dump);
             break;
         default:
