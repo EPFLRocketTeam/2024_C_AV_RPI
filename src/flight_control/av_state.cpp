@@ -108,8 +108,8 @@ State AvState::from_ignition(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id== CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition IGNITION->ABORT_IN_FLIGHT");
-        return State::ABORT_IN_FLIGHT;
+        Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
     }
     // TODO: condition is ignition_failed OR non_liftoff_detected
     else if (dump.event.ignition_failed)
@@ -131,8 +131,8 @@ State AvState::from_burn(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition LOFTOFF->ABORT_IN_FLIGHT");
-        return State::ABORT_IN_FLIGHT;
+        Logger::log_eventf("FSM transition LOFTOFF->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
     }
     // If ECO is confirmed or the altitude threashold is cleared we go to the ASCENT state
     else if (dump.event.engine_cut_off || (dump.nav.altitude > ALTITUDE_THRESHOLD && dump.nav.speed.z >= SPEED_MIN_ASCENT))
@@ -147,8 +147,8 @@ State AvState::from_ascent(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition ASCENT->ABORT_IN_FLIGHT");
-        return State::ABORT_IN_FLIGHT;
+        Logger::log_eventf("FSM transition ASCENT->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
     }
     else if (dump.nav.speed.z < SPEED_ZERO)
     {
@@ -162,8 +162,8 @@ State AvState::from_descent(DataDump const &dump)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition DESCENT->ABORT_IN_FLIGHT");
-        return State::ABORT_IN_FLIGHT;
+        Logger::log_eventf("FSM transition DESCENT->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
     }
     else if (dump.nav.speed.norm() <= SPEED_ZERO)
     {
@@ -230,11 +230,11 @@ void AvState::update(const DataDump &dump)
         case State::LANDED:
             currentState = from_landed(dump);
             break;
-        case State::ABORT_IN_FLIGHT:
+        case State::ABORT_ON_GROUND:
             currentState = from_abort_flight(dump);
             break;
         default:
-            currentState = State::ABORT_IN_FLIGHT;
+            currentState = State::ABORT_ON_GROUND;
     }
 }
 std::string AvState::stateToString(State state)
