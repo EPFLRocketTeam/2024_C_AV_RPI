@@ -30,7 +30,6 @@ public:
     void write_igniter(uint32_t cmd);
     void write_valves(const uint32_t cmd);
     void read_valves();
-    void execute_abort();
 
 private:
     uint32_t delta_ms;
@@ -44,8 +43,8 @@ private:
     void handle_burn(const DataDump& dump);
     void handle_ascent(const DataDump& dump);
     void handle_descent(const DataDump& dump);
-    void handle_error_flight(const DataDump& dump);
-    void handle_error_ground(const DataDump& dump);
+    void handle_abort_flight(const DataDump& dump);
+    void handle_abort_ground(const DataDump& dump);
 
     void read_register(const uint8_t reg_addr, uint8_t* data);
     void write_register(const uint8_t reg_addr, const uint8_t* data);

@@ -143,12 +143,6 @@ void PR_board::read_valves() {
     Logger::log_eventf(Logger::DEBUG, "Reading valves from PRB: %x", rslt);
 }
 
-void PR_board::execute_abort() {
-    periodic_timestamp(1000);
-    uint8_t abort_value = AV_NET_CMD_ON;
-    write_register(AV_NET_PRB_ABORT, &abort_value);
-    Logger::log_eventf(Logger::DEBUG, "Writing ABORT to PRB");
-}
 
 // TODO: Review check policy FLIGHT LOGIC
 void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
@@ -156,9 +150,6 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     switch (dump.av_state) {
         case State::INIT:
             // For the INIT state we do nothing
-            break;
-        case State::ABORT_ON_GROUND:
-            execute_abort();
             break;
         case State::CALIBRATION:
             // Handle calibration logic
@@ -185,8 +176,11 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::DESCENT:
             handle_descent(dump);
             break;
+        case State::ABORT_ON_GROUND:
+            handle_abort_ground(dump);
+            break;
         case State::ABORT_IN_FLIGHT:
-            execute_abort();
+            handle_abort_flight(dump);
             break;
         default:
             break;
@@ -199,9 +193,6 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     read_combustion_chamber();
 }
 
-void PR_board::handle_error_ground(const DataDump& dump) {
-    // Handle errors on the ground
-}
 void PR_board::handle_calibration(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
@@ -289,7 +280,7 @@ void PR_board::handle_ignition(const DataDump& dump) {
         // After some delay, check the PRB FSM for ignition status
         if (ignition_sq_started && ignition_ack_ms > IGNITION_ACK_DELAY_MS) {
             static bool ignited(true);
-            if (prb_state == PRB_FSM::ABORT_ON_FLIGHT) {
+            if (prb_state == PRB_FSM::ABORT) {
                 ignited = false;
             }
             Data::get_instance().write(Data::EVENT_IGNITED, &ignited);
@@ -324,6 +315,20 @@ void PR_board::handle_descent(const DataDump& dump) {
         uint8_t trigger_off = 0;
         Data::get_instance().write(Data::EVENT_IGNITED, &trigger_off);
     }
+}
+
+void PR_board::handle_abort_ground(const DataDump& dump) {
+    periodic_timestamp(1e3);
+    uint8_t passivate(AV_NET_CMD_OFF);
+    write_register(AV_NET_PRB_ABORT, &passivate);
+    Logger::log_eventf(Logger::DEBUG, "Sending ABORT to PRB. NO PASSIVATION");
+}
+
+void PR_board::handle_abort_flight(const DataDump& dump) {
+    periodic_timestamp(1e2);
+    uint8_t passivate(AV_NET_CMD_ON);
+    write_register(AV_NET_PRB_ABORT, &passivate);
+    Logger::log_eventf(Logger::DEBUG, "Sending ABORT to PRB. WITH PASSIVATION");
 }
 
 
