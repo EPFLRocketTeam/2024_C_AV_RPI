@@ -14,10 +14,15 @@ void assert_valves(DPR& dpr, const uint32_t valves) {
 }
 
 void test_valve(DPR& dpr, const uint8_t shift) {
-    uint32_t valves(AV_NET_CMD_ON << shift);
+    uint32_t valves(AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC
+            | AV_NET_CMD_OFF << AV_NET_SHIFT_DN_NC
+            | AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO);
+    valves &= ~(0xFF << shift);
+    valves |= AV_NET_CMD_ON << shift;
     assert_valves(dpr, valves);
     AvTimer::sleep(1e3);
-    valves = AV_NET_CMD_OFF << shift;
+    valves &= ~(0xFF << shift);
+    valves |= AV_NET_CMD_OFF << shift;
     assert_valves(dpr, valves);
     AvTimer::sleep(1e3);
 }

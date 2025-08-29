@@ -34,6 +34,16 @@ PropSensors::PropSensors()
     chamber_temperature(0)
 {}
 
+Valves::Valves()
+:   valve_dpr_pressure_lox(0),
+    valve_dpr_pressure_fuel(0),
+    valve_dpr_vent_copv(0),
+    valve_dpr_vent_lox(0),
+    valve_dpr_vent_fuel(0),
+    valve_prb_main_lox(0),
+    valve_prb_main_fuel(0)
+{}
+
 NavigationData::NavigationData()
 :   time{0, 0, 0, 0, 0, 0, 0},
     position{0, 0, 0},

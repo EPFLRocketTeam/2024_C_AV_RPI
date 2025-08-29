@@ -14,7 +14,7 @@ DPR::DPR(const uint8_t address) : m_address(address) {
     try {
         I2CInterface::getInstance().open(m_address);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf(Logger::ERROR, "Error during DPR %s I2C initialization: %s", m_code.c_str(), e.what());
+        Logger::log_eventf(Logger::ERROR, "Error during DPR_%s I2C initialization: %s", m_code.c_str(), e.what());
     }
 }
 
@@ -22,7 +22,7 @@ DPR::~DPR() {
     try {
         I2CInterface::getInstance().close(m_address);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf(Logger::ERROR, "Error during DPR %s I2C deinitialization: %s", m_code.c_str(), e.what());
+        Logger::log_eventf(Logger::ERROR, "Error during DPR_%s I2C deinitialization: %s", m_code.c_str(), e.what());
     }
 }
 
@@ -73,7 +73,7 @@ void DPR::send_pressurize() {
         std::string msg("DPR " + m_code + " send_pressurize error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending PRESSURIZE to DPR %s", m_code.c_str());
+    Logger::log_eventf(Logger::DEBUG, "Sending PRESSURIZE to DPR_%s", m_code.c_str());
 }
 
 void DPR::send_abort() {
@@ -84,7 +84,7 @@ void DPR::send_abort() {
         std::string msg("DPR " + m_code + " send_abort error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending ABORT to DPR %s", m_code.c_str());
+    Logger::log_eventf(Logger::DEBUG, "Sending ABORT to DPR_%s", m_code.c_str());
 }
 
 /*
@@ -115,7 +115,8 @@ float DPR::read_tank_pressure() {
 
     Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_P_ETA : Data::PR_SENSOR_P_OTA);
     Data::get_instance().write(gr, &rslt);
-    Logger::log_eventf(Logger::DEBUG, "Reading %s tank pressure from DPR_%s: %f", m_code.c_str(), m_code.c_str(), rslt);
+    const char* prefix(m_address == AV_NET_ADDR_DPR_ETH ? "E" : "O");
+    Logger::log_eventf(Logger::DEBUG, "Reading P_%sTA from DPR_%s: %f", prefix, m_code.c_str(), rslt);
 
     return rslt;
 }
@@ -131,7 +132,8 @@ float DPR::read_tank_temperature() {
 
     Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_T_ETA : Data::PR_SENSOR_T_OTA);
     Data::get_instance().write(gr, &rslt);
-    Logger::log_eventf(Logger::DEBUG, "Reading %s tank temperature from DPR_%s: %f", m_code.c_str(), m_code.c_str(), rslt);
+    const char* prefix(m_address == AV_NET_ADDR_DPR_ETH ? "E" : "O");
+    Logger::log_eventf(Logger::DEBUG, "Reading T_%sTA from DPR_%s: %f", prefix, m_code.c_str(), rslt);
 
     return rslt;
 }
@@ -146,7 +148,7 @@ float DPR::read_copv_pressure() {
     }
 
     Data::get_instance().write(Data::PR_SENSOR_P_NCO, &rslt);
-    Logger::log_eventf(Logger::DEBUG, "Reading COPV pressure from DPR_%s: %f", m_code.c_str(), rslt);
+    Logger::log_eventf(Logger::DEBUG, "Reading P_NCO from DPR_%s: %f", m_code.c_str(), rslt);
 
     return rslt;
 }
@@ -161,7 +163,7 @@ float DPR::read_copv_temperature() {
     }
 
     Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
-    Logger::log_eventf(Logger::DEBUG, "Reading COPV temperature from DPR_%s: %f", m_code.c_str(), rslt);
+    Logger::log_eventf(Logger::DEBUG, "Reading T_NCO from DPR_%s: %f", m_code.c_str(), rslt);
 
     return rslt;
 }
