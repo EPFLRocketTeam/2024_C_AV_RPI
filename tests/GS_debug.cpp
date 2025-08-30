@@ -3,6 +3,7 @@
 #include "telecom.h"
 #include "logger.h"
 #include "av_timer.h"
+#include <pigpio.h>
 
 void actuate_valves(const DataDump& dump) {
     const uint8_t cmd(dump.telemetry_cmd.id);
@@ -33,6 +34,7 @@ void actuate_valves(const DataDump& dump) {
 }
 
 int main() {
+    gpioInitialise();
     Logger::init();
 
     AvState fsm;
@@ -56,4 +58,7 @@ int main() {
             AvTimer::sleep(50 - delta_ms);
         }
     }
+
+    Logger::terminate();
+    gpioTerminate();
 }
