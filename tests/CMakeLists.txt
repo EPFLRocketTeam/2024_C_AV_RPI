@@ -72,6 +72,9 @@ target_link_libraries(valves_test flight_computer)
 add_executable(GS_valves_test GS_valves_test.cpp)
 target_link_libraries(GS_valves_test flight_computer)
 
+add_executable(GS_debug GS_debug.cpp)
+target_link_libraries(GS_debug flight_computer)
+
 
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})
