@@ -18,7 +18,7 @@ add_executable(bmp390_test BMP390_test.cpp)
 target_link_libraries(bmp390_test bmp3)
 
 add_executable(gps_test I2CGPS_test.cpp)
-target_link_libraries(gps_test gps)
+target_link_libraries(gps_test gps flight_computer)
 
 add_executable(lora_test LoRa_test.cpp)
 target_link_libraries(lora_test LoRa4Raspi ERT_RF_Protocol_Interface)
@@ -48,6 +48,9 @@ target_link_libraries(trb_test flight_computer)
 add_executable(buzzer_test buzzer_test.cpp)
 target_link_libraries(buzzer_test flight_computer)
 
+add_executable(led_ws2812_test led_ws2812_test.cpp)
+target_link_libraries(led_ws2812_test neopixel)
+
 add_executable(telecom_test telecom_test.cpp)
 target_link_libraries(telecom_test flight_computer)
 
@@ -57,6 +60,9 @@ target_link_libraries(avtimer_test flight_computer)
 add_executable(prb_test prb_test.cpp)
 target_link_libraries(prb_test flight_computer)
 
+add_executable(dpr_test dpr_test.cpp)
+target_link_libraries(dpr_test flight_computer)
+
 add_executable(dpr_test_sequence dpr_test_sequence.cpp)
 target_link_libraries(dpr_test_sequence flight_computer)
 
@@ -65,6 +71,9 @@ target_link_libraries(valves_test flight_computer)
 
 add_executable(GS_valves_test GS_valves_test.cpp)
 target_link_libraries(GS_valves_test flight_computer)
+
+add_executable(GS_debug GS_debug.cpp)
+target_link_libraries(GS_debug flight_computer)
 
 
 #set(MOCK_SENSOR src/MockSensor.cpp)

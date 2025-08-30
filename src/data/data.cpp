@@ -34,6 +34,16 @@ PropSensors::PropSensors()
     chamber_temperature(0)
 {}
 
+Valves::Valves()
+:   valve_dpr_pressure_lox(0),
+    valve_dpr_pressure_fuel(0),
+    valve_dpr_vent_copv(0),
+    valve_dpr_vent_lox(0),
+    valve_dpr_vent_fuel(0),
+    valve_prb_main_lox(0),
+    valve_prb_main_fuel(0)
+{}
+
 NavigationData::NavigationData()
 :   time{0, 0, 0, 0, 0, 0, 0},
     position{0, 0, 0},
@@ -55,6 +65,7 @@ Event::Event()
     prb_ready(false),
     trb_ready(false),
     ignited(false),
+    engine_cut_off(false),
     seperated(false),
     chute_unreefed(false),
     ignition_failed(false)
@@ -187,7 +198,7 @@ void Data::write(GoatReg reg, void* data) {
             prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
             break;
         case PR_BOARD_FSM_STATE:
-            prop_sensors.PR_state = *reinterpret_cast<uint32_t*>(data);
+            prop_sensors.PRB_state = *reinterpret_cast<uint8_t*>(data);
             break;
         case VALVES:
             valves = *reinterpret_cast<Valves*>(data);
@@ -228,8 +239,14 @@ void Data::write(GoatReg reg, void* data) {
         case BAT_LPB_VOLTAGE:
             bat.lpb_voltage = *reinterpret_cast<float*>(data);
             break;
+        case BAT_LPB_CURRENT:
+            bat.lpb_current = *reinterpret_cast<float*>(data);
+            break;
         case BAT_HPB_VOLTAGE:
             bat.hpb_voltage = *reinterpret_cast<float*>(data);
+            break;
+        case BAT_HPB_CURRENT:
+            bat.hpb_current = *reinterpret_cast<float*>(data);
             break;
         case CAM_RECORDING_SEP:
             cams_recording.cam_sep = *reinterpret_cast<bool*>(data);
@@ -266,6 +283,9 @@ void Data::write(GoatReg reg, void* data) {
             break;
         case EVENT_IGNITED:
             event.ignited = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_ENGINE_CUT_OFF:
+            event.engine_cut_off = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_SEPERATED:
             event.seperated = *reinterpret_cast<bool*>(data);

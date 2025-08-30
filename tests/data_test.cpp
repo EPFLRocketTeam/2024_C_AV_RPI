@@ -404,14 +404,18 @@ int main(int argc, char** argv) {
 
     // Test VALVES
     Data::GoatReg valvesReg = Data::GoatReg::VALVES;
-    Valves testValves = {true, true, false, true};
+    Valves testValves;
+    testValves.valve_dpr_pressure_lox = 1;
+    testValves.valve_dpr_pressure_fuel = 1;
+    testValves.valve_dpr_vent_lox = 1;
+    testValves.valve_prb_main_fuel = 1;
     goatData.write(valvesReg, &testValves);
     dump = goatData.get();
     assert(areEqualValves(dump.valves, testValves));
 
     // Test AV_STATE
     Data::GoatReg avStateReg = Data::GoatReg::AV_STATE;
-    State testAvState = State::LIFTOFF;
+    State testAvState = State::BURN;
     goatData.write(avStateReg, &testAvState);
     dump = goatData.get();
     assert(dump.av_state == testAvState);

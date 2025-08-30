@@ -12,16 +12,16 @@ enum class State
 {
     INIT,
     CALIBRATION,
-    MANUAL,
+    FILLING,
     ARMED,
-    READY,
-    LIFTOFF,
-    ERRORGROUND,
-    THRUSTSEQUENCE,
+    PRESSURIZED,
+    ABORT_ON_GROUND,
+    IGNITION,
+    BURN,
     ASCENT,
     LANDED,
     DESCENT,
-    ERRORFLIGHT
+    ABORT_IN_FLIGHT
 };
 
 /**
@@ -78,7 +78,7 @@ struct PropSensors {
     double    LOX_inj_temperature;
     double    chamber_temperature;
     //TODO: should be changed ounce intranet with PRB_STATE is resolved
-    uint32_t  PR_state;
+    uint32_t  PRB_state;
 
     PropSensors();
 };
@@ -91,6 +91,8 @@ struct Valves{
     bool valve_dpr_vent_fuel;
     bool valve_prb_main_lox;
     bool valve_prb_main_fuel;
+
+    Valves();
 };
 
 struct Vector3 {
@@ -123,7 +125,7 @@ struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
     //referentiel earth
-    Vector3 position_kalman;
+    Vector3   position_kalman;
     Vector3   speed;
     //ref of accel TBD !!!!
     Vector3   accel;
@@ -137,7 +139,9 @@ struct NavigationData {
 
 struct Batteries {
     float lpb_voltage;
+    float lpb_current;
     float hpb_voltage;
+    float hpb_current;
 };
 
 struct CamsRecording {
@@ -156,9 +160,10 @@ struct Event {
     bool prb_ready;
     bool trb_ready;
     bool ignited;
+    bool engine_cut_off;
     bool seperated;
     bool chute_unreefed;
-    //armed state this resets to 0
+    // FILLING state this resets to 0
     bool ignition_failed;
 
     // will have to be discussed in interface meeting w/ prop
@@ -268,7 +273,9 @@ public:
 
         /* Batteries status */
         BAT_LPB_VOLTAGE,
+        BAT_LPB_CURRENT,
         BAT_HPB_VOLTAGE,
+        BAT_HPB_CURRENT,
 
         /* Cameras recording status */
         CAM_RECORDING_SEP,
@@ -285,6 +292,7 @@ public:
         EVENT_PRB_READY,
         EVENT_TRB_READY,
         EVENT_IGNITED,
+        EVENT_ENGINE_CUT_OFF,
         EVENT_SEPERATED,
         EVENT_CHUTE_OPENED,
         EVENT_CHUTE_UNREEFED,

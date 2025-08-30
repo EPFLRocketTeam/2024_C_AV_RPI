@@ -26,6 +26,7 @@ namespace {
 Telecom::Telecom()
 :   new_cmd_received(false),
     last_packet{0, 0},
+    packet_number(0),
     capsule_uplink(&Telecom::handle_capsule_uplink, this),
     capsule_downlink(&Telecom::handle_capsule_downlink, this)
 {}
@@ -52,6 +53,8 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             break;
     }
 
+    send_telemetry();
+
     // Write incoming packets to buffer
     // TODO: see if this can be called in handle_uplink during callback instead of polling
     update();
@@ -60,10 +63,10 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 bool Telecom::begin() {
     lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
     if (!lora_uplink.begin(UPLINK_FREQUENCY, SPI0)) {
-        throw TelecomException("LoRa uplink init failed\n");
+        throw TelecomException("LoRa uplink init failed. Aborting LoRa downlink init.");
         return false;
     }else {
-        Logger::log_eventf("LoRa uplink init succeeded!\n");
+        Logger::log_eventf("LoRa uplink init succeeded!");
     }
 
     lora_uplink.setTxPower(UPLINK_POWER);
@@ -91,10 +94,10 @@ bool Telecom::begin() {
 
     lora_downlink.setPins(LORA_DOWNLINK_CS, LORA_DOWNLINK_RST, LORA_DOWNLINK_DI0);
     if (!lora_downlink.begin(AV_DOWNLINK_FREQUENCY, SPI1)) {
-        throw TelecomException("LoRa downlink init failed\n");
+        throw TelecomException("LoRa downlink init failed");
         return false;
     }else {
-        Logger::log_eventf("LoRa downlink init succeeded!\n");
+        Logger::log_eventf("LoRa downlink init succeeded!");
     }
 
     lora_downlink.setTxPower(AV_DOWNLINK_POWER);
@@ -122,7 +125,7 @@ void Telecom::send_telemetry() {
     const DataDump data = Data::get_instance().get();
 
     av_downlink_unpacked_t packet;
-    packet.packet_nbr = data.av_timestamp;
+    packet.packet_nbr = packet_number;
     packet.gnss_lon = data.nav.position.lng;
     packet.gnss_lat = data.nav.position.lat;
     packet.gnss_alt = data.nav.position.alt;
@@ -148,12 +151,12 @@ void Telecom::send_telemetry() {
                         | valves.valve_prb_main_fuel * ENGINE_STATE_MAIN_FUEL;
 
     packet.lpb_voltage = data.bat.lpb_voltage;
-    packet.lpb_current = 0;
+    packet.lpb_current = data.bat.lpb_current;
     packet.hpb_voltage = data.bat.hpb_voltage;
-    packet.hpb_current = 0;
+    packet.hpb_current = data.bat.hpb_current;
 
     packet.av_fc_temp = data.av_fc_temp;
-    packet.ambient_temp = 0;
+    packet.ambient_temp = data.nav.baro.temperature;
 
     packet.av_state = (uint8_t)data.av_state;
 
@@ -163,7 +166,11 @@ void Telecom::send_telemetry() {
     
     av_downlink_t compressed_packet(encode_downlink(packet));
 
+    Logger::log_eventf("Sending packet on downlink: %u", packet_number);
+
     send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size);
+
+    ++packet_number;
 }
 
 void Telecom::update() {
