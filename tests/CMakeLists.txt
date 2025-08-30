@@ -48,6 +48,9 @@ target_link_libraries(trb_test flight_computer)
 add_executable(buzzer_test buzzer_test.cpp)
 target_link_libraries(buzzer_test flight_computer)
 
+add_executable(led_ws2812_test led_ws2812_test.cpp)
+target_link_libraries(led_ws2812_test neopixel)
+
 add_executable(telecom_test telecom_test.cpp)
 target_link_libraries(telecom_test flight_computer)
 

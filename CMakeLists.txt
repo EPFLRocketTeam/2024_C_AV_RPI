@@ -22,7 +22,7 @@ target_include_directories(Capsule INTERFACE 2024_C_AV-GS_CAPSULE/src)
 
 # Set the RFBG protocol to Firehorn
 add_compile_definitions(RF_PROTOCOL_FIREHORN)
-add_compile_options(-Wno-packed-bitfield-compat)
+add_compile_options(-g -std=c++17 -Wall -Wno-packed-bitfield-compat)
 
 add_executable(main main.cpp)
 
