@@ -219,7 +219,7 @@ uint32_t DPR::read_valves() {
         if (pressure_tank == AV_NET_CMD_ON) {
             valves.valve_dpr_pressure_fuel = 1;
         }else if (pressure_tank == AV_NET_CMD_OFF) {
-            valves.valve_dpr_pressure_fuel = 1;
+            valves.valve_dpr_pressure_fuel = 0;
         }
         if (vent_tank == AV_NET_CMD_ON) {
             valves.valve_dpr_vent_fuel = 1;
