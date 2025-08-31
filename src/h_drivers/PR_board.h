@@ -13,6 +13,7 @@ public:
     ~PR_board();
 
     void check_policy(const DataDump& dump, const uint32_t delta_ms) override;
+    void actuate_valve(const bool active, const uint8_t valve_bitshift);
 
     // FIXME: implement the valve logic later on
     // Valve control functions
@@ -30,6 +31,7 @@ public:
     void write_igniter(uint32_t cmd);
     void write_valves(const uint32_t cmd);
     uint32_t read_valves();
+    float read_impulse();
 
 private:
     uint32_t delta_ms;
@@ -39,7 +41,7 @@ private:
     void handle_calibration(const DataDump& dump);
     void handle_filling(const DataDump& dump);
     void handle_armed(const DataDump& dump);
-    void handle_pressurized(const DataDump& dump);
+    void handle_pressurization(const DataDump& dump);
     void handle_ignition(const DataDump& dump);
     void handle_burn(const DataDump& dump);
     void handle_ascent(const DataDump& dump);

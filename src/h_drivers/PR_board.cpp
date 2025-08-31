@@ -145,6 +145,14 @@ uint32_t PR_board::read_valves() {
     return rslt;
 }
 
+float PR_board::read_impulse() {
+    float rslt(0);
+    read_register(AV_NET_PRB_SPECIFIC_IMP, (uint8_t*)&rslt);
+    Logger::log_eventf("Reading specific impulse from PRB: %f", rslt);
+
+    return rslt;
+}
+
 
 // TODO: Review check policy FLIGHT LOGIC
 void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
@@ -163,8 +171,8 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::ARMED:
             handle_armed(dump);
             break;
-        case State::PRESSURIZED:
-            handle_pressurized(dump);
+        case State::PRESSURIZATION:
+            handle_pressurization(dump);
             break;
         case State::IGNITION:
             handle_ignition(dump);
@@ -195,6 +203,20 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     read_combustion_chamber();
 }
 
+void PR_board::actuate_valve(const bool active, const uint8_t valve_bitshift) {
+    uint8_t cmd(0);
+    if (active) {
+        cmd = AV_NET_CMD_ON << valve_bitshift;
+    }else {
+        cmd = AV_NET_CMD_OFF << valve_bitshift;
+    }
+    uint32_t valves(read_valves());
+    valves &= ~(0xFF << valve_bitshift);
+    valves |= cmd;
+    write_valves(valves);
+}
+
+
 void PR_board::handle_init(const DataDump& dump) {
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B);
@@ -215,37 +237,16 @@ void PR_board::handle_calibration(const DataDump& dump) {
 void PR_board::handle_filling(const DataDump& dump) {
     // Process commands in manual mode
     periodic_timestamp(100);
-    uint32_t valves(read_valves());
     if (dump.event.command_updated) {
-        uint32_t cmd(0);
         const uint8_t value(dump.telemetry_cmd.value);
         switch (dump.telemetry_cmd.id) {
             case CMD_ID::AV_CMD_MAIN_LOX:
-                {
-                    // Handle main LOX valve commands
-                    Logger::log_eventf("VALUE: %u", value);
-                    if (value == 1) {
-                        cmd = AV_NET_CMD_ON << AV_NET_SHIFT_MO_BC;
-                    }else if (value == 0) {
-                        cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC;
-                    }
-                    valves &= ~(0xFF << AV_NET_SHIFT_MO_BC);
-                    valves |= cmd;
-                    write_valves(valves); 
-                }
+                // Handle main LOX valve commands
+                actuate_valve(value, AV_NET_SHIFT_MO_BC);
                 break;
             case CMD_ID::AV_CMD_MAIN_FUEL:
-                {
-                    // Handle main Fuel valve commands
-                    if (value == 1) {
-                        cmd = AV_NET_CMD_ON << AV_NET_SHIFT_ME_B;
-                    }else if (value == 0) {
-                        cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B;
-                    }
-                    valves &= ~(0xFF << AV_NET_SHIFT_ME_B);
-                    valves |= cmd;
-                    write_valves(valves); 
-                }
+                // Handle main Fuel valve commands
+                actuate_valve(value, AV_NET_SHIFT_ME_B);
                 break;
             default:
                 break;
@@ -257,14 +258,16 @@ void PR_board::handle_armed(const DataDump& dump) {
     periodic_timestamp(100);
 }
 
-void PR_board::handle_pressurized(const DataDump& dump) {
+void PR_board::handle_pressurization(const DataDump& dump) {
     // Write timestamp + clear to trigger at 10Hz
     periodic_timestamp(100);
     if (dump.event.ignition_failed) {
         bool trigger_failed = false;
         Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &trigger_failed);
     }
-    clear_to_ignite(1);
+    if (dump.prop.PRB_state != PRB_FSM::CLEAR_TO_IGNITE) {
+        clear_to_ignite(1);
+    }
 }
 
 void PR_board::handle_ignition(const DataDump& dump) {
@@ -280,7 +283,7 @@ void PR_board::handle_ignition(const DataDump& dump) {
             write_igniter(AV_NET_CMD_ON);
 
             if (ignition_send_ms > IGNITION_SEND_TIMEOUT_MS) {
-                Logger::log_eventf(Logger::ERROR, "Prop Board failed to enter IGNITION_SQ after %u ms",
+                Logger::log_eventf(Logger::FATAL, "Prop Board failed to enter IGNITION_SQ after %u ms",
                         IGNITION_SEND_TIMEOUT_MS);
                 ignition_send_ms = 0;
             }
