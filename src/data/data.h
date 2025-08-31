@@ -14,7 +14,7 @@ enum class State
     CALIBRATION,
     FILLING,
     ARMED,
-    PRESSURIZED,
+    PRESSURIZATION,
     ABORT_ON_GROUND,
     IGNITION,
     BURN,
