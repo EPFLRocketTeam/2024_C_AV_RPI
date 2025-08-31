@@ -56,20 +56,5 @@ int main() {
               << " p90=" << s.p90 << "us"
               << " p99=" << s.p99 << "us"
               << " max=" << s.max << "us\n";
-
-    for (int i=0; i<N; ++i) {
-        auto t0 = ns_now();
-        t.update();
-        auto t1 = ns_now();
-        times.push_back((t1 - t0) / 1000.0); // us
-    }
-
-    auto s = summarize(times);
-    std::cout << "update() latency over " << N << " iterations:\n"
-              << " avg=" << s.avg << "us"
-              << " p50=" << s.p50 << "us"
-              << " p90=" << s.p90 << "us"
-              << " p99=" << s.p99 << "us"
-              << " max=" << s.max << "us\n";
-
+    return 0;
 }
