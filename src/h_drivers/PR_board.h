@@ -35,6 +35,7 @@ private:
     uint32_t delta_ms;
     uint32_t count_ms;
 
+    void handle_init(const DataDump& dump);
     void handle_calibration(const DataDump& dump);
     void handle_filling(const DataDump& dump);
     void handle_armed(const DataDump& dump);

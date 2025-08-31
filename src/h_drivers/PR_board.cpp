@@ -195,6 +195,12 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     read_combustion_chamber();
 }
 
+void PR_board::handle_init(const DataDump& dump) {
+    uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC
+            | AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B);
+    write_valves(default_valves);
+}
+
 void PR_board::handle_calibration(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);

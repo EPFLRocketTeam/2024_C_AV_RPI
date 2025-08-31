@@ -215,6 +215,19 @@ uint32_t DPR::read_valves() {
 		}
 	}
 
+    if (m_address == AV_NET_ADDR_DPR_ETH) {
+        if (pressure_tank == AV_NET_CMD_ON) {
+            valves.valve_dpr_pressure_fuel = 1;
+        }else if (pressure_tank == AV_NET_CMD_OFF) {
+            valves.valve_dpr_pressure_fuel = 1;
+        }
+        if (vent_tank == AV_NET_CMD_ON) {
+            valves.valve_dpr_vent_fuel = 1;
+        }else if (vent_tank == AV_NET_CMD_OFF) {
+            valves.valve_dpr_vent_fuel = 0;
+        }
+    }
+
 	Logger::log_eventf(Logger::DEBUG, "Reading valves from DPR_%s: %x", m_code.c_str(), dpr_valves);
 	Data::get_instance().write(Data::VALVES, &valves);
 
@@ -276,6 +289,10 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 void DPR::handle_init(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
+    uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_DN_NC
+            | AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC
+            | AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO);
+    write_valves(default_valves);
 }
 
 void DPR::handle_calibration(const DataDump& dump) {
@@ -294,11 +311,12 @@ void DPR::handle_filling(const DataDump& dump) {
     uint32_t valves(read_valves());
     if (dump.event.command_updated) {
         uint32_t cmd(0);
+        const bool value(dump.telemetry_cmd.value);
         switch (dump.telemetry_cmd.id) {
             // TODO: add PE, PO and DN valves to RF_Protocol_Interface CMD_ID enum
 		case CMD_ID::AV_CMD_P_LOX:
 			if (m_address == AV_NET_ADDR_DPR_LOX) {
-				if (dump.telemetry_cmd.value) {
+				if (value ^ 0) {
 					cmd = AV_NET_CMD_ON << AV_NET_SHIFT_PX_NC;
 				}else {
 					cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC;
@@ -310,7 +328,7 @@ void DPR::handle_filling(const DataDump& dump) {
 			break;
 		case CMD_ID::AV_CMD_P_FUEL:
 			if (m_address == AV_NET_ADDR_DPR_ETH) {
-                if (dump.telemetry_cmd.value) {
+                if (value ^ 0) {
                     cmd = AV_NET_CMD_ON << AV_NET_SHIFT_PX_NC;
                 }else {
                     cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC;
@@ -322,7 +340,7 @@ void DPR::handle_filling(const DataDump& dump) {
 			break;
         case CMD_ID::AV_CMD_VENT_LOX:
 			if (m_address == AV_NET_ADDR_DPR_LOX) {
-				if (dump.telemetry_cmd.value) {
+				if (value ^ 1) {
 					cmd = AV_NET_CMD_ON << AV_NET_SHIFT_VX_NO;
 				}else {
 					cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO;
@@ -334,7 +352,7 @@ void DPR::handle_filling(const DataDump& dump) {
 			break;
         case CMD_ID::AV_CMD_VENT_FUEL:
 			if (m_address == AV_NET_ADDR_DPR_ETH) {
-				if (dump.telemetry_cmd.value) {
+				if (value ^ 1) {
 					cmd = AV_NET_CMD_ON << AV_NET_SHIFT_VX_NO;
 				}else {
 					cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO;
@@ -346,7 +364,7 @@ void DPR::handle_filling(const DataDump& dump) {
 			break;
         case CMD_ID::AV_CMD_VENT_N2:
             if (m_address == AV_NET_ADDR_DPR_ETH) {
-                if (dump.telemetry_cmd.value) {
+                if (value ^ 0) {
                     cmd = AV_NET_CMD_ON << AV_NET_SHIFT_DN_NC;
                 }else {
                     cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_DN_NC;
