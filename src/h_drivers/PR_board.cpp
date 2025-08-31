@@ -117,7 +117,7 @@ void PR_board::write_valves(const uint32_t cmd) {
     Logger::log_eventf(Logger::DEBUG, "Writing valves to PRB: %x", cmd);
 }
 
-void PR_board::read_valves() {
+uint32_t PR_board::read_valves() {
     uint32_t rslt(0);
     read_register(AV_NET_PRB_VALVES_STATE, (uint8_t*)&rslt);
 
@@ -141,6 +141,8 @@ void PR_board::read_valves() {
     Data::get_instance().write(Data::VALVES, &valves);
 
     Logger::log_eventf(Logger::DEBUG, "Reading valves from PRB: %x", rslt);
+
+    return rslt;
 }
 
 
@@ -207,31 +209,36 @@ void PR_board::handle_calibration(const DataDump& dump) {
 void PR_board::handle_filling(const DataDump& dump) {
     // Process commands in manual mode
     periodic_timestamp(100);
+    uint32_t valves(read_valves());
     if (dump.event.command_updated) {
+        uint32_t cmd(0);
         const uint8_t value(dump.telemetry_cmd.value);
         switch (dump.telemetry_cmd.id) {
-            case AV_CMD_MAIN_LOX:
+            case CMD_ID::AV_CMD_MAIN_LOX:
                 {
                     // Handle main LOX valve commands
-                    uint32_t cmd(0);
-                    if (value) {
+                    Logger::log_eventf("VALUE: %u", value);
+                    if (value == 1) {
                         cmd = AV_NET_CMD_ON << AV_NET_SHIFT_MO_BC;
-                    }else {
+                    }else if (value == 0) {
                         cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC;
                     }
-                    write_valves(cmd); 
+                    valves &= ~(0xFF << AV_NET_SHIFT_MO_BC);
+                    valves |= cmd;
+                    write_valves(valves); 
                 }
                 break;
-            case AV_CMD_MAIN_FUEL:
+            case CMD_ID::AV_CMD_MAIN_FUEL:
                 {
                     // Handle main Fuel valve commands
-                    uint32_t cmd(0);
-                    if (value) {
+                    if (value == 1) {
                         cmd = AV_NET_CMD_ON << AV_NET_SHIFT_ME_B;
-                    }else {
+                    }else if (value == 0) {
                         cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B;
                     }
-                    write_valves(cmd); 
+                    valves &= ~(0xFF << AV_NET_SHIFT_ME_B);
+                    valves |= cmd;
+                    write_valves(valves); 
                 }
                 break;
             default:

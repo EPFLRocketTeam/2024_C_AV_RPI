@@ -187,7 +187,10 @@ uint32_t DPR::read_valves() {
 		std::string msg("DPR " + m_code + " read_valves error: ");
 		throw DPRException(msg + e.what());
 	}
-	uint8_t vent_copv((dpr_valves & AV_NET_DPR_VALVE_DN_NC) >> AV_NET_SHIFT_DN_NC);
+    uint8_t vent_copv(0);
+    if (m_address == AV_NET_ADDR_DPR_ETH) {
+        vent_copv = (dpr_valves & AV_NET_DPR_VALVE_DN_NC) >> AV_NET_SHIFT_DN_NC;
+    }
 	uint8_t pressure_tank((dpr_valves & AV_NET_DPR_VALVE_PX_NC) >> AV_NET_SHIFT_PX_NC);
 	uint8_t vent_tank((dpr_valves & AV_NET_DPR_VALVE_VX_NO) >> AV_NET_SHIFT_VX_NO);
 
@@ -288,29 +291,72 @@ void DPR::handle_calibration(const DataDump& dump) {
 void DPR::handle_filling(const DataDump& dump) {
     periodic_timestamp(500);
 
+    uint32_t valves(read_valves());
     if (dump.event.command_updated) {
+        uint32_t cmd(0);
         switch (dump.telemetry_cmd.id) {
             // TODO: add PE, PO and DN valves to RF_Protocol_Interface CMD_ID enum
 		case CMD_ID::AV_CMD_P_LOX:
 			if (m_address == AV_NET_ADDR_DPR_LOX) {
-				std::cout << "Command AV_CMD_P_LOX\n";
-				uint32_t cmd(0);
 				if (dump.telemetry_cmd.value) {
-					cmd = AV_NET_CMD_ON << 8;
+					cmd = AV_NET_CMD_ON << AV_NET_SHIFT_PX_NC;
 				}else {
-					cmd = AV_NET_CMD_OFF << 8;
+					cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC;
 				}
-				write_valves(cmd);
+                valves &= ~(0xFF << AV_NET_SHIFT_PX_NC);
+                valves |= cmd;
+				write_valves(valves);
 			}
 			break;
 		case CMD_ID::AV_CMD_P_FUEL:
 			if (m_address == AV_NET_ADDR_DPR_ETH) {
-				uint32_t cmd(dump.telemetry_cmd.value);
-				write_valves(cmd);
+                if (dump.telemetry_cmd.value) {
+                    cmd = AV_NET_CMD_ON << AV_NET_SHIFT_PX_NC;
+                }else {
+                    cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC;
+                }
+                valves &= ~(0xFF << AV_NET_SHIFT_PX_NC);
+                valves |= cmd;
+				write_valves(valves);
 			}
 			break;
-            default:
-                break;
+        case CMD_ID::AV_CMD_VENT_LOX:
+			if (m_address == AV_NET_ADDR_DPR_LOX) {
+				if (dump.telemetry_cmd.value) {
+					cmd = AV_NET_CMD_ON << AV_NET_SHIFT_VX_NO;
+				}else {
+					cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO;
+				}
+                valves &= ~(0xFF << AV_NET_SHIFT_VX_NO);
+                valves |= cmd;
+				write_valves(valves);
+			}
+			break;
+        case CMD_ID::AV_CMD_VENT_FUEL:
+			if (m_address == AV_NET_ADDR_DPR_ETH) {
+				if (dump.telemetry_cmd.value) {
+					cmd = AV_NET_CMD_ON << AV_NET_SHIFT_VX_NO;
+				}else {
+					cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO;
+				}
+                valves &= ~(0xFF << AV_NET_SHIFT_VX_NO);
+                valves |= cmd;
+				write_valves(valves);
+			}
+			break;
+        case CMD_ID::AV_CMD_VENT_N2:
+            if (m_address == AV_NET_ADDR_DPR_ETH) {
+                if (dump.telemetry_cmd.value) {
+                    cmd = AV_NET_CMD_ON << AV_NET_SHIFT_DN_NC;
+                }else {
+                    cmd = AV_NET_CMD_OFF << AV_NET_SHIFT_DN_NC;
+                }
+                valves &= ~(0xFF << AV_NET_SHIFT_DN_NC);
+                valves |= cmd;
+                write_valves(valves);
+            }
+        default:
+            break;
         }
     }
 }

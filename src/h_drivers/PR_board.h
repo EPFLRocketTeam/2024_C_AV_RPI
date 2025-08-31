@@ -29,7 +29,7 @@ public:
     void read_combustion_chamber();
     void write_igniter(uint32_t cmd);
     void write_valves(const uint32_t cmd);
-    void read_valves();
+    uint32_t read_valves();
 
 private:
     uint32_t delta_ms;

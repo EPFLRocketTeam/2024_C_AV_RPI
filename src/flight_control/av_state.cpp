@@ -236,6 +236,7 @@ void AvState::update(const DataDump &dump)
         default:
             currentState = State::ABORT_ON_GROUND;
     }
+    Data::get_instance().write(Data::AV_STATE, &currentState);
 }
 std::string AvState::stateToString(State state)
 {

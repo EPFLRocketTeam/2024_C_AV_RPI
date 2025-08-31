@@ -20,6 +20,8 @@ namespace {
 
     LoopbackStream uplink_buffer(MAX_BUFFER_SIZE);
     LoopbackStream downlink_buffer(MAX_BUFFER_SIZE);
+
+    bool tx_done(true);
 }
 
 
@@ -33,7 +35,9 @@ Telecom::Telecom()
 
 void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     if (new_cmd_received) {
-        //new_cmd_received = false;
+        new_cmd_received = false;
+        Data::get_instance().write(Data::EVENT_CMD_RECEIVED, &new_cmd_received);
+        gpioWrite(LED_LORA_RX, 0);
         switch (last_packet.order_id) {
             case CMD_ID::AV_CMD_ABORT:
                 reset_cmd();
@@ -118,6 +122,10 @@ bool Telecom::begin() {
     lora_downlink.disableInvertIQ();
 #endif
 */
+
+    // Set downlink tx done callback
+    lora_downlink.onTxDone(handle_tx_done);
+
     return true;
 }
 
@@ -142,13 +150,13 @@ void Telecom::send_telemetry() {
     packet.chamber_pressure = data.prop.chamber_pressure;
 
     const Valves valves(data.valves);
-    packet.engine_state = valves.valve_dpr_vent_copv * ENGINE_STATE_VENT_N2 
-                        | valves.valve_dpr_vent_lox * ENGINE_STATE_VENT_LOX 
-                        | valves.valve_dpr_vent_fuel * ENGINE_STATE_VENT_FUEL 
-                        | valves.valve_dpr_pressure_lox * ENGINE_STATE_P_LOX
-                        | valves.valve_dpr_pressure_fuel * ENGINE_STATE_P_FUEL
-                        | valves.valve_prb_main_lox * ENGINE_STATE_MAIN_LOX
-                        | valves.valve_prb_main_fuel * ENGINE_STATE_MAIN_FUEL;
+    packet.engine_state = ((valves.valve_dpr_vent_copv ^ 0) * ENGINE_STATE_VENT_N2)
+                        | ((valves.valve_dpr_vent_lox ^ 1) * ENGINE_STATE_VENT_LOX) 
+                        | ((valves.valve_dpr_vent_fuel ^ 1) * ENGINE_STATE_VENT_FUEL)
+                        | ((valves.valve_dpr_pressure_lox ^ 0) * ENGINE_STATE_P_LOX)
+                        | ((valves.valve_dpr_pressure_fuel ^ 0)* ENGINE_STATE_P_FUEL)
+                        | ((valves.valve_prb_main_lox ^ 0) * ENGINE_STATE_MAIN_LOX)
+                        | ((valves.valve_prb_main_fuel ^ 0) * ENGINE_STATE_MAIN_FUEL);
 
     packet.lpb_voltage = data.bat.lpb_voltage;
     packet.lpb_current = data.bat.lpb_current;
@@ -156,7 +164,7 @@ void Telecom::send_telemetry() {
     packet.hpb_current = data.bat.hpb_current;
 
     packet.av_fc_temp = data.av_fc_temp;
-    packet.ambient_temp = data.nav.baro.temperature;
+    packet.ambient_temp = data.av_amb_temp;
 
     packet.av_state = (uint8_t)data.av_state;
 
@@ -166,11 +174,13 @@ void Telecom::send_telemetry() {
     
     av_downlink_t compressed_packet(encode_downlink(packet));
 
-    Logger::log_eventf("Sending packet on downlink: %u", packet_number);
+ //   Logger::log_eventf(Logger::DEBUG, "Sending packet on downlink: %x, %x", packet.packet_nbr,
+  //          (uint32_t)compressed_packet.packet_nbr);
+//    std::cout << "compressed.packet_nbr: " << compressed_packet.packet_nbr << "\n"; 
 
-    send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size);
-
-    ++packet_number;
+    if (send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size)) {
+        ++packet_number;
+    }
 }
 
 void Telecom::update() {
@@ -218,7 +228,6 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
             	Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i\n", last_packet.order_id, last_packet.order_value);
 	    }
 
-            gpioWrite(LED_LORA_RX, 0);
             break;
 	case CAPSULE_ID::AV_TELEMETRY:
 	    av_downlink_t radio_packet;
@@ -259,17 +268,26 @@ void Telecom::handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint3
     std::cerr << "\n";
 }
 
-void Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
+void Telecom::handle_tx_done() {
+    tx_done = true;
+    gpioWrite(LED_LORA_TX, 0);
+}
+
+bool Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
     gpioWrite(LED_LORA_TX, 1);
 
     uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));
     size_t length(capsule_downlink.getCodedLen(len));
 
-    lora_downlink.beginPacket();
+    if (!lora_downlink.beginPacket()) {
+        return false;
+    }
     lora_downlink.write(coded_buffer, length);
     lora_downlink.endPacket(true);
 
     delete[] coded_buffer;
 
     gpioWrite(LED_LORA_TX, 0);
+    
+    return true;
 }

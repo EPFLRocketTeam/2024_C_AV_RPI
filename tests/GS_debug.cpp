@@ -6,6 +6,9 @@
 #include <pigpio.h>
 
 void actuate_valves(const DataDump& dump) {
+    if (!dump.event.command_updated) {
+        return;
+    }
     const uint8_t cmd(dump.telemetry_cmd.id);
     Valves valves(dump.valves);
     switch (cmd) {
@@ -31,6 +34,7 @@ void actuate_valves(const DataDump& dump) {
             valves.valve_prb_main_fuel = !valves.valve_prb_main_fuel;
             break;
         }
+    Data::get_instance().write(Data::VALVES, &valves);
 }
 
 int main() {
@@ -57,6 +61,7 @@ int main() {
         if (delta_ms < 50) {
             AvTimer::sleep(50 - delta_ms);
         }
+
     }
 
     Logger::terminate();
