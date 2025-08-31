@@ -150,55 +150,55 @@ void Data::write(GoatReg reg, void* data) {
             nav_sensors.bmp_aux = *reinterpret_cast<bmp3_data*>(data);
             break;
         case PR_SENSOR_P_NCO:
-            prop_sensors.N2_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.N2_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_ETA:
-            prop_sensors.fuel_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_OTA:
-            prop_sensors.LOX_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.LOX_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_CIG:
-            prop_sensors.igniter_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.igniter_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_EIN:
-            prop_sensors.fuel_inj_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_inj_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_OIN:
-            prop_sensors.LOX_inj_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.LOX_inj_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_CCC:
-            prop_sensors.chamber_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.chamber_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_L_ETA:
-            prop_sensors.fuel_level = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_level = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_L_OTA:
-            prop_sensors.LOX_level = *reinterpret_cast<double*>(data);
+            prop_sensors.LOX_level = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_NCO:
-            prop_sensors.N2_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.N2_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_ETA:
-            prop_sensors.fuel_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_OTA:
-            prop_sensors.LOX_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.LOX_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_CIG:
-            prop_sensors.igniter_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.igniter_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_EIN:
-            prop_sensors.fuel_inj_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_inj_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_EIN_CF:
-            prop_sensors.fuel_inj_cooling_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_inj_cooling_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_OIN:
-            prop_sensors.LOX_inj_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.LOX_inj_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_CCC:
-            prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.chamber_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_BOARD_FSM_STATE:
             prop_sensors.PRB_state = *reinterpret_cast<uint8_t*>(data);

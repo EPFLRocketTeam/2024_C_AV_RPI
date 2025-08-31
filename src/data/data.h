@@ -60,23 +60,23 @@ struct NavSensors {
 
 // TODO: merge PropSensors and Valves into Prop struct
 struct PropSensors {
-    double    N2_pressure;
-    double    fuel_pressure;
-    double    LOX_pressure;
-    double    igniter_pressure;
-    double    LOX_inj_pressure;
-    double    fuel_inj_pressure;
-    double    chamber_pressure;
-    double    fuel_level;
-    double    LOX_level;
-    double    N2_temperature;
-    double    fuel_temperature;
-    double    LOX_temperature;
-    double    igniter_temperature;
-    double    fuel_inj_temperature;
-    double    fuel_inj_cooling_temperature;
-    double    LOX_inj_temperature;
-    double    chamber_temperature;
+    float    N2_pressure;
+    float    fuel_pressure;
+    float    LOX_pressure;
+    float    igniter_pressure;
+    float    LOX_inj_pressure;
+    float    fuel_inj_pressure;
+    float    chamber_pressure;
+    float    fuel_level;
+    float    LOX_level;
+    float    N2_temperature;
+    float    fuel_temperature;
+    float    LOX_temperature;
+    float    igniter_temperature;
+    float    fuel_inj_temperature;
+    float    fuel_inj_cooling_temperature;
+    float    LOX_inj_temperature;
+    float    chamber_temperature;
     //TODO: should be changed ounce intranet with PRB_STATE is resolved
     uint32_t  PRB_state;
 
