@@ -84,7 +84,7 @@ int main() {
         // Write timestamp and retreive GOAT object 
         Data::get_instance().write(Data::AV_TIMESTAMP, &now_ms);
         DataDump dump = Data::get_instance().get();        
-        fsm.update(dump);
+        fsm.update(dump,delta_ms);
 
 
         // Retrieve sensors data

@@ -78,7 +78,7 @@ void Kalman::check_static(const DataDump& dump) {
         case State::CALIBRATION:
              is_static = true;
                 break;
-        case State::PRESSURIZED:
+        case State::PRESSURIZATION:
         case State::IGNITION:
         case State::BURN:
         case State::ASCENT:

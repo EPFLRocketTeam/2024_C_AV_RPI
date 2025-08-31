@@ -250,7 +250,7 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::ARMED:
             handle_armed(dump);
             break ;
-        case State::PRESSURIZED:
+        case State::PRESSURIZATION:
             handle_pressurized(dump);
             break;
         case State::IGNITION:
