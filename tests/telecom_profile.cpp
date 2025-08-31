@@ -65,7 +65,7 @@ int main() {
     }
 
     auto s = summarize(times);
-    std::cout << "send_telemetry() latency over " << N << " iterations:\n"
+    std::cout << "update() latency over " << N << " iterations:\n"
               << " avg=" << s.avg << "us"
               << " p50=" << s.p50 << "us"
               << " p90=" << s.p90 << "us"
