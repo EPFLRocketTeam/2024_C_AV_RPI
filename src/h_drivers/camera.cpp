@@ -90,7 +90,7 @@ void Camera::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::FILLING:
         case State::ARMED:
             break;
-        case State::PRESSURIZED:
+        case State::PRESSURIZATION:
             handle_pressurized();
             break;
         case State::IGNITION:
