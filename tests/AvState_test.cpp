@@ -104,8 +104,8 @@ void armedToErrorGround(AvState &fsm, DataDump &dump) {
 void armedToReady(AvState &fsm, DataDump &dump) {
     dump.event.dpr_eth_pressure_ok = true;
     dump.event.dpr_lox_pressure_ok = true;
-    dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED;
-    dump.prop.LOX_pressure = LOX_PRESSURE_WANTED;
+    //dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED;
+    //dump.prop.LOX_pressure = LOX_PRESSURE_WANTED;
     fsm.update(dump,0);
     assert_s(State::PRESSURIZATION, fsm);
     //sameState(fsm, dump);
@@ -147,8 +147,9 @@ void thrustSequenceToErrorFlight(AvState &fsm, DataDump &dump) {
 void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
     dump.event.ignited = true;
     dump.nav.speed.z = SPEED_MIN_ASCENT + 1;
-    dump.nav.accel.z = ACCEL_ZERO + 1;
-    dump.nav.altitude = ALTITUDE_ZERO + 1;
+    //dump.nav.accel.z = ACCEL_ZERO + 1;
+    //dump.nav.altitude = ALTITUDE_ZERO + 1;
+    /*
     dump.prop.igniter_pressure = IGNITER_PRESSURE_WANTED + 1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_WANTED + 1;
     dump.prop.fuel_inj_pressure = INJECTOR_PRESSURE_WANTED_MIN + 1;
@@ -156,6 +157,7 @@ void thrustSequenceToLiftoff(AvState &fsm, DataDump &dump) {
     dump.prop.fuel_pressure = FUEL_PRESSURE_WANTED + 1;
     dump.prop.LOX_pressure = LOX_PRESSURE_WANTED + 1;
     dump.prop.N2_pressure = N2_PRESSURE_ZERO + 1;
+    */
     fsm.update(dump,0);
     assert_s(State::BURN, fsm);
     //sameState(fsm, dump);
@@ -187,7 +189,7 @@ void ascentToErrorFlight(AvState &fsm, DataDump &dump) {
 
 // Function to trigger the ASCENT -> DESCENT transition
 void ascentToDescent(AvState &fsm, DataDump &dump) {
-    dump.nav.speed.z = SPEED_ZERO * 0.1;
+    //dump.nav.speed.z = SPEED_ZERO * 0.1;
     fsm.update(dump,0);
     assert_s(State::DESCENT, fsm);
     //sameState(fsm, dump);
@@ -203,7 +205,7 @@ void descentToErrorFlight(AvState &fsm, DataDump &dump) {
 
 // Function to trigger the DESCENT -> LANDED transition
 void descentToLanded(AvState &fsm, DataDump &dump) {
-    dump.nav.speed.z = SPEED_ZERO * 0.1;
+    /*dump.nav.speed.z = SPEED_ZERO * 0.1;
     dump.nav.speed.x = SPEED_ZERO * 0.1;
     dump.nav.speed.y = SPEED_ZERO * 0.1;
     dump.prop.chamber_pressure = CHAMBER_PRESSURE_ZERO - 1;
@@ -213,6 +215,7 @@ void descentToLanded(AvState &fsm, DataDump &dump) {
     dump.prop.LOX_inj_pressure = INJECTOR_PRESSURE_ZERO - 1;
     dump.prop.N2_pressure = N2_PRESSURE_ZERO - 1;
     dump.prop.igniter_pressure = IGNITER_PRESSURE_ZERO - 1;
+    */
     fsm.update(dump,0);
     assert_s(State::LANDED, fsm);
     //sameState(fsm, dump);

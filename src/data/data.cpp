@@ -331,6 +331,7 @@ DataDump Data::get() const {
     };
 }
 
+/*
 bool DataDump::depressurised() const {
     return prop.N2_pressure < N2_PRESSURE_ZERO
         && prop.fuel_pressure < FUEL_PRESSURE_ZERO
@@ -339,4 +340,5 @@ bool DataDump::depressurised() const {
         && prop.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
         && prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
 }
+*/
 

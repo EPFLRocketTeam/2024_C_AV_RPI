@@ -43,6 +43,11 @@ void PR_board::send_sleep() {
     write_register(AV_NET_PRB_WAKE_UP, (uint8_t*)&order);
 }
 
+void PR_board::send_reset() {
+    const uint32_t order(AV_NET_CMD_ON);
+    write_register(AV_NET_PRB_RESET, (uint8_t*)&order);
+}
+
 bool PR_board::read_is_woken_up() {
     uint32_t rslt(0);
     read_register(AV_NET_PRB_IS_WOKEN_UP, (uint8_t*)&rslt);
@@ -221,6 +226,7 @@ void PR_board::handle_init(const DataDump& dump) {
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B);
     write_valves(default_valves);
+    send_reset();
 }
 
 void PR_board::handle_calibration(const DataDump& dump) {
@@ -302,6 +308,11 @@ void PR_board::handle_ignition(const DataDump& dump) {
 
 void PR_board::handle_burn(const DataDump& dump) {
     periodic_timestamp(100);
+    bool cut_off(true);
+    if (!dump.valves.valve_prb_main_lox && !dump.valves.valve_prb_main_fuel) {
+        Data::get_instance().write(Data::EVENT_ENGINE_CUT_OFF, &cut_off);
+    }
+
 }
 
 void PR_board::handle_ascent(const DataDump& dump) {

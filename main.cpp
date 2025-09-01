@@ -84,6 +84,9 @@ int main() {
         // Write timestamp and retreive GOAT object 
         Data::get_instance().write(Data::AV_TIMESTAMP, &now_ms);
         DataDump dump = Data::get_instance().get();        
+        // Data logging
+        Logger::log_dump(dump);
+        // FSM
         fsm.update(dump,delta_ms);
 
 
@@ -99,12 +102,17 @@ int main() {
         // Execute DPRs
         try {
             dpr_ethanol.check_policy(dump, delta_ms);
+        }catch(DPRException& e) {
+            Logger::log_eventf(Logger::ERROR, "%s", e.what());
+        }
+
+        try {
             dpr_lox.check_policy(dump, delta_ms);
         }catch(DPRException& e) {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
+
         // Execute telemetry
-        
         try {
             telecom.check_policy(dump, delta_ms);
         }catch(TelecomException& e) {

@@ -153,7 +153,7 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
                 // allow a short grace period after entering this state before triggering overpressure aborts
                 if (pressurization_start_time > OVERPRESSURE_GRACE_MS)
                 {
-                    if (fuel_avg > FUEL_PRESSURE_MAX || lox_avg > LOX_PRESSURE_MAX)
+                    if (fuel_avg > PRESSURIZATION_CHECK_PRESSURE || lox_avg > PRESSURIZATION_CHECK_PRESSURE)
                     {
                         reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
                         Logger::log_eventf(
@@ -166,9 +166,9 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
                 }
 
                 // success path once we've waited long enough
-                if (pressurization_start_time > PRESSURIZATION_WAIT_TIME &&
-                        fuel_avg >= FUEL_PRESSURE_WANTED &&
-                        lox_avg >= LOX_PRESSURE_WANTED)
+                if (pressurization_start_time > PRESSURIZATION_HOLD &&
+                        fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
+                        lox_avg <= PRESSURIZATION_CHECK_PRESSURE)
                 {
                     reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
                     Logger::log_eventf("Pressurization successful");

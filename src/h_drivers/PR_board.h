@@ -22,6 +22,7 @@ public:
     void write_timestamp(); 
     void send_wake_up();
     void send_sleep();
+    void send_reset();
     bool read_is_woken_up();
     void clear_to_ignite(bool value);
     void read_fsm();

@@ -188,9 +188,6 @@ struct DataDump {
     Batteries bat;
     CamsRecording cams_recording;
     Event event;
-
-    // TODO: move to PR_board.check_policy
-    bool depressurised() const;
 };
 
 
