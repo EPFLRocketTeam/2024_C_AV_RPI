@@ -17,7 +17,7 @@ public:
     bool read_is_woken_up();
     void send_pressurize(const bool active);
     void send_passivate();
-    void send_abort();
+    void send_abort(const bool in_flight);
     float read_tank_pressure();
     float read_tank_temperature();
     float read_copv_pressure();

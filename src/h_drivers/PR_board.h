@@ -52,6 +52,7 @@ private:
     void read_register(const uint8_t reg_addr, uint8_t* data);
     void write_register(const uint8_t reg_addr, const uint8_t* data);
 
+    void listen_valves_command(const DataDump& dump);
     inline void count_time(uint32_t period,uint32_t delta_ms);
     inline void periodic_timestamp(const uint32_t period);
 };

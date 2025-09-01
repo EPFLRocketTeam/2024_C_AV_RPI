@@ -88,15 +88,15 @@ void DPR::send_passivate() {
     Logger::log_eventf(Logger::DEBUG, "Sending PASSIVATE to DPR_%s", m_code.c_str());
 }
 
-void DPR::send_abort() {
-    const uint32_t order(AV_NET_CMD_ON);
+void DPR::send_abort(const bool in_flight) {
+    const uint32_t order(in_flight ? AV_NET_CMD_ON : AV_NET_CMD_OFF);
     try {
         I2CInterface::getInstance().write(m_address, AV_NET_DPR_ABORT, (uint8_t*)&order, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("DPR " + m_code + " send_abort error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending ABORT to DPR_%s", m_code.c_str());
+    Logger::log_eventf(Logger::DEBUG, "Sending ABORT to DPR_%s: %x", m_code.c_str(), order);
 }
 
 /*
@@ -302,14 +302,10 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 void DPR::handle_init(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
-    static int n(0);
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_DN_NC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO);
-    if (n < 10) {
-        write_valves(default_valves);
-        ++n;
-    }
+    write_valves(default_valves);
 }
 
 void DPR::handle_calibration(const DataDump& dump) {
@@ -374,11 +370,13 @@ void DPR::handle_landed(const DataDump& dump) {
 void DPR::handle_abort_ground(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
+    send_abort(0);
 }
 
 void DPR::handle_abort_flight(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
+    send_abort(1);
 }
 
 void DPR::listen_valves_command(const DataDump& dump) {

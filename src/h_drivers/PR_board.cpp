@@ -204,10 +204,10 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 }
 
 void PR_board::actuate_valve(const bool active, const uint8_t valve_bitshift) {
-    uint8_t cmd(0);
-    if (active) {
+    uint32_t cmd(0);
+    if (active == 1) {
         cmd = AV_NET_CMD_ON << valve_bitshift;
-    }else {
+    }else if (active == 0) {
         cmd = AV_NET_CMD_OFF << valve_bitshift;
     }
     uint32_t valves(read_valves());
@@ -218,13 +218,9 @@ void PR_board::actuate_valve(const bool active, const uint8_t valve_bitshift) {
 
 
 void PR_board::handle_init(const DataDump& dump) {
-    static int n(0);
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B);
-    if (n < 10) {
-        write_valves(default_valves);
-        ++n;
-    }
+    write_valves(default_valves);
 }
 
 void PR_board::handle_calibration(const DataDump& dump) {
@@ -241,25 +237,12 @@ void PR_board::handle_calibration(const DataDump& dump) {
 void PR_board::handle_filling(const DataDump& dump) {
     // Process commands in manual mode
     periodic_timestamp(100);
-    if (dump.event.command_updated) {
-        const uint8_t value(dump.telemetry_cmd.value);
-        switch (dump.telemetry_cmd.id) {
-            case CMD_ID::AV_CMD_MAIN_LOX:
-                // Handle main LOX valve commands
-                actuate_valve(value, AV_NET_SHIFT_MO_BC);
-                break;
-            case CMD_ID::AV_CMD_MAIN_FUEL:
-                // Handle main Fuel valve commands
-                actuate_valve(value, AV_NET_SHIFT_ME_B);
-                break;
-            default:
-                break;
-        }
-    }
+    listen_valves_command(dump);
 }
 
 void PR_board::handle_armed(const DataDump& dump) {
     periodic_timestamp(100);
+    listen_valves_command(dump);
 }
 
 void PR_board::handle_pressurization(const DataDump& dump) {
@@ -367,6 +350,24 @@ void PR_board::write_register(const uint8_t reg_addr, const uint8_t* data) {
     }catch(I2CInterfaceException& e) {
         std::string msg("PRB communication error: failed writing to register ");
         throw PRBoardException(msg + std::to_string(reg_addr) + "\t(" + e.what() + ")");
+    }
+}
+
+void PR_board::listen_valves_command(const DataDump& dump) {
+    if (dump.event.command_updated) {
+        const uint8_t value(dump.telemetry_cmd.value);
+        switch (dump.telemetry_cmd.id) {
+            case CMD_ID::AV_CMD_MAIN_LOX:
+                // Handle main LOX valve commands
+                actuate_valve(value, AV_NET_SHIFT_MO_BC);
+                break;
+            case CMD_ID::AV_CMD_MAIN_FUEL:
+                // Handle main Fuel valve commands
+                actuate_valve(value, AV_NET_SHIFT_ME_B);
+                break;
+            default:
+                break;
+        }
     }
 }
 

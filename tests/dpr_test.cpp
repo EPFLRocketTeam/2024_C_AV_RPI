@@ -61,15 +61,15 @@ void leak_test(DPR& dpr_lox, DPR& dpr_eth) {
     Logger::log_eventf("======LEAK TEST======");
     Logger::log_eventf("Sending ABORT (HOLD) to both DPRs");
     
-    dpr_lox.send_abort();
-    dpr_eth.send_abort();
+    dpr_lox.send_abort(0);
+    dpr_eth.send_abort(0);
 
     Logger::log_eventf("Starting LOX pressurization in 5s");
 
     AvTimer::sleep(5e3);
 
     // Pressurize LOX tank
-    dpr_lox.send_pressurize();
+    dpr_lox.send_pressurize(1);
 
     bool eth_pressurized(false);
     uint32_t now_ms(AvTimer::tick());
@@ -86,7 +86,7 @@ void leak_test(DPR& dpr_lox, DPR& dpr_eth) {
         read_sensors(dpr_eth);
 
         if (total_ms >= 30e3 && !eth_pressurized) {
-            dpr_eth.send_pressurize();
+            dpr_eth.send_pressurize(1);
             eth_pressurized = true;
         }
 
