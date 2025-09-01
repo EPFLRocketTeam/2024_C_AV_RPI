@@ -7,6 +7,7 @@
 #include "dpr.h"
 #include "i2c_interface.h"
 #include "intranet_commands.h"
+#include "thresholds.h"
 
 
 DPR::DPR(const uint8_t address) : m_address(address) {
@@ -65,15 +66,26 @@ bool DPR::read_is_woken_up() {
     return dpr_woken_up;
 }
 
-void DPR::send_pressurize() {
-    const uint32_t order(AV_NET_CMD_ON);
+void DPR::send_pressurize(const bool active) {
+    const uint32_t order(active ? AV_NET_CMD_ON : AV_NET_CMD_OFF);
     try {
         I2CInterface::getInstance().write(m_address, AV_NET_DPR_PRESSURIZE, (uint8_t*)&order, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("DPR " + m_code + " send_pressurize error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending PRESSURIZE to DPR_%s", m_code.c_str());
+    Logger::log_eventf(Logger::DEBUG, "Sending PRESSURIZE to DPR_%s: %x", m_code.c_str(), order);
+}
+
+void DPR::send_passivate() {
+    const uint32_t cmd(AV_NET_CMD_ON);
+    try {
+        I2CInterface::getInstance().write(m_address, AV_NET_DPR_PASSIVATE, (uint8_t*)&cmd, AV_NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("DPR_" + m_code + " write_passivate error: ");
+        throw DPRException(msg + e.what());
+    }
+    Logger::log_eventf(Logger::DEBUG, "Sending PASSIVATE to DPR_%s", m_code.c_str());
 }
 
 void DPR::send_abort() {
@@ -234,6 +246,7 @@ uint32_t DPR::read_valves() {
     return dpr_valves;
 }
 
+
 void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     this->delta_ms = delta_ms;
     count_ms += delta_ms;
@@ -251,10 +264,10 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             handle_armed(dump);
             break ;
         case State::PRESSURIZATION:
-            handle_pressurized(dump);
+            handle_pressurization(dump);
             break;
         case State::IGNITION:
-            handle_thrustsequence(dump);
+            handle_ignition(dump);
             break;
         case State::BURN:
             handle_burn(dump);
@@ -307,7 +320,64 @@ void DPR::handle_calibration(const DataDump& dump) {
 
 void DPR::handle_filling(const DataDump& dump) {
     periodic_timestamp(500);
+    listen_valves_command(dump);
+}
 
+void DPR::handle_armed(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+    listen_valves_command(dump);
+}
+
+void DPR::handle_pressurization(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+    send_pressurize(1);
+}
+
+void DPR::handle_ignition(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+}
+
+void DPR::handle_burn(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+}
+
+void DPR::handle_ascent(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+    send_pressurize(0);
+}
+
+void DPR::handle_descent(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+    static uint32_t passivation_count_ms(0);
+    if (passivation_count_ms >= PASSIVATION_DELAY_AFTER_APOGEE) {
+        send_passivate();
+    }else {
+        passivation_count_ms += delta_ms;
+    }
+}
+
+void DPR::handle_landed(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+}
+
+void DPR::handle_abort_ground(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+}
+
+void DPR::handle_abort_flight(const DataDump& dump) {
+    // Write timestamp at a freq of 1Hz
+    periodic_timestamp(1000);
+}
+
+void DPR::listen_valves_command(const DataDump& dump) {
     uint32_t valves(read_valves());
     if (dump.event.command_updated) {
         uint32_t cmd(0);
@@ -377,58 +447,6 @@ void DPR::handle_filling(const DataDump& dump) {
             break;
         }
     }
-}
-
-void DPR::handle_armed(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
-
-    const bool dpr_ready(m_address == AV_NET_ADDR_DPR_ETH ? dump.event.dpr_eth_ready : dump.event.dpr_lox_ready);
-    if (dpr_ready && dump.event.command_updated) {
-        if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_PRESSURIZE) {
-            send_pressurize();
-        }
-    }
-}
-
-void DPR::handle_pressurized(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
-}
-
-void DPR::handle_thrustsequence(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
-}
-
-void DPR::handle_burn(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
-}
-
-void DPR::handle_ascent(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
-}
-
-void DPR::handle_descent(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
-}
-
-void DPR::handle_landed(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
-}
-
-void DPR::handle_abort_ground(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
-}
-
-void DPR::handle_abort_flight(const DataDump& dump) {
-    // Write timestamp at a freq of 1Hz
-    periodic_timestamp(1000);
 }
 
 inline void DPR::periodic_timestamp(const uint32_t period) {

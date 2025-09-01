@@ -11,12 +11,13 @@ public:
     DPR(const uint8_t address);
     virtual ~DPR();
 
+    // I2C registers R/W low-level functions
     void write_timestamp();
     void wake_up();
     bool read_is_woken_up();
-    void send_pressurize();
+    void send_pressurize(const bool active);
+    void send_passivate();
     void send_abort();
-    // void read_tank_level();
     float read_tank_pressure();
     float read_tank_temperature();
     float read_copv_pressure();
@@ -35,8 +36,8 @@ private:
     void handle_calibration(const DataDump& dump);
     void handle_filling(const DataDump& dump);
     void handle_armed(const DataDump& dump);
-    void handle_pressurized(const DataDump& dump);
-    void handle_thrustsequence(const DataDump& dump);
+    void handle_pressurization(const DataDump& dump);
+    void handle_ignition(const DataDump& dump);
     void handle_burn(const DataDump& dump);
     void handle_ascent(const DataDump& dump);
     void handle_descent(const DataDump& dump);
@@ -44,6 +45,7 @@ private:
     void handle_abort_ground(const DataDump& dump);
     void handle_abort_flight(const DataDump& dump);
 
+    void listen_valves_command(const DataDump& dump);
     inline void periodic_timestamp(const uint32_t period);
 };
 
