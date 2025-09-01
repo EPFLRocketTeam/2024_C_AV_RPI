@@ -159,7 +159,7 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     this->delta_ms = delta_ms;
     switch (dump.av_state) {
         case State::INIT:
-            // For the INIT state we do nothing
+            handle_init(dump);
             break;
         case State::CALIBRATION:
             // Handle calibration logic
@@ -218,9 +218,13 @@ void PR_board::actuate_valve(const bool active, const uint8_t valve_bitshift) {
 
 
 void PR_board::handle_init(const DataDump& dump) {
+    static int n(0);
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B);
-    write_valves(default_valves);
+    if (n < 10) {
+        write_valves(default_valves);
+        ++n;
+    }
 }
 
 void PR_board::handle_calibration(const DataDump& dump) {

@@ -1,6 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// ABORT CONFIG
+#define ABORT_FLIGHT_EN     0
+
 /* GPIOS */
 #define LORA_UPLINK_CS      8
 #define LORA_UPLINK_RST     24

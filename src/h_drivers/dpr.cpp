@@ -289,10 +289,14 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 void DPR::handle_init(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
+    static int n(0);
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_DN_NC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO);
-    write_valves(default_valves);
+    if (n < 10) {
+        write_valves(default_valves);
+        ++n;
+    }
 }
 
 void DPR::handle_calibration(const DataDump& dump) {
@@ -382,13 +386,6 @@ void DPR::handle_filling(const DataDump& dump) {
 void DPR::handle_armed(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
-
-    const bool dpr_ready(m_address == AV_NET_ADDR_DPR_ETH ? dump.event.dpr_eth_ready : dump.event.dpr_lox_ready);
-    if (dpr_ready && dump.event.command_updated) {
-        if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_PRESSURIZE) {
-            send_pressurize();
-        }
-    }
 }
 
 void DPR::handle_pressurized(const DataDump& dump) {
