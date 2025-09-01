@@ -112,14 +112,14 @@ void armedToReady(AvState &fsm, DataDump &dump) {
 }
 
 void armedToReadyBypassed(AvState& fsm, DataDump dump) {
-    dump.telemetry_cmd.id = CMD_ID::AV_CMD_BYPASS_DPR_CHECK;
+    //dump.telemetry_cmd.id = CMD_ID::AV_CMD_BYPASS_DPR_CHECK;
     fsm.update(dump,0);
     assert_s(State::PRESSURIZATION, fsm);
 }
 
 // Function to trigger the READY -> THRUSTSEQUENCE transition
 void readyToThrustSequence(AvState &fsm, DataDump &dump) {
-    dump.telemetry_cmd.id = CMD_ID::AV_CMD_IGNITION;
+    //dump.telemetry_cmd.id = CMD_ID::AV_CMD_IGNITION;
     fsm.update(dump,0);
     assert_s(State::IGNITION, fsm);
     //TODO check that this is correct

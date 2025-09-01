@@ -302,10 +302,14 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 void DPR::handle_init(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
+    static int n(0);
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_DN_NC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO);
-    write_valves(default_valves);
+    if (n < 10) {
+        write_valves(default_valves);
+        ++n;
+    }
 }
 
 void DPR::handle_calibration(const DataDump& dump) {
@@ -383,7 +387,6 @@ void DPR::listen_valves_command(const DataDump& dump) {
         uint32_t cmd(0);
         const bool value(dump.telemetry_cmd.value);
         switch (dump.telemetry_cmd.id) {
-            // TODO: add PE, PO and DN valves to RF_Protocol_Interface CMD_ID enum
 		case CMD_ID::AV_CMD_P_LOX:
 			if (m_address == AV_NET_ADDR_DPR_LOX) {
 				if (value ^ 0) {

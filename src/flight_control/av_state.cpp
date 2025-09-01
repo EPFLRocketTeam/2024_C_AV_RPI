@@ -37,6 +37,11 @@ void MovingAverage::reset()
     samples.clear();
     sum = 0.0f;
 }
+
+
+///////////////////////////////
+// AvState: Flight Computer FSM
+///////////////////////////////
 AvState::AvState()
 {
     this->currentState = State::INIT;
@@ -69,7 +74,7 @@ State AvState::from_calibration(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition CALIBRATION->ABORT_ON_GROUND");
+        Logger::log_eventf(Logger::WARN, "FSM transition CALIBRATION->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
     // If all the sensors are calibrated and ready for use we go to the FILLING state
@@ -85,7 +90,7 @@ State AvState::from_filling(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition FILLING->ABORT_ON_GROUND");
+        Logger::log_eventf(Logger::WARN, "FSM transition FILLING->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
@@ -105,17 +110,11 @@ State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
         return State::ABORT_ON_GROUND;
     }
 
-    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_PRESSURIZE)
+    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_LAUNCH)
     {
-        Logger::log_eventf("FSM transition ARMED->PRESSURIZED");
+        Logger::log_eventf("FSM transition ARMED->PRESSURIZATION");
+        Logger::log_eventf(Logger::WARN, "IGNITION is imminent");
         return State::PRESSURIZATION;
-    }
-
-    // Transition to PRESSURIZED can be bypassed by ground operators
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_BYPASS_DPR_CHECK)
-    {
-        Logger::log_eventf(Logger::WARN, "Bypassing automatic pressurization check. FSM transition ARMED->PRESSURIZED");
-        return State::IGNITION;
     }
 
     return currentState;
@@ -132,62 +131,56 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
 {
     switch (dump.telemetry_cmd.id)
     {
-    case CMD_ID::AV_CMD_ABORT:
-    {
-        Logger::log_eventf("FSM transition PRESSURIZED->ABORT_ON_GROUND");
-        reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
-        return State::ABORT_ON_GROUND;
-    }
-
-    case CMD_ID::AV_CMD_IGNITION:
-    {
-        reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
-        Logger::log_eventf("FSM transition PRESSURIZED->IGNITION");
-        return State::IGNITION;
-    }
-
-    default:
-    {
-        // advance timer
-        pressurization_start_time += delta_ms;
-
-        // update moving averages
-        pressure_lox_avg.addSample(dump.prop.LOX_pressure);
-        pressure_fuel_avg.addSample(dump.prop.fuel_pressure);
-
-        // cache averages (avoid repeated calls)
-        const auto fuel_avg = pressure_fuel_avg.getAverage();
-        const auto lox_avg = pressure_lox_avg.getAverage();
-
-        // allow a short grace period after entering this state before triggering overpressure aborts
-
-        if (pressurization_start_time > OVERPRESSURE_GRACE_MS)
-        {
-            if (fuel_avg > FUEL_PRESSURE_MAX || lox_avg > LOX_PRESSURE_MAX)
+        case CMD_ID::AV_CMD_ABORT:
             {
+                Logger::log_eventf(Logger::WARN, "FSM transition PRESSURIZED->ABORT_ON_GROUND");
                 reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
-                Logger::log_eventf(
-                    Logger::ERROR,
-                    "Tank overpressure detected! Fuel: %.2f / LOX: %.2f. "
-                    "FSM transition PRESSURIZED->ABORT_ON_GROUND",
-                    fuel_avg, lox_avg);
                 return State::ABORT_ON_GROUND;
             }
-        }
+        default:
+            {
+                // advance timer
+                pressurization_start_time += delta_ms;
 
-        // success path once we've waited long enough
-        if (pressurization_start_time > PRESSURIZATION_WAIT_TIME &&
-            fuel_avg >= FUEL_PRESSURE_WANTED &&
-            lox_avg >= LOX_PRESSURE_WANTED)
-        {
-            reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
-            Logger::log_eventf("Pressurization successful");
-            return State::IGNITION;
-        }
+                // update moving averages
+                pressure_lox_avg.addSample(dump.prop.LOX_pressure);
+                pressure_fuel_avg.addSample(dump.prop.fuel_pressure);
 
-        return currentState;
+                // cache averages (avoid repeated calls)
+                const auto fuel_avg = pressure_fuel_avg.getAverage();
+                const auto lox_avg = pressure_lox_avg.getAverage();
+
+                // allow a short grace period after entering this state before triggering overpressure aborts
+                if (pressurization_start_time > OVERPRESSURE_GRACE_MS)
+                {
+                    if (fuel_avg > FUEL_PRESSURE_MAX || lox_avg > LOX_PRESSURE_MAX)
+                    {
+                        reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+                        Logger::log_eventf(
+                                Logger::FATAL,
+                                "Tank overpressure detected! Fuel: %.2f / LOX: %.2f. ",
+                                fuel_avg, lox_avg);
+                        Logger::log_eventf("FSM transition PRESSURIZED->ABORT_ON_GROUND");
+                        return State::ABORT_ON_GROUND;
+                    }
+                }
+
+                // success path once we've waited long enough
+                if (pressurization_start_time > PRESSURIZATION_WAIT_TIME &&
+                        fuel_avg >= FUEL_PRESSURE_WANTED &&
+                        lox_avg >= LOX_PRESSURE_WANTED)
+                {
+                    reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+                    Logger::log_eventf("Pressurization successful");
+                    Logger::log_eventf("FSM transition PRESSURIZATION->IGNITION");
+                    return State::IGNITION;
+                }
+
+                return currentState;
+            }
     }
-    }
+
+    return currentState;
 }
 
 void inline reset_ignition_timers(uint32_t &timer_accel, uint32_t &timer_liftoff_timeout)
@@ -201,6 +194,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     timer_liftoff_timeout += delta_ms;
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
+        Logger::log_eventf(Logger::WARN, "ABORT command received");
         Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
         reset_ignition_timers(timer_accel, timer_liftoff_timeout);
         return State::ABORT_ON_GROUND;
@@ -216,22 +210,16 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     }
     if (timer_accel > 500)
     {
-        if (dump.nav.altitude > ALTITUDE_ZERO)
-        {
-            reset_ignition_timers(timer_accel, timer_liftoff_timeout);
-            Logger::log_eventf("Liftoff detected");
-            return State::BURN;
-        }
-        else
-        {
-            reset_ignition_timers(timer_accel, timer_liftoff_timeout);
-            Logger::log_eventf("Liftoff detected but altitude too low, aborting");
-            return State::ABORT_IN_FLIGHT;
-        }
+        // Transition from IGNITION->BURN with liftoff detection was canceled on 01/09/2025
     }
 
-    // TODO: condition is ignition_failed OR non_liftoff_detected
-    else if (dump.event.ignition_failed || timer_liftoff_timeout > MAX_LIFTOFF_TIMEOUT)
+    if (dump.event.ignited) {
+        Logger::log_eventf("FSM transition IGNITION->BURN");
+        return State::BURN;
+    }
+
+    // TODO: condition is ignition_failed
+    else if (dump.event.ignition_failed)
     {
         reset_ignition_timers(timer_accel, timer_liftoff_timeout);
         Logger::log_eventf("FSM transition IGNITION->FILLING");
@@ -245,11 +233,17 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition LOFTOFF->ABORT_ON_GROUND");
+        Logger::log_eventf(Logger::WARN, "ABORT command received");
+#if (ABORT_FLIGHT_EN)
+        Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
+        return State::ABORT_IN_FLIGHT;
+#else
+        Logger::log_eventf("FSM transition BURN->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
+#endif
     }
-    // If ECO is confirmed or the altitude threashold is cleared we go to the ASCENT state
-    else if (dump.event.engine_cut_off || (dump.nav.altitude > ALTITUDE_THRESHOLD && dump.nav.speed.z >= SPEED_MIN_ASCENT))
+    // If ECO is confirmed we go to the ASCENT state
+    if (dump.event.engine_cut_off)
     {
         Logger::log_eventf("FSM transition BURN->ASCENT");
         return State::ASCENT;
@@ -261,8 +255,14 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition ASCENT->ABORT_ON_GROUND");
+        Logger::log_eventf(Logger::WARN, "ABORT command received");
+#if (ABORT_FLIGHT_EN)
+        Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
+        return State::ABORT_IN_FLIGHT;
+#else
+        Logger::log_eventf("FSM transition BURN->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
+#endif
     }
     //TODO: better apogee detection
     else if (dump.nav.speed.z < SPEED_ZERO)
@@ -277,8 +277,14 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition DESCENT->ABORT_ON_GROUND");
+        Logger::log_eventf(Logger::WARN, "ABORT command received");
+#if (ABORT_FLIGHT_EN)
+        Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
+        return State::ABORT_IN_FLIGHT;
+#else
+        Logger::log_eventf("FSM transition BURN->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
+#endif
     }
     //TODO:probably a safety against an exactly zero speed apogee detection like a timer of 200ms
     else if (dump.nav.speed.norm() <= SPEED_ZERO)
@@ -298,6 +304,7 @@ State AvState::from_abort_ground(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_RECOVER)
     {
+        Logger::log_eventf(Logger::WARN, "RECOVER command received");
         Logger::log_eventf("FSM transition ABORT_ON_GROUND->INIT");
         return State::INIT;
     }
