@@ -49,10 +49,6 @@ int main() {
         goat.write(Data::PR_SENSOR_P_ETA, &Fuel_pres);
         double lox_pres(132.564);
         goat.write(Data::PR_SENSOR_P_OTA, &lox_pres);
-        double fuel_level(23.56);
-        goat.write(Data::PR_SENSOR_L_ETA, &fuel_level);
-        double lox_level(12.34);
-        goat.write(Data::PR_SENSOR_L_OTA, &lox_level);
         double N2_temp(-180);
         goat.write(Data::PR_SENSOR_T_NCO, &N2_temp);
         double lox_temp(90);

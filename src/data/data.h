@@ -67,8 +67,6 @@ struct PropSensors {
     float    LOX_inj_pressure;
     float    fuel_inj_pressure;
     float    chamber_pressure;
-    float    fuel_level;
-    float    LOX_level;
     float    N2_temperature;
     float    fuel_temperature;
     float    LOX_temperature;
@@ -124,6 +122,7 @@ struct GPSTime {
 struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
+    double    gnss_speed;
     //referentiel earth
     Vector3   position_kalman;
     Vector3   speed;
@@ -244,6 +243,7 @@ public:
         NAV_GNSS_POS_LAT,
         NAV_GNSS_POS_LNG,
         NAV_GNSS_POS_ALT,
+        NAV_GNSS_SPEED,
         NAV_GNSS_COURSE,
       
         NAV_KALMAN_DATA,
@@ -256,8 +256,6 @@ public:
         PR_SENSOR_P_EIN, // Ethanol Injector Pressure
         PR_SENSOR_P_OIN, // Lox Injector Pressure
         PR_SENSOR_P_CCC, // Combustion Chamber Pressure
-        PR_SENSOR_L_ETA, // Ethanol Tank Level
-        PR_SENSOR_L_OTA, // Lox Tank Level
         PR_SENSOR_T_NCO, // N2 Temperature
         PR_SENSOR_T_ETA, // Ethanol Tank Temperature
         PR_SENSOR_T_OTA, // Lox Tank Temperature

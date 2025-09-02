@@ -18,8 +18,6 @@ PropSensors::PropSensors()
 :   N2_pressure(0),
     fuel_pressure(0),
     LOX_pressure(0),
-    fuel_level(0),
-    LOX_level(0),
     igniter_pressure(0),
     LOX_inj_pressure(0),
     fuel_inj_pressure(0),
@@ -47,6 +45,7 @@ Valves::Valves()
 NavigationData::NavigationData()
 :   time{0, 0, 0, 0, 0, 0, 0},
     position{0, 0, 0},
+    gnss_speed(0),
     speed{0, 0, 0},
     accel{0, 0, 0},
     attitude{0, 0, 0},
@@ -170,12 +169,6 @@ void Data::write(GoatReg reg, void* data) {
         case PR_SENSOR_P_CCC:
             prop_sensors.chamber_pressure = *reinterpret_cast<float*>(data);
             break;
-        case PR_SENSOR_L_ETA:
-            prop_sensors.fuel_level = *reinterpret_cast<float*>(data);
-            break;
-        case PR_SENSOR_L_OTA:
-            prop_sensors.LOX_level = *reinterpret_cast<float*>(data);
-            break;
         case PR_SENSOR_T_NCO:
             prop_sensors.N2_temperature = *reinterpret_cast<float*>(data);
             break;
@@ -235,6 +228,9 @@ void Data::write(GoatReg reg, void* data) {
             break;
         case NAV_GNSS_POS_ALT:
             nav.position.alt = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_GNSS_SPEED:
+            nav.gnss_speed = *reinterpret_cast<double*>(data);
             break;
         case NAV_GNSS_COURSE:
             nav.course = *reinterpret_cast<double*>(data);

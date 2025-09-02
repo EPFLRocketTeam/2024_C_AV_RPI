@@ -54,4 +54,5 @@ set(TMP1075_SOURCES
 )
 add_library(tmp1075 ${TMP1075_SOURCES})
 target_include_directories(tmp1075 INTERFACE ${DRIVERS_DIR})
+target_include_directories(tmp1075 PRIVATE ${SRC_DIR})
 target_link_libraries(tmp1075 PRIVATE i2c_interface)

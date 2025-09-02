@@ -284,20 +284,6 @@ int main(int argc, char** argv) {
     dump = goatData.get();
     assert(dump.prop.chamber_pressure == testpCcc);
 
-    // Test PR_SENSOR_L_ETA
-    Data::GoatReg lEtaReg = Data::GoatReg::PR_SENSOR_L_ETA;
-    double testlEta = 8.8;
-    goatData.write(lEtaReg, &testlEta);
-    dump = goatData.get();
-    assert(dump.prop.fuel_level == testlEta);
-
-    // Test PR_SENSOR_L_OTA
-    Data::GoatReg lOtaReg = Data::GoatReg::PR_SENSOR_L_OTA;
-    double testlOta = 9.9;
-    goatData.write(lOtaReg, &testlOta);
-    dump = goatData.get();
-    assert(dump.prop.LOX_level == testlOta);
-
     // Test PR_SENSOR_T_NCO
     Data::GoatReg tNcoReg = Data::GoatReg::PR_SENSOR_T_NCO;
     double testtNco = 1.0;
