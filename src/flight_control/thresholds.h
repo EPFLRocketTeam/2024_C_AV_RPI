@@ -5,46 +5,39 @@
 #ifndef THRESHOLDS_H
 #define THRESHOLDS_H
 
+/*
+ * FLIGHT COMPUTER FSM THRESHOLDS
+ * - - - - - - - - - - - - - - - 
+ * All delays / timeouts are in milliseconds
+ * All distance / altitude thresholds are in meters
+ * ALl velocity thresholds are in meters per second
+ * All pressure thresholds are in bar
+ */
 
-#define SPEED_ZERO 0.1
-#define SPEED_MIN_ASCENT 0.1
-#define ALTITUDE_MAX 9000
+// Flight
 #define ALTITUDE_ZERO 10
-#define ASCENT_DURATION_MS 30000 // ms
+#define ALTITUDE_MAX 4000
+#define ALTITUDE_THRESHOLD 300
+#define SPEED_ZERO 0.1
+#define ASCENT_DURATION_MS 30000
+#define ACCEL_ZERO 0.1
+#define ACCEL_LIFTOFF 0.1
+// Moving averages
+#define OVERPRESSURE_GRACE_MS  80
+#define BUFFER_ACCEL_TIME_MS 500
+#define MAX_LIFTOFF_TIMEOUT_MS 10000
 
 // Pressurization
 #define PRESSURIZATION_CHECK_PRESSURE 70
-#define PRESSURIZATION_HOLD 10350 //in ms
+#define PRESSURIZATION_HOLD_MS 10350
 
-// Engine
-#define CHAMBER_PRESSURE_WANTED 0.1
-#define CHAMBER_PRESSURE_ZERO 0.1
-#define ENGINE_TEMP_ZERO 0.1
-#define ENGINE_TEMP_WANTED 0.1
-// Injector
-#define INJECTOR_PRESSURE_WANTED_MIN 0.1
-#define INJECTOR_PRESSURE_WANTED_MAX 0.1
-#define INJECTOR_PRESSURE_ZERO 0.1
+// Ignition
+#define IGNITION_NO_COM_TIMEOUT_MS 5000
+#define IGNITION_ACK_DELAY_MS    500  // TO TUNE DEPENDING ON THE ACTUAL DELAY ON IGNITION SEQUENCE
 
-#define FUEL_INJ_ZERO 0.1
-#define LOX_LEVEL_ZERO 0.1
-#define LOX_LEVEL_FULL 0.1
-#define FUEL_LEVEL_ZERO 0.1
-#define FUEL_LEVEL_FULL 0.1
-#define N2_PRESSURE_ZERO 0.1
-
-#define ACCEL_ZERO 0.1
-#define ACCEL_LIFTOFF 0.1
-#define IGNITER_PRESSURE_WANTED 0.1
-#define IGNITER_PRESSURE_ZERO 0.1
-#define ALTITUDE_THRESHOLD 300
-                                  
-#define OVERPRESSURE_GRACE_MS  80 //in ms
-#define BUFFER_ACCEL_TIME 500 //in ms
-#define MAX_LIFTOFF_TIMEOUT 10000 //in ms
-
-#define PASSIVATION_DELAY_AFTER_APOGEE  90e3 // ms
-#define PASSIVATION_ALTITUDE_HIGH_BOUND 100 // m
+// Passivation
+#define PASSIVATION_DELAY_AFTER_APOGEE  90e3
+#define PASSIVATION_ALTITUDE_HIGH_BOUND 100
 
 #endif //THRESHOLDS_H
 

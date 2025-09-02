@@ -74,7 +74,8 @@ State AvState::from_calibration(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "FSM transition CALIBRATION->ABORT_ON_GROUND");
+        Logger::log_eventf(Logger::WARN, "ABORT command received");
+        Logger::log_eventf("FSM transition CALIBRATION->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
     // If all the sensors are calibrated and ready for use we go to the FILLING state
@@ -90,7 +91,8 @@ State AvState::from_filling(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "FSM transition FILLING->ABORT_ON_GROUND");
+        Logger::log_eventf(Logger::WARN, "ABORT command received");
+        Logger::log_eventf("FSM transition FILLING->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
@@ -106,7 +108,8 @@ State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
     // Switch to fault state ABORT_ON_GROUND when receiving ABORT from ground operators
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received. FSM transition ARMED->ABORT_ON_GROUND");
+        Logger::log_eventf(Logger::WARN, "ABORT command received");
+        Logger::log_eventf("ABORT command received. FSM transition ARMED->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
 
@@ -129,55 +132,48 @@ void inline reset_pressurization(MovingAverage &avg_lox, MovingAverage &avg_fuel
 
 State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
 {
-    switch (dump.telemetry_cmd.id)
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        case CMD_ID::AV_CMD_ABORT:
-            {
-                Logger::log_eventf(Logger::WARN, "FSM transition PRESSURIZED->ABORT_ON_GROUND");
-                reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
-                return State::ABORT_ON_GROUND;
-            }
-        default:
-            {
-                // advance timer
-                pressurization_start_time += delta_ms;
+        Logger::log_eventf(Logger::WARN, "ABORT command received");
+        Logger::log_eventf("FSM transition PRESSURIZED->ABORT_ON_GROUND");
+        reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+        return State::ABORT_ON_GROUND;
+    }
 
-                // update moving averages
-                pressure_lox_avg.addSample(dump.prop.LOX_pressure);
-                pressure_fuel_avg.addSample(dump.prop.fuel_pressure);
+    // advance timer
+    pressurization_start_time += delta_ms;
 
-                // cache averages (avoid repeated calls)
-                const auto fuel_avg = pressure_fuel_avg.getAverage();
-                const auto lox_avg = pressure_lox_avg.getAverage();
+    // update moving averages
+    pressure_lox_avg.addSample(dump.prop.LOX_pressure);
+    pressure_fuel_avg.addSample(dump.prop.fuel_pressure);
 
-                // allow a short grace period after entering this state before triggering overpressure aborts
-                if (pressurization_start_time > OVERPRESSURE_GRACE_MS)
-                {
-                    if (fuel_avg > PRESSURIZATION_CHECK_PRESSURE || lox_avg > PRESSURIZATION_CHECK_PRESSURE)
-                    {
-                        reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
-                        Logger::log_eventf(
-                                Logger::FATAL,
-                                "Tank overpressure detected! Fuel: %.2f / LOX: %.2f. ",
-                                fuel_avg, lox_avg);
-                        Logger::log_eventf("FSM transition PRESSURIZED->ABORT_ON_GROUND");
-                        return State::ABORT_ON_GROUND;
-                    }
-                }
+    const float fuel_avg = pressure_fuel_avg.getAverage();
+    const float lox_avg = pressure_lox_avg.getAverage();
 
-                // success path once we've waited long enough
-                if (pressurization_start_time > PRESSURIZATION_HOLD &&
-                        fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
-                        lox_avg <= PRESSURIZATION_CHECK_PRESSURE)
-                {
-                    reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
-                    Logger::log_eventf("Pressurization successful");
-                    Logger::log_eventf("FSM transition PRESSURIZATION->IGNITION");
-                    return State::IGNITION;
-                }
+    // allow a short grace period after entering this state before triggering overpressure aborts
+    if (pressurization_start_time > OVERPRESSURE_GRACE_MS)
+    {
+        if (fuel_avg > PRESSURIZATION_CHECK_PRESSURE || lox_avg > PRESSURIZATION_CHECK_PRESSURE)
+        {
+            reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+            Logger::log_eventf(
+                    Logger::FATAL,
+                    "Tank overpressure detected! Fuel: %.2f / LOX: %.2f. ",
+                    fuel_avg, lox_avg);
+            Logger::log_eventf("FSM transition PRESSURIZED->ABORT_ON_GROUND");
+            return State::ABORT_ON_GROUND;
+        }
+    }
 
-                return currentState;
-            }
+    // success path once we've waited long enough
+    if (pressurization_start_time > PRESSURIZATION_HOLD_MS &&
+            fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
+            lox_avg <= PRESSURIZATION_CHECK_PRESSURE)
+    {
+        reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+        Logger::log_eventf("Pressurization successful");
+        Logger::log_eventf("FSM transition PRESSURIZATION->IGNITION");
+        return State::IGNITION;
     }
 
     return currentState;
@@ -200,6 +196,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
         return State::ABORT_ON_GROUND;
     }
 
+    /*
     if (dump.nav.accel.z > ACCEL_LIFTOFF)
     {
         timer_accel += delta_ms;
@@ -212,13 +209,13 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     {
         // Transition from IGNITION->BURN with liftoff detection was canceled on 01/09/2025
     }
+    */
 
     if (dump.event.ignited) {
         Logger::log_eventf("FSM transition IGNITION->BURN");
         return State::BURN;
     }
 
-    // TODO: condition is ignition_failed
     else if (dump.event.ignition_failed)
     {
         reset_ignition_timers(timer_accel, timer_liftoff_timeout);

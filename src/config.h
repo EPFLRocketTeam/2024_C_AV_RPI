@@ -1,8 +1,19 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// ABORT CONFIG
+// ABORT CONFIG  - DO NOT TOUCH
 #define ABORT_FLIGHT_EN     0
+///////////////////////////////
+
+/* Frequencies */
+#define MAIN_LOOP_MAX_FREQUENCY  100
+#define DATADUMP_FSYNC_FREQUENCY 50
+
+/* Logger */
+#define LOG_DUMP_DEFAULT_PATH   "/boot/av_log/dump_log.log"
+#define LOG_EVENT_DEFAULT_PATH  "/boot/av_log/event_log.log"
+extern const bool CONSOLE_LOG;
+extern const bool DEBUG_LOG;
 
 /* GPIOS */
 #define LORA_UPLINK_CS      8
@@ -19,25 +30,12 @@
 #define LED_LORA_RX         17
 #define LED_LORA_TX         18
 
-/* INA228 CONFIGS */
+/* Sensors */
 #define INA228_LPB_SHUNT   65.2e-3
 #define INA228_LPB_MAX_CUR 2.5
-
 #define INA228_HPB_SHUNT   27e-3
 #define INA228_HPB_MAX_CUR 6
 
-
-/* TIMINGS */
-#define MAIN_LOOP_MAX_FREQUENCY  100
-#define IGNITION_SEND_TIMEOUT_MS 5000
-#define IGNITION_ACK_DELAY_MS    500  // TO TUNE DEPENDING ON THE ACTUAL DELAY ON IGNITION SEQUENCE
-
-/* LOGGING */
-#define LOG_DUMP_DEFAULT_PATH   "/boot/av_log/dump_log.log"
-#define LOG_EVENT_DEFAULT_PATH  "/boot/av_log/event_log.log"
-#define DATADUMP_FSYNC_FREQ     50
-
-extern const bool CONSOLE_LOG;
-extern const bool DEBUG_LOG;
+#define TMP1075_ALERT_TEMPERATURE 55
 
 #endif /* CONFIG_H */

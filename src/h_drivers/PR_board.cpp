@@ -275,9 +275,9 @@ void PR_board::handle_ignition(const DataDump& dump) {
             // Send IGNITER command to PRB to start the ignition sequence
             write_igniter(AV_NET_CMD_ON);
 
-            if (ignition_send_ms > IGNITION_SEND_TIMEOUT_MS) {
+            if (ignition_send_ms > IGNITION_NO_COM_TIMEOUT_MS) {
                 Logger::log_eventf(Logger::FATAL, "Prop Board failed to enter IGNITION_SQ after %u ms",
-                        IGNITION_SEND_TIMEOUT_MS);
+                        IGNITION_NO_COM_TIMEOUT_MS);
                 ignition_send_ms = 0;
             }
             ignition_send_ms += delta_ms;

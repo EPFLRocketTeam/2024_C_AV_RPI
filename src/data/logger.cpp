@@ -71,7 +71,7 @@ void Logger::log_dump(const DataDump& dump) {
     
     counter++;
 
-    if (counter >= DATADUMP_FSYNC_FREQ){
+    if (counter >= DATADUMP_FSYNC_FREQUENCY){
         counter = 0;
         fsync(dump_fd);
     }
