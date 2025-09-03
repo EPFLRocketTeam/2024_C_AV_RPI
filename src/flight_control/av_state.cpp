@@ -43,6 +43,10 @@ void MovingAverage::reset()
 // AvState: Flight Computer FSM
 ///////////////////////////////
 AvState::AvState()
+:   pressurization_start_time(0),
+    timer_accel(0),
+    timer_liftoff_timeout(0)
+
 {
     this->currentState = State::INIT;
 }
@@ -144,8 +148,12 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
     pressurization_start_time += delta_ms;
 
     // update moving averages
-    pressure_lox_avg.addSample(dump.prop.LOX_pressure);
-    pressure_fuel_avg.addSample(dump.prop.fuel_pressure);
+    if (-10 <= dump.prop.LOX_pressure && dump.prop.LOX_pressure <= 1000) {
+        pressure_lox_avg.addSample(dump.prop.LOX_pressure);
+    }
+    if (-10 <= dump.prop.fuel_pressure && dump.prop.fuel_pressure <= 1000) {
+        pressure_fuel_avg.addSample(dump.prop.fuel_pressure);
+    }
 
     const float fuel_avg = pressure_fuel_avg.getAverage();
     const float lox_avg = pressure_lox_avg.getAverage();
@@ -166,6 +174,8 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
     }
 
     // success path once we've waited long enough
+    Logger::log_eventf("pressurization_elapsed: %u", pressurization_start_time);
+    Logger::log_eventf("Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
     if (pressurization_start_time > PRESSURIZATION_HOLD_MS &&
             fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
             lox_avg <= PRESSURIZATION_CHECK_PRESSURE)
@@ -196,7 +206,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
         return State::ABORT_ON_GROUND;
     }
 
-    /*
+    
     if (dump.nav.accel.z > ACCEL_LIFTOFF)
     {
         timer_accel += delta_ms;
@@ -205,11 +215,13 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     {
         timer_accel = 0;
     }
-    if (timer_accel > 500)
+    if (timer_accel > ACCEL_LIFTOFF_DURATION_MS)
     {
-        // Transition from IGNITION->BURN with liftoff detection was canceled on 01/09/2025
+        Logger::log_eventf(Logger::WARN, "Vertical acceleration detected. ABORTING");
+        Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
     }
-    */
+    
 
     if (dump.event.ignited) {
         Logger::log_eventf("FSM transition IGNITION->BURN");
@@ -250,6 +262,8 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 
 State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
+    static uint32_t ascent_elapsed(0);
+    Logger::log_eventf("ASCENT elapsed: %u", ascent_elapsed);
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         Logger::log_eventf(Logger::WARN, "ABORT command received");
@@ -262,16 +276,18 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 #endif
     }
     //TODO: better apogee detection
-    else if (dump.nav.speed.z < SPEED_ZERO)
+    else if (dump.nav.speed.z < SPEED_ZERO && ascent_elapsed > 10e3)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
         return State::DESCENT;
     }
+    ascent_elapsed += delta_ms;
     return currentState;
 }
 
 State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
 {
+    static uint32_t descent_elapsed(0);
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         Logger::log_eventf(Logger::WARN, "ABORT command received");
@@ -284,11 +300,14 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
 #endif
     }
     //TODO:probably a safety against an exactly zero speed apogee detection like a timer of 200ms
-    else if (dump.nav.speed.norm() <= SPEED_ZERO)
+    else if (dump.nav.speed.norm() <= SPEED_ZERO && descent_elapsed > 180e3)
     {
         Logger::log_eventf("FSM transition DESCENT->LANDED");
         return State::LANDED;
     }
+
+    Logger::log_eventf("DESCENT elapsed: %u", descent_elapsed);
+    descent_elapsed += delta_ms;
     return currentState;
 }
 

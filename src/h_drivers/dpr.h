@@ -17,6 +17,7 @@ public:
     bool read_is_woken_up();
     void send_pressurize(const bool active);
     void send_passivate();
+    void send_reset();
     void send_abort(const bool in_flight);
     float read_tank_pressure();
     float read_tank_temperature();
@@ -31,6 +32,7 @@ private:
     std::string m_code;
     uint32_t delta_ms;
     uint32_t count_ms;
+    uint32_t passivation_count_ms;
 
     void handle_init(const DataDump& dump);
     void handle_calibration(const DataDump& dump);

@@ -1,0 +1,646 @@
+[0] 	INFO	| Module Sensors::Adxl375.primary is enabled...[0m
+[0] 	INFO	| Module Sensors::Adxl375.secondary is enabled...[0m
+[0] 	INFO	| Module Sensors::Bmi088.primary is enabled...[0m
+[0] 	INFO	| Module Sensors::Bmi088.secondary is enabled...[0m
+[0] 	INFO	| Module Sensors::Bmp390.primary is enabled...[0m
+[0] 	INFO	| Module Sensors::Bmp390.secondary is enabled...[0m
+[0] 	INFO	| Module Sensors::Ina228.LPB is enabled...[0m
+[0] 	INFO	| Module Sensors::Ina228.HPB is enabled...[0m
+[0] 	INFO	| Module Sensors::GPS is enabled...[0m
+[0] 	INFO	| Module Sensors::Tmp1075 is enabled...[0m
+[0] 	INFO	| Init module Sensors::Adxl375.primary...[0m
+[0] 	INFO	| Init module Sensors::Adxl375.secondary...[0m
+[0] 	INFO	| Init module Sensors::Bmi088.primary...[0m
+[0] 	[31mERROR[0m	| [31mModule Sensors::Bmi088.primary :: init failed[0m
+[0] 	INFO	| Init module Sensors::Bmi088.secondary...[0m
+[0] 	[31mERROR[0m	| [31mModule Sensors::Bmi088.secondary :: init failed[0m
+[0] 	INFO	| Init module Sensors::Bmp390.primary...[0m
+[0] 	[31mERROR[0m	| [31mModule Sensors::Bmp390.primary :: init failed[0m
+[0] 	INFO	| Init module Sensors::Bmp390.secondary...[0m
+[0] 	INFO	| Init module Sensors::Ina228.LPB...[0m
+[0] 	INFO	| Init module Sensors::Ina228.HPB...[0m
+[0] 	INFO	| Init module Sensors::GPS...[0m
+[0] 	INFO	| Init module Sensors::Tmp1075...[0m
+[0] 	INFO	| LoRa uplink init succeeded![0m
+[0] 	INFO	| LoRa downlink init succeeded![0m
+[0] 	INFO	| Verifying sensors status...[0m
+[0] 	INFO	| Sensors::Adxl375.primary: 1[0m
+[0] 	INFO	| Sensors::Adxl375.secondary: 1[0m
+[0] 	INFO	| Sensors::Bmi088.primary: 0[0m
+[0] 	INFO	| Sensors::Bmi088.secondary: 0[0m
+[0] 	INFO	| Sensors::Bmp390.primary: 0[0m
+[0] 	INFO	| Sensors::Bmp390.secondary: 1[0m
+[0] 	INFO	| Sensors::GPS: 1[0m
+[0] 	INFO	| Sensors::Ina228.HPB: 1[0m
+[0] 	INFO	| Sensors::Ina228.LPB: 1[0m
+[0] 	INFO	| Sensors::Tmp1075: 1[0m
+[1210] 	[31mERROR[0m	| [31mModule Sensors::Ina228.HPB :: update failed[0m
+[1210] 	[31mERROR[0m	| [31mModule Sensors::Ina228.HPB :: checkPolicy failed[0m
+[1210] 	INFO	| Sending RESET to DPR_ETH[0m
+[1210] 	INFO	| Sending RESET to DPR_LOX[0m
+[1424] 	INFO	| Sending RESET to DPR_ETH[0m
+[1424] 	INFO	| Sending RESET to DPR_LOX[0m
+[1457] 	INFO	| Sending RESET to DPR_ETH[0m
+[1457] 	INFO	| Sending RESET to DPR_LOX[0m
+[1489] 	INFO	| Sending RESET to DPR_ETH[0m
+[1489] 	INFO	| Sending RESET to DPR_LOX[0m
+[1523] 	INFO	| Sending RESET to DPR_ETH[0m
+[1523] 	INFO	| Sending RESET to DPR_LOX[0m
+[1556] 	INFO	| Sending RESET to DPR_ETH[0m
+[1556] 	INFO	| Sending RESET to DPR_LOX[0m
+[1589] 	INFO	| Sending RESET to DPR_ETH[0m
+[1589] 	INFO	| Sending RESET to DPR_LOX[0m
+[1622] 	INFO	| Sending RESET to DPR_ETH[0m
+[1622] 	INFO	| Sending RESET to DPR_LOX[0m
+[1655] 	INFO	| Sending RESET to DPR_ETH[0m
+[1655] 	INFO	| Sending RESET to DPR_LOX[0m
+[1688] 	INFO	| Sending RESET to DPR_ETH[0m
+[1688] 	INFO	| Sending RESET to DPR_LOX[0m
+[1721] 	INFO	| Sending RESET to DPR_ETH[0m
+[1721] 	INFO	| Sending RESET to DPR_LOX[0m
+[1755] 	INFO	| Sending RESET to DPR_ETH[0m
+[1755] 	INFO	| Sending RESET to DPR_LOX[0m
+[1788] 	INFO	| Sending RESET to DPR_ETH[0m
+[1788] 	INFO	| Sending RESET to DPR_LOX[0m
+[1821] 	INFO	| Sending RESET to DPR_ETH[0m
+[1821] 	INFO	| Sending RESET to DPR_LOX[0m
+[1855] 	INFO	| Sending RESET to DPR_ETH[0m
+[1855] 	INFO	| Sending RESET to DPR_LOX[0m
+[1888] 	INFO	| Sending RESET to DPR_ETH[0m
+[1888] 	INFO	| Sending RESET to DPR_LOX[0m
+[1923] 	INFO	| Sending RESET to DPR_ETH[0m
+[1923] 	INFO	| Sending RESET to DPR_LOX[0m
+[1956] 	INFO	| Sending RESET to DPR_ETH[0m
+[1956] 	INFO	| Sending RESET to DPR_LOX[0m
+[1990] 	INFO	| Sending RESET to DPR_ETH[0m
+[1990] 	INFO	| Sending RESET to DPR_LOX[0m
+[2024] 	INFO	| Sending RESET to DPR_ETH[0m
+[2024] 	INFO	| Sending RESET to DPR_LOX[0m
+[2058] 	INFO	| Sending RESET to DPR_ETH[0m
+[2058] 	INFO	| Sending RESET to DPR_LOX[0m
+[2091] 	INFO	| Sending RESET to DPR_ETH[0m
+[2091] 	INFO	| Sending RESET to DPR_LOX[0m
+[2127] 	INFO	| Sending RESET to DPR_ETH[0m
+[2127] 	INFO	| Sending RESET to DPR_LOX[0m
+[2231] 	INFO	| Sending RESET to DPR_ETH[0m
+[2231] 	INFO	| Sending RESET to DPR_LOX[0m
+[2264] 	INFO	| Sending RESET to DPR_ETH[0m
+[2264] 	INFO	| Sending RESET to DPR_LOX[0m
+[2298] 	INFO	| Sending RESET to DPR_ETH[0m
+[2298] 	INFO	| Sending RESET to DPR_LOX[0m
+[2332] 	INFO	| Sending RESET to DPR_ETH[0m
+[2332] 	INFO	| Sending RESET to DPR_LOX[0m
+[2366] 	INFO	| Sending RESET to DPR_ETH[0m
+[2366] 	INFO	| Sending RESET to DPR_LOX[0m
+[2399] 	INFO	| Sending RESET to DPR_ETH[0m
+[2399] 	INFO	| Sending RESET to DPR_LOX[0m
+[2433] 	INFO	| Sending RESET to DPR_ETH[0m
+[2433] 	INFO	| Sending RESET to DPR_LOX[0m
+[2467] 	INFO	| Sending RESET to DPR_ETH[0m
+[2467] 	INFO	| Sending RESET to DPR_LOX[0m
+[2501] 	INFO	| Sending RESET to DPR_ETH[0m
+[2501] 	INFO	| Sending RESET to DPR_LOX[0m
+[2534] 	INFO	| Sending RESET to DPR_ETH[0m
+[2534] 	INFO	| Sending RESET to DPR_LOX[0m
+[2569] 	INFO	| Sending RESET to DPR_ETH[0m
+[2569] 	INFO	| Sending RESET to DPR_LOX[0m
+[2602] 	INFO	| Sending RESET to DPR_ETH[0m
+[2602] 	INFO	| Sending RESET to DPR_LOX[0m
+[2637] 	INFO	| Sending RESET to DPR_ETH[0m
+[2637] 	INFO	| Sending RESET to DPR_LOX[0m
+[2670] 	INFO	| Sending RESET to DPR_ETH[0m
+[2670] 	INFO	| Sending RESET to DPR_LOX[0m
+[2704] 	INFO	| Sending RESET to DPR_ETH[0m
+[2704] 	INFO	| Sending RESET to DPR_LOX[0m
+[2738] 	INFO	| Sending RESET to DPR_ETH[0m
+[2738] 	INFO	| Sending RESET to DPR_LOX[0m
+[2772] 	INFO	| Sending RESET to DPR_ETH[0m
+[2772] 	INFO	| Sending RESET to DPR_LOX[0m
+[2806] 	INFO	| Sending RESET to DPR_ETH[0m
+[2806] 	INFO	| Sending RESET to DPR_LOX[0m
+[2840] 	INFO	| Sending RESET to DPR_ETH[0m
+[2840] 	INFO	| Sending RESET to DPR_LOX[0m
+[2874] 	INFO	| Sending RESET to DPR_ETH[0m
+[2874] 	INFO	| Sending RESET to DPR_LOX[0m
+[2908] 	INFO	| Sending RESET to DPR_ETH[0m
+[2908] 	INFO	| Sending RESET to DPR_LOX[0m
+[2942] 	INFO	| Sending RESET to DPR_ETH[0m
+[2942] 	INFO	| Sending RESET to DPR_LOX[0m
+[2977] 	INFO	| Sending RESET to DPR_ETH[0m
+[2977] 	INFO	| Sending RESET to DPR_LOX[0m
+[3010] 	INFO	| Sending RESET to DPR_ETH[0m
+[3010] 	INFO	| Sending RESET to DPR_LOX[0m
+[3045] 	INFO	| Sending RESET to DPR_ETH[0m
+[3045] 	INFO	| Sending RESET to DPR_LOX[0m
+[3172] 	INFO	| Sending RESET to DPR_ETH[0m
+[3172] 	INFO	| Sending RESET to DPR_LOX[0m
+[3207] 	INFO	| Sending RESET to DPR_ETH[0m
+[3207] 	INFO	| Sending RESET to DPR_LOX[0m
+[3250] 	INFO	| Sending RESET to DPR_ETH[0m
+[3250] 	INFO	| Sending RESET to DPR_LOX[0m
+[3287] 	INFO	| Sending RESET to DPR_ETH[0m
+[3287] 	INFO	| Sending RESET to DPR_LOX[0m
+[3322] 	INFO	| Sending RESET to DPR_ETH[0m
+[3322] 	INFO	| Sending RESET to DPR_LOX[0m
+[3359] 	INFO	| Sending RESET to DPR_ETH[0m
+[3359] 	INFO	| Sending RESET to DPR_LOX[0m
+[3395] 	INFO	| Sending RESET to DPR_ETH[0m
+[3395] 	INFO	| Sending RESET to DPR_LOX[0m
+[3432] 	INFO	| Sending RESET to DPR_ETH[0m
+[3432] 	INFO	| Sending RESET to DPR_LOX[0m
+[3468] 	INFO	| Sending RESET to DPR_ETH[0m
+[3468] 	INFO	| Sending RESET to DPR_LOX[0m
+[3505] 	INFO	| Sending RESET to DPR_ETH[0m
+[3505] 	INFO	| Sending RESET to DPR_LOX[0m
+[3541] 	INFO	| Sending RESET to DPR_ETH[0m
+[3541] 	INFO	| Sending RESET to DPR_LOX[0m
+[3578] 	INFO	| Sending RESET to DPR_ETH[0m
+[3578] 	INFO	| Sending RESET to DPR_LOX[0m
+[3614] 	INFO	| Sending RESET to DPR_ETH[0m
+[3614] 	INFO	| Sending RESET to DPR_LOX[0m
+[3651] 	INFO	| Sending RESET to DPR_ETH[0m
+[3651] 	INFO	| Sending RESET to DPR_LOX[0m
+[3687] 	INFO	| Sending RESET to DPR_ETH[0m
+[3687] 	INFO	| Sending RESET to DPR_LOX[0m
+[3725] 	INFO	| Sending RESET to DPR_ETH[0m
+[3725] 	INFO	| Sending RESET to DPR_LOX[0m
+[3761] 	INFO	| Sending RESET to DPR_ETH[0m
+[3761] 	INFO	| Sending RESET to DPR_LOX[0m
+[3798] 	INFO	| Sending RESET to DPR_ETH[0m
+[3798] 	INFO	| Sending RESET to DPR_LOX[0m
+[3835] 	INFO	| Sending RESET to DPR_ETH[0m
+[3835] 	INFO	| Sending RESET to DPR_LOX[0m
+[3874] 	INFO	| Sending RESET to DPR_ETH[0m
+[3874] 	INFO	| Sending RESET to DPR_LOX[0m
+[3907] 	INFO	| Sending RESET to DPR_ETH[0m
+[3907] 	INFO	| Sending RESET to DPR_LOX[0m
+[3945] 	INFO	| Sending RESET to DPR_ETH[0m
+[3945] 	INFO	| Sending RESET to DPR_LOX[0m
+[4002] 	INFO	| Sending RESET to DPR_ETH[0m
+[4002] 	INFO	| Sending RESET to DPR_LOX[0m
+[4035] 	INFO	| Sending RESET to DPR_ETH[0m
+[4035] 	INFO	| Sending RESET to DPR_LOX[0m
+[4070] 	INFO	| Sending RESET to DPR_ETH[0m
+[4070] 	INFO	| Sending RESET to DPR_LOX[0m
+[4104] 	INFO	| Sending RESET to DPR_ETH[0m
+[4104] 	INFO	| Sending RESET to DPR_LOX[0m
+[4138] 	INFO	| Sending RESET to DPR_ETH[0m
+[4138] 	INFO	| Sending RESET to DPR_LOX[0m
+[4172] 	INFO	| Sending RESET to DPR_ETH[0m
+[4172] 	INFO	| Sending RESET to DPR_LOX[0m
+[4207] 	INFO	| Sending RESET to DPR_ETH[0m
+[4207] 	INFO	| Sending RESET to DPR_LOX[0m
+[4242] 	INFO	| Sending RESET to DPR_ETH[0m
+[4242] 	INFO	| Sending RESET to DPR_LOX[0m
+[4276] 	INFO	| Sending RESET to DPR_ETH[0m
+[4276] 	INFO	| Sending RESET to DPR_LOX[0m
+[4310] 	INFO	| Sending RESET to DPR_ETH[0m
+[4310] 	INFO	| Sending RESET to DPR_LOX[0m
+[4345] 	INFO	| Sending RESET to DPR_ETH[0m
+[4345] 	INFO	| Sending RESET to DPR_LOX[0m
+[4379] 	INFO	| Sending RESET to DPR_ETH[0m
+[4379] 	INFO	| Sending RESET to DPR_LOX[0m
+[4414] 	INFO	| Sending RESET to DPR_ETH[0m
+[4414] 	INFO	| Sending RESET to DPR_LOX[0m
+[4447] 	INFO	| Sending RESET to DPR_ETH[0m
+[4447] 	INFO	| Sending RESET to DPR_LOX[0m
+[4482] 	INFO	| Sending RESET to DPR_ETH[0m
+[4482] 	INFO	| Sending RESET to DPR_LOX[0m
+[4516] 	INFO	| Sending RESET to DPR_ETH[0m
+[4516] 	INFO	| Sending RESET to DPR_LOX[0m
+[4551] 	INFO	| Sending RESET to DPR_ETH[0m
+[4551] 	INFO	| Sending RESET to DPR_LOX[0m
+[4585] 	INFO	| Sending RESET to DPR_ETH[0m
+[4585] 	INFO	| Sending RESET to DPR_LOX[0m
+[4620] 	INFO	| Sending RESET to DPR_ETH[0m
+[4620] 	INFO	| Sending RESET to DPR_LOX[0m
+[4654] 	INFO	| Sending RESET to DPR_ETH[0m
+[4654] 	INFO	| Sending RESET to DPR_LOX[0m
+[4689] 	INFO	| Sending RESET to DPR_ETH[0m
+[4689] 	INFO	| Sending RESET to DPR_LOX[0m
+[4723] 	INFO	| Sending RESET to DPR_ETH[0m
+[4723] 	INFO	| Sending RESET to DPR_LOX[0m
+[4759] 	INFO	| Sending RESET to DPR_ETH[0m
+[4759] 	INFO	| Sending RESET to DPR_LOX[0m
+[4794] 	INFO	| Sending RESET to DPR_ETH[0m
+[4794] 	INFO	| Sending RESET to DPR_LOX[0m
+[4830] 	INFO	| Sending RESET to DPR_ETH[0m
+[4830] 	INFO	| Sending RESET to DPR_LOX[0m
+[4865] 	INFO	| Sending RESET to DPR_ETH[0m
+[4865] 	INFO	| Sending RESET to DPR_LOX[0m
+[4971] 	INFO	| Sending RESET to DPR_ETH[0m
+[4971] 	INFO	| Sending RESET to DPR_LOX[0m
+[5006] 	INFO	| Sending RESET to DPR_ETH[0m
+[5006] 	INFO	| Sending RESET to DPR_LOX[0m
+[5041] 	INFO	| Sending RESET to DPR_ETH[0m
+[5041] 	INFO	| Sending RESET to DPR_LOX[0m
+[5076] 	INFO	| Sending RESET to DPR_ETH[0m
+[5076] 	INFO	| Sending RESET to DPR_LOX[0m
+[5119] 	INFO	| Sending RESET to DPR_ETH[0m
+[5119] 	INFO	| Sending RESET to DPR_LOX[0m
+[5154] 	INFO	| Sending RESET to DPR_ETH[0m
+[5154] 	INFO	| Sending RESET to DPR_LOX[0m
+[5189] 	INFO	| Sending RESET to DPR_ETH[0m
+[5189] 	INFO	| Sending RESET to DPR_LOX[0m
+[5226] 	INFO	| Sending RESET to DPR_ETH[0m
+[5226] 	INFO	| Sending RESET to DPR_LOX[0m
+[5261] 	INFO	| Sending RESET to DPR_ETH[0m
+[5261] 	INFO	| Sending RESET to DPR_LOX[0m
+[5297] 	INFO	| Sending RESET to DPR_ETH[0m
+[5297] 	INFO	| Sending RESET to DPR_LOX[0m
+[5332] 	INFO	| Sending RESET to DPR_ETH[0m
+[5332] 	INFO	| Sending RESET to DPR_LOX[0m
+[5367] 	INFO	| Sending RESET to DPR_ETH[0m
+[5367] 	INFO	| Sending RESET to DPR_LOX[0m
+[5402] 	INFO	| Sending RESET to DPR_ETH[0m
+[5402] 	INFO	| Sending RESET to DPR_LOX[0m
+[5438] 	INFO	| Sending RESET to DPR_ETH[0m
+[5438] 	INFO	| Sending RESET to DPR_LOX[0m
+[5473] 	INFO	| Sending RESET to DPR_ETH[0m
+[5473] 	INFO	| Sending RESET to DPR_LOX[0m
+[5509] 	INFO	| Sending RESET to DPR_ETH[0m
+[5509] 	INFO	| Sending RESET to DPR_LOX[0m
+[5544] 	INFO	| Sending RESET to DPR_ETH[0m
+[5544] 	INFO	| Sending RESET to DPR_LOX[0m
+[5580] 	INFO	| Sending RESET to DPR_ETH[0m
+[5580] 	INFO	| Sending RESET to DPR_LOX[0m
+[5615] 	INFO	| Sending RESET to DPR_ETH[0m
+[5615] 	INFO	| Sending RESET to DPR_LOX[0m
+[5656] 	INFO	| Sending RESET to DPR_ETH[0m
+[5656] 	INFO	| Sending RESET to DPR_LOX[0m
+[5691] 	INFO	| Sending RESET to DPR_ETH[0m
+[5691] 	INFO	| Sending RESET to DPR_LOX[0m
+[5724] 	INFO	| Sending RESET to DPR_ETH[0m
+[5724] 	INFO	| Sending RESET to DPR_LOX[0m
+[5758] 	INFO	| Sending RESET to DPR_ETH[0m
+[5758] 	INFO	| Sending RESET to DPR_LOX[0m
+[5792] 	INFO	| Sending RESET to DPR_ETH[0m
+[5792] 	INFO	| Sending RESET to DPR_LOX[0m
+[5921] 	INFO	| Sending RESET to DPR_ETH[0m
+[5921] 	INFO	| Sending RESET to DPR_LOX[0m
+[5954] 	INFO	| Sending RESET to DPR_ETH[0m
+[5954] 	INFO	| Sending RESET to DPR_LOX[0m
+[5988] 	INFO	| Sending RESET to DPR_ETH[0m
+[5988] 	INFO	| Sending RESET to DPR_LOX[0m
+[6022] 	INFO	| Sending RESET to DPR_ETH[0m
+[6022] 	INFO	| Sending RESET to DPR_LOX[0m
+[6057] 	INFO	| Sending RESET to DPR_ETH[0m
+[6057] 	INFO	| Sending RESET to DPR_LOX[0m
+[6091] 	INFO	| Sending RESET to DPR_ETH[0m
+[6091] 	INFO	| Sending RESET to DPR_LOX[0m
+[6125] 	INFO	| Sending RESET to DPR_ETH[0m
+[6125] 	INFO	| Sending RESET to DPR_LOX[0m
+[6159] 	INFO	| Sending RESET to DPR_ETH[0m
+[6159] 	INFO	| Sending RESET to DPR_LOX[0m
+[6194] 	INFO	| Sending RESET to DPR_ETH[0m
+[6194] 	INFO	| Sending RESET to DPR_LOX[0m
+[6229] 	INFO	| Sending RESET to DPR_ETH[0m
+[6229] 	INFO	| Sending RESET to DPR_LOX[0m
+[6264] 	INFO	| Sending RESET to DPR_ETH[0m
+[6264] 	INFO	| Sending RESET to DPR_LOX[0m
+[6298] 	INFO	| Sending RESET to DPR_ETH[0m
+[6298] 	INFO	| Sending RESET to DPR_LOX[0m
+[6332] 	INFO	| Sending RESET to DPR_ETH[0m
+[6332] 	INFO	| Sending RESET to DPR_LOX[0m
+[6366] 	INFO	| Sending RESET to DPR_ETH[0m
+[6366] 	INFO	| Sending RESET to DPR_LOX[0m
+[6401] 	INFO	| Sending RESET to DPR_ETH[0m
+[6401] 	INFO	| Sending RESET to DPR_LOX[0m
+[6435] 	INFO	| Sending RESET to DPR_ETH[0m
+[6435] 	INFO	| Sending RESET to DPR_LOX[0m
+[6470] 	INFO	| Sending RESET to DPR_ETH[0m
+[6470] 	INFO	| Sending RESET to DPR_LOX[0m
+[6504] 	INFO	| Sending RESET to DPR_ETH[0m
+[6504] 	INFO	| Sending RESET to DPR_LOX[0m
+[6539] 	INFO	| Sending RESET to DPR_ETH[0m
+[6539] 	INFO	| Sending RESET to DPR_LOX[0m
+[6573] 	INFO	| Sending RESET to DPR_ETH[0m
+[6573] 	INFO	| Sending RESET to DPR_LOX[0m
+[6608] 	INFO	| Sending RESET to DPR_ETH[0m
+[6608] 	INFO	| Sending RESET to DPR_LOX[0m
+[6643] 	INFO	| Sending RESET to DPR_ETH[0m
+[6643] 	INFO	| Sending RESET to DPR_LOX[0m
+[6678] 	INFO	| Sending RESET to DPR_ETH[0m
+[6678] 	INFO	| Sending RESET to DPR_LOX[0m
+[6712] 	INFO	| Sending RESET to DPR_ETH[0m
+[6712] 	INFO	| Sending RESET to DPR_LOX[0m
+[6817] 	INFO	| Sending RESET to DPR_ETH[0m
+[6817] 	INFO	| Sending RESET to DPR_LOX[0m
+[6852] 	INFO	| Sending RESET to DPR_ETH[0m
+[6852] 	INFO	| Sending RESET to DPR_LOX[0m
+[6890] 	INFO	| Sending RESET to DPR_ETH[0m
+[6890] 	INFO	| Sending RESET to DPR_LOX[0m
+[6922] 	INFO	| Sending RESET to DPR_ETH[0m
+[6922] 	INFO	| Sending RESET to DPR_LOX[0m
+[6955] 	INFO	| Sending RESET to DPR_ETH[0m
+[6955] 	INFO	| Sending RESET to DPR_LOX[0m
+[6987] 	INFO	| Sending RESET to DPR_ETH[0m
+[6987] 	INFO	| Sending RESET to DPR_LOX[0m
+[7025] 	INFO	| Sending RESET to DPR_ETH[0m
+[7025] 	INFO	| Sending RESET to DPR_LOX[0m
+[7059] 	INFO	| Sending RESET to DPR_ETH[0m
+[7059] 	INFO	| Sending RESET to DPR_LOX[0m
+[7091] 	INFO	| Sending RESET to DPR_ETH[0m
+[7091] 	INFO	| Sending RESET to DPR_LOX[0m
+[7124] 	INFO	| Sending RESET to DPR_ETH[0m
+[7124] 	INFO	| Sending RESET to DPR_LOX[0m
+[7161] 	INFO	| Sending RESET to DPR_ETH[0m
+[7161] 	INFO	| Sending RESET to DPR_LOX[0m
+[7198] 	INFO	| Sending RESET to DPR_ETH[0m
+[7198] 	INFO	| Sending RESET to DPR_LOX[0m
+[7235] 	INFO	| Sending RESET to DPR_ETH[0m
+[7235] 	INFO	| Sending RESET to DPR_LOX[0m
+[7268] 	INFO	| Sending RESET to DPR_ETH[0m
+[7268] 	INFO	| Sending RESET to DPR_LOX[0m
+[7301] 	INFO	| Sending RESET to DPR_ETH[0m
+[7301] 	INFO	| Sending RESET to DPR_LOX[0m
+[7335] 	INFO	| Sending RESET to DPR_ETH[0m
+[7335] 	INFO	| Sending RESET to DPR_LOX[0m
+[7367] 	INFO	| Sending RESET to DPR_ETH[0m
+[7367] 	INFO	| Sending RESET to DPR_LOX[0m
+[7401] 	INFO	| Sending RESET to DPR_ETH[0m
+[7401] 	INFO	| Sending RESET to DPR_LOX[0m
+[7434] 	INFO	| Sending RESET to DPR_ETH[0m
+[7434] 	INFO	| Sending RESET to DPR_LOX[0m
+[7466] 	INFO	| Sending RESET to DPR_ETH[0m
+[7466] 	INFO	| Sending RESET to DPR_LOX[0m
+[7500] 	INFO	| Sending RESET to DPR_ETH[0m
+[7500] 	INFO	| Sending RESET to DPR_LOX[0m
+[7532] 	INFO	| Sending RESET to DPR_ETH[0m
+[7532] 	INFO	| Sending RESET to DPR_LOX[0m
+[7566] 	INFO	| Sending RESET to DPR_ETH[0m
+[7566] 	INFO	| Sending RESET to DPR_LOX[0m
+[7599] 	INFO	| Sending RESET to DPR_ETH[0m
+[7599] 	INFO	| Sending RESET to DPR_LOX[0m
+[7632] 	INFO	| Sending RESET to DPR_ETH[0m
+[7632] 	INFO	| Sending RESET to DPR_LOX[0m
+[7735] 	INFO	| Sending RESET to DPR_ETH[0m
+[7735] 	INFO	| Sending RESET to DPR_LOX[0m
+[7769] 	INFO	| Sending RESET to DPR_ETH[0m
+[7769] 	INFO	| Sending RESET to DPR_LOX[0m
+[7802] 	INFO	| Sending RESET to DPR_ETH[0m
+[7802] 	INFO	| Sending RESET to DPR_LOX[0m
+[7836] 	INFO	| Sending RESET to DPR_ETH[0m
+[7836] 	INFO	| Sending RESET to DPR_LOX[0m
+[7869] 	INFO	| Sending RESET to DPR_ETH[0m
+[7869] 	INFO	| Sending RESET to DPR_LOX[0m
+[7904] 	INFO	| Sending RESET to DPR_ETH[0m
+[7904] 	INFO	| Sending RESET to DPR_LOX[0m
+[7937] 	INFO	| Sending RESET to DPR_ETH[0m
+[7937] 	INFO	| Sending RESET to DPR_LOX[0m
+[7971] 	INFO	| Sending RESET to DPR_ETH[0m
+[7971] 	INFO	| Sending RESET to DPR_LOX[0m
+[8004] 	INFO	| Sending RESET to DPR_ETH[0m
+[8004] 	INFO	| Sending RESET to DPR_LOX[0m
+[8037] 	INFO	| Sending RESET to DPR_ETH[0m
+[8037] 	INFO	| Sending RESET to DPR_LOX[0m
+[8071] 	INFO	| Sending RESET to DPR_ETH[0m
+[8071] 	INFO	| Sending RESET to DPR_LOX[0m
+[8104] 	INFO	| Sending RESET to DPR_ETH[0m
+[8104] 	INFO	| Sending RESET to DPR_LOX[0m
+[8138] 	INFO	| Sending RESET to DPR_ETH[0m
+[8138] 	INFO	| Sending RESET to DPR_LOX[0m
+[8172] 	INFO	| Sending RESET to DPR_ETH[0m
+[8172] 	INFO	| Sending RESET to DPR_LOX[0m
+[8205] 	INFO	| Sending RESET to DPR_ETH[0m
+[8205] 	INFO	| Sending RESET to DPR_LOX[0m
+[8241] 	INFO	| Sending RESET to DPR_ETH[0m
+[8241] 	INFO	| Sending RESET to DPR_LOX[0m
+[8274] 	INFO	| Sending RESET to DPR_ETH[0m
+[8274] 	INFO	| Sending RESET to DPR_LOX[0m
+[8308] 	INFO	| Sending RESET to DPR_ETH[0m
+[8308] 	INFO	| Sending RESET to DPR_LOX[0m
+[8341] 	INFO	| Sending RESET to DPR_ETH[0m
+[8341] 	INFO	| Sending RESET to DPR_LOX[0m
+[8375] 	INFO	| Sending RESET to DPR_ETH[0m
+[8375] 	INFO	| Sending RESET to DPR_LOX[0m
+[8409] 	INFO	| Sending RESET to DPR_ETH[0m
+[8409] 	INFO	| Sending RESET to DPR_LOX[0m
+[8444] 	INFO	| Sending RESET to DPR_ETH[0m
+[8444] 	INFO	| Sending RESET to DPR_LOX[0m
+[8477] 	INFO	| Sending RESET to DPR_ETH[0m
+[8477] 	INFO	| Sending RESET to DPR_LOX[0m
+[8512] 	INFO	| Sending RESET to DPR_ETH[0m
+[8512] 	INFO	| Sending RESET to DPR_LOX[0m
+[8545] 	INFO	| Sending RESET to DPR_ETH[0m
+[8545] 	INFO	| Sending RESET to DPR_LOX[0m
+[8649] 	INFO	| Sending RESET to DPR_ETH[0m
+[8649] 	INFO	| Sending RESET to DPR_LOX[0m
+[8683] 	INFO	| Sending RESET to DPR_ETH[0m
+[8683] 	INFO	| Sending RESET to DPR_LOX[0m
+[8718] 	INFO	| Sending RESET to DPR_ETH[0m
+[8718] 	INFO	| Sending RESET to DPR_LOX[0m
+[8751] 	INFO	| Sending RESET to DPR_ETH[0m
+[8751] 	INFO	| Sending RESET to DPR_LOX[0m
+[8786] 	INFO	| Sending RESET to DPR_ETH[0m
+[8786] 	INFO	| Sending RESET to DPR_LOX[0m
+[8820] 	INFO	| Sending RESET to DPR_ETH[0m
+[8820] 	INFO	| Sending RESET to DPR_LOX[0m
+[8866] 	INFO	| Sending RESET to DPR_ETH[0m
+[8866] 	INFO	| Sending RESET to DPR_LOX[0m
+[8900] 	INFO	| Sending RESET to DPR_ETH[0m
+[8900] 	INFO	| Sending RESET to DPR_LOX[0m
+[8935] 	INFO	| Sending RESET to DPR_ETH[0m
+[8935] 	INFO	| Sending RESET to DPR_LOX[0m
+[8969] 	INFO	| Sending RESET to DPR_ETH[0m
+[8969] 	INFO	| Sending RESET to DPR_LOX[0m
+[9004] 	INFO	| Sending RESET to DPR_ETH[0m
+[9004] 	INFO	| Sending RESET to DPR_LOX[0m
+[9038] 	INFO	| Sending RESET to DPR_ETH[0m
+[9038] 	INFO	| Sending RESET to DPR_LOX[0m
+[9072] 	INFO	| Sending RESET to DPR_ETH[0m
+[9072] 	INFO	| Sending RESET to DPR_LOX[0m
+[9106] 	INFO	| Sending RESET to DPR_ETH[0m
+[9106] 	INFO	| Sending RESET to DPR_LOX[0m
+[9141] 	INFO	| Sending RESET to DPR_ETH[0m
+[9141] 	INFO	| Sending RESET to DPR_LOX[0m
+[9181] 	INFO	| Sending RESET to DPR_ETH[0m
+[9181] 	INFO	| Sending RESET to DPR_LOX[0m
+[9215] 	INFO	| Sending RESET to DPR_ETH[0m
+[9215] 	INFO	| Sending RESET to DPR_LOX[0m
+[9251] 	INFO	| Sending RESET to DPR_ETH[0m
+[9251] 	INFO	| Sending RESET to DPR_LOX[0m
+[9285] 	INFO	| Sending RESET to DPR_ETH[0m
+[9285] 	INFO	| Sending RESET to DPR_LOX[0m
+[9319] 	INFO	| Sending RESET to DPR_ETH[0m
+[9319] 	INFO	| Sending RESET to DPR_LOX[0m
+[9354] 	INFO	| Sending RESET to DPR_ETH[0m
+[9354] 	INFO	| Sending RESET to DPR_LOX[0m
+[9389] 	INFO	| Sending RESET to DPR_ETH[0m
+[9389] 	INFO	| Sending RESET to DPR_LOX[0m
+[9423] 	INFO	| Sending RESET to DPR_ETH[0m
+[9423] 	INFO	| Sending RESET to DPR_LOX[0m
+[9458] 	INFO	| Sending RESET to DPR_ETH[0m
+[9458] 	INFO	| Sending RESET to DPR_LOX[0m
+[9562] 	INFO	| Sending RESET to DPR_ETH[0m
+[9562] 	INFO	| Sending RESET to DPR_LOX[0m
+[9597] 	INFO	| Sending RESET to DPR_ETH[0m
+[9597] 	INFO	| Sending RESET to DPR_LOX[0m
+[9632] 	INFO	| Sending RESET to DPR_ETH[0m
+[9632] 	INFO	| Sending RESET to DPR_LOX[0m
+[9667] 	INFO	| Sending RESET to DPR_ETH[0m
+[9667] 	INFO	| Sending RESET to DPR_LOX[0m
+[9701] 	INFO	| Sending RESET to DPR_ETH[0m
+[9701] 	INFO	| Sending RESET to DPR_LOX[0m
+[9739] 	INFO	| Sending RESET to DPR_ETH[0m
+[9739] 	INFO	| Sending RESET to DPR_LOX[0m
+[9771] 	INFO	| Sending RESET to DPR_ETH[0m
+[9771] 	INFO	| Sending RESET to DPR_LOX[0m
+[9804] 	INFO	| Sending RESET to DPR_ETH[0m
+[9804] 	INFO	| Sending RESET to DPR_LOX[0m
+[9836] 	INFO	| Sending RESET to DPR_ETH[0m
+[9836] 	INFO	| Sending RESET to DPR_LOX[0m
+[9869] 	INFO	| Sending RESET to DPR_ETH[0m
+[9869] 	INFO	| Sending RESET to DPR_LOX[0m
+[9902] 	INFO	| Sending RESET to DPR_ETH[0m
+[9902] 	INFO	| Sending RESET to DPR_LOX[0m
+[9935] 	INFO	| Sending RESET to DPR_ETH[0m
+[9935] 	INFO	| Sending RESET to DPR_LOX[0m
+[9967] 	INFO	| Sending RESET to DPR_ETH[0m
+[9967] 	INFO	| Sending RESET to DPR_LOX[0m
+[10000] 	INFO	| Sending RESET to DPR_ETH[0m
+[10000] 	INFO	| Sending RESET to DPR_LOX[0m
+[10033] 	INFO	| Sending RESET to DPR_ETH[0m
+[10033] 	INFO	| Sending RESET to DPR_LOX[0m
+[10066] 	INFO	| Sending RESET to DPR_ETH[0m
+[10066] 	INFO	| Sending RESET to DPR_LOX[0m
+[10099] 	INFO	| Sending RESET to DPR_ETH[0m
+[10099] 	INFO	| Sending RESET to DPR_LOX[0m
+[10132] 	INFO	| Sending RESET to DPR_ETH[0m
+[10132] 	INFO	| Sending RESET to DPR_LOX[0m
+[10164] 	INFO	| Sending RESET to DPR_ETH[0m
+[10164] 	INFO	| Sending RESET to DPR_LOX[0m
+[10197] 	INFO	| Sending RESET to DPR_ETH[0m
+[10197] 	INFO	| Sending RESET to DPR_LOX[0m
+[10230] 	INFO	| Sending RESET to DPR_ETH[0m
+[10230] 	INFO	| Sending RESET to DPR_LOX[0m
+[10265] 	INFO	| Sending RESET to DPR_ETH[0m
+[10265] 	INFO	| Sending RESET to DPR_LOX[0m
+[10297] 	INFO	| Sending RESET to DPR_ETH[0m
+[10297] 	INFO	| Sending RESET to DPR_LOX[0m
+[10330] 	INFO	| Sending RESET to DPR_ETH[0m
+[10330] 	INFO	| Sending RESET to DPR_LOX[0m
+[10363] 	INFO	| Sending RESET to DPR_ETH[0m
+[10363] 	INFO	| Sending RESET to DPR_LOX[0m
+[10513] 	INFO	| Sending RESET to DPR_ETH[0m
+[10513] 	INFO	| Sending RESET to DPR_LOX[0m
+[10545] 	INFO	| Sending RESET to DPR_ETH[0m
+[10545] 	INFO	| Sending RESET to DPR_LOX[0m
+[10579] 	INFO	| Sending RESET to DPR_ETH[0m
+[10579] 	INFO	| Sending RESET to DPR_LOX[0m
+[10612] 	INFO	| Sending RESET to DPR_ETH[0m
+[10612] 	INFO	| Sending RESET to DPR_LOX[0m
+[10646] 	INFO	| Sending RESET to DPR_ETH[0m
+[10646] 	INFO	| Sending RESET to DPR_LOX[0m
+[10679] 	INFO	| Sending RESET to DPR_ETH[0m
+[10679] 	INFO	| Sending RESET to DPR_LOX[0m
+[10713] 	INFO	| Sending RESET to DPR_ETH[0m
+[10713] 	INFO	| Sending RESET to DPR_LOX[0m
+[10753] 	INFO	| Sending RESET to DPR_ETH[0m
+[10753] 	INFO	| Sending RESET to DPR_LOX[0m
+[10786] 	INFO	| Sending RESET to DPR_ETH[0m
+[10786] 	INFO	| Sending RESET to DPR_LOX[0m
+[10820] 	INFO	| Sending RESET to DPR_ETH[0m
+[10820] 	INFO	| Sending RESET to DPR_LOX[0m
+[10853] 	INFO	| Sending RESET to DPR_ETH[0m
+[10853] 	INFO	| Sending RESET to DPR_LOX[0m
+[10901] 	INFO	| Sending RESET to DPR_ETH[0m
+[10901] 	INFO	| Sending RESET to DPR_LOX[0m
+[10942] 	INFO	| Sending RESET to DPR_ETH[0m
+[10942] 	INFO	| Sending RESET to DPR_LOX[0m
+[10982] 	INFO	| Sending RESET to DPR_ETH[0m
+[10982] 	INFO	| Sending RESET to DPR_LOX[0m
+[11014] 	INFO	| Sending RESET to DPR_ETH[0m
+[11014] 	INFO	| Sending RESET to DPR_LOX[0m
+[11143] 	INFO	| Sending RESET to DPR_ETH[0m
+[11143] 	INFO	| Sending RESET to DPR_LOX[0m
+[11288] 	INFO	| Sending RESET to DPR_ETH[0m
+[11288] 	INFO	| Sending RESET to DPR_LOX[0m
+[11504] 	INFO	| Sending RESET to DPR_ETH[0m
+[11504] 	INFO	| Sending RESET to DPR_LOX[0m
+[11648] 	INFO	| Sending RESET to DPR_ETH[0m
+[11648] 	INFO	| Sending RESET to DPR_LOX[0m
+[11792] 	INFO	| Sending RESET to DPR_ETH[0m
+[11792] 	INFO	| Sending RESET to DPR_LOX[0m
+[11933] 	INFO	| Sending RESET to DPR_ETH[0m
+[11933] 	INFO	| Sending RESET to DPR_LOX[0m
+[12077] 	INFO	| Sending RESET to DPR_ETH[0m
+[12077] 	INFO	| Sending RESET to DPR_LOX[0m
+[12220] 	INFO	| Sending RESET to DPR_ETH[0m
+[12220] 	INFO	| Sending RESET to DPR_LOX[0m
+[12432] 	INFO	| Sending RESET to DPR_ETH[0m
+[12432] 	INFO	| Sending RESET to DPR_LOX[0m
+[12576] 	INFO	| Sending RESET to DPR_ETH[0m
+[12576] 	INFO	| Sending RESET to DPR_LOX[0m
+[12717] 	INFO	| Sending RESET to DPR_ETH[0m
+[12717] 	INFO	| Sending RESET to DPR_LOX[0m
+[12856] 	INFO	| Sending RESET to DPR_ETH[0m
+[12856] 	INFO	| Sending RESET to DPR_LOX[0m
+[13001] 	INFO	| Sending RESET to DPR_ETH[0m
+[13001] 	INFO	| Sending RESET to DPR_LOX[0m
+[13142] 	INFO	| Sending RESET to DPR_ETH[0m
+[13142] 	INFO	| Sending RESET to DPR_LOX[0m
+[13353] 	INFO	| Sending RESET to DPR_ETH[0m
+[13353] 	INFO	| Sending RESET to DPR_LOX[0m
+[13486] 	INFO	| Sending RESET to DPR_ETH[0m
+[13486] 	INFO	| Sending RESET to DPR_LOX[0m
+[13603] 	INFO	| Sending RESET to DPR_ETH[0m
+[13603] 	INFO	| Sending RESET to DPR_LOX[0m
+[13748] 	INFO	| Sending RESET to DPR_ETH[0m
+[13748] 	INFO	| Sending RESET to DPR_LOX[0m
+[13893] 	INFO	| Sending RESET to DPR_ETH[0m
+[13893] 	INFO	| Sending RESET to DPR_LOX[0m
+[13893] 	INFO	| Received command from GSC.		ID: 3; Value: 1
+[0m
+[14092] 	INFO	| FSM transition INIT->CALIBRATION[0m
+[14092] 	INFO	| Sending RESET to DPR_ETH[0m
+[14092] 	INFO	| Sending RESET to DPR_LOX[0m
+[17185] 	INFO	| FSM transition CALIBRATION->FILLING[0m
+[26193] 	INFO	| Received command from GSC.		ID: 13; Value: 0
+[0m
+[34788] 	INFO	| Received command from GSC.		ID: 12; Value: 0
+[0m
+[454622] 	INFO	| Received command from GSC.		ID: 8; Value: 1
+[0m
+[509459] 	INFO	| Received command from GSC.		ID: 8; Value: 0
+[0m
+[619477] 	INFO	| Received command from GSC.		ID: 9; Value: 1
+[0m
+[625768] 	INFO	| Received command from GSC.		ID: 9; Value: 0
+[0m
+[668138] 	INFO	| Received command from GSC.		ID: 11; Value: 1
+[0m
+[669841] 	INFO	| Received command from GSC.		ID: 11; Value: 0
+[0m
+[671233] 	INFO	| Received command from GSC.		ID: 11; Value: 1
+[0m
+[672835] 	INFO	| Received command from GSC.		ID: 11; Value: 0
+[0m
+[698217] 	INFO	| Received command from GSC.		ID: 9; Value: 1
+[0m
+[713948] 	INFO	| Received command from GSC.		ID: 9; Value: 0
+[0m
+[795710] 	INFO	| Received command from GSC.		ID: 13; Value: 1
+[0m
+[811378] 	[31mERROR[0m	| [31mDPR LOX read_tank_temperature error: I2C read operation failed[0m
+[1101641] 	[31mERROR[0m	| [31mDPR ETH read_tank_pressure error: I2C read operation failed[0m
+[1565814] 	[31mERROR[0m	| [31mDPR LOX read_copv_pressure error: I2C read operation failed[0m
+[1650908] 	INFO	| Received command from GSC.		ID: 13; Value: 0
+[0m
+[1660822] 	INFO	| Received command from GSC.		ID: 9; Value: 1
+[0m
+[1745824] 	[31mERROR[0m	| [31mDPR ETH read_tank_temperature error: I2C read operation failed[0m
+[1806337] 	INFO	| Received command from GSC.		ID: 9; Value: 0
+[0m
+[1952478] 	[31mERROR[0m	| [31mDPR ETH read_copv_temperature error: I2C read operation failed[0m
+[1982884] 	INFO	| Received command from GSC.		ID: 11; Value: 1
+[0m
+[2050109] 	[31mERROR[0m	| [31mDPR ETH read_tank_pressure error: I2C read operation failed[0m
+[2050183] 	[31mERROR[0m	| [31mDPR ETH write_timestamp error: I2C write operation failed[0m
+[2092401] 	INFO	| Received command from GSC.		ID: 12; Value: 1
+[0m
+[2119701] 	INFO	| Received command from GSC.		ID: 14; Value: 1
+[0m
+[2134346] 	[31mERROR[0m	| [31mDPR ETH read_tank_temperature error: I2C read operation failed[0m
+[2143416] 	INFO	| Received command from GSC.		ID: 8; Value: 1
+[0m

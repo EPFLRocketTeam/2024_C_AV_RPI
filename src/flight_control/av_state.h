@@ -12,8 +12,6 @@
 #include "thresholds.h"
 #include "data.h"
 
-
-
 class MovingAverage {
 public:
 // power
@@ -63,8 +61,6 @@ private:
     uint32_t pressurization_start_time;
     uint32_t timer_accel;
     uint32_t timer_liftoff_timeout;
-
-
 };
 
 

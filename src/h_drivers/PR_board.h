@@ -25,6 +25,7 @@ public:
     void send_reset();
     bool read_is_woken_up();
     void clear_to_ignite(bool value);
+    void send_passivate();
     void read_fsm();
     void read_injector_oxygen();
     void read_injector_fuel();

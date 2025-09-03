@@ -11,6 +11,7 @@
 
 
 DPR::DPR(const uint8_t address) : m_address(address) {
+    passivation_count_ms = 0;
     m_code = (m_address == AV_NET_ADDR_DPR_ETH ? "ETH" : "LOX");
     try {
         I2CInterface::getInstance().open(m_address);
@@ -74,7 +75,7 @@ void DPR::send_pressurize(const bool active) {
         std::string msg("DPR " + m_code + " send_pressurize error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending PRESSURIZE to DPR_%s: %x", m_code.c_str(), order);
+    Logger::log_eventf("Sending PRESSURIZE to DPR_%s: %x", m_code.c_str(), order);
 }
 
 void DPR::send_passivate() {
@@ -85,7 +86,18 @@ void DPR::send_passivate() {
         std::string msg("DPR_" + m_code + " write_passivate error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending PASSIVATE to DPR_%s", m_code.c_str());
+    Logger::log_eventf("Sending PASSIVATE to DPR_%s", m_code.c_str());
+}
+
+void DPR::send_reset() {
+    const uint32_t cmd(AV_NET_CMD_ON);
+    try {
+        I2CInterface::getInstance().write(m_address, AV_NET_DPR_RESET, (uint8_t*)&cmd, AV_NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("DPR_" + m_code + "send_reset error: ");
+        throw DPRException(msg + e.what());
+    }
+    Logger::log_eventf("Sending RESET to DPR_%s", m_code.c_str());
 }
 
 void DPR::send_abort(const bool in_flight) {
@@ -306,6 +318,7 @@ void DPR::handle_init(const DataDump& dump) {
             | AV_NET_CMD_OFF << AV_NET_SHIFT_PX_NC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_VX_NO);
     write_valves(default_valves);
+    send_reset();
 }
 
 void DPR::handle_calibration(const DataDump& dump) {
@@ -354,8 +367,8 @@ void DPR::handle_ascent(const DataDump& dump) {
 void DPR::handle_descent(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
-    static uint32_t passivation_count_ms(0);
-    if (passivation_count_ms >= PASSIVATION_DELAY_AFTER_APOGEE) {
+    Logger::log_eventf("Passivation delay elapsed: %u", passivation_count_ms);
+    if (passivation_count_ms >= PASSIVATION_DELAY_FOR_DPR) {
         send_passivate();
     }else {
         passivation_count_ms += delta_ms;

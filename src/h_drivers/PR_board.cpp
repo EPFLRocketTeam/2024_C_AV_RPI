@@ -63,6 +63,12 @@ void PR_board::clear_to_ignite(bool value) {
     Logger::log_eventf(Logger::DEBUG, "Writing CLEAR_TO_IGNITE to PRB");
 }
 
+void PR_board::send_passivate() {
+    uint32_t cmd(AV_NET_CMD_ON);
+    write_register(AV_NET_PRB_PASSIVATE, (uint8_t*)&cmd);
+    Logger::log_eventf("Sending PASSIVATE to PRB");
+}
+
 void PR_board::read_fsm() {
     uint32_t state(0);
     read_register(AV_NET_PRB_FSM_PRB, (uint8_t*)&state);
@@ -114,7 +120,7 @@ void PR_board::read_combustion_chamber() {
 
 void PR_board::write_igniter(uint32_t cmd) {
     write_register(AV_NET_PRB_IGNITER, (uint8_t*)&cmd);
-    Logger::log_eventf(Logger::DEBUG, "Writing IGNITER to PRB: %u", cmd);
+    Logger::log_eventf("Writing IGNITER to PRB: %u", cmd);
 }
 
 void PR_board::write_valves(const uint32_t cmd) {
@@ -280,8 +286,9 @@ void PR_board::handle_ignition(const DataDump& dump) {
                         IGNITION_NO_COM_TIMEOUT_MS);
                 ignition_send_ms = 0;
             }
+            Logger::log_eventf("ignition com elapsed: %u", ignition_send_ms);
             ignition_send_ms += delta_ms;
-        }else {
+        }else if (!ignition_sq_started) {
             ignition_sq_started = true;
             Logger::log_eventf("IGNITION SEQUENCE STARTED");
         }
@@ -302,6 +309,7 @@ void PR_board::handle_ignition(const DataDump& dump) {
                 Logger::log_eventf(Logger::FATAL, "IGNITION FAILED. SEQUENCE ABORTION");
             }
         }
+        Logger::log_eventf("ignition check elapsed: %u", ignition_ack_ms);
         ignition_ack_ms += delta_ms;
     }
 }
@@ -312,7 +320,6 @@ void PR_board::handle_burn(const DataDump& dump) {
     if (!dump.valves.valve_prb_main_lox && !dump.valves.valve_prb_main_fuel) {
         Data::get_instance().write(Data::EVENT_ENGINE_CUT_OFF, &cut_off);
     }
-
 }
 
 void PR_board::handle_ascent(const DataDump& dump) {
@@ -320,14 +327,12 @@ void PR_board::handle_ascent(const DataDump& dump) {
 }
 
 void PR_board::handle_descent(const DataDump& dump) {
-    // Handle logic for descent phase
-    //TODO: not final as not needed for VSFT
     periodic_timestamp(100);
-
-    if(dump.event.ignited){
-        write_igniter(AV_NET_CMD_OFF);
-        uint8_t trigger_off = 0;
-        Data::get_instance().write(Data::EVENT_IGNITED, &trigger_off);
+    static uint32_t passivation_count_ms(0);
+    if (passivation_count_ms >= PASSIVATION_DELAY_AFTER_APOGEE) {
+       send_passivate();
+    }else {
+        passivation_count_ms += delta_ms;
     }
 }
 

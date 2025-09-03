@@ -1,5 +1,6 @@
 #include <iostream>
 #include "sensors.h"
+#include "av_timer.h"
 #include "INA228.h"
 #include "TMP1075.h"
 #include "kalman_params.h"
@@ -28,8 +29,11 @@ void Sensors::init_sensors () {
     sensors.push_back( Adxl375Module::make_primary() );
     sensors.push_back( Adxl375Module::make_secondary() );
 
+    AvTimer::sleep(100);
     sensors.push_back( Bmi088Module::make_primary() );
+    AvTimer::sleep(100);
     sensors.push_back( Bmi088Module::make_secondary() );
+    AvTimer::sleep(100);
 
     sensors.push_back( Bmp390Module::make_primary() );
     sensors.push_back( Bmp390Module::make_secondary() );
