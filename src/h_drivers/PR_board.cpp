@@ -46,6 +46,7 @@ void PR_board::send_sleep() {
 void PR_board::send_reset() {
     const uint32_t order(AV_NET_CMD_ON);
     write_register(AV_NET_PRB_RESET, (uint8_t*)&order);
+    Logger::log_eventf("Sending RESET to PRB");
 }
 
 bool PR_board::read_is_woken_up() {
@@ -102,6 +103,13 @@ void PR_board::read_injector_fuel() {
 
     Logger::log_eventf(Logger::DEBUG, "Reading P_EIN from PRB: %f", pressure);
     Logger::log_eventf(Logger::DEBUG, "Reading T_EIN from PRB: %f", temperature);
+}
+
+void PR_board::read_injector_cooling_temperature() {
+    float temperature(0);
+    read_register(AV_NET_PRB_T_EIN_PT1000, (uint8_t*)&temperature);
+    Data::get_instance().write(Data::PR_SENSOR_T_EIN_CF, &temperature);
+    Logger::log_eventf(Logger::DEBUG, "Reading T_EIN_PT1000 from PRB: %f", temperature);
 }
 
 void PR_board::read_combustion_chamber() {
@@ -211,6 +219,7 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     read_valves();
     read_injector_oxygen();
     read_injector_fuel();
+    read_injector_cooling_temperature();
     read_combustion_chamber();
 }
 

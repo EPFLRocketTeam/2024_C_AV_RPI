@@ -29,6 +29,7 @@ public:
     void read_fsm();
     void read_injector_oxygen();
     void read_injector_fuel();
+    void read_injector_cooling_temperature();
     void read_combustion_chamber();
     void write_igniter(uint32_t cmd);
     void write_valves(const uint32_t cmd);

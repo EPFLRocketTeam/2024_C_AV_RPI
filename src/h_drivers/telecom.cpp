@@ -53,7 +53,7 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             // TODO: try establishing communication with GS
             break;
         default:
-            send_telemetry();
+            //send_telemetry();
             break;
     }
 
@@ -196,10 +196,17 @@ void Telecom::reset_cmd() {
 }
 
 void Telecom::handle_uplink(int packet_size) {
-    if (packet_size == 0) {
+    /*
+    if (packet_size == 0 || packet_size != 5 + av_uplink_size) {
+        return;
     }
+    */
 
-    std::cerr << "packet received\n";
+    std::cout << "packet received\n";
+    int rssi(lora_uplink.packetSnr());
+    float snr(lora_uplink.packetRssi());
+    Logger::log_eventf("RSSI: %i", rssi);
+    Logger::log_eventf("SNR: %f", snr);
 
     for (int i(0); i < packet_size; ++i) {
         uplink_buffer.write(lora_uplink.read());
@@ -227,6 +234,7 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
 
             	Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i\n", last_packet.order_id, last_packet.order_value);
 	    }
+        //uplink_buffer.flush();
 
             break;
 	case CAPSULE_ID::AV_TELEMETRY:
