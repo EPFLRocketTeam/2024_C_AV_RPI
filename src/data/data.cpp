@@ -64,10 +64,11 @@ Event::Event()
     prb_ready(false),
     trb_ready(false),
     ignited(false),
+    ignition_failed(false),
     engine_cut_off(false),
     seperated(false),
-    chute_unreefed(false),
-    ignition_failed(false)
+    chute_opened(false),
+    chute_unreefed(false)
 {}
 
 
@@ -283,17 +284,20 @@ void Data::write(GoatReg reg, void* data) {
         case EVENT_IGNITED:
             event.ignited = *reinterpret_cast<bool*>(data);
             break;
+        case EVENT_IGNITION_FAILED:
+            event.ignition_failed = *reinterpret_cast<bool*>(data);
+            break;
         case EVENT_ENGINE_CUT_OFF:
             event.engine_cut_off = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_SEPERATED:
             event.seperated = *reinterpret_cast<bool*>(data);
             break;
+        case EVENT_CHUTE_OPENED:
+            event.chute_opened = *reinterpret_cast<bool*>(data);
+            break;
         case EVENT_CHUTE_UNREEFED:
             event.chute_unreefed = *reinterpret_cast<bool*>(data);
-            break;
-            case EVENT_IGNITION_FAILED:
-            event.ignition_failed = *reinterpret_cast<bool*>(data);
             break;
 
         case NAV_KALMAN_DATA:

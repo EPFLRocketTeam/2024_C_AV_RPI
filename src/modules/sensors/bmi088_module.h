@@ -25,13 +25,13 @@ public:
 private:
     Bmi088* bmi = nullptr;
 
+    uint32_t gyro_i2c_address;
+    uint32_t accel_i2c_address;
+
     Data::GoatReg gyro_stat_reg;
     Data::GoatReg gyro_data_reg;
     Data::GoatReg accel_stat_reg;
     Data::GoatReg accel_data_reg;
-    
-    uint32_t gyro_i2c_address;
-    uint32_t accel_i2c_address;
 
     bool run_init() override;
     bool run_update() override;

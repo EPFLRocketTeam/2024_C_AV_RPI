@@ -26,11 +26,11 @@ namespace {
 
 
 Telecom::Telecom()
-:   new_cmd_received(false),
+:   capsule_uplink(&Telecom::handle_capsule_uplink, this),
+    capsule_downlink(&Telecom::handle_capsule_downlink, this),
     last_packet{0, 0},
-    packet_number(0),
-    capsule_uplink(&Telecom::handle_capsule_uplink, this),
-    capsule_downlink(&Telecom::handle_capsule_downlink, this)
+    new_cmd_received(false),
+    packet_number(0)
 {}
 
 void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
@@ -202,11 +202,9 @@ void Telecom::handle_uplink(int packet_size) {
     }
     */
 
-    std::cout << "packet received\n";
-    int rssi(lora_uplink.packetSnr());
-    float snr(lora_uplink.packetRssi());
-    Logger::log_eventf("RSSI: %i", rssi);
-    Logger::log_eventf("SNR: %f", snr);
+    const int rssi(lora_uplink.packetSnr());
+    const float snr(lora_uplink.packetRssi());
+    Logger::log_eventf("Packet received. RSSI: %i\t\tSNR: %f", rssi, snr);
 
     for (int i(0); i < packet_size; ++i) {
         uplink_buffer.write(lora_uplink.read());
@@ -225,17 +223,7 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
             Data::get_instance().write(Data::TLM_CMD_VALUE, &last_packet.order_value);
             Data::get_instance().write(Data::EVENT_CMD_RECEIVED, &new_cmd_received);
 
-	    {
-            	const int order_id((int)last_packet.order_id);
-            	const int order_value((int)last_packet.order_value);
-            	//std::cout << "Command received from GS!\n"
-                //	      << "ID: " << last_packet.order_id << "\n"
-                //      	<< "Value: " << last_packet.order_value << "\n\n";
-
-            	Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i\n", last_packet.order_id, last_packet.order_value);
-	    }
-        //uplink_buffer.flush();
-
+            Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i\n", last_packet.order_id, last_packet.order_value);
             break;
 	case CAPSULE_ID::AV_TELEMETRY:
 	    av_downlink_t radio_packet;

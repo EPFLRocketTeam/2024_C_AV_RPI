@@ -6,7 +6,6 @@
 int main() {
 	I2CInterface::getInstance().open(AV_NET_ADDR_PRB);
 	I2CInterface::getInstance().open(AV_NET_ADDR_DPR_LOX);
-	uint32_t test(0xFFFFFFFF);
 	//I2CInterface::getInstance().write(AV_NET_ADDR_DRP_LOX, AV_NET_PRB_CLEAR_TO_IGNITE, (uint8_t*)&test, AV_NET_XFER_SIZE);
 
 	//uint32_t cmd(AV_NET_CMD_ON);

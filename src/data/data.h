@@ -159,11 +159,12 @@ struct Event {
     bool prb_ready;
     bool trb_ready;
     bool ignited;
-    bool engine_cut_off;
-    bool seperated;
-    bool chute_unreefed;
     // FILLING state this resets to 0
     bool ignition_failed;
+    bool engine_cut_off;
+    bool seperated;
+    bool chute_opened;
+    bool chute_unreefed;
 
     // will have to be discussed in interface meeting w/ prop
     // transition b/w ARMED and ERRORGROUND states

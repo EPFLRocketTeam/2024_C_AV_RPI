@@ -79,7 +79,7 @@ void leak_test(DPR& dpr_lox, DPR& dpr_eth) {
     while (1) {
         old_ms = now_ms;
         now_ms = AvTimer::tick();
-        delta_ms = now_ms - now_ms;
+        delta_ms = now_ms - old_ms;
         total_ms += delta_ms;
 
         read_sensors(dpr_lox);

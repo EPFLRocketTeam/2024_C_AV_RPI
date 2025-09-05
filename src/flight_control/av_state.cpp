@@ -12,7 +12,7 @@ MovingAverage::MovingAverage(size_t power) : maxSize(power), sum(0.0f)
 
 void MovingAverage::addSample(float sample)
 {
-    if (samples.size() >= (1 << maxSize))
+    if (samples.size() >= (unsigned)(1 << maxSize))
     {
         sum -= samples.front();
         samples.erase(samples.begin());

@@ -121,8 +121,8 @@ int main() {
         
 
         // If loop finished early, compensate
-        if (delta_ms < 10) {
-            AvTimer::sleep(10 - delta_ms);
+        if (delta_ms < inv_freq) {
+            AvTimer::sleep(inv_freq - delta_ms);
         }
     }
 

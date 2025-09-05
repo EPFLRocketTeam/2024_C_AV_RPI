@@ -54,7 +54,7 @@ int main() {
 }
 
 void intensive_read_write_test(TriggerBoard& trb) {
-    const unsigned iter(128);
+    const int iter(128);
     std::cout << "Writing " << iter << " random timestamps to TRB_TIMESTAMP_MAIN...";
     for (int i(0); i < iter; ++i) {
         uint32_t tmsp(rand());
