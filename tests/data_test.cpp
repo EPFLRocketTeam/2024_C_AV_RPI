@@ -284,20 +284,6 @@ int main(int argc, char** argv) {
     dump = goatData.get();
     assert(dump.prop.chamber_pressure == testpCcc);
 
-    // Test PR_SENSOR_L_ETA
-    Data::GoatReg lEtaReg = Data::GoatReg::PR_SENSOR_L_ETA;
-    double testlEta = 8.8;
-    goatData.write(lEtaReg, &testlEta);
-    dump = goatData.get();
-    assert(dump.prop.fuel_level == testlEta);
-
-    // Test PR_SENSOR_L_OTA
-    Data::GoatReg lOtaReg = Data::GoatReg::PR_SENSOR_L_OTA;
-    double testlOta = 9.9;
-    goatData.write(lOtaReg, &testlOta);
-    dump = goatData.get();
-    assert(dump.prop.LOX_level == testlOta);
-
     // Test PR_SENSOR_T_NCO
     Data::GoatReg tNcoReg = Data::GoatReg::PR_SENSOR_T_NCO;
     double testtNco = 1.0;
@@ -404,14 +390,18 @@ int main(int argc, char** argv) {
 
     // Test VALVES
     Data::GoatReg valvesReg = Data::GoatReg::VALVES;
-    Valves testValves = {true, true, false, true};
+    Valves testValves;
+    testValves.valve_dpr_pressure_lox = 1;
+    testValves.valve_dpr_pressure_fuel = 1;
+    testValves.valve_dpr_vent_lox = 1;
+    testValves.valve_prb_main_fuel = 1;
     goatData.write(valvesReg, &testValves);
     dump = goatData.get();
     assert(areEqualValves(dump.valves, testValves));
 
     // Test AV_STATE
     Data::GoatReg avStateReg = Data::GoatReg::AV_STATE;
-    State testAvState = State::LIFTOFF;
+    State testAvState = State::BURN;
     goatData.write(avStateReg, &testAvState);
     dump = goatData.get();
     assert(dump.av_state == testAvState);

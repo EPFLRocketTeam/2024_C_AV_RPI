@@ -2,6 +2,7 @@
 #include <fstream>
 #include <locale>
 #include "dynconf.h"
+#include "logger.h"
 
 std::string trim(std::string buffer) {
     int left  = 0;
@@ -19,7 +20,10 @@ void ConfigManager::init(std::string path) {
     std::string line_buf;
     std::string section = "";
     while (std::getline(file, line_buf)) {
-        if (file.fail()) break;
+        if (file.fail()) {
+            Logger::log_eventf(Logger::ERROR, "Configuration file \"%s\" not found", path.c_str());
+            break;
+        }
 
         line_buf = trim(line_buf);
         if (line_buf == "") continue;

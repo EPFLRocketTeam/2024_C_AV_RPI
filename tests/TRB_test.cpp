@@ -54,7 +54,7 @@ int main() {
 }
 
 void intensive_read_write_test(TriggerBoard& trb) {
-    const unsigned iter(128);
+    const int iter(128);
     std::cout << "Writing " << iter << " random timestamps to TRB_TIMESTAMP_MAIN...";
     for (int i(0); i < iter; ++i) {
         uint32_t tmsp(rand());
@@ -249,7 +249,7 @@ void check_policy_test(TriggerBoard& trb) {
 
     uint8_t state(static_cast<uint8_t>(State::INIT));
 
-    while (state < static_cast<uint8_t>(State::ERRORFLIGHT)) {
+    while (state < static_cast<uint8_t>(State::ABORT_IN_FLIGHT)) {
         goat.av_state = static_cast<State>(state); 
         trb.check_policy(goat, 0);
         ++state;

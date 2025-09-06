@@ -20,6 +20,7 @@
 */
 #include "TMP1075.h"
 #include "i2c_wrappers.h"
+#include "config.h"
 #include <memory>
 
 TMP1075::TMP1075(uint8_t addr)
@@ -41,6 +42,7 @@ TMP1075::TMP1075(uint8_t addr)
         return;
     }
     this->configRegister = (uint8_t)(this->readRegister(0x01) >> 8);
+    setHighTemperatureLimitCelsius(TMP1075_ALERT_TEMPERATURE);
 }
 
 void TMP1075::writeRegister(const uint8_t pointerRegister, const uint16_t value)

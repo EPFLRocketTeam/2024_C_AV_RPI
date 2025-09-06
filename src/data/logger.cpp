@@ -8,6 +8,9 @@
 #include "data.h"
 #include "config.h"
 
+const bool CONSOLE_LOG = 1;
+const bool DEBUG_LOG = 0;
+
 // If the folder contains more than 10^6 files, throw an error
 const int MAX_TEMPLATE_COUNT = 1'000'000;
 
@@ -68,13 +71,17 @@ void Logger::log_dump(const DataDump& dump) {
     
     counter++;
 
-    if (counter >= DATADUMP_FSYNC_FREQ){
+    if (counter >= DATADUMP_FSYNC_FREQUENCY){
         counter = 0;
         fsync(dump_fd);
     }
 }
 
 void Logger::log_event(const Severity lvl, const std::string event) {
+    if (!DEBUG_LOG && lvl == Logger::DEBUG) {
+        return;
+    }
+
     const std::string event_msg(fmt_severity_msg(lvl, event));
     const uint32_t str_length = event_msg.size();
 
@@ -86,7 +93,9 @@ void Logger::log_event(const Severity lvl, const std::string event) {
     write(event_fd, buffer_ln, sizeof(uint32_t));
     write(event_fd, event_msg.c_str(), str_length * sizeof(char));
 
-    std::cout << timestamp << event_msg << "\n";
+    if (CONSOLE_LOG) {
+        std::cout << timestamp << event_msg << "\n";
+    }
     fsync(event_fd);
 }
 

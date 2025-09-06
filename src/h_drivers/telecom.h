@@ -23,15 +23,17 @@ public:
     void handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_t len);
     static void handle_downlink(int packet_size);
     void handle_capsule_downlink(uint8_t packet_id, uint8_t* data_in, uint32_t len);
+    static void handle_tx_done();
 
 private:
-    void send_packet(uint8_t packet_id, uint8_t* data, uint32_t len);
+    bool send_packet(uint8_t packet_id, uint8_t* data, uint32_t len);
 
     Capsule<Telecom> capsule_uplink;
     Capsule<Telecom> capsule_downlink;
 
     av_uplink_t last_packet;
     bool new_cmd_received;
+    uint32_t packet_number;
 };
 
 class TelecomException : public std::exception {
