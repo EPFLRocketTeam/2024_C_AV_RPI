@@ -39,6 +39,15 @@ public:
 private:
     uint32_t delta_ms;
     uint32_t count_ms;
+    uint32_t polling_count_ms;
+
+    // Internal states and counters
+    uint32_t ignition_send_ms;
+    uint32_t ignition_ack_ms;
+    bool ignition_sq_started;
+    bool ignited;
+    uint32_t passivation_count_ms;
+    void reset_counters();
 
     void handle_init(const DataDump& dump);
     void handle_calibration(const DataDump& dump);

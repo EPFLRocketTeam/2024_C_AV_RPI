@@ -318,6 +318,11 @@ public:
 
     DataDump get() const;
 
+    /**
+     * @brief Resets all flight events to their default state (false)
+     */
+    void reset_events();
+
     Data(Data const&) = delete; // Prevents copying
     void operator=(Data const&) = delete; // Prevents assignment
 private:

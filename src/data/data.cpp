@@ -331,14 +331,19 @@ DataDump Data::get() const {
     };
 }
 
-/*
-bool DataDump::depressurised() const {
-    return prop.N2_pressure < N2_PRESSURE_ZERO
-        && prop.fuel_pressure < FUEL_PRESSURE_ZERO
-        && prop.LOX_pressure < LOX_PRESSURE_ZERO
-        && prop.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && prop.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
+void Data::reset_events() {
+    event.command_updated = 0;
+    event.calibrated = 0;
+    event.dpr_eth_ready = 0;
+    event.dpr_eth_pressure_ok = 0;
+    event.dpr_lox_ready = 0;
+    event.prb_ready = 0;
+    event.trb_ready = 0;
+    event.ignited = 0;
+    event.ignition_failed = 0;
+    event.engine_cut_off = 0;
+    event.seperated = 0;
+    event.chute_opened = 0;
+    event.chute_unreefed = 0;
+    event.catastrophic_failure = 0;
 }
-*/
-
