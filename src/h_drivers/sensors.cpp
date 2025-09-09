@@ -45,6 +45,10 @@ void Sensors::init_sensors () {
 
     sensors.push_back( Tmp1075Module::make_tmp() );
 
+    #if MOCKED
+    tsdb.loadCSV("data/sensors_mock_data.csv");
+    #endif
+
     for (SensorModule* module : sensors)
         module->init();
 }
@@ -61,13 +65,30 @@ std::map<std::string, bool> Sensors::sensors_status () {
     return result;
 }
 
+#if MOCKED
+void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms){
+    for (int i = NAV_SENSOR_ADXL1_STAT; i <= NAV_SENSOR_BMP2_DATA; i++) {
+        switch(dump.av_state) {
+            case State::Calibration:
+                Data::get_instance().write(Data::EVENT_CALIBRATED, &calibrated);
+            default:
+                auto val = tsdb.getValue(i, dump.av_timestamp);
+                if (val.has_value()) {
+                    float fval = val.value();
+                Data::get_instance().write(i, &fval);
+            }
+        }
+    }
+}
+#endif
+
+#if !MOCKED
 void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     for (SensorModule* mod : sensors)
         mod->check_policy(dump, delta_ms);
     
     if (dump.av_state == State::CALIBRATION) {
         bool calibrated(true);
-
         Data::get_instance().write(Data::EVENT_CALIBRATED, &calibrated);
     }
 
@@ -75,3 +96,4 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     // kalman.check_static(dump);
     return;
 }
+#endif

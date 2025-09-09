@@ -23,6 +23,7 @@
 #include "INA228.h"
 #include "TMP1075.h"
 #include "module.h"
+#include "tsdb.h"
 
 class Sensors : public HDriver {
 public:
@@ -40,6 +41,9 @@ public:
     // inline SensFiltered get_clean() const { return clean_data; }
 private:
     std::vector<SensorModule*> sensors;
+    TimeSeriesDB tsdb;
+    void mock_check_policy(const DataDump& dump, const uint32_t delta_ms);
+
 
     // SensStatus status;
     // SensRaw raw_data;
