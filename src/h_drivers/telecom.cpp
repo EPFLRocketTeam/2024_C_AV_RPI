@@ -151,6 +151,11 @@ void Telecom::restart_loras() {
     Logger::log_eventf(Logger::WARN, "Restarting LoRas");
     lora_uplink.end();
     lora_downlink.end();
+
+    // uplink_buffer.clearWriteError();
+    // downlink_buffer.clearWriteError();
+
+
     begin();
 }
 
