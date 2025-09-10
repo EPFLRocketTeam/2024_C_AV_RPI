@@ -53,6 +53,7 @@ public:
     std::string stateToString(State state);
 
 private:
+    void reset_flight();
     State from_init(DataDump const &dump,uint32_t delta_ms);
     State from_calibration(DataDump const &dump,uint32_t delta_ms);
     State from_filling(DataDump const &dump,uint32_t delta_ms);
@@ -66,15 +67,21 @@ private:
     State from_descent(DataDump const &dump,uint32_t delta_ms);
     State from_abort_flight(DataDump const &dump,uint32_t delta_ms);
     State currentState;
+
     MovingAverage pressure_fuel_avg{6}; // 64 samples
     MovingAverage pressure_lox_avg{6}; // 64 samples
+                                       //
     uint32_t pressurization_start_time;
     uint32_t timer_accel;
     uint32_t timer_liftoff_timeout;
+    
     WeightedMovingAverage altitude_avg{4}; // 16 samples
     WeightedMovingAverage lagged_delay_avg{4}; // 16 samples
     std::vector<float> bmp_buffer;
     std::vector<uint32_t> ts_buffer;
+
+    uint32_t ascent_elapsed;
+    uint32_t descent_elapsed;
 };
 
 

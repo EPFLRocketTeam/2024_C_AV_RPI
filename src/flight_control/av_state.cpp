@@ -81,12 +81,25 @@ AvState::AvState()
     this->currentState = State::INIT;
     buffer.reserve(1 << power);
     ts_buffer.reserve(1 << power);
+    reset_flight();
 }
 
 // Destructor
 AvState::~AvState()
 {
     // Nothing to do
+}
+
+void AvState::reset_flight() {
+    pressure_fuel_avg.reset();
+    pressure_lox_avg.reset();
+    pressurization_start_time = 0;
+    timer_accel = 0;
+    timer_liftoff_timeout = 0;
+    ascent_elapsed = 0;
+    descent_elapsed = 0;
+    this->currentState = State::INIT;
+    Data::get_instance().reset_events();
 }
 
 // This function allows to get the current state of the FSM
@@ -207,8 +220,8 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
 
     // success path once we've waited long enough
     Logger::log_eventf("pressurization_elapsed: %u", pressurization_start_time);
-    Logger::log_eventf("Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
-    if (pressurization_start_time > PRESSURIZATION_HOLD_MS &&
+    Logger::log_eventf("Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
+    if (pressurization_start_time > PRESSURIZATION_HOLD_MS  &&
             fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
             lox_avg <= PRESSURIZATION_CHECK_PRESSURE)
     {
@@ -316,7 +329,8 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 #endif
     }
     //TODO: better apogee detection
-    else if (dump.nav.speed.z < SPEED_ZERO && ascent_elapsed > 10e3)
+    else if (ascent_elapsed > 10e3/*dump.nav.speed.z < SPEED_ZERO*/
+             || ascent_elapsed > ASCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
         return State::DESCENT;

@@ -57,11 +57,28 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             break;
     }
 
+    static uint32_t last_packet_number(0);
+    last_packet_number = packet_number;
     send_telemetry();
 
     // Write incoming packets to buffer
     // TODO: see if this can be called in handle_uplink during callback instead of polling
     update();
+
+    // Crash recovery
+    static uint32_t hang_time(0);
+    if (dump.av_state != State::CALIBRATION) {
+        if (packet_number == last_packet_number) {
+            hang_time += delta_ms;
+        }else {
+            hang_time = 0;
+        }
+        if (hang_time > 1000) {
+            restart_loras();
+            hang_time = 0;
+        }
+        Logger::log_eventf("Downlink hang time: %u", hang_time);
+    }
 }
 
 bool Telecom::begin() {
@@ -129,6 +146,19 @@ bool Telecom::begin() {
     return true;
 }
 
+void Telecom::restart_loras() {
+    Logger::log_eventf(Logger::ERROR, "Downlink hang > 5s detected");
+    Logger::log_eventf(Logger::WARN, "Restarting LoRas");
+    lora_uplink.end();
+    lora_downlink.end();
+
+    // uplink_buffer.clearWriteError();
+    // downlink_buffer.clearWriteError();
+
+
+    begin();
+}
+
 void Telecom::send_telemetry() {
     const DataDump data = Data::get_instance().get();
 
@@ -180,6 +210,7 @@ void Telecom::send_telemetry() {
 
     if (send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size)) {
         ++packet_number;
+        Logger::log_eventf("Sending packet on downlink");
     }
 }
 
@@ -270,7 +301,6 @@ void Telecom::handle_tx_done() {
 }
 
 bool Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
-    gpioWrite(LED_LORA_TX, 1);
 
     uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));
     size_t length(capsule_downlink.getCodedLen(len));
@@ -278,6 +308,9 @@ bool Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
     if (!lora_downlink.beginPacket()) {
         return false;
     }
+
+    gpioWrite(LED_LORA_TX, 1);
+
     lora_downlink.write(coded_buffer, length);
     lora_downlink.endPacket(true);
 

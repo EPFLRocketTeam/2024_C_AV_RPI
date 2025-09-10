@@ -312,6 +312,7 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 }
 
 void DPR::handle_init(const DataDump& dump) {
+    passivation_count_ms = 0;
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_DN_NC

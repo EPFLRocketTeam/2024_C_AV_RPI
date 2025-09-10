@@ -12,11 +12,12 @@
 
 // FIXME: implement the valve logic later on
 PR_board::PR_board() {
-      try {
+    try {
         I2CInterface::getInstance().open(AV_NET_ADDR_PRB);
     }catch(const I2CInterfaceException& e) {
         Logger::log_eventf(Logger::FATAL, "Error during PRB I2C initilazation: %s", e.what());
     }    
+    reset_counters(); 
 }
 
 PR_board::~PR_board() {
@@ -84,7 +85,9 @@ void PR_board::read_injector_oxygen() {
     read_register(AV_NET_PRB_P_OIN, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_OIN, (uint8_t*)&temperature);
 
-    Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
+    if (pressure != 50) {
+        Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
+    }
     Data::get_instance().write(Data::PR_SENSOR_T_OIN, &temperature);
 
     Logger::log_eventf(Logger::DEBUG, "Reading P_OIN from PRB: %f", pressure);
@@ -98,7 +101,9 @@ void PR_board::read_injector_fuel() {
     read_register(AV_NET_PRB_P_EIN, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_EIN, (uint8_t*)&temperature);
 
-    Data::get_instance().write(Data::PR_SENSOR_P_EIN, &pressure);
+    if (pressure != 50) {
+        Data::get_instance().write(Data::PR_SENSOR_P_EIN, &pressure);
+    }
     Data::get_instance().write(Data::PR_SENSOR_T_EIN, &temperature);
 
     Logger::log_eventf(Logger::DEBUG, "Reading P_EIN from PRB: %f", pressure);
@@ -119,7 +124,9 @@ void PR_board::read_combustion_chamber() {
     read_register(AV_NET_PRB_P_CCC, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_CCC, (uint8_t*)&temperature);
 
-    Data::get_instance().write(Data::PR_SENSOR_P_CCC, &pressure);
+    if (pressure != 50) {
+        Data::get_instance().write(Data::PR_SENSOR_P_CCC, &pressure);
+    }
     Data::get_instance().write(Data::PR_SENSOR_T_CCC, &temperature);
 
     Logger::log_eventf(Logger::DEBUG, "Reading P_CCC from PRB: %f", pressure);
@@ -236,8 +243,18 @@ void PR_board::actuate_valve(const bool active, const uint8_t valve_bitshift) {
     write_valves(valves);
 }
 
+void PR_board::reset_counters() {
+    count_ms = 0;
+    polling_count_ms = 0;
+    ignition_send_ms = 0;
+    ignition_ack_ms = 0;
+    ignition_sq_started = 0;
+    ignited = 0;
+    passivation_count_ms = 0;
+}
 
 void PR_board::handle_init(const DataDump& dump) {
+    reset_counters();
     uint32_t default_valves(AV_NET_CMD_OFF << AV_NET_SHIFT_MO_BC
             | AV_NET_CMD_OFF << AV_NET_SHIFT_ME_B);
     write_valves(default_valves);
@@ -283,6 +300,7 @@ void PR_board::handle_ignition(const DataDump& dump) {
     static uint32_t ignition_ack_ms(0);
     
     const PRB_FSM prb_state((PRB_FSM)dump.prop.PRB_state);
+    const Valves valves(dump.valves);
     if (!dump.event.ignited && !dump.event.ignition_failed) {
         static bool ignition_sq_started(false);
         // While PRB hasn't switched to IGNITION_SQ, send IGNITER cmd
@@ -303,7 +321,8 @@ void PR_board::handle_ignition(const DataDump& dump) {
         }
 
         // After some delay, check the PRB FSM for ignition status
-        if (ignition_sq_started && ignition_ack_ms > IGNITION_ACK_DELAY_MS) {
+        const bool engine_valves_open(valves.valve_prb_main_lox && valves.valve_prb_main_fuel);
+        if (ignition_sq_started && ignition_ack_ms > IGNITION_ACK_DELAY_MS && engine_valves_open) {
             static bool ignited(true);
             if (prb_state == PRB_FSM::ABORT) {
                 ignited = false;

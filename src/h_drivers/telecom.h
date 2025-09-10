@@ -27,13 +27,14 @@ public:
 
 private:
     bool send_packet(uint8_t packet_id, uint8_t* data, uint32_t len);
+    void restart_loras();
 
     Capsule<Telecom> capsule_uplink;
     Capsule<Telecom> capsule_downlink;
 
     av_uplink_t last_packet;
     bool new_cmd_received;
-    uint32_t packet_number;
+    uint32_t packet_number, last_packet_number;
 };
 
 class TelecomException : public std::exception {
