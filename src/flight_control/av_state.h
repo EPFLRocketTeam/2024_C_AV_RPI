@@ -19,20 +19,22 @@ public:
     void addSample(float sample);
     float getAverage() const;
     void reset();
-private:
+protected:
     std::vector<float> samples;
     size_t maxSize;
     float sum;
 };
 
-class WeightedMovingAverage: public MovingAverage {
+class WeightedMovingAverage : public MovingAverage {
 public:
-    WeightedMovingAverage(size_t power);
-    void addSample(float sample) override;
-    private:
+    explicit WeightedMovingAverage(size_t power);
+    void addSample(float sample);
+    float getAverage() const; // (optional) override if you want weighted avg out
+
+private:
     std::vector<float> weights;
-    float weighted_sum;
-    float total_weight;
+    float weighted_sum = 0.0f;
+    float total_weight = 0.0f;
 };
 
 
@@ -76,7 +78,7 @@ private:
     uint32_t timer_liftoff_timeout;
     
     WeightedMovingAverage altitude_avg{4}; // 16 samples
-    WeightedMovingAverage lagged_delay_avg{4}; // 16 samples
+    WeightedMovingAverage lagged_alt_avg{4}; // 16 samples
     std::vector<float> bmp_buffer;
     std::vector<uint32_t> ts_buffer;
 

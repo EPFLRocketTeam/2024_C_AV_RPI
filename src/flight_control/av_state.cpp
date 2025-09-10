@@ -5,6 +5,8 @@
 #include "logger.h"
 #include <iostream>
 
+#define ALTITUDE_BUFFER_SIZE 16
+
 
 ///////////////////////////////
 // MovingAverage: Utility class
@@ -45,8 +47,7 @@ void MovingAverage::reset()
 ///////////////////////////////
 // WeightedMovingAverage: Utility class
 ///////////////////////////////
-WeightedMovingAverage::WeightedMovingAverage(size_t power){
-    samples.reserve(1 << power);
+WeightedMovingAverage::WeightedMovingAverage(size_t power):MovingAverage(power){
     weights.reserve(1 << power);
     weighted_sum = 0.0f;
     total_weight = 0.0f;
@@ -57,15 +58,29 @@ WeightedMovingAverage::WeightedMovingAverage(size_t power){
     }
 }
 
-void WeightedMovingAverage::addSample(float sample)
-{
-    if (samples.size() >= weights.size())
-    {
-        weighted_sum -= samples.front() * weights.front();
-        samples.erase(samples.begin());   
+void WeightedMovingAverage::addSample(float s) {
+    if (samples.size() == maxSize) {
+        samples.erase(samples.begin());
     }
-    samples.push_back(sample);
-    weighted_sum += sample * weights.back();
+    samples.push_back(s);
+
+    // Recompute weighted_sum using weights aligned oldest->weights[0], newest->weights[k-1]
+    weighted_sum = 0.0f;
+    const size_t k = samples.size();
+    const size_t offset = weights.size() - k;  // if weights.size()==maxSize
+    for (size_t i = 0; i < k; ++i) {
+        weighted_sum += samples[i] * weights[offset + i];
+    }
+}
+
+float WeightedMovingAverage::getAverage() const {
+    if (samples.empty()) return 0.0f;
+    // Denominator is only the portion of weights actually used (for partial fill)
+    const size_t k = samples.size();
+    const size_t offset = weights.size() - k;
+    float denom = 0.0f;
+    for (size_t i = 0; i < k; ++i) denom += weights[offset + i];
+    return weighted_sum / denom;
 }
 
 
@@ -79,8 +94,8 @@ AvState::AvState()
 
 {
     this->currentState = State::INIT;
-    buffer.reserve(1 << power);
-    ts_buffer.reserve(1 << power);
+    bmp_buffer.reserve(ALTITUDE_BUFFER_SIZE);
+    ts_buffer.reserve(ALTITUDE_BUFFER_SIZE);
     reset_flight();
 }
 
@@ -309,11 +324,11 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
     static uint32_t ascent_elapsed(0);
     altitude_avg.addSample(dump.nav.altitude);
-    buffer.push_back(dump.nav.baro.pressure);
-    ts_buffer.push_back(dump.header.timestamp);
-    if (buffer.size() > bmp_buffer.size()) {
-        lagged_delay_avg.addSample(buffer.front());
-        buffer.erase(buffer.begin());
+    bmp_buffer.push_back(dump.nav.baro.pressure);
+    ts_buffer.push_back(dump.av_timestamp);
+    if (bmp_buffer.size() > bmp_buffer.size()) {
+        lagged_alt_avg.addSample(bmp_buffer.front());
+        bmp_buffer.erase(bmp_buffer.begin());
         ts_buffer.erase(ts_buffer.begin());
     }
     Logger::log_eventf("ASCENT elapsed: %u", ascent_elapsed);
@@ -329,7 +344,7 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 #endif
     }
     //TODO: better apogee detection
-    else if (ascent_elapsed > 10e3/*dump.nav.speed.z < SPEED_ZERO*/
+    else if ( lagged_alt_avg.getAverage()> altitude_avg.getAverage()
              || ascent_elapsed > ASCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
