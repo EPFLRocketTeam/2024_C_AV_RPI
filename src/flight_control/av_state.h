@@ -25,6 +25,16 @@ private:
     float sum;
 };
 
+class WeightedMovingAverage: public MovingAverage {
+public:
+    WeightedMovingAverage(size_t power);
+    void addSample(float sample) override;
+    private:
+    std::vector<float> weights;
+    float weighted_sum;
+    float total_weight;
+};
+
 
 // Path: AV-Firehorn-Rpi/include/flightControl/AvState.h
 // Compare this snippet from AV-Firehorn-Rpi/src/flightControl/FSM.cpp:
@@ -61,6 +71,10 @@ private:
     uint32_t pressurization_start_time;
     uint32_t timer_accel;
     uint32_t timer_liftoff_timeout;
+    WeightedMovingAverage altitude_avg{4}; // 16 samples
+    WeightedMovingAverage lagged_delay_avg{4}; // 16 samples
+    std::vector<float> bmp_buffer;
+    std::vector<uint32_t> ts_buffer;
 };
 
 

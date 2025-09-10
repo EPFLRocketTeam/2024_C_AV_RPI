@@ -5,6 +5,10 @@
 #include "logger.h"
 #include <iostream>
 
+
+///////////////////////////////
+// MovingAverage: Utility class
+///////////////////////////////
 MovingAverage::MovingAverage(size_t power) : maxSize(power), sum(0.0f)
 {
     samples.reserve(1 << power);
@@ -38,6 +42,32 @@ void MovingAverage::reset()
     sum = 0.0f;
 }
 
+///////////////////////////////
+// WeightedMovingAverage: Utility class
+///////////////////////////////
+WeightedMovingAverage::WeightedMovingAverage(size_t power){
+    samples.reserve(1 << power);
+    weights.reserve(1 << power);
+    weighted_sum = 0.0f;
+    total_weight = 0.0f;
+    for (size_t i = 0; i < (1 << power); ++i) {
+        float weight = static_cast<float>(i + 1); // Linear weights: 1, 2, 3, ...
+        weights.push_back(weight);
+        total_weight += weight;
+    }
+}
+
+void WeightedMovingAverage::addSample(float sample)
+{
+    if (samples.size() >= weights.size())
+    {
+        weighted_sum -= samples.front() * weights.front();
+        samples.erase(samples.begin());   
+    }
+    samples.push_back(sample);
+    weighted_sum += sample * weights.back();
+}
+
 
 ///////////////////////////////
 // AvState: Flight Computer FSM
@@ -49,6 +79,8 @@ AvState::AvState()
 
 {
     this->currentState = State::INIT;
+    buffer.reserve(1 << power);
+    ts_buffer.reserve(1 << power);
 }
 
 // Destructor
@@ -175,7 +207,7 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
 
     // success path once we've waited long enough
     Logger::log_eventf("pressurization_elapsed: %u", pressurization_start_time);
-    Logger::log_eventf("Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
+    Logger::log_eventf("Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
     if (pressurization_start_time > PRESSURIZATION_HOLD_MS &&
             fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
             lox_avg <= PRESSURIZATION_CHECK_PRESSURE)
@@ -263,6 +295,14 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
     static uint32_t ascent_elapsed(0);
+    altitude_avg.addSample(dump.nav.altitude);
+    buffer.push_back(dump.nav.baro.pressure);
+    ts_buffer.push_back(dump.header.timestamp);
+    if (buffer.size() > bmp_buffer.size()) {
+        lagged_delay_avg.addSample(buffer.front());
+        buffer.erase(buffer.begin());
+        ts_buffer.erase(ts_buffer.begin());
+    }
     Logger::log_eventf("ASCENT elapsed: %u", ascent_elapsed);
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
