@@ -54,6 +54,9 @@ target_link_libraries(avtimer_test flight_computer)
 add_executable(prb_test prb_test.cpp)
 target_link_libraries(prb_test flight_computer)
 
+add_executable(prb_stauration_test prb_stauration_test.cpp)
+target_link_libraries(prb_stauration_test flight_computer)
+
 add_executable(dpr_test dpr_test.cpp)
 target_link_libraries(dpr_test flight_computer)
 
