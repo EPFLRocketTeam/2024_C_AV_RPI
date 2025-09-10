@@ -38,8 +38,13 @@ int main() {
             s_packet_to_send = (uint32_t) STEP_DURATION_MS/s_rate_ms;
             s_packet_sent = 0;
         }
+        
+        try {
+            h_prb.read_combustion_chamber();
+        } catch(PRBoardException e) {
+            s_packet_lost++;
+        }
 
-        h_prb.read_combustion_chamber();
         AvTimer::sleep(s_rate_ms);
     }
 
