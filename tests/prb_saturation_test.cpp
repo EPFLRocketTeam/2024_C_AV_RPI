@@ -33,7 +33,7 @@ int main() {
 
     while(s_rate_ms >= RATE_STOP_MS){
         if(s_packet_sent++ >= s_packet_to_send) {
-            Logger::log_eventf("Packet loss rate @ %d [ms] delta - %d/%d\n", s_rate_ms, s_packet_lost, s_packet_to_send);
+            Logger::log_eventf("Packet loss rate @ %d [ms] delta - %d/%d (%.2f\%)\n", s_rate_ms, s_packet_lost, s_packet_to_send, ((float) s_packet_lost)/((float) s_packet_to_send) * 100);
             s_rate_ms -= RATE_STEP_MS;
             s_packet_to_send = (uint32_t) STEP_DURATION_MS/s_rate_ms;
             s_packet_sent = 0;
