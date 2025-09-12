@@ -12,6 +12,7 @@
 #include "logger.h"
 #include "h_driver.h"
 #include "config.h"
+#include "av_timer.h"
 
 #define lora_uplink LoRa
 
@@ -147,11 +148,19 @@ bool Telecom::begin() {
 }
 
 void Telecom::restart_loras() {
-    Logger::log_eventf(Logger::ERROR, "Downlink hang > 5s detected");
-    Logger::log_eventf(Logger::WARN, "Restarting LoRas");
-    lora_uplink.end();
+    Logger::log_eventf(Logger::ERROR, "Downlink hang > 1s detected");
+    Logger::log_eventf(Logger::WARN, "Restarting Downlink LoRa");
     lora_downlink.end();
+    AvTimer::sleep(500);
 
+    if (!lora_downlink.begin(AV_DOWNLINK_FREQUENCY, SPI1)) {
+        throw TelecomException("LoRa downlink init failed");
+    }else {
+        Logger::log_eventf("LoRa downlink init succeeded!");
+    }
+
+    //uplink_buffer.clear();
+    downlink_buffer.clear();
     // uplink_buffer.clearWriteError();
     // downlink_buffer.clearWriteError();
 
@@ -218,9 +227,9 @@ void Telecom::update() {
     while (uplink_buffer.available()) {
         capsule_uplink.decode(uplink_buffer.read());
     }
-    while (downlink_buffer.available()) {
-        capsule_downlink.decode(downlink_buffer.read());
-    }
+    //while (downlink_buffer.available()) {
+    //    capsule_downlink.decode(downlink_buffer.read());
+    //}
 }
 
 void Telecom::reset_cmd() {

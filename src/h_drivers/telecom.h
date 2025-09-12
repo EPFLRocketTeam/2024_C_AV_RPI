@@ -16,8 +16,8 @@ public:
 
     bool begin();
     void send_telemetry();
-    void update();
     void reset_cmd();
+    void update();
 
     static void handle_uplink(int packet_size);
     void handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_t len);
