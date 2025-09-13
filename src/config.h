@@ -31,10 +31,12 @@ extern const bool DEBUG_LOG;
 #define LED_LORA_TX         18
 
 /* Sensors */
-#define INA228_LPB_SHUNT   65.2e-3
-#define INA228_LPB_MAX_CUR 2.5
-#define INA228_HPB_SHUNT   27e-3
-#define INA228_HPB_MAX_CUR 6
+#define INA228_LPB_SHUNT       65.2e-3
+#define INA228_LPB_MAX_CUR     2.5
+#define INA228_HPB_TRB_SHUNT   27e-3
+#define INA228_HPB_TRB_MAX_CUR 6
+#define INA228_HPB_PRB_SHUNT   13e-3
+#define INA228_HPB_PRB_MAX_CUR 12
 
 #define TMP1075_ALERT_TEMPERATURE 55
 

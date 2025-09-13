@@ -160,8 +160,8 @@ void Telecom::send_telemetry() {
 
     packet.lpb_voltage = data.bat.lpb_voltage;
     packet.lpb_current = data.bat.lpb_current;
-    packet.hpb_voltage = data.bat.hpb_voltage;
-    packet.hpb_current = data.bat.hpb_current;
+    packet.hpb_voltage = 0.5 * (data.bat.hpb_voltage_trb + data.bat.hpb_voltage_prb);
+    packet.hpb_current = data.bat.hpb_current_trb + data.bat.hpb_current_prb;;
 
     packet.av_fc_temp = data.av_fc_temp;
     packet.ambient_temp = data.av_amb_temp;
