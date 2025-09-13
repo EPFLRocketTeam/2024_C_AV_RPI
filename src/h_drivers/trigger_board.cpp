@@ -252,7 +252,6 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
     static uint32_t trigger_ack_ms(0);
     static bool pyro_main_fail(false);
     static bool pyro_spare1_fail(false);
-    static bool pyro_spare2_fail(false);
 
     if (!dump.event.seperated) {
         write_timestamp();
@@ -290,25 +289,6 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
                 trigger_ack_ms += delta_ms;
                 if (trigger_ack_ms >= 200) {
                     pyro_spare1_fail = true;
-                    trigger_ms = 0;
-                    trigger_ack_ms = 0;
-                }
-            }
-        }
-        // Again, if passed a delay of no trigger ACK, fire on the next channel
-        else {
-            if (trigger_ms < 400) {
-                uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3);
-                write_pyros(order);
-                trigger_ms += delta_ms;
-            }else {
-                read_has_triggered();
-                uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3);
-                write_pyros(order);
-
-                trigger_ack_ms += delta_ms;
-                if (trigger_ack_ms >= 200) {
-                    pyro_spare2_fail = true;
                     trigger_ms = 0;
                     trigger_ack_ms = 0;
                 }

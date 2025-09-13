@@ -12,6 +12,7 @@
 #include "logger.h"
 #include "h_driver.h"
 #include "config.h"
+#include "av_timer.h"
 
 #define lora_uplink LoRa
 
@@ -26,11 +27,11 @@ namespace {
 
 
 Telecom::Telecom()
-:   new_cmd_received(false),
+:   capsule_uplink(&Telecom::handle_capsule_uplink, this),
+    capsule_downlink(&Telecom::handle_capsule_downlink, this),
     last_packet{0, 0},
-    packet_number(0),
-    capsule_uplink(&Telecom::handle_capsule_uplink, this),
-    capsule_downlink(&Telecom::handle_capsule_downlink, this)
+    new_cmd_received(false),
+    packet_number(0)
 {}
 
 void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
@@ -57,11 +58,28 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             break;
     }
 
+    static uint32_t last_packet_number(0);
+    last_packet_number = packet_number;
     send_telemetry();
 
     // Write incoming packets to buffer
     // TODO: see if this can be called in handle_uplink during callback instead of polling
     update();
+
+    // Crash recovery
+    static uint32_t hang_time(0);
+    if (dump.av_state != State::CALIBRATION) {
+        if (packet_number == last_packet_number) {
+            hang_time += delta_ms;
+        }else {
+            hang_time = 0;
+        }
+        if (hang_time > 1000) {
+            restart_loras();
+            hang_time = 0;
+        }
+        Logger::log_eventf("Downlink hang time: %u", hang_time);
+    }
 }
 
 bool Telecom::begin() {
@@ -129,6 +147,27 @@ bool Telecom::begin() {
     return true;
 }
 
+void Telecom::restart_loras() {
+    Logger::log_eventf(Logger::ERROR, "Downlink hang > 1s detected");
+    Logger::log_eventf(Logger::WARN, "Restarting Downlink LoRa");
+    lora_downlink.end();
+    AvTimer::sleep(500);
+
+    if (!lora_downlink.begin(AV_DOWNLINK_FREQUENCY, SPI1)) {
+        throw TelecomException("LoRa downlink init failed");
+    }else {
+        Logger::log_eventf("LoRa downlink init succeeded!");
+    }
+
+    //uplink_buffer.clear();
+    downlink_buffer.clear();
+    // uplink_buffer.clearWriteError();
+    // downlink_buffer.clearWriteError();
+
+
+    begin();
+}
+
 void Telecom::send_telemetry() {
     const DataDump data = Data::get_instance().get();
 
@@ -180,6 +219,7 @@ void Telecom::send_telemetry() {
 
     if (send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size)) {
         ++packet_number;
+        Logger::log_eventf("Sending packet on downlink");
     }
 }
 
@@ -187,9 +227,9 @@ void Telecom::update() {
     while (uplink_buffer.available()) {
         capsule_uplink.decode(uplink_buffer.read());
     }
-    while (downlink_buffer.available()) {
-        capsule_downlink.decode(downlink_buffer.read());
-    }
+    //while (downlink_buffer.available()) {
+    //    capsule_downlink.decode(downlink_buffer.read());
+    //}
 }
 
 void Telecom::reset_cmd() {
@@ -202,11 +242,9 @@ void Telecom::handle_uplink(int packet_size) {
     }
     */
 
-    std::cout << "packet received\n";
-    int rssi(lora_uplink.packetSnr());
-    float snr(lora_uplink.packetRssi());
-    Logger::log_eventf("RSSI: %i", rssi);
-    Logger::log_eventf("SNR: %f", snr);
+    const int rssi(lora_uplink.packetSnr());
+    const float snr(lora_uplink.packetRssi());
+    Logger::log_eventf("Packet received. RSSI: %i\t\tSNR: %f", rssi, snr);
 
     for (int i(0); i < packet_size; ++i) {
         uplink_buffer.write(lora_uplink.read());
@@ -225,17 +263,7 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
             Data::get_instance().write(Data::TLM_CMD_VALUE, &last_packet.order_value);
             Data::get_instance().write(Data::EVENT_CMD_RECEIVED, &new_cmd_received);
 
-	    {
-            	const int order_id((int)last_packet.order_id);
-            	const int order_value((int)last_packet.order_value);
-            	//std::cout << "Command received from GS!\n"
-                //	      << "ID: " << last_packet.order_id << "\n"
-                //      	<< "Value: " << last_packet.order_value << "\n\n";
-
-            	Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i\n", last_packet.order_id, last_packet.order_value);
-	    }
-        //uplink_buffer.flush();
-
+            Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i\n", last_packet.order_id, last_packet.order_value);
             break;
 	case CAPSULE_ID::AV_TELEMETRY:
 	    av_downlink_t radio_packet;
@@ -282,7 +310,6 @@ void Telecom::handle_tx_done() {
 }
 
 bool Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
-    gpioWrite(LED_LORA_TX, 1);
 
     uint8_t* coded_buffer(capsule_downlink.encode(packet_id, data, len));
     size_t length(capsule_downlink.getCodedLen(len));
@@ -290,6 +317,9 @@ bool Telecom::send_packet(uint8_t packet_id, uint8_t* data, uint32_t len) {
     if (!lora_downlink.beginPacket()) {
         return false;
     }
+
+    gpioWrite(LED_LORA_TX, 1);
+
     lora_downlink.write(coded_buffer, length);
     lora_downlink.endPacket(true);
 

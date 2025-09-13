@@ -412,7 +412,7 @@ void NeoPixel::initHardware(){
 
 
     // PWM
-    pwm_reg[PWM_CTL] = 0;
+    pwm_reg[PWM_CTL] = 1;
 
     pwm_reg[PWM_RNG1] = 32;
     usleep(100);

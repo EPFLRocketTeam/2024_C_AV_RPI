@@ -161,11 +161,12 @@ struct Event {
     bool prb_ready;
     bool trb_ready;
     bool ignited;
-    bool engine_cut_off;
-    bool seperated;
-    bool chute_unreefed;
     // FILLING state this resets to 0
     bool ignition_failed;
+    bool engine_cut_off;
+    bool seperated;
+    bool chute_opened;
+    bool chute_unreefed;
 
     // will have to be discussed in interface meeting w/ prop
     // transition b/w ARMED and ERRORGROUND states
@@ -320,6 +321,11 @@ public:
     void write(GoatReg reg, void* data);
 
     DataDump get() const;
+
+    /**
+     * @brief Resets all flight events to their default state (false)
+     */
+    void reset_events();
 
     Data(Data const&) = delete; // Prevents copying
     void operator=(Data const&) = delete; // Prevents assignment

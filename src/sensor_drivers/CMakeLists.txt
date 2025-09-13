@@ -36,6 +36,7 @@ set(GPS_SOURCES
 )
 add_library(gps ${GPS_SOURCES})
 target_include_directories(gps INTERFACE ${DRIVERS_DIR})
+target_include_directories(gps PRIVATE ${SRC_DIR})
 target_link_libraries(gps PRIVATE i2c_interface)
 
 # INA228

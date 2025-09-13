@@ -64,10 +64,11 @@ Event::Event()
     prb_ready(false),
     trb_ready(false),
     ignited(false),
+    ignition_failed(false),
     engine_cut_off(false),
     seperated(false),
-    chute_unreefed(false),
-    ignition_failed(false)
+    chute_opened(false),
+    chute_unreefed(false)
 {}
 
 
@@ -289,17 +290,20 @@ void Data::write(GoatReg reg, void* data) {
         case EVENT_IGNITED:
             event.ignited = *reinterpret_cast<bool*>(data);
             break;
+        case EVENT_IGNITION_FAILED:
+            event.ignition_failed = *reinterpret_cast<bool*>(data);
+            break;
         case EVENT_ENGINE_CUT_OFF:
             event.engine_cut_off = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_SEPERATED:
             event.seperated = *reinterpret_cast<bool*>(data);
             break;
+        case EVENT_CHUTE_OPENED:
+            event.chute_opened = *reinterpret_cast<bool*>(data);
+            break;
         case EVENT_CHUTE_UNREEFED:
             event.chute_unreefed = *reinterpret_cast<bool*>(data);
-            break;
-            case EVENT_IGNITION_FAILED:
-            event.ignition_failed = *reinterpret_cast<bool*>(data);
             break;
 
         case NAV_KALMAN_DATA:
@@ -333,14 +337,19 @@ DataDump Data::get() const {
     };
 }
 
-/*
-bool DataDump::depressurised() const {
-    return prop.N2_pressure < N2_PRESSURE_ZERO
-        && prop.fuel_pressure < FUEL_PRESSURE_ZERO
-        && prop.LOX_pressure < LOX_PRESSURE_ZERO
-        && prop.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && prop.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
+void Data::reset_events() {
+    event.command_updated = 0;
+    event.calibrated = 0;
+    event.dpr_eth_ready = 0;
+    event.dpr_eth_pressure_ok = 0;
+    event.dpr_lox_ready = 0;
+    event.prb_ready = 0;
+    event.trb_ready = 0;
+    event.ignited = 0;
+    event.ignition_failed = 0;
+    event.engine_cut_off = 0;
+    event.seperated = 0;
+    event.chute_opened = 0;
+    event.chute_unreefed = 0;
+    event.catastrophic_failure = 0;
 }
-*/
-

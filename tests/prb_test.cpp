@@ -42,12 +42,10 @@ int main() {
 	Logger::log_eventf(Logger::DEBUG, "Writing IGNITER");
 */	
 
-	float rslt(0);
     prb.read_combustion_chamber();
     prb.read_injector_oxygen();
     prb.read_injector_fuel();
 
-	uint32_t valves(0);
     prb.read_valves();
 
     prb.read_combustion_chamber();
