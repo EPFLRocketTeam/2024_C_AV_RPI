@@ -274,7 +274,6 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 
 State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
-    static uint32_t ascent_elapsed(0);
     Logger::log_eventf("ASCENT elapsed: %u", ascent_elapsed);
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
@@ -300,7 +299,6 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 
 State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
 {
-    static uint32_t descent_elapsed(0);
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         Logger::log_eventf(Logger::WARN, "ABORT command received");
