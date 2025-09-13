@@ -31,7 +31,7 @@
 
 // Pressurization
 #define PRESSURIZATION_CHECK_PRESSURE 70
-#define PRESSURIZATION_HOLD_MS        10400 + 5000
+#define PRESSURIZATION_HOLD_MS        25400
 
 // Ignition
 #define IGNITION_NO_COM_TIMEOUT_MS 5000

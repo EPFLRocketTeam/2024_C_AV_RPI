@@ -150,22 +150,71 @@ bool Telecom::begin() {
 void Telecom::restart_loras() {
     Logger::log_eventf(Logger::ERROR, "Downlink hang > 1s detected");
     Logger::log_eventf(Logger::WARN, "Restarting Downlink LoRa");
-    lora_downlink.end();
-    AvTimer::sleep(500);
 
+    lora_downlink.end();
+    lora_downlink.setPins(LORA_DOWNLINK_CS, LORA_DOWNLINK_RST, LORA_DOWNLINK_DI0);
     if (!lora_downlink.begin(AV_DOWNLINK_FREQUENCY, SPI1)) {
         throw TelecomException("LoRa downlink init failed");
     }else {
         Logger::log_eventf("LoRa downlink init succeeded!");
     }
 
-    //uplink_buffer.clear();
+    lora_downlink.setTxPower(AV_DOWNLINK_POWER);
+    lora_downlink.setSignalBandwidth(AV_DOWNLINK_BW);
+    lora_downlink.setSpreadingFactor(AV_DOWNLINK_SF);
+    lora_downlink.setCodingRate4(AV_DOWNLINK_CR);
+    lora_downlink.setPreambleLength(AV_DOWNLINK_PREAMBLE_LEN);
+
+#if (DOWNLINK_CRC)
+    lora_downlink.enableCrc();
+#else
+    lora_downlink.disableCrc();
+#endif
+    /*
+#if (DOWNLINK_INVERSE_IQ)
+    lora_downlink.enableInvertIQ();
+#else
+    lora_downlink.disableInvertIQ();
+#endif
+*/
+
+
+    Logger::log_eventf(Logger::WARN, "Restarting Uplink LoRa");
+    lora_uplink.end();
+    lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
+    if (!lora_uplink.begin(UPLINK_FREQUENCY, SPI0)) {
+        throw TelecomException("LoRa uplink init failed. Aborting LoRa downlink init.");
+    }else {
+        Logger::log_eventf("LoRa uplink init succeeded!");
+    }
+
+    lora_uplink.setTxPower(UPLINK_POWER);
+    lora_uplink.setSignalBandwidth(UPLINK_BW);
+    lora_uplink.setSpreadingFactor(UPLINK_SF);
+    lora_uplink.setCodingRate4(UPLINK_CR);
+    lora_uplink.setPreambleLength(UPLINK_PREAMBLE_LEN);
+
+#if (UPLINK_CRC)
+    lora_uplink.enableCrc();
+#else
+    lora_uplink.disableCrc();
+#endif
+    /*
+#if (UPLINK_INVERSE_IQ)
+    lora_uplink.enableInvertIQ();
+#else
+    lora_uplink.disableInvertIQ();
+#endif
+*/
+
+    // Set uplink radio as a continuous receiver
+    lora_uplink.onReceive(handle_uplink);
+    lora_uplink.receive();
+
+    uplink_buffer.clear();
     downlink_buffer.clear();
     // uplink_buffer.clearWriteError();
     // downlink_buffer.clearWriteError();
-
-
-    begin();
 }
 
 void Telecom::send_telemetry() {
