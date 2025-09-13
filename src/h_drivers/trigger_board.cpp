@@ -121,20 +121,20 @@ void TriggerBoard::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::CALIBRATION:
             handle_calibration();
             break;
-        case State::MANUAL:
-            handle_manual();
+        case State::FILLING:
+            handle_filling();
             break;
         case State::ARMED:
             handle_armed(dump);
             break;
-        case State::READY:
-            handle_ready();
+        case State::PRESSURIZATION:
+            handle_pressurized();
             break;
-        case State::THRUSTSEQUENCE:
-            handle_thrustsequence();
+        case State::IGNITION:
+            handle_ignition();
             break;
-        case State::LIFTOFF:
-            handle_liftoff();
+        case State::BURN:
+            handle_burn();
             break;
         case State::ASCENT:
             handle_ascent();
@@ -144,11 +144,11 @@ void TriggerBoard::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::LANDED:
             handle_landed();
             break;
-        case State::ERRORGROUND:
-            handle_errorground();
+        case State::ABORT_ON_GROUND:
+            handle_abort_ground();
             break;
-        case State::ERRORFLIGHT:
-            handle_errorflight();
+        case State::ABORT_IN_FLIGHT:
+            handle_abort_flight();
             break;
     }
 }
@@ -171,7 +171,7 @@ void TriggerBoard::handle_calibration() {
     }
 }
 
-void TriggerBoard::handle_manual() {
+void TriggerBoard::handle_filling() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -209,7 +209,7 @@ void TriggerBoard::handle_armed(const DataDump& dump) {
     }
 }
 
-void TriggerBoard::handle_ready() {
+void TriggerBoard::handle_pressurized() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -218,7 +218,7 @@ void TriggerBoard::handle_ready() {
     }
 }
 
-void TriggerBoard::handle_thrustsequence() {
+void TriggerBoard::handle_ignition() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -227,7 +227,7 @@ void TriggerBoard::handle_thrustsequence() {
     }
 }
 
-void TriggerBoard::handle_liftoff() {
+void TriggerBoard::handle_burn() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -252,7 +252,6 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
     static uint32_t trigger_ack_ms(0);
     static bool pyro_main_fail(false);
     static bool pyro_spare1_fail(false);
-    static bool pyro_spare2_fail(false);
 
     if (!dump.event.seperated) {
         write_timestamp();
@@ -295,25 +294,6 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
                 }
             }
         }
-        // Again, if passed a delay of no trigger ACK, fire on the next channel
-        else {
-            if (trigger_ms < 400) {
-                uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3);
-                write_pyros(order);
-                trigger_ms += delta_ms;
-            }else {
-                read_has_triggered();
-                uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3);
-                write_pyros(order);
-
-                trigger_ack_ms += delta_ms;
-                if (trigger_ack_ms >= 200) {
-                    pyro_spare2_fail = true;
-                    trigger_ms = 0;
-                    trigger_ack_ms = 0;
-                }
-            }
-        }
     }else {
         // After separation, write timestamp at 2Hz
         count_ms += delta_ms;
@@ -333,7 +313,7 @@ void TriggerBoard::handle_landed() {
     }
 }
 
-void TriggerBoard::handle_errorground() {
+void TriggerBoard::handle_abort_ground() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -342,7 +322,7 @@ void TriggerBoard::handle_errorground() {
     }
 }
 
-void TriggerBoard::handle_errorflight() {
+void TriggerBoard::handle_abort_flight() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
