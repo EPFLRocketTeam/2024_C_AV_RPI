@@ -78,7 +78,7 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             restart_loras();
             hang_time = 0;
         }
-        Logger::log_eventf("Downlink hang time: %u", hang_time);
+        Logger::log_eventf(Logger::DEBUG, "Downlink hang time: %u", hang_time);
     }
 }
 

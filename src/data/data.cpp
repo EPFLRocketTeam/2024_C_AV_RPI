@@ -29,7 +29,9 @@ PropSensors::PropSensors()
     fuel_inj_temperature(0),
     fuel_inj_cooling_temperature(0),
     LOX_inj_temperature(0),
-    chamber_temperature(0)
+    chamber_temperature(0),
+    total_impulse(0),
+    PRB_state(0)
 {}
 
 Valves::Valves()
@@ -193,6 +195,9 @@ void Data::write(GoatReg reg, void* data) {
             break;
         case PR_SENSOR_T_CCC:
             prop_sensors.chamber_temperature = *reinterpret_cast<float*>(data);
+            break;
+        case PR_TOTAL_IMPULSE:
+            prop_sensors.total_impulse = *reinterpret_cast<float*>(data);
             break;
         case PR_BOARD_FSM_STATE:
             prop_sensors.PRB_state = *reinterpret_cast<uint8_t*>(data);

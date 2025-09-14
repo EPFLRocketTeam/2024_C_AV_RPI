@@ -47,7 +47,7 @@ void PR_board::send_sleep() {
 void PR_board::send_reset() {
     const uint32_t order(AV_NET_CMD_ON);
     write_register(AV_NET_PRB_RESET, (uint8_t*)&order);
-    Logger::log_eventf("Sending RESET to PRB");
+    Logger::log_eventf(Logger::DEBUG, "Sending RESET to PRB");
 }
 
 bool PR_board::read_is_woken_up() {
@@ -68,7 +68,7 @@ void PR_board::clear_to_ignite(bool value) {
 void PR_board::send_passivate() {
     uint32_t cmd(AV_NET_CMD_ON);
     write_register(AV_NET_PRB_PASSIVATE, (uint8_t*)&cmd);
-    Logger::log_eventf("Sending PASSIVATE to PRB");
+    Logger::log_eventf(Logger::DEBUG, "Sending PASSIVATE to PRB");
 }
 
 void PR_board::read_fsm() {
@@ -135,7 +135,7 @@ void PR_board::read_combustion_chamber() {
 
 void PR_board::write_igniter(uint32_t cmd) {
     write_register(AV_NET_PRB_IGNITER, (uint8_t*)&cmd);
-    Logger::log_eventf("Writing IGNITER to PRB: %u", cmd);
+    Logger::log_eventf(Logger::DEBUG, "Writing IGNITER to PRB: %u", cmd);
 }
 
 void PR_board::write_valves(const uint32_t cmd) {
@@ -171,10 +171,13 @@ uint32_t PR_board::read_valves() {
     return rslt;
 }
 
-float PR_board::read_impulse() {
+float PR_board::read_impulse(const DataDump& dump) {
     float rslt(0);
     read_register(AV_NET_PRB_SPECIFIC_IMP, (uint8_t*)&rslt);
-    Logger::log_eventf("Reading specific impulse from PRB: %f", rslt);
+    Data::get_instance().write(Data::PR_TOTAL_IMPULSE, &rslt);
+    Logger::Severity severity(dump.av_state == State::IGNITION || dump.av_state == State::BURN ?
+            Logger::INFO : Logger::DEBUG);
+    Logger::log_eventf(severity, "Reading specific impulse from PRB: %f", rslt);
 
     return rslt;
 }
@@ -228,6 +231,7 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     read_injector_fuel();
     read_injector_cooling_temperature();
     read_combustion_chamber();
+    read_impulse(dump);
 }
 
 void PR_board::actuate_valve(const bool active, const uint8_t valve_bitshift) {
@@ -250,6 +254,7 @@ void PR_board::reset_counters() {
     ignition_ack_ms = 0;
     ignition_sq_started = 0;
     ignited = 0;
+    burn_elapsed_ms = 0;
     passivation_count_ms = 0;
 }
 
@@ -313,7 +318,7 @@ void PR_board::handle_ignition(const DataDump& dump) {
                         IGNITION_NO_COM_TIMEOUT_MS);
                 ignition_send_ms = 0;
             }
-            Logger::log_eventf("ignition com elapsed: %u", ignition_send_ms);
+            Logger::log_eventf(Logger::DEBUG, "ignition com elapsed: %u", ignition_send_ms);
             ignition_send_ms += delta_ms;
         }else if (!ignition_sq_started) {
             ignition_sq_started = true;
@@ -337,7 +342,7 @@ void PR_board::handle_ignition(const DataDump& dump) {
                 Logger::log_eventf(Logger::FATAL, "IGNITION FAILED. SEQUENCE ABORTION");
             }
         }
-        Logger::log_eventf("ignition check elapsed: %u", ignition_ack_ms);
+        Logger::log_eventf(Logger::INFO, "ignition check elapsed: %u", ignition_ack_ms);
         ignition_ack_ms += delta_ms;
     }
 }
@@ -345,9 +350,11 @@ void PR_board::handle_ignition(const DataDump& dump) {
 void PR_board::handle_burn(const DataDump& dump) {
     periodic_timestamp(100);
     bool cut_off(true);
-    if (!dump.valves.valve_prb_main_lox && !dump.valves.valve_prb_main_fuel) {
+    if (!dump.valves.valve_prb_main_lox) {
         Data::get_instance().write(Data::EVENT_ENGINE_CUT_OFF, &cut_off);
     }
+    burn_elapsed_ms += delta_ms;
+    Logger::log_eventf("BURN elapsed: %u", burn_elapsed_ms);
 }
 
 void PR_board::handle_ascent(const DataDump& dump) {

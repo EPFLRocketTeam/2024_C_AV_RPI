@@ -34,7 +34,7 @@ public:
     void write_igniter(uint32_t cmd);
     void write_valves(const uint32_t cmd);
     uint32_t read_valves();
-    float read_impulse();
+    float read_impulse(const DataDump& dump);
 
 private:
     uint32_t delta_ms;
@@ -46,6 +46,7 @@ private:
     uint32_t ignition_ack_ms;
     bool ignition_sq_started;
     bool ignited;
+    uint32_t burn_elapsed_ms;
     uint32_t passivation_count_ms;
     void reset_counters();
 
