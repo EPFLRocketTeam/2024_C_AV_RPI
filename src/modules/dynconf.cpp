@@ -16,15 +16,14 @@ std::string trim(std::string buffer) {
 
 void ConfigManager::init(std::string path) {
     std::ifstream file(path.c_str());
+    if (file.fail()) {
+        Logger::log_eventf(Logger::ERROR, "Configuration file \"%s\" not found", path.c_str());
+        return;
+    }
 
     std::string line_buf;
     std::string section = "";
     while (std::getline(file, line_buf)) {
-        if (file.fail()) {
-            Logger::log_eventf(Logger::ERROR, "Configuration file \"%s\" not found", path.c_str());
-            break;
-        }
-
         line_buf = trim(line_buf);
         if (line_buf == "") continue;
 

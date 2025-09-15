@@ -36,7 +36,7 @@ int main() {
         float lpb(5);
         goat.write(Data::BAT_LPB_VOLTAGE, &lpb);
         float hpb(24);
-        goat.write(Data::BAT_HPB_VOLTAGE, &hpb);
+        goat.write(Data::BAT_HPB_VOLTAGE_TRB, &hpb);
         double lon(112.34);
         goat.write(Data::NAV_GNSS_POS_LNG, &lon);
         double lat(113.34);

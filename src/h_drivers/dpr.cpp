@@ -140,8 +140,10 @@ float DPR::read_tank_pressure() {
         throw DPRException(msg + e.what());
     }
 
-    Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_P_ETA : Data::PR_SENSOR_P_OTA);
-    Data::get_instance().write(gr, &rslt);
+    if (!std::isinf(rslt) && rslt > 0) {
+        Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_P_ETA : Data::PR_SENSOR_P_OTA);
+        Data::get_instance().write(gr, &rslt);
+    }
     const char* prefix(m_address == AV_NET_ADDR_DPR_ETH ? "E" : "O");
     Logger::log_eventf(Logger::DEBUG, "Reading P_%sTA from DPR_%s: %f", prefix, m_code.c_str(), rslt);
 
@@ -157,8 +159,10 @@ float DPR::read_tank_temperature() {
         throw DPRException(msg + e.what());
     }
 
-    Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_T_ETA : Data::PR_SENSOR_T_OTA);
-    Data::get_instance().write(gr, &rslt);
+    if (!std::isinf(rslt)) {
+        Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_T_ETA : Data::PR_SENSOR_T_OTA);
+        Data::get_instance().write(gr, &rslt);
+    }
     const char* prefix(m_address == AV_NET_ADDR_DPR_ETH ? "E" : "O");
     Logger::log_eventf(Logger::DEBUG, "Reading T_%sTA from DPR_%s: %f", prefix, m_code.c_str(), rslt);
 
@@ -174,7 +178,28 @@ float DPR::read_copv_pressure() {
         throw DPRException(msg + e.what());
     }
 
-    //Data::get_instance().write(Data::PR_SENSOR_P_NCO, &rslt);
+    bool eth_ok(true);
+    bool lox_ok(true);
+    if (!std::isinf(rslt) && rslt > 0) {
+        if (m_address == AV_NET_ADDR_DPR_ETH) {
+            copv_pressure_eth = rslt;
+        }else if (m_address == AV_NET_ADDR_DPR_LOX) {
+            copv_pressure_lox = rslt;
+        }
+    }else {
+        if (m_address == AV_NET_ADDR_DPR_ETH) {
+            eth_ok = false;
+        }else {
+            lox_ok = false;
+        }
+    }
+
+    if (eth_ok || lox_ok) {
+        float pressure((copv_pressure_eth + copv_pressure_lox) / (eth_ok + lox_ok));
+        Data::get_instance().write(Data::PR_SENSOR_P_NCO, &pressure);
+        Logger::log_eventf(Logger::DEBUG, "Filtering P_NCO: %f", pressure);
+    }
+
     Logger::log_eventf(Logger::DEBUG, "Reading P_NCO from DPR_%s: %f", m_code.c_str(), rslt);
 
     return rslt;
@@ -189,7 +214,7 @@ float DPR::read_copv_temperature() {
         throw DPRException(msg + e.what());
     }
 
-    //Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
+    Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
     Logger::log_eventf(Logger::DEBUG, "Reading T_NCO from DPR_%s: %f", m_code.c_str(), rslt);
 
     return rslt;

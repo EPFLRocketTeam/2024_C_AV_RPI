@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <pigpio.h>
 #include <vector>
+#include <cmath>
 #include "dynconf.h"
 #include "module.h"
 #include "sensors.h"
@@ -114,6 +115,7 @@ int main() {
         // -----------
         // TODO: MOVE ELSEWHERE
         // COPV Readings averaging both DPRs
+        /*
         float copv_pressure(0);
         float copv_press_eth(0);
         bool copv_press_eth_ok(1);
@@ -134,16 +136,17 @@ int main() {
         // TODO: Filter sensors with lower and higher bounds.
         // Rationale: do not allow spurious readings to interfere with FSM and be sent to GS
         // DO THIS ON EVERY PR SENSOR ? IN A NEW FILE ?
-        if (copv_press_eth > 500) {
-            copv_press_eth_ok = 1;
+        if (std::isinf(copv_press_eth)) {
+            copv_press_eth_ok = 0;
         }
-        if (copv_press_lox > 500) {
-            copv_press_lox_ok = 1;
+        if (std::isinf(copv_press_lox)) {
+            copv_press_lox_ok = 0;
         }
         if (copv_press_eth_ok || copv_press_lox_ok) {
             copv_pressure = (copv_press_eth + copv_press_lox) / (copv_press_eth_ok + copv_press_lox_ok);
             Data::get_instance().write(Data::PR_SENSOR_P_NCO, &copv_pressure);
         }
+        */
         // ---------
 
         // Execute telemetry
@@ -157,6 +160,10 @@ int main() {
         // If loop finished early, compensate
         if (delta_ms < inv_freq) {
             AvTimer::sleep(inv_freq - delta_ms);
+        }
+
+        if (dump.av_state == State::INIT) {
+            Logger::log_eventf("Delta_ms: %u", delta_ms);
         }
     }
 

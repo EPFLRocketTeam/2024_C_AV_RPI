@@ -43,6 +43,7 @@ INA228Module::INA228Module(
 :   SensorModule(module_name, module_config),
     i2c_address(i2c_address),
     voltage_reg(voltage_reg),
+    current_reg(current_reg),
     shunt(shunt),
     maxCurrent(maxCurrent)
 {}

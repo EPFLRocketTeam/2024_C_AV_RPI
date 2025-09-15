@@ -39,7 +39,8 @@ void Sensors::init_sensors () {
     sensors.push_back( Bmp390Module::make_secondary() );
 
     sensors.push_back( INA228Module::make_lpb() );
-    sensors.push_back( INA228Module::make_hpb() );
+    sensors.push_back( INA228Module::make_hpb_trb() );
+    sensors.push_back( INA228Module::make_hpb_prb() );
 
     sensors.push_back( GPSModule::make_gps() );
 
@@ -70,6 +71,9 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 
         Data::get_instance().write(Data::EVENT_CALIBRATED, &calibrated);
     }
+
+    float amb_temp(dump.sens.bmp_aux.temperature);
+    Data::get_instance().write(Data::AV_AMB_TEMPERATURE, &amb_temp);
 
     // kalman checks if we are static for calibration
     // kalman.check_static(dump);

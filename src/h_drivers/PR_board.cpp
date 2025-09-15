@@ -85,10 +85,16 @@ void PR_board::read_injector_oxygen() {
     read_register(AV_NET_PRB_P_OIN, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_OIN, (uint8_t*)&temperature);
 
-    if (pressure != 50) {
-        Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
+    if (!std::isinf(pressure)) {
+        if (pressure < 0) {
+            pressure = 0;
+        }else {
+            Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
+        }
     }
-    Data::get_instance().write(Data::PR_SENSOR_T_OIN, &temperature);
+    if (!std::isinf(temperature)) {
+        Data::get_instance().write(Data::PR_SENSOR_T_OIN, &temperature);
+    }
 
     Logger::log_eventf(Logger::DEBUG, "Reading P_OIN from PRB: %f", pressure);
     Logger::log_eventf(Logger::DEBUG, "Reading T_OIN from PRB: %f", temperature);
@@ -101,10 +107,16 @@ void PR_board::read_injector_fuel() {
     read_register(AV_NET_PRB_P_EIN, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_EIN, (uint8_t*)&temperature);
 
-    if (pressure != 50) {
-        Data::get_instance().write(Data::PR_SENSOR_P_EIN, &pressure);
+    if (!std::isinf(pressure)) {
+        if (pressure < 0) {
+            pressure = 0;
+        }else {
+            Data::get_instance().write(Data::PR_SENSOR_P_EIN, &pressure);
+        }
     }
-    Data::get_instance().write(Data::PR_SENSOR_T_EIN, &temperature);
+    if (!std::isinf(temperature)) {
+        Data::get_instance().write(Data::PR_SENSOR_T_EIN, &temperature);
+    }
 
     Logger::log_eventf(Logger::DEBUG, "Reading P_EIN from PRB: %f", pressure);
     Logger::log_eventf(Logger::DEBUG, "Reading T_EIN from PRB: %f", temperature);
@@ -124,10 +136,16 @@ void PR_board::read_combustion_chamber() {
     read_register(AV_NET_PRB_P_CCC, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_CCC, (uint8_t*)&temperature);
 
-    if (pressure != 50) {
-        Data::get_instance().write(Data::PR_SENSOR_P_CCC, &pressure);
+    if (!std::isinf(pressure)) {
+        if (pressure < 0) {
+            pressure = 0;
+        }else {
+            Data::get_instance().write(Data::PR_SENSOR_P_CCC, &pressure);
+        }
     }
-    Data::get_instance().write(Data::PR_SENSOR_T_CCC, &temperature);
+    if (!std::isinf(temperature)) {
+        Data::get_instance().write(Data::PR_SENSOR_T_CCC, &temperature);
+    }
 
     Logger::log_eventf(Logger::DEBUG, "Reading P_CCC from PRB: %f", pressure);
     Logger::log_eventf(Logger::DEBUG, "Reading T_CCC from PRB: %f", temperature);

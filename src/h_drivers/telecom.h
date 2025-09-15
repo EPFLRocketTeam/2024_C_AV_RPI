@@ -35,6 +35,7 @@ private:
     av_uplink_t last_packet;
     bool new_cmd_received;
     uint32_t packet_number, last_packet_number;
+    uint32_t telecom_restart_timer;
 };
 
 class TelecomException : public std::exception {

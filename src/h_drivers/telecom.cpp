@@ -31,7 +31,8 @@ Telecom::Telecom()
     capsule_downlink(&Telecom::handle_capsule_downlink, this),
     last_packet{0, 0},
     new_cmd_received(false),
-    packet_number(0)
+    packet_number(0),
+    telecom_restart_timer(0)
 {}
 
 void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
@@ -79,6 +80,13 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
             hang_time = 0;
         }
         Logger::log_eventf(Logger::DEBUG, "Downlink hang time: %u", hang_time);
+    }
+
+    if (telecom_restart_timer > 60e3) {
+        restart_loras();
+        telecom_restart_timer = 0;
+    }else {
+        telecom_restart_timer += delta_ms;
     }
 }
 
@@ -248,7 +256,8 @@ void Telecom::send_telemetry() {
 
     packet.lpb_voltage = data.bat.lpb_voltage;
     packet.lpb_current = data.bat.lpb_current;
-    packet.hpb_voltage = 0.5 * (data.bat.hpb_voltage_trb + data.bat.hpb_voltage_prb);
+    //packet.hpb_voltage = 0.5 * (data.bat.hpb_voltage_trb + data.bat.hpb_voltage_prb);
+    packet.hpb_voltage = data.bat.hpb_voltage_prb;
     packet.hpb_current = data.bat.hpb_current_trb + data.bat.hpb_current_prb;;
 
     packet.av_fc_temp = data.av_fc_temp;
