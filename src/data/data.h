@@ -139,8 +139,10 @@ struct NavigationData {
 struct Batteries {
     float lpb_voltage;
     float lpb_current;
-    float hpb_voltage;
-    float hpb_current;
+    float hpb_voltage_trb;
+    float hpb_current_trb;
+    float hpb_voltage_prb;
+    float hpb_current_prb;
 };
 
 struct CamsRecording {
@@ -272,8 +274,10 @@ public:
         /* Batteries status */
         BAT_LPB_VOLTAGE,
         BAT_LPB_CURRENT,
-        BAT_HPB_VOLTAGE,
-        BAT_HPB_CURRENT,
+        BAT_HPB_VOLTAGE_TRB,
+        BAT_HPB_CURRENT_TRB,
+        BAT_HPB_VOLTAGE_PRB,
+        BAT_HPB_CURRENT_PRB,
 
         /* Cameras recording status */
         CAM_RECORDING_SEP,
