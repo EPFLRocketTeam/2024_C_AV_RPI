@@ -75,8 +75,8 @@ struct PropSensors {
     float    fuel_inj_cooling_temperature;
     float    LOX_inj_temperature;
     float    chamber_temperature;
-    //TODO: should be changed ounce intranet with PRB_STATE is resolved
-    uint32_t  PRB_state;
+    float    total_impulse;
+    uint32_t PRB_state;
 
     PropSensors();
 };
@@ -268,6 +268,8 @@ public:
         PR_SENSOR_T_OIN, // Lox Injector Temperature
         PR_SENSOR_T_CCC,  // Combustion Chamber Temperature
 
+        /* Propulsion State */
+        PR_TOTAL_IMPULSE, // Engine impulse (integral calculus from PRB)
         PR_BOARD_FSM_STATE, // PRB Finite State Machine State
         VALVES,
 

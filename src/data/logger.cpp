@@ -9,7 +9,7 @@
 #include "config.h"
 
 const bool CONSOLE_LOG = 1;
-const bool DEBUG_LOG = 0;
+const bool DEBUG_LOG = 1;
 
 // If the folder contains more than 10^6 files, throw an error
 const int MAX_TEMPLATE_COUNT = 1'000'000;

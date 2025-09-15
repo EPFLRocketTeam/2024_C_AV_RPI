@@ -9,6 +9,9 @@
 #include "intranet_commands.h"
 #include "thresholds.h"
 
+static float copv_pressure_eth(0);
+static float copv_pressure_lox(0);
+
 
 DPR::DPR(const uint8_t address) : m_address(address) {
     passivation_count_ms = 0;
@@ -75,7 +78,7 @@ void DPR::send_pressurize(const bool active) {
         std::string msg("DPR " + m_code + " send_pressurize error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf("Sending PRESSURIZE to DPR_%s: %x", m_code.c_str(), order);
+    Logger::log_eventf(Logger::DEBUG, "Sending PRESSURIZE to DPR_%s: %x", m_code.c_str(), order);
 }
 
 void DPR::send_passivate() {
@@ -86,7 +89,7 @@ void DPR::send_passivate() {
         std::string msg("DPR_" + m_code + " write_passivate error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf("Sending PASSIVATE to DPR_%s", m_code.c_str());
+    Logger::log_eventf(Logger::DEBUG, "Sending PASSIVATE to DPR_%s", m_code.c_str());
 }
 
 void DPR::send_reset() {
@@ -97,7 +100,7 @@ void DPR::send_reset() {
         std::string msg("DPR_" + m_code + "send_reset error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf("Sending RESET to DPR_%s", m_code.c_str());
+    Logger::log_eventf(Logger::DEBUG, "Sending RESET to DPR_%s", m_code.c_str());
 }
 
 void DPR::send_abort(const bool in_flight) {
@@ -171,7 +174,7 @@ float DPR::read_copv_pressure() {
         throw DPRException(msg + e.what());
     }
 
-    Data::get_instance().write(Data::PR_SENSOR_P_NCO, &rslt);
+    //Data::get_instance().write(Data::PR_SENSOR_P_NCO, &rslt);
     Logger::log_eventf(Logger::DEBUG, "Reading P_NCO from DPR_%s: %f", m_code.c_str(), rslt);
 
     return rslt;
@@ -186,7 +189,7 @@ float DPR::read_copv_temperature() {
         throw DPRException(msg + e.what());
     }
 
-    Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
+    //Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
     Logger::log_eventf(Logger::DEBUG, "Reading T_NCO from DPR_%s: %f", m_code.c_str(), rslt);
 
     return rslt;
@@ -368,7 +371,7 @@ void DPR::handle_ascent(const DataDump& dump) {
 void DPR::handle_descent(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
-    Logger::log_eventf("Passivation delay elapsed: %u", passivation_count_ms);
+    Logger::log_eventf(Logger::DEBUG, "Passivation delay elapsed: %u", passivation_count_ms);
     if (passivation_count_ms >= PASSIVATION_DELAY_FOR_DPR) {
         send_passivate();
     }else {

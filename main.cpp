@@ -105,12 +105,46 @@ int main() {
         }catch(DPRException& e) {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
-
         try {
             dpr_lox.check_policy(dump, delta_ms);
         }catch(DPRException& e) {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
+
+        // -----------
+        // TODO: MOVE ELSEWHERE
+        // COPV Readings averaging both DPRs
+        float copv_pressure(0);
+        float copv_press_eth(0);
+        bool copv_press_eth_ok(1);
+        float copv_press_lox(0);
+        bool copv_press_lox_ok(1);
+        try {
+            copv_press_eth = dpr_ethanol.read_copv_pressure();
+        }catch(DPRException& e) {
+            Logger::log_eventf(Logger::ERROR, "%s", e.what());
+            copv_press_eth_ok = false;
+        }
+        try {
+            copv_press_lox = dpr_lox.read_copv_pressure();
+        }catch(DPRException& e) {
+            Logger::log_eventf(Logger::DEBUG, "%s", e.what());
+            copv_press_lox_ok = false;
+        }
+        // TODO: Filter sensors with lower and higher bounds.
+        // Rationale: do not allow spurious readings to interfere with FSM and be sent to GS
+        // DO THIS ON EVERY PR SENSOR ? IN A NEW FILE ?
+        if (copv_press_eth > 500) {
+            copv_press_eth_ok = 1;
+        }
+        if (copv_press_lox > 500) {
+            copv_press_lox_ok = 1;
+        }
+        if (copv_press_eth_ok || copv_press_lox_ok) {
+            copv_pressure = (copv_press_eth + copv_press_lox) / (copv_press_eth_ok + copv_press_lox_ok);
+            Data::get_instance().write(Data::PR_SENSOR_P_NCO, &copv_pressure);
+        }
+        // ---------
 
         // Execute telemetry
         try {
