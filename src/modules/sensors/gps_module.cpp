@@ -51,6 +51,11 @@ bool GPSModule::run_update() {
 
             Data::get_instance().write(Data::NAV_GNSS_POS_ALT, &altitude);
         }
+        if (tiny_gps->speed.isValid()) {
+            double speed(tiny_gps->speed.mps());
+
+            Data::get_instance().write(Data::NAV_GNSS_SPEED, &speed);
+        }
         if (tiny_gps->course.isValid()) {
             double course (tiny_gps->course.deg());
 

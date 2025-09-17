@@ -22,10 +22,9 @@ public:
 private:
     Bmp390* bmp = nullptr;
 
+    uint32_t i2c_address;
     Data::GoatReg stat_reg;
     Data::GoatReg data_reg;
-    
-    uint32_t i2c_address;
     
     bool run_init() override;
     bool run_update() override;

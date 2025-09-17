@@ -1,6 +1,7 @@
 option(ENABLE_TESTING "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable coverage" OFF)
 
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 set(FLIGHT_CONTROL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flight_control)
 set(I2C_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/i2c_interface)
@@ -9,10 +10,12 @@ set(H_DRIVERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/h_drivers)
 set(KALMAN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/kalman)
 set(MODULES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 set(MODULES_SENSORS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/modules/sensors)
+set(NEOPIXEL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/neopixel)
 
 add_subdirectory(${I2C_INTERFACE_DIR})
 add_subdirectory(${DRIVERS_DIR})
 # add_subdirectory(${KALMAN_DIR})
+add_subdirectory(${NEOPIXEL_DIR})
 
 set(FIREHORN_FC_SOURCES
     ${DATA_DIR}/data.cpp
@@ -55,16 +58,16 @@ set(FIREHORN_FC_SOURCES
     ${MODULES_SENSORS_DIR}/gps_module.h
     ${MODULES_SENSORS_DIR}/ina228_module.h
     ${MODULES_SENSORS_DIR}/tmp1075_module.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/buzzer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/buzzer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/av_timer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/av_timer.h
+    ${SRC_DIR}/buzzer.cpp
+    ${SRC_DIR}/buzzer.h
+    ${SRC_DIR}/av_timer.cpp
+    ${SRC_DIR}/av_timer.h
 )
 
 add_library(flight_computer ${FIREHORN_FC_SOURCES})
 
 target_include_directories(flight_computer PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${SRC_DIR}
     /usr/include/eigen3
     ${DATA_DIR}
     ${H_DRIVERS_DIR}
@@ -74,6 +77,7 @@ target_include_directories(flight_computer PUBLIC
     ${KALMAN_DIR}
     ${MODULES_DIR}
     ${MODULES_SENSORS_DIR}
+    ${NEOPIXEL_DIR}
 )
 
 target_link_libraries(flight_computer PUBLIC
@@ -87,5 +91,6 @@ target_link_libraries(flight_computer PUBLIC
     gps
     ina228
     tmp1075
+    neopixel
       # Kalman should now be linked properly
 )
