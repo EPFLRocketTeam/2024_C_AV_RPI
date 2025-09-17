@@ -374,7 +374,10 @@ void DPR::handle_armed(const DataDump& dump) {
 void DPR::handle_pressurization(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
+    
     send_pressurize(1);
+    
+    listen_valves_command(dump);
 }
 
 void DPR::handle_ignition(const DataDump& dump) {

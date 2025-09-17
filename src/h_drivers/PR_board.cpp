@@ -309,10 +309,14 @@ void PR_board::handle_armed(const DataDump& dump) {
 void PR_board::handle_pressurization(const DataDump& dump) {
     // Write timestamp + clear to trigger at 10Hz
     periodic_timestamp(100);
+
+    listen_valves_command(dump);
+
     if (dump.event.ignition_failed) {
         bool trigger_failed = false;
         Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &trigger_failed);
     }
+
     if (dump.prop.PRB_state != PRB_FSM::CLEAR_TO_IGNITE) {
         clear_to_ignite(1);
     }
@@ -414,6 +418,7 @@ void PR_board::read_register(const uint8_t reg_addr, uint8_t* data) {
 }
 
 void PR_board::write_register(const uint8_t reg_addr, const uint8_t* data) {
+ 
     try {
         I2CInterface::getInstance().write(AV_NET_ADDR_PRB, reg_addr, data, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
