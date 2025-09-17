@@ -17,6 +17,8 @@
 #include "telecom.h"
 #include "intranet_commands.h"
 
+#define PRB_ERROR_LIMIT 4
+
 int main() {
     if (!Logger::init()) {
         std::cout << "Failed opening log files.\n";
@@ -77,6 +79,7 @@ int main() {
     uint32_t now_ms(AvTimer::tick());
     uint32_t old_ms(0);
     uint32_t delta_ms(0);
+    uint8_t prb_error_count(0);
     while (1) {
         old_ms = now_ms;
         now_ms = AvTimer::tick();
@@ -97,8 +100,18 @@ int main() {
         // Execute PRB
         try {
             prop_board.check_policy(dump, delta_ms);
-        }catch(PRBoardException& e) {
-            Logger::log_eventf(Logger::ERROR, "%s", e.what());
+            prb_error_count = 0;
+        }catch(PRBoardException& e)
+        {
+            if (prb_error_count >= PRB_ERROR_LIMIT)
+            {
+                Logger::log_eventf(Logger::FATAL, "PRB error limit reached (%u). Aborting.", PRB_ERROR_LIMIT);
+                Logger::log_eventf(Logger::ERROR, "%s", e.what());
+            }
+            else
+            {
+                prb_error_count++;
+            }
         }
         // Execute DPRs
         try {
