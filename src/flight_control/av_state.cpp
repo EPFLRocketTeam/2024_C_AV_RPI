@@ -128,8 +128,8 @@ State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
         Logger::log_eventf("ABORT command received. FSM transition ARMED->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
-
-    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_LAUNCH)
+    //TODO cmd -> pressurize
+    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_PRESSURIZE)
     {
         Logger::log_eventf("FSM transition ARMED->PRESSURIZATION");
         Logger::log_eventf(Logger::WARN, "IGNITION is imminent");
@@ -188,14 +188,18 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
     // success path once we've waited long enough
     Logger::log_eventf("pressurization_elapsed: %u", pressurization_start_time);
     Logger::log_eventf("Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
-    if (pressurization_start_time > PRESSURIZATION_HOLD_MS  &&
-            fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
-            lox_avg <= PRESSURIZATION_CHECK_PRESSURE)
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_LAUNCH )
     {
+        if (fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
+            lox_avg <= PRESSURIZATION_CHECK_PRESSURE){
         reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
         Logger::log_eventf("Pressurization successful");
         Logger::log_eventf("FSM transition PRESSURIZATION->IGNITION");
-        return State::IGNITION;
+        return State::IGNITION;}
+        else {
+            Logger::log_eventf(Logger::ERROR, "Cannot launch: tank overpressure detected! Fuel: %.2f / LOX: %.2f. ",
+                               fuel_avg, lox_avg);
+        }
     }
 
     return currentState;
