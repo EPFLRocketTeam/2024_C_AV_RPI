@@ -12,16 +12,16 @@ enum class State
 {
     INIT,
     CALIBRATION,
-    MANUAL,
+    FILLING,
     ARMED,
-    READY,
-    LIFTOFF,
-    ERRORGROUND,
-    THRUSTSEQUENCE,
+    PRESSURIZATION,
+    ABORT_ON_GROUND,
+    IGNITION,
+    BURN,
     ASCENT,
     LANDED,
     DESCENT,
-    ERRORFLIGHT
+    ABORT_IN_FLIGHT
 };
 
 /**
@@ -60,25 +60,26 @@ struct NavSensors {
 
 // TODO: merge PropSensors and Valves into Prop struct
 struct PropSensors {
-    double    N2_pressure;
-    double    fuel_pressure;
-    double    LOX_pressure;
-    double    igniter_pressure;
-    double    LOX_inj_pressure;
-    double    fuel_inj_pressure;
-    double    chamber_pressure;
-    double    fuel_level;
-    double    LOX_level;
-    double    N2_temperature;
-    double    fuel_temperature;
-    double    LOX_temperature;
-    double    igniter_temperature;
-    double    fuel_inj_temperature;
-    double    fuel_inj_cooling_temperature;
-    double    LOX_inj_temperature;
-    double    chamber_temperature;
-    //TODO: should be changed ounce intranet with PRB_STATE is resolved
-    uint32_t  PR_state;
+    float    N2_pressure_eth;
+    float    N2_pressure_lox;
+    float    N2_pressure;
+    float    fuel_pressure;
+    float    LOX_pressure;
+    float    igniter_pressure;
+    float    LOX_inj_pressure;
+    float    fuel_inj_pressure;
+    float    chamber_pressure;
+    float    N2_temperature;
+    float    fuel_temperature;
+    float    LOX_temperature;
+    float    igniter_temperature;
+    float    fuel_inj_temperature;
+    float    fuel_inj_cooling_temperature;
+    float    LOX_inj_temperature;
+    float    chamber_temperature;
+    float    pressure_check;
+    float    total_impulse;
+    uint32_t PRB_state;
 
     PropSensors();
 };
@@ -91,12 +92,14 @@ struct Valves{
     bool valve_dpr_vent_fuel;
     bool valve_prb_main_lox;
     bool valve_prb_main_fuel;
+
+    Valves();
 };
 
 struct Vector3 {
-    double x;
-    double y;
-    double z;
+    float x;
+    float y;
+    float z;
     
     inline double norm() const {
         return std::sqrt(x * x + y * y + z * z);
@@ -122,8 +125,9 @@ struct GPSTime {
 struct NavigationData {
     GPSTime   time;
     GPSCoord  position;
+    double    gnss_speed;
     //referentiel earth
-    Vector3 position_kalman;
+    Vector3   position_kalman;
     Vector3   speed;
     //ref of accel TBD !!!!
     Vector3   accel;
@@ -137,7 +141,11 @@ struct NavigationData {
 
 struct Batteries {
     float lpb_voltage;
-    float hpb_voltage;
+    float lpb_current;
+    float hpb_voltage_trb;
+    float hpb_current_trb;
+    float hpb_voltage_prb;
+    float hpb_current_prb;
 };
 
 struct CamsRecording {
@@ -156,10 +164,12 @@ struct Event {
     bool prb_ready;
     bool trb_ready;
     bool ignited;
-    bool seperated;
-    bool chute_unreefed;
-    //armed state this resets to 0
+    // FILLING state this resets to 0
     bool ignition_failed;
+    bool engine_cut_off;
+    bool seperated;
+    bool chute_opened;
+    bool chute_unreefed;
 
     // will have to be discussed in interface meeting w/ prop
     // transition b/w ARMED and ERRORGROUND states
@@ -174,6 +184,7 @@ struct DataDump {
     uint32_t av_timestamp;
     UplinkCmd telemetry_cmd;
     float av_fc_temp;
+    float av_amb_temp;
     SensStatus stat;
     NavSensors sens;
     PropSensors prop;
@@ -182,9 +193,6 @@ struct DataDump {
     Batteries bat;
     CamsRecording cams_recording;
     Event event;
-
-    // TODO: move to PR_board.check_policy
-    bool depressurised() const;
 };
 
 
@@ -207,6 +215,7 @@ public:
 
         /* CM4 temperature */
         AV_FC_TEMPERATURE,
+        AV_AMB_TEMPERATURE,
 
         /* Navigation sensors status */
         //TODO: sensors that have 3 32 bits values should be split into 3 registers?
@@ -240,11 +249,17 @@ public:
         NAV_GNSS_POS_LAT,
         NAV_GNSS_POS_LNG,
         NAV_GNSS_POS_ALT,
+        NAV_GNSS_SPEED,
         NAV_GNSS_COURSE,
+
+        /* Mobile Averages and filtered data */
+        NAV_ACCELERATION,
       
         NAV_KALMAN_DATA,
 
         /* Propulsion sensors */
+        PR_SENSOR_P_NCO_ETH, // N2 Pressure from DPR_ETH
+        PR_SENSOR_P_NCO_LOX, // N2 Pressure from DPR_LOX
         PR_SENSOR_P_NCO, // N2 Pressure
         PR_SENSOR_P_ETA, // Ethanol Tank Pressure
         PR_SENSOR_P_OTA, // Lox Tank Pressure
@@ -252,8 +267,6 @@ public:
         PR_SENSOR_P_EIN, // Ethanol Injector Pressure
         PR_SENSOR_P_OIN, // Lox Injector Pressure
         PR_SENSOR_P_CCC, // Combustion Chamber Pressure
-        PR_SENSOR_L_ETA, // Ethanol Tank Level
-        PR_SENSOR_L_OTA, // Lox Tank Level
         PR_SENSOR_T_NCO, // N2 Temperature
         PR_SENSOR_T_ETA, // Ethanol Tank Temperature
         PR_SENSOR_T_OTA, // Lox Tank Temperature
@@ -263,12 +276,19 @@ public:
         PR_SENSOR_T_OIN, // Lox Injector Temperature
         PR_SENSOR_T_CCC,  // Combustion Chamber Temperature
 
+        /* Propulsion State */
+        PR_PRESSURE_CHECK, // Chamber pressure avg during IGNITION
+        PR_TOTAL_IMPULSE, // Engine impulse (integral calculus from PRB)
         PR_BOARD_FSM_STATE, // PRB Finite State Machine State
         VALVES,
 
         /* Batteries status */
         BAT_LPB_VOLTAGE,
-        BAT_HPB_VOLTAGE,
+        BAT_LPB_CURRENT,
+        BAT_HPB_VOLTAGE_TRB,
+        BAT_HPB_CURRENT_TRB,
+        BAT_HPB_VOLTAGE_PRB,
+        BAT_HPB_CURRENT_PRB,
 
         /* Cameras recording status */
         CAM_RECORDING_SEP,
@@ -285,6 +305,7 @@ public:
         EVENT_PRB_READY,
         EVENT_TRB_READY,
         EVENT_IGNITED,
+        EVENT_ENGINE_CUT_OFF,
         EVENT_SEPERATED,
         EVENT_CHUTE_OPENED,
         EVENT_CHUTE_UNREEFED,
@@ -312,6 +333,11 @@ public:
 
     DataDump get() const;
 
+    /**
+     * @brief Resets all flight events to their default state (false)
+     */
+    void reset_events();
+
     Data(Data const&) = delete; // Prevents copying
     void operator=(Data const&) = delete; // Prevents assignment
 private:
@@ -322,6 +348,7 @@ private:
     uint32_t av_timestamp;
     UplinkCmd telemetry_cmd;
     float av_fc_temp;
+    float av_amb_temp;
     SensStatus sensors_status;
     NavSensors nav_sensors;
     PropSensors prop_sensors;

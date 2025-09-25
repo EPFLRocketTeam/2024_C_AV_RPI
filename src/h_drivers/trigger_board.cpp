@@ -47,16 +47,20 @@ void TriggerBoard::write_register(const uint8_t reg_addr, const uint8_t* data) {
 void TriggerBoard::write_timestamp() {
     const uint32_t timestamp(Data::get_instance().get().av_timestamp);
     write_register(AV_NET_TRB_TIMESTAMP, (uint8_t*)&timestamp);
+    Logger::log_eventf(Logger::DEBUG, "Writing TIMESTAMP to TRB: %u", timestamp);
 }
 
 void TriggerBoard::send_wake_up() {
     const uint32_t order(AV_NET_CMD_ON);
     write_register(AV_NET_TRB_WAKE_UP, (uint8_t*)&order);
+    Logger::log_eventf(Logger::DEBUG, "Sending WAKE_UP to TRB: %x", order);
 }
 
 void TriggerBoard::send_sleep() {
     const uint32_t order(AV_NET_CMD_OFF);
     write_register(AV_NET_TRB_WAKE_UP, (uint8_t*)&order);
+    Logger::log_eventf(Logger::DEBUG, "Sending WAKE_UP to TRB: %x", order);
+
 }
 
 bool TriggerBoard::read_is_woken_up() {
@@ -76,13 +80,21 @@ bool TriggerBoard::read_is_woken_up() {
     return trb_woken_up;
 }
 
+void TriggerBoard::send_reset() {
+    uint32_t cmd(AV_NET_CMD_ON);
+    write_register(AV_NET_TRB_RESET, (uint8_t*)&cmd);
+    Logger::log_eventf(Logger::DEBUG, "Sending RESET to TRB");
+}
+
 void TriggerBoard::write_clear_to_trigger(const bool go) {
     const uint32_t cmd(go ? AV_NET_CMD_ON : AV_NET_CMD_OFF);
     write_register(AV_NET_TRB_CLEAR_TO_TRIGGER, (uint8_t*)&cmd);
+    Logger::log_eventf(Logger::DEBUG, "Writing CLEAR_TO_TRIGGER to TRB: %x", cmd);
 }
 
 void TriggerBoard::write_pyros(const uint32_t pyros) {
     write_register(AV_NET_TRB_PYROS, (uint8_t*)&pyros);
+    Logger::log_eventf(Logger::DEBUG, "Writing PYROS to TRB: %x", pyros);
 }
 
 uint32_t TriggerBoard::read_pyros() {
@@ -121,34 +133,35 @@ void TriggerBoard::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         case State::CALIBRATION:
             handle_calibration();
             break;
-        case State::MANUAL:
-            handle_manual();
+        case State::FILLING:
+            handle_filling();
             break;
         case State::ARMED:
             handle_armed(dump);
             break;
-        case State::READY:
-            handle_ready();
+        case State::PRESSURIZATION:
+            handle_pressurized();
             break;
-        case State::THRUSTSEQUENCE:
-            handle_thrustsequence();
+        case State::IGNITION:
+            handle_ignition();
             break;
-        case State::LIFTOFF:
-            handle_liftoff();
+        case State::BURN:
+            handle_burn();
             break;
         case State::ASCENT:
             handle_ascent();
+            break;
         case State::DESCENT:
             handle_descent(dump);
             break;
         case State::LANDED:
             handle_landed();
             break;
-        case State::ERRORGROUND:
-            handle_errorground();
+        case State::ABORT_ON_GROUND:
+            handle_abort_ground();
             break;
-        case State::ERRORFLIGHT:
-            handle_errorflight();
+        case State::ABORT_IN_FLIGHT:
+            handle_abort_flight();
             break;
     }
 }
@@ -158,6 +171,8 @@ void TriggerBoard::handle_init() {
     count_ms += delta_ms;
     if (count_ms >= 2000) {
         write_timestamp();
+        send_reset();
+        send_sleep();
         count_ms = 0;
     }
 }
@@ -171,7 +186,7 @@ void TriggerBoard::handle_calibration() {
     }
 }
 
-void TriggerBoard::handle_manual() {
+void TriggerBoard::handle_filling() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -189,27 +204,25 @@ void TriggerBoard::handle_armed(const DataDump& dump) {
     }
 
     // After DPR GO, send wake_up each 500ms until is_woken_up is true
-    if (dump.event.dpr_eth_pressure_ok && dump.event.dpr_lox_pressure_ok && !dump.event.trb_ready) {
-        static uint32_t count_wkp(0);
-        static uint8_t wkp_attempts(0);
-        count_wkp += delta_ms;
+    static uint32_t count_wkp(0);
+    static uint8_t wkp_attempts(0);
+    count_wkp += delta_ms;
 
-        if (count_wkp >= 500) {
-            send_wake_up();
-            read_is_woken_up();
-            count_wkp = 0;
-            ++wkp_attempts;
-        }
+    if (count_wkp >= 500) {
+        send_wake_up();
+        read_is_woken_up();
+        count_wkp = 0;
+        ++wkp_attempts;
+    }
 
-        if (wkp_attempts > 10) {
-            // Log error msg
-            Logger::log_event(Logger::FATAL, "Trigger Board not responding to WAKE_UP command after 10 attempts.");
-            // FSM -> ERRORGROUND ?
-        }
+    if (wkp_attempts > 10) {
+        // Log error msg
+        Logger::log_event(Logger::FATAL, "Trigger Board not responding to WAKE_UP command after 10 attempts.");
+        // FSM -> ERRORGROUND ?
     }
 }
 
-void TriggerBoard::handle_ready() {
+void TriggerBoard::handle_pressurized() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -218,7 +231,7 @@ void TriggerBoard::handle_ready() {
     }
 }
 
-void TriggerBoard::handle_thrustsequence() {
+void TriggerBoard::handle_ignition() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -227,7 +240,7 @@ void TriggerBoard::handle_thrustsequence() {
     }
 }
 
-void TriggerBoard::handle_liftoff() {
+void TriggerBoard::handle_burn() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -242,6 +255,7 @@ void TriggerBoard::handle_ascent() {
     if (count_ms >= 100) {
         write_timestamp();
         write_clear_to_trigger(1);
+        count_ms = 0;
     }
 }
 
@@ -252,7 +266,6 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
     static uint32_t trigger_ack_ms(0);
     static bool pyro_main_fail(false);
     static bool pyro_spare1_fail(false);
-    static bool pyro_spare2_fail(false);
 
     if (!dump.event.seperated) {
         write_timestamp();
@@ -295,25 +308,6 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
                 }
             }
         }
-        // Again, if passed a delay of no trigger ACK, fire on the next channel
-        else {
-            if (trigger_ms < 400) {
-                uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3);
-                write_pyros(order);
-                trigger_ms += delta_ms;
-            }else {
-                read_has_triggered();
-                uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3);
-                write_pyros(order);
-
-                trigger_ack_ms += delta_ms;
-                if (trigger_ack_ms >= 200) {
-                    pyro_spare2_fail = true;
-                    trigger_ms = 0;
-                    trigger_ack_ms = 0;
-                }
-            }
-        }
     }else {
         // After separation, write timestamp at 2Hz
         count_ms += delta_ms;
@@ -333,7 +327,7 @@ void TriggerBoard::handle_landed() {
     }
 }
 
-void TriggerBoard::handle_errorground() {
+void TriggerBoard::handle_abort_ground() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {
@@ -342,7 +336,7 @@ void TriggerBoard::handle_errorground() {
     }
 }
 
-void TriggerBoard::handle_errorflight() {
+void TriggerBoard::handle_abort_flight() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
     if (count_ms >= 1000) {

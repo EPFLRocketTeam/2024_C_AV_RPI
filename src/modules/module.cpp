@@ -44,22 +44,20 @@ bool SensorModule::run_check_policy(const DataDump& dump, const uint32_t delta_m
     int polling_time = -1;
     switch (dump.av_state) {
         case State::INIT:
-        case State::MANUAL:
+        case State::FILLING:
         case State::ARMED:
         case State::CALIBRATION:
             polling_time = low_polling_time();
             break;
-        case State::READY:
-        case State::THRUSTSEQUENCE:
-        case State::LIFTOFF:
+        case State::PRESSURIZATION:
+        case State::IGNITION:
+        case State::BURN:
         case State::ASCENT:
         case State::DESCENT:
         case State::LANDED:
             polling_time = high_polling_time();
-            break;
-        case State::ERRORGROUND:
-            break;
-        case State::ERRORFLIGHT:
+        case State::ABORT_ON_GROUND:
+        case State::ABORT_IN_FLIGHT:
             break;
     }
 

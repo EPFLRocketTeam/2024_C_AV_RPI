@@ -5,6 +5,9 @@
 
 struct DataDump;
 
+bool IS_PRES_VALID(const float pressure);
+bool IS_TEMP_VALID(const float temperature);
+
 class HDriver {
 public:
     virtual ~HDriver() = default;
