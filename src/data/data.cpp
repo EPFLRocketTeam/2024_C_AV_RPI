@@ -30,6 +30,7 @@ PropSensors::PropSensors()
     fuel_inj_cooling_temperature(0),
     LOX_inj_temperature(0),
     chamber_temperature(0),
+    pressure_check(0),
     total_impulse(0),
     PRB_state(0)
 {}
@@ -151,6 +152,12 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_SENSOR_BMP2_DATA:
             nav_sensors.bmp_aux = *reinterpret_cast<bmp3_data*>(data);
             break;
+        case PR_SENSOR_P_NCO_ETH:
+            prop_sensors.N2_pressure_eth = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_P_NCO_LOX:
+            prop_sensors.N2_pressure_lox = *reinterpret_cast<float*>(data);
+            break;
         case PR_SENSOR_P_NCO:
             prop_sensors.N2_pressure = *reinterpret_cast<float*>(data);
             break;
@@ -196,6 +203,9 @@ void Data::write(GoatReg reg, void* data) {
         case PR_SENSOR_T_CCC:
             prop_sensors.chamber_temperature = *reinterpret_cast<float*>(data);
             break;
+        case PR_PRESSURE_CHECK:
+            prop_sensors.pressure_check = *reinterpret_cast<float*>(data);
+            break;
         case PR_TOTAL_IMPULSE:
             prop_sensors.total_impulse = *reinterpret_cast<float*>(data);
             break;
@@ -240,6 +250,9 @@ void Data::write(GoatReg reg, void* data) {
             break;
         case NAV_GNSS_COURSE:
             nav.course = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_ACCELERATION:
+            nav.accel = *reinterpret_cast<Vector3*>(data);
             break;
         case BAT_LPB_VOLTAGE:
             bat.lpb_voltage = *reinterpret_cast<float*>(data);

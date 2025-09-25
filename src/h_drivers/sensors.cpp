@@ -6,7 +6,7 @@
 #include "kalman_params.h"
 #include "config.h"
 #include "data.h"
-
+#include "logger.h"
 #include "adxl375_module.h"
 #include "bmi088_module.h"
 #include "bmp390_module.h"
@@ -74,6 +74,13 @@ void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 
     float amb_temp(dump.sens.bmp_aux.temperature);
     Data::get_instance().write(Data::AV_AMB_TEMPERATURE, &amb_temp);
+
+    float acc_x((dump.sens.bmi_accel.x + dump.sens.bmi_aux_accel.x) * 0.5);
+    float acc_y((dump.sens.bmi_accel.y + dump.sens.bmi_aux_accel.y) * 0.5);
+    float acc_z((dump.sens.bmi_accel.z + dump.sens.bmi_aux_accel.z) * 0.5);
+    Vector3 acceleration{acc_x, acc_y, acc_z};
+    Data::get_instance().write(Data::NAV_ACCELERATION, &acceleration);
+    Logger::log_eventf(Logger::DEBUG, "Acceleration Avg: X: %f | Y: %f | Z: %f", acceleration.x, acceleration.y, acceleration.z);
 
     // kalman checks if we are static for calibration
     // kalman.check_static(dump);

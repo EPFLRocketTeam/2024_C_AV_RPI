@@ -60,6 +60,8 @@ struct NavSensors {
 
 // TODO: merge PropSensors and Valves into Prop struct
 struct PropSensors {
+    float    N2_pressure_eth;
+    float    N2_pressure_lox;
     float    N2_pressure;
     float    fuel_pressure;
     float    LOX_pressure;
@@ -75,6 +77,7 @@ struct PropSensors {
     float    fuel_inj_cooling_temperature;
     float    LOX_inj_temperature;
     float    chamber_temperature;
+    float    pressure_check;
     float    total_impulse;
     uint32_t PRB_state;
 
@@ -94,9 +97,9 @@ struct Valves{
 };
 
 struct Vector3 {
-    double x;
-    double y;
-    double z;
+    float x;
+    float y;
+    float z;
     
     inline double norm() const {
         return std::sqrt(x * x + y * y + z * z);
@@ -248,10 +251,15 @@ public:
         NAV_GNSS_POS_ALT,
         NAV_GNSS_SPEED,
         NAV_GNSS_COURSE,
+
+        /* Mobile Averages and filtered data */
+        NAV_ACCELERATION,
       
         NAV_KALMAN_DATA,
 
         /* Propulsion sensors */
+        PR_SENSOR_P_NCO_ETH, // N2 Pressure from DPR_ETH
+        PR_SENSOR_P_NCO_LOX, // N2 Pressure from DPR_LOX
         PR_SENSOR_P_NCO, // N2 Pressure
         PR_SENSOR_P_ETA, // Ethanol Tank Pressure
         PR_SENSOR_P_OTA, // Lox Tank Pressure
@@ -269,6 +277,7 @@ public:
         PR_SENSOR_T_CCC,  // Combustion Chamber Temperature
 
         /* Propulsion State */
+        PR_PRESSURE_CHECK, // Chamber pressure avg during IGNITION
         PR_TOTAL_IMPULSE, // Engine impulse (integral calculus from PRB)
         PR_BOARD_FSM_STATE, // PRB Finite State Machine State
         VALVES,

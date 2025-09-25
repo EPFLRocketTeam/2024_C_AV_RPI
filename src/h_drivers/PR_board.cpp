@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "intranet_commands.h"
 #include "config.h"
+#include "thresholds.h"
 
 // Enumeration for the command of the PR board
 
@@ -85,14 +86,10 @@ void PR_board::read_injector_oxygen() {
     read_register(AV_NET_PRB_P_OIN, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_OIN, (uint8_t*)&temperature);
 
-    if (!std::isinf(pressure)) {
-        if (pressure < 0) {
-            pressure = 0;
-        }else {
-            Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
-        }
+    if (std::isfinite(pressure) && CHECK_TANK_PRESS(pressure)) {
+        Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
     }
-    if (!std::isinf(temperature)) {
+    if (std::isfinite(temperature) && CHECK_TEMPERATURE(temperature)) {
         Data::get_instance().write(Data::PR_SENSOR_T_OIN, &temperature);
     }
 
@@ -107,14 +104,10 @@ void PR_board::read_injector_fuel() {
     read_register(AV_NET_PRB_P_EIN, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_EIN, (uint8_t*)&temperature);
 
-    if (!std::isinf(pressure)) {
-        if (pressure < 0) {
-            pressure = 0;
-        }else {
-            Data::get_instance().write(Data::PR_SENSOR_P_EIN, &pressure);
-        }
+    if (std::isfinite(pressure) && CHECK_TANK_PRESS(pressure)) {
+        Data::get_instance().write(Data::PR_SENSOR_P_EIN, &pressure);
     }
-    if (!std::isinf(temperature)) {
+    if (std::isfinite(temperature) && CHECK_TEMPERATURE(temperature)) {
         Data::get_instance().write(Data::PR_SENSOR_T_EIN, &temperature);
     }
 
@@ -125,7 +118,9 @@ void PR_board::read_injector_fuel() {
 void PR_board::read_injector_cooling_temperature() {
     float temperature(0);
     read_register(AV_NET_PRB_T_EIN_PT1000, (uint8_t*)&temperature);
-    Data::get_instance().write(Data::PR_SENSOR_T_EIN_CF, &temperature);
+    if (std::isfinite(temperature) && CHECK_TEMPERATURE(temperature)) {
+        Data::get_instance().write(Data::PR_SENSOR_T_EIN_CF, &temperature);
+    }
     Logger::log_eventf(Logger::DEBUG, "Reading T_EIN_PT1000 from PRB: %f", temperature);
 }
 
@@ -136,14 +131,10 @@ void PR_board::read_combustion_chamber() {
     read_register(AV_NET_PRB_P_CCC, (uint8_t*)&pressure);
     read_register(AV_NET_PRB_T_CCC, (uint8_t*)&temperature);
 
-    if (!std::isinf(pressure)) {
-        if (pressure < 0) {
-            pressure = 0;
-        }else {
-            Data::get_instance().write(Data::PR_SENSOR_P_CCC, &pressure);
-        }
+    if (std::isfinite(pressure) && CHECK_TANK_PRESS(pressure)) {
+        Data::get_instance().write(Data::PR_SENSOR_P_CCC, &pressure);
     }
-    if (!std::isinf(temperature)) {
+    if (std::isfinite(temperature) && CHECK_TEMPERATURE(temperature)) {
         Data::get_instance().write(Data::PR_SENSOR_T_CCC, &temperature);
     }
 
@@ -185,6 +176,15 @@ uint32_t PR_board::read_valves() {
     Data::get_instance().write(Data::VALVES, &valves);
 
     Logger::log_eventf(Logger::DEBUG, "Reading valves from PRB: %x", rslt);
+
+    return rslt;
+}
+
+float PR_board::read_pressure_check() {
+    float rslt(0);
+    read_register(AV_NET_PRB_PRESSURE_CHECK, (uint8_t*)&rslt);
+    Data::get_instance().write(Data::PR_PRESSURE_CHECK, &rslt);
+    Logger::log_eventf(Logger::DEBUG, "Reading pressure check from PRB: %f", rslt);
 
     return rslt;
 }
@@ -271,7 +271,7 @@ void PR_board::reset_counters() {
     ignition_send_ms = 0;
     ignition_ack_ms = 0;
     ignition_sq_started = 0;
-    ignited = 0;
+    ignited = 1;
     burn_elapsed_ms = 0;
     passivation_count_ms = 0;
 }
@@ -311,6 +311,7 @@ void PR_board::handle_pressurization(const DataDump& dump) {
     periodic_timestamp(100);
 
     listen_valves_command(dump);
+    read_pressure_check();
 
     if (dump.event.ignition_failed) {
         bool trigger_failed = false;
@@ -323,13 +324,9 @@ void PR_board::handle_pressurization(const DataDump& dump) {
 }
 
 void PR_board::handle_ignition(const DataDump& dump) {
-    static uint32_t ignition_send_ms(0);
-    static uint32_t ignition_ack_ms(0);
-    
     const PRB_FSM prb_state((PRB_FSM)dump.prop.PRB_state);
     const Valves valves(dump.valves);
     if (!dump.event.ignited && !dump.event.ignition_failed) {
-        static bool ignition_sq_started(false);
         // While PRB hasn't switched to IGNITION_SQ, send IGNITER cmd
         if (prb_state != PRB_FSM::IGNITION_SQ) {
             // Send IGNITER command to PRB to start the ignition sequence
@@ -350,7 +347,6 @@ void PR_board::handle_ignition(const DataDump& dump) {
         // After some delay, check the PRB FSM for ignition status
         const bool engine_valves_open(valves.valve_prb_main_lox && valves.valve_prb_main_fuel);
         if (ignition_sq_started && ignition_ack_ms > IGNITION_ACK_DELAY_MS && engine_valves_open) {
-            static bool ignited(true);
             if (prb_state == PRB_FSM::ABORT) {
                 ignited = false;
             }
@@ -367,6 +363,7 @@ void PR_board::handle_ignition(const DataDump& dump) {
         Logger::log_eventf(Logger::INFO, "ignition check elapsed: %u", ignition_ack_ms);
         ignition_ack_ms += delta_ms;
     }
+    read_pressure_check();
 }
 
 void PR_board::handle_burn(const DataDump& dump) {
@@ -385,7 +382,6 @@ void PR_board::handle_ascent(const DataDump& dump) {
 
 void PR_board::handle_descent(const DataDump& dump) {
     periodic_timestamp(100);
-    static uint32_t passivation_count_ms(0);
     if (passivation_count_ms >= PASSIVATION_DELAY_AFTER_APOGEE) {
        send_passivate();
     }else {

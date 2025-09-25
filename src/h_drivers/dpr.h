@@ -21,7 +21,7 @@ public:
     void send_abort(const bool in_flight);
     float read_tank_pressure();
     float read_tank_temperature();
-    float read_copv_pressure();
+    float read_copv_pressure(const DataDump& dump);
     float read_copv_temperature();
     void write_valves(const uint32_t cmd);
     uint32_t read_valves();

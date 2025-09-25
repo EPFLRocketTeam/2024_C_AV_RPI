@@ -51,7 +51,7 @@ void throttle_test(DPR& dpr) {
 }
 
 void read_sensors(DPR& dpr) {
-    dpr.read_copv_pressure();
+    dpr.read_copv_pressure(Data::get_instance().get());
     dpr.read_copv_temperature();
     dpr.read_tank_pressure();
     dpr.read_tank_temperature();

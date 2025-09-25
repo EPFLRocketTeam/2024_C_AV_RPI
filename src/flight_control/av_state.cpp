@@ -3,6 +3,7 @@
 #include "av_state.h"
 #include "data.h"
 #include "logger.h"
+#include "av_timer.h"
 #include <iostream>
 
 MovingAverage::MovingAverage(size_t power) : maxSize(power), sum(0.0f)
@@ -65,6 +66,7 @@ void AvState::reset_flight() {
     timer_liftoff_timeout = 0;
     ascent_elapsed = 0;
     descent_elapsed = 0;
+    accel_g_offset = 0;
     this->currentState = State::INIT;
     Data::get_instance().reset_events();
 }
@@ -76,11 +78,18 @@ State AvState::getCurrentState()
 }
 
 State AvState::from_init(DataDump const &dump, uint32_t delta_ms)
-
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
     {
         Logger::log_eventf("FSM transition INIT->CALIBRATION");
+        const int samples(1000);
+        float sum(0);
+        for (int i(0); i < samples; ++i) {
+            float acc_x(dump.nav.accel.x);
+            sum += acc_x;
+            AvTimer::sleep(1);
+        }
+        accel_g_offset = sum / samples;
         return State::CALIBRATION;
     }
     return currentState;
@@ -128,11 +137,11 @@ State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
         Logger::log_eventf("ABORT command received. FSM transition ARMED->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
-    //TODO cmd -> pressurize
-    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_PRESSURIZE)
+    
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_PRESSURIZE)
     {
         Logger::log_eventf("FSM transition ARMED->PRESSURIZATION");
-        Logger::log_eventf(Logger::WARN, "IGNITION is imminent");
+        Logger::log_eventf(Logger::WARN, "PRESSURIZATION is imminent");
         return State::PRESSURIZATION;
     }
 
@@ -191,14 +200,12 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_LAUNCH )
     {
         if (fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
-            lox_avg <= PRESSURIZATION_CHECK_PRESSURE){
-        reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
-        Logger::log_eventf("Pressurization successful");
-        Logger::log_eventf("FSM transition PRESSURIZATION->IGNITION");
-        return State::IGNITION;}
-        else {
-            Logger::log_eventf(Logger::ERROR, "Cannot launch: tank overpressure detected! Fuel: %.2f / LOX: %.2f. ",
-                               fuel_avg, lox_avg);
+            lox_avg <= PRESSURIZATION_CHECK_PRESSURE) {
+            reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+            Logger::log_eventf("Pressurization successful");
+            Logger::log_eventf("FSM transition PRESSURIZATION->IGNITION");
+            Logger::log_eventf(Logger::WARN, "IGNITION is imminent");
+            return State::IGNITION;
         }
     }
 
@@ -223,7 +230,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     }
 
     
-    if (dump.nav.accel.z > ACCEL_LIFTOFF)
+    if (0/*dump.nav.accel.x > ACCEL_LIFTOFF*/)
     {
         timer_accel += delta_ms;
     }
@@ -335,7 +342,8 @@ State AvState::from_abort_ground(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_RECOVER)
     {
-        Logger::log_eventf(Logger::WARN, "RECOVER command received");
+        Logger::log_eventf(Logger::WARN, "RECOVER command received, resetting flight variables");
+        reset_flight();
         Logger::log_eventf("FSM transition ABORT_ON_GROUND->INIT");
         return State::INIT;
     }

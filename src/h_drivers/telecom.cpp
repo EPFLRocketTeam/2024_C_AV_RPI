@@ -82,7 +82,7 @@ void Telecom::check_policy(const DataDump& dump, const uint32_t delta_ms) {
         Logger::log_eventf(Logger::DEBUG, "Downlink hang time: %u", hang_time);
     }
 
-    if (telecom_restart_timer > 60e3) {
+    if (telecom_restart_timer > 30e3) {
         restart_loras();
         telecom_restart_timer = 0;
     }else {

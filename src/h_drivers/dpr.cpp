@@ -140,7 +140,7 @@ float DPR::read_tank_pressure() {
         throw DPRException(msg + e.what());
     }
 
-    if (!std::isinf(rslt) && rslt > 0) {
+    if (std::isfinite(rslt) && CHECK_TANK_PRESS(rslt)) {
         Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_P_ETA : Data::PR_SENSOR_P_OTA);
         Data::get_instance().write(gr, &rslt);
     }
@@ -159,7 +159,7 @@ float DPR::read_tank_temperature() {
         throw DPRException(msg + e.what());
     }
 
-    if (!std::isinf(rslt)) {
+    if (std::isfinite(rslt) && CHECK_TEMPERATURE(rslt)) {
         Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_T_ETA : Data::PR_SENSOR_T_OTA);
         Data::get_instance().write(gr, &rslt);
     }
@@ -169,7 +169,7 @@ float DPR::read_tank_temperature() {
     return rslt;
 }
 
-float DPR::read_copv_pressure() {
+float DPR::read_copv_pressure(const DataDump& dump) {
     float rslt(0);
     try {
         I2CInterface::getInstance().read(m_address, AV_NET_DPR_P_NCO, (uint8_t*)&rslt, AV_NET_XFER_SIZE);
@@ -178,26 +178,11 @@ float DPR::read_copv_pressure() {
         throw DPRException(msg + e.what());
     }
 
-    bool eth_ok(true);
-    bool lox_ok(true);
-    if (!std::isinf(rslt) && rslt > 0) {
-        if (m_address == AV_NET_ADDR_DPR_ETH) {
-            copv_pressure_eth = rslt;
-        }else if (m_address == AV_NET_ADDR_DPR_LOX) {
-            copv_pressure_lox = rslt;
-        }
+    const Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_P_NCO_ETH : Data::PR_SENSOR_P_NCO_LOX);
+    if (std::isfinite(rslt) && CHECK_TANK_PRESS(rslt)) {
+        Data::get_instance().write(gr, &rslt);
     }else {
-        if (m_address == AV_NET_ADDR_DPR_ETH) {
-            eth_ok = false;
-        }else {
-            lox_ok = false;
-        }
-    }
-
-    if (eth_ok || lox_ok) {
-        float pressure((copv_pressure_eth + copv_pressure_lox) / (eth_ok + lox_ok));
-        Data::get_instance().write(Data::PR_SENSOR_P_NCO, &pressure);
-        Logger::log_eventf(Logger::DEBUG, "Filtering P_NCO: %f", pressure);
+        Logger::log_eventf(Logger::ERROR, "Reading invalid value for P_NCO_%s: %f", m_code.c_str(), rslt);
     }
 
     Logger::log_eventf(Logger::DEBUG, "Reading P_NCO from DPR_%s: %f", m_code.c_str(), rslt);
@@ -214,7 +199,9 @@ float DPR::read_copv_temperature() {
         throw DPRException(msg + e.what());
     }
 
-    Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
+    if (std::isfinite(rslt) && CHECK_TEMPERATURE(rslt)) {
+        Data::get_instance().write(Data::PR_SENSOR_T_NCO, &rslt);
+    }
     Logger::log_eventf(Logger::DEBUG, "Reading T_NCO from DPR_%s: %f", m_code.c_str(), rslt);
 
     return rslt;
@@ -334,7 +321,7 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
 
     read_tank_pressure();
     read_tank_temperature();
-    read_copv_pressure();
+    read_copv_pressure(dump);
     read_copv_temperature();
     read_valves();
 }

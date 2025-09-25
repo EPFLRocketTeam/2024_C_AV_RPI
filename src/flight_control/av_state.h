@@ -66,6 +66,7 @@ private:
     uint32_t timer_liftoff_timeout;
     uint32_t ascent_elapsed;
     uint32_t descent_elapsed;
+    float accel_g_offset;
 };
 
 

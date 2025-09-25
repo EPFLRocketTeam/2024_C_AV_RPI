@@ -34,6 +34,7 @@ public:
     void write_igniter(uint32_t cmd);
     void write_valves(const uint32_t cmd);
     uint32_t read_valves();
+    float read_pressure_check();
     float read_impulse(const DataDump& dump);
 
 private:

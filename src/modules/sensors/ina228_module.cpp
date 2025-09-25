@@ -1,6 +1,8 @@
 #include "config.h"
 #include "ina228_module.h"
 #include "INA228.h"
+#include "logger.h"
+#include "data.h"
 
 bool INA228Module::run_init() {
     ina = new INA228(i2c_address, shunt, maxCurrent);
@@ -14,9 +16,15 @@ bool INA228Module::run_update() {
 
     float voltage(ina->getBusVoltage());
     float current(ina->getCurrent());
+    float temperature(ina->getTemperature());
 
     Data::get_instance().write(voltage_reg, &voltage);
     Data::get_instance().write(current_reg, &current);
+
+    DataDump dump(Data::get_instance().get());
+    if (dump.av_state == State::PRESSURIZATION || dump.av_state == State::IGNITION || dump.av_state == State::BURN) {
+        Logger::log_eventf("INA228: voltage: %f | current: %f | temp: %f", voltage, current, temperature);
+    }
 
     return true;
 }

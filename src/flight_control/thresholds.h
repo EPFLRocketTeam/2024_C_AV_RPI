@@ -35,12 +35,28 @@
 
 // Ignition
 #define IGNITION_NO_COM_TIMEOUT_MS 5000
-#define IGNITION_ACK_DELAY_MS      4600  // TO TUNE DEPENDING ON THE ACTUAL DELAY ON IGNITION SEQUENCE
+#define IGNITION_ACK_DELAY_MS      5600  // TO TUNE DEPENDING ON THE ACTUAL DELAY ON IGNITION SEQUENCE
 
 // Passivation
 #define PASSIVATION_DELAY_AFTER_APOGEE  90e3
 #define PASSIVATION_DELAY_FOR_DPR       PASSIVATION_DELAY_AFTER_APOGEE + 30e3
 #define PASSIVATION_ALTITUDE_HIGH_BOUND 100
+
+// ------LIMITS------
+// Pressure limits in [bar]
+#define PRESSURE_MIN      0.0f
+#define TANK_PRESSURE_MAX 500.0f
+#define TANK_PRESSURE_MIN PRESSURE_MIN
+// Temperature limits in [°C]
+#define TEMPERATURE_MIN   -273.15f
+#define TEMPERATURE_MAX   500.0f
+
+inline bool CHECK_TANK_PRESS(const float pressure) {
+    return TANK_PRESSURE_MIN <= pressure && pressure <= TANK_PRESSURE_MAX;
+}
+inline bool CHECK_TEMPERATURE(const float temperature) {
+    return TEMPERATURE_MIN <= temperature && temperature <= TEMPERATURE_MAX;
+}
 
 #endif //THRESHOLDS_H
 
