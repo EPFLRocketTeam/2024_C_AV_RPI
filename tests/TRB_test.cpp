@@ -12,6 +12,8 @@
 #include "data.h"
 #include "intranet_commands.h"
 #include "trigger_board.h"
+#include "av_timer.h"
+#include "logger.h"
 
 void intensive_read_write_test(TriggerBoard& trb);
 void sequential_read_write_test(TriggerBoard& trb);
@@ -20,7 +22,7 @@ void check_policy_test(TriggerBoard& trb);
 
 void reset_trb_state(TriggerBoard& trb) {
     std::cout << "Resetting TRB state...";
-    trb.write_clear_to_trigger(0);
+    trb.send_reset();
     trb.send_sleep();
     usleep(1e6);
     std::cout << "\x1b[32mOK\x1b[0m\n";
@@ -28,6 +30,7 @@ void reset_trb_state(TriggerBoard& trb) {
 
 int main() {
     srand((unsigned) time(0));
+    Logger::init();
 
     std::cout << "\x1b[7m" "Avionics Trigger Board I2C Tests" "\x1b[0m\n";
     std::cout << "WARNING: This test will write to the TRB pyro channels /!\\\n\n";
@@ -44,13 +47,17 @@ int main() {
     reset_trb_state(trb);
     sequential_write_test(trb);
     std::cout << "\n";
-    usleep(500e3);
+    usleep(5e6);
+    //reset_trb_state(trb);
+    /*
     std::cout << "Testing sequential R/W commands and checking TRB behavior:\n";
     reset_trb_state(trb);
     sequential_read_write_test(trb);
+    */
+    std::cout << "Testing driver policy\n";
+    check_policy_test(trb);
 
-    //std::cout << "Testing driver policy\n";
-    //check_policy_test(trb);
+    Logger::terminate();
 }
 
 void intensive_read_write_test(TriggerBoard& trb) {
@@ -249,11 +256,28 @@ void check_policy_test(TriggerBoard& trb) {
 
     uint8_t state(static_cast<uint8_t>(State::INIT));
 
-    while (state < static_cast<uint8_t>(State::ABORT_IN_FLIGHT)) {
-        goat.av_state = static_cast<State>(state); 
-        trb.check_policy(goat, 0);
-        ++state;
+    uint32_t now_ms(0);
+    uint32_t old_ms(0);
+    uint32_t delta_ms(0);
+    uint32_t count_ms(0);
+    while (1) {
+        old_ms = now_ms;
+        now_ms = AvTimer::tick();
+        delta_ms = now_ms - old_ms;
 
-        usleep(5e5);
+        goat.av_state = static_cast<State>(state); 
+        goat.av_timestamp = now_ms;
+        Data::get_instance().write(Data::AV_TIMESTAMP, &now_ms);
+        trb.check_policy(goat, delta_ms);
+        if (count_ms >= 5e3 && state != (int)State::ABORT_IN_FLIGHT) {
+            ++state;
+            if (state == (int)State::ABORT_ON_GROUND || state == (int)State::LANDED) {
+                ++state;
+            }
+            count_ms = 0;
+            std::cout << "AVState: " << (int)state << "\n";
+        }
+
+        count_ms += delta_ms;
     }
 }

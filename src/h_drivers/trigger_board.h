@@ -14,6 +14,7 @@ public:
     void send_wake_up();
     void send_sleep();
     bool read_is_woken_up();
+    void send_reset();
     void write_clear_to_trigger(const bool go);
     void write_pyros(const uint32_t pyros);    
     uint32_t read_pyros();

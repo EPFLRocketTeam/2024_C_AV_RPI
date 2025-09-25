@@ -38,7 +38,7 @@ int main() {
     AvTimer::sleep(100);
 
     // HDrivers
-    //TriggerBoard trigger_board;
+    TriggerBoard trigger_board;
     PR_board prop_board;
     DPR dpr_ethanol(AV_NET_ADDR_DPR_ETH);
     DPR dpr_lox(AV_NET_ADDR_DPR_LOX);
@@ -120,6 +120,13 @@ int main() {
         const float copv_p_lox(dump.prop.N2_pressure_lox);
         float copv_pressure((copv_p_eth + copv_p_lox) * 0.5);
         Data::get_instance().write(Data::PR_SENSOR_P_NCO, &copv_pressure);
+
+        // Execute TRB
+        try {
+            trigger_board.check_policy(dump, delta_ms);
+        }catch(TriggerBoardException& e) {
+            Logger::log_eventf(Logger::ERROR, "%s", e.what());
+        }
 
 
         // Execute telemetry
