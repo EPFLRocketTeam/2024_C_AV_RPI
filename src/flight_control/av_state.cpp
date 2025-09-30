@@ -212,10 +212,11 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
     return currentState;
 }
 
-void inline reset_ignition_timers(uint32_t &timer_accel, uint32_t &timer_liftoff_timeout)
+void inline reset_ignition_timers(uint32_t &timer_accel, uint32_t &timer_liftoff_timeout, uint32_t &timer_burn_timeout)
 {
     timer_accel = 0;
     timer_liftoff_timeout = 0;
+    timer_burn_timeout = 0;
 }
 
 State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
@@ -225,7 +226,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     {
         Logger::log_eventf(Logger::WARN, "ABORT command received");
         Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
-        reset_ignition_timers(timer_accel, timer_liftoff_timeout);
+        reset_ignition_timers(timer_accel, timer_liftoff_timeout, timer_burn_timeout);
         return State::ABORT_ON_GROUND;
     }
 
@@ -253,7 +254,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
 
     else if (dump.event.ignition_failed)
     {
-        reset_ignition_timers(timer_accel, timer_liftoff_timeout);
+        reset_ignition_timers(timer_accel, timer_liftoff_timeout, timer_burn_timeout);
         Logger::log_eventf("FSM transition IGNITION->FILLING");
         return State::ABORT_ON_GROUND;
     }
@@ -263,6 +264,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
 
 State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 {
+    timer_burn_timeout += delta_ms;
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
         Logger::log_eventf(Logger::WARN, "ABORT command received");
@@ -275,11 +277,13 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 #endif
     }
     // If ECO is confirmed we go to the ASCENT state
-    if (dump.event.engine_cut_off)
+    // New condition, after a certain burn time, we force the transition
+    if (dump.event.engine_cut_off || timer_burn_timeout > BURN_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition BURN->ASCENT");
         return State::ASCENT;
     }
+    
     return currentState;
 }
 

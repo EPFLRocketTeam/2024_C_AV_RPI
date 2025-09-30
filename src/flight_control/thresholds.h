@@ -24,6 +24,7 @@
 #define ACCEL_ZERO                0.1
 #define ACCEL_LIFTOFF             0.1 * G_GRAVITY_CST
 #define ACCEL_LIFTOFF_DURATION_MS 500
+#define BURN_MAX_DURATION_MS      5000
 // Moving averages
 #define OVERPRESSURE_GRACE_MS  80
 #define BUFFER_ACCEL_TIME_MS   500
