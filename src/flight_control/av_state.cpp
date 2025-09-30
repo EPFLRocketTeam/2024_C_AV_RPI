@@ -255,7 +255,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     {
         reset_ignition_timers(timer_accel, timer_liftoff_timeout);
         Logger::log_eventf("FSM transition IGNITION->FILLING");
-        return State::FILLING;
+        return State::ABORT_ON_GROUND;
     }
 
     return currentState;
