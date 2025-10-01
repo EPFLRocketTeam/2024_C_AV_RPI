@@ -157,7 +157,7 @@ bool Telecom::begin() {
 
 void Telecom::restart_loras() {
     Logger::log_eventf(Logger::ERROR, "Downlink hang > 1s detected");
-    Logger::log_eventf(Logger::WARN, "Restarting Downlink LoRa");
+    Logger::log_eventf("Restarting Downlink LoRa");
 
     lora_downlink.end();
     lora_downlink.setPins(LORA_DOWNLINK_CS, LORA_DOWNLINK_RST, LORA_DOWNLINK_DI0);
@@ -187,7 +187,7 @@ void Telecom::restart_loras() {
 */
 
 
-    Logger::log_eventf(Logger::WARN, "Restarting Uplink LoRa");
+    Logger::log_eventf("Restarting Uplink LoRa");
     lora_uplink.end();
     lora_uplink.setPins(LORA_UPLINK_CS, LORA_UPLINK_RST, LORA_UPLINK_DI0);
     if (!lora_uplink.begin(UPLINK_FREQUENCY, SPI0)) {
@@ -277,7 +277,7 @@ void Telecom::send_telemetry() {
 
     if (send_packet(CAPSULE_ID::AV_TELEMETRY, (uint8_t*)&compressed_packet, av_downlink_size)) {
         ++packet_number;
-        Logger::log_eventf("Sending packet on downlink");
+        Logger::log_eventf(Logger::DEBUG, "Sending packet on downlink");
     }
 }
 
@@ -322,6 +322,9 @@ void Telecom::handle_capsule_uplink(uint8_t packet_id, uint8_t* data_in, uint32_
             Data::get_instance().write(Data::EVENT_CMD_RECEIVED, &new_cmd_received);
 
             Logger::log_eventf("Received command from GSC.\t\tID: %i; Value: %i\n", last_packet.order_id, last_packet.order_value);
+            if (last_packet.order_id == CMD_ID::AV_CMD_ABORT) {
+                Logger::log_eventf(Logger::WARN, "ABORT command received");
+            }
             break;
 	case CAPSULE_ID::AV_TELEMETRY:
 	    av_downlink_t radio_packet;

@@ -21,7 +21,7 @@ Camera::Camera(const uint8_t address) noexcept : m_address(address), m_recording
     try {
         I2CInterface::getInstance().open(m_address);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf("Error during camera %x driver initialization: %s", m_address, e.what());
+        Logger::log_eventf(Logger::ERROR, "Error during camera %x driver initialization: %s", m_address, e.what());
     }
 }
 
@@ -29,7 +29,7 @@ Camera::~Camera() {
     try {
         I2CInterface::getInstance().close(m_address);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf("Error during camera %x driver deinitialization: %s", m_address, e.what());
+        Logger::log_eventf(Logger::ERROR, "Error during camera %x driver deinitialization: %s", m_address, e.what());
     }
 }
 
