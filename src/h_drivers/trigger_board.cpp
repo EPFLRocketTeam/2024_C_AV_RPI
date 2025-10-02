@@ -14,7 +14,7 @@ TriggerBoard::TriggerBoard() {
     try {
         I2CInterface::getInstance().open(AV_NET_ADDR_TRB);
     }catch(const I2CInterfaceException& e) {
-        Logger::log_eventf("Error during TRB I2C initilazation: %s", e.what());
+        Logger::log_eventf(Logger::FATAL, "Error during TRB I2C initilazation: %s", e.what());
     }    
 }
 
@@ -22,7 +22,7 @@ TriggerBoard::~TriggerBoard() {
     try {
         I2CInterface::getInstance().close(AV_NET_ADDR_TRB);
     }catch(I2CInterfaceException& e) {
-        Logger::log_eventf("Error during TRB I2C deinitialization: %s", e.what());
+        Logger::log_eventf(Logger::ERROR, "Error during TRB I2C deinitialization: %s", e.what());
     }
 }
 
@@ -217,7 +217,7 @@ void TriggerBoard::handle_armed(const DataDump& dump) {
 
     if (wkp_attempts > 10) {
         // Log error msg
-        Logger::log_event(Logger::FATAL, "Trigger Board not responding to WAKE_UP command after 10 attempts.");
+        //Logger::log_event(Logger::FATAL, "Trigger Board not responding to WAKE_UP command after 10 attempts.");
         // FSM -> ERRORGROUND ?
     }
 }
@@ -234,8 +234,9 @@ void TriggerBoard::handle_pressurized() {
 void TriggerBoard::handle_ignition() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
-    if (count_ms >= 1000) {
+    if (count_ms >= 100) {
         write_timestamp();
+        write_clear_to_trigger(1);
         count_ms = 0;
     }
 }
@@ -243,8 +244,9 @@ void TriggerBoard::handle_ignition() {
 void TriggerBoard::handle_burn() {
     // Write timestamp at a freq of 1Hz
     count_ms += delta_ms;
-    if (count_ms >= 1000) {
+    if (count_ms >= 100) {
         write_timestamp();
+        write_clear_to_trigger(1);
         count_ms = 0;
     }
 }
@@ -254,7 +256,6 @@ void TriggerBoard::handle_ascent() {
     count_ms += delta_ms;
     if (count_ms >= 100) {
         write_timestamp();
-        write_clear_to_trigger(1);
         count_ms = 0;
     }
 }
@@ -343,6 +344,7 @@ void TriggerBoard::handle_abort_flight() {
         write_timestamp();
         count_ms = 0;
     }
+    // TODO: Trigger sepmech
 }
 
 

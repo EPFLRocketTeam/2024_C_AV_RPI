@@ -195,7 +195,7 @@ float PR_board::read_impulse(const DataDump& dump) {
     Data::get_instance().write(Data::PR_TOTAL_IMPULSE, &rslt);
     Logger::Severity severity(dump.av_state == State::IGNITION || dump.av_state == State::BURN ?
             Logger::INFO : Logger::DEBUG);
-    Logger::log_eventf(severity, "Reading specific impulse from PRB: %f", rslt);
+    Logger::log_eventf(Logger::DEBUG, "Reading specific impulse from PRB: %f", rslt);
 
     return rslt;
 }
@@ -355,12 +355,12 @@ void PR_board::handle_ignition(const DataDump& dump) {
             Data::get_instance().write(Data::EVENT_IGNITION_FAILED, &ignition_failure);
 
             if (ignited) {
-                Logger::log_eventf("IGNITION CONFIRMED. CHAMBER PRESSURE NOMINAL");
+                Logger::log_eventf("IGNITION CONFIRMED. CHAMBER PRESSURE NOMINAL: %f [bar]", dump.prop.pressure_check);
             }else if (ignition_failure) {
-                Logger::log_eventf(Logger::FATAL, "IGNITION FAILED. SEQUENCE ABORTION");
+                Logger::log_eventf("IGNITION FAILED. CHAMBER PRESSURE TOO LOW: %f [bar]", dump.prop.pressure_check);
             }
         }
-        Logger::log_eventf(Logger::INFO, "ignition check elapsed: %u", ignition_ack_ms);
+        Logger::log_eventf(Logger::DEBUG, "ignition check elapsed: %u", ignition_ack_ms);
         ignition_ack_ms += delta_ms;
     }
     read_pressure_check();

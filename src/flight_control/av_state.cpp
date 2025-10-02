@@ -99,7 +99,6 @@ State AvState::from_calibration(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received");
         Logger::log_eventf("FSM transition CALIBRATION->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
@@ -116,7 +115,6 @@ State AvState::from_filling(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received");
         Logger::log_eventf("FSM transition FILLING->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
@@ -133,8 +131,7 @@ State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
     // Switch to fault state ABORT_ON_GROUND when receiving ABORT from ground operators
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received");
-        Logger::log_eventf("ABORT command received. FSM transition ARMED->ABORT_ON_GROUND");
+        Logger::log_eventf("FSM transition ARMED->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
     }
     
@@ -159,7 +156,6 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received");
         Logger::log_eventf("FSM transition PRESSURIZED->ABORT_ON_GROUND");
         reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
         return State::ABORT_ON_GROUND;
@@ -212,10 +208,11 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
     return currentState;
 }
 
-void inline reset_ignition_timers(uint32_t &timer_accel, uint32_t &timer_liftoff_timeout)
+void inline reset_ignition_timers(uint32_t &timer_accel, uint32_t &timer_liftoff_timeout, uint32_t &timer_burn_timeout)
 {
     timer_accel = 0;
     timer_liftoff_timeout = 0;
+    timer_burn_timeout = 0;
 }
 
 State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
@@ -223,9 +220,8 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     timer_liftoff_timeout += delta_ms;
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received");
         Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
-        reset_ignition_timers(timer_accel, timer_liftoff_timeout);
+        reset_ignition_timers(timer_accel, timer_liftoff_timeout, timer_burn_timeout);
         return State::ABORT_ON_GROUND;
     }
 
@@ -253,9 +249,15 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
 
     else if (dump.event.ignition_failed)
     {
-        reset_ignition_timers(timer_accel, timer_liftoff_timeout);
-        Logger::log_eventf("FSM transition IGNITION->FILLING");
-        return State::FILLING;
+        reset_ignition_timers(timer_accel, timer_liftoff_timeout, timer_burn_timeout);
+        Logger::log_eventf(Logger::WARN, "BURN SEQUENCE ABORTION");
+#if (ABORT_FLIGHT_EN)
+        Logger::log_eventf("FSM transition IGNITION->ABORT_IN_FLIGHT");
+        return State::ABORT_IN_FLIGHT;
+#else
+        Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
+#endif
     }
 
     return currentState;
@@ -263,9 +265,9 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
 
 State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 {
+    timer_burn_timeout += delta_ms;
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received");
 #if (ABORT_FLIGHT_EN)
         Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
         return State::ABORT_IN_FLIGHT;
@@ -275,11 +277,13 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 #endif
     }
     // If ECO is confirmed we go to the ASCENT state
-    if (dump.event.engine_cut_off)
+    // New condition, after a certain burn time, we force the transition
+    if (dump.event.engine_cut_off || timer_burn_timeout > BURN_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition BURN->ASCENT");
         return State::ASCENT;
     }
+    
     return currentState;
 }
 
@@ -288,7 +292,6 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
     Logger::log_eventf("ASCENT elapsed: %u", ascent_elapsed);
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received");
 #if (ABORT_FLIGHT_EN)
         Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
         return State::ABORT_IN_FLIGHT;
@@ -312,7 +315,6 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf(Logger::WARN, "ABORT command received");
 #if (ABORT_FLIGHT_EN)
         Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
         return State::ABORT_IN_FLIGHT;
