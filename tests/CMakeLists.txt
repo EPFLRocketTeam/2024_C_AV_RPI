@@ -66,6 +66,9 @@ target_link_libraries(dpr_test_sequence flight_computer)
 add_executable(GS_valves_test GS_valves_test.cpp)
 target_link_libraries(GS_valves_test flight_computer)
 
+add_executable(camera_test camera_test.cpp)
+target_link_libraries(camera_test flight_computer)
+
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})
 #target_include_directories(mock_sensor PUBLIC include)
