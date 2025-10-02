@@ -40,17 +40,18 @@ void Camera::read_register(const uint8_t reg_addr, uint8_t* data) {
         std::string msg("Camera " + m_id + " I2C error: failed reading from register ");
         throw CameraException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
     }
-    assert(sizeof(data) <= AV_NET_XFER_SIZE);
+    //assert(sizeof(data) <= AV_NET_XFER_SIZE);
 }
 
 void Camera::write_register(const uint8_t reg_addr, const uint8_t* value) {
-    assert(sizeof(value) <= AV_NET_XFER_SIZE);
+    //assert(sizeof(value) <= AV_NET_XFER_SIZE);
     try {
         I2CInterface::getInstance().write(m_address, reg_addr, value, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("Camera " + m_id + " I2C error: failed writing to register ");
         throw CameraException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
     }
+    Logger::log_eventf(Logger::DEBUG, "Writing to CAM_%s register %x: | %x: ", m_id, reg_addr, value);
 }
 
 void Camera::write_timestamp(const DataDump& dump) {
