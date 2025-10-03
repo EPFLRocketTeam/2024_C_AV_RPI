@@ -122,11 +122,13 @@ int main() {
         Data::get_instance().write(Data::PR_SENSOR_P_NCO, &copv_pressure);
 
         // Execute TRB
+        /*
         try {
             trigger_board.check_policy(dump, delta_ms);
         }catch(TriggerBoardException& e) {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
+        */
 
 
         // Execute telemetry

@@ -29,8 +29,6 @@ int main() {
 	uint32_t cmd(0);
 	cmd = AV_NET_CMD_ON;
 
-    prb.send_wake_up();
-    prb.read_is_woken_up();
     prb.write_igniter(cmd);
     prb.clear_to_ignite(cmd);
     AvTimer::sleep(1e3);

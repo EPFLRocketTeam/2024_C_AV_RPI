@@ -301,8 +301,7 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 #endif
     }
     //TODO: better apogee detection
-    else if (ascent_elapsed > 10e3/*dump.nav.speed.z < SPEED_ZERO*/
-             || ascent_elapsed > ASCENT_MAX_DURATION_MS)
+    else if (0/*dump.nav.speed.z < SPEED_ZERO*/ || ascent_elapsed > ASCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
         return State::DESCENT;

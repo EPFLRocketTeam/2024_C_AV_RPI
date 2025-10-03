@@ -21,10 +21,12 @@ bool INA228Module::run_update() {
     Data::get_instance().write(voltage_reg, &voltage);
     Data::get_instance().write(current_reg, &current);
 
+    /*
     DataDump dump(Data::get_instance().get());
     if (dump.av_state == State::PRESSURIZATION || dump.av_state == State::IGNITION || dump.av_state == State::BURN) {
         Logger::log_eventf("INA228: voltage: %f | current: %f | temp: %f", voltage, current, temperature);
     }
+    */
 
     return true;
 }

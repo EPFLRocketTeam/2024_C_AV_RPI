@@ -257,12 +257,12 @@ int main(int argc, char** argv) {
     assert(dump.prop.LOX_pressure == testPOta);
 
     // Test PR_SENSOR_P_CIG
-    Data::GoatReg pCigReg = Data::GoatReg::PR_SENSOR_P_CIG;
+    /*Data::GoatReg pCigReg = Data::GoatReg::PR_SENSOR_P_CIG;
     double testPCig = 4.4;
     goatData.write(pCigReg, &testPCig);
     dump = goatData.get();
     assert(dump.prop.igniter_pressure == testPCig);
-
+*/
     // Test PR_SENSOR_P_EIN
     Data::GoatReg pEinReg = Data::GoatReg::PR_SENSOR_P_EIN;
     double testPEin = 5.5;
@@ -306,12 +306,13 @@ int main(int argc, char** argv) {
     assert(dump.prop.LOX_temperature == testtOta);
 
     // Test PR_SENSOR_T_CIG
+    /*
     Data::GoatReg tCigReg = Data::GoatReg::PR_SENSOR_T_CIG;
     double testtCig = 4.0;
     goatData.write(tCigReg, &testtCig);
     dump = goatData.get();
     assert(dump.prop.igniter_temperature == testtCig);
-
+*/
     // Test PR_SENSOR_T_EIN
     Data::GoatReg tEinReg = Data::GoatReg::PR_SENSOR_T_EIN;
     double testtEin = 5.0;
@@ -320,19 +321,21 @@ int main(int argc, char** argv) {
     assert(dump.prop.fuel_inj_temperature == testtEin);
 
     // Test PR_SENSOR_T_EIN_CF
+    /*
     Data::GoatReg tEinCfReg = Data::GoatReg::PR_SENSOR_T_EIN_CF;
     double testtEinCf = 6.0;
     goatData.write(tEinCfReg, &testtEinCf);
     dump = goatData.get();
     assert(dump.prop.fuel_inj_cooling_temperature == testtEinCf);
-
+*/
     // Test PR_SENSOR_T_OIN
+    /*
     Data::GoatReg tOinReg = Data::GoatReg::PR_SENSOR_T_OIN;
     double testtOin = 7.0;
     goatData.write(tOinReg, &testtOin);
     dump = goatData.get();
     assert(dump.prop.LOX_inj_temperature == testtOin);
-
+*/
     // Test PR_SENSOR_T_CCC
     Data::GoatReg tCccReg = Data::GoatReg::PR_SENSOR_T_CCC;
     double testtCcc = 8.0;

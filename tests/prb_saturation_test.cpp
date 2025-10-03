@@ -28,7 +28,6 @@ int main() {
     uint32_t s_packet_sent = 0;
     uint32_t s_packet_lost = 0;
 
-    h_prb.send_wake_up();
     AvTimer::sleep(1000); // Simple delay for logs observation
 
     while(s_rate_ms >= RATE_STOP_MS){
