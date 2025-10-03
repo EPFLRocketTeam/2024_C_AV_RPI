@@ -20,16 +20,14 @@ public:
     // void write_valve(uint8_t valve_id, ValveOpenDegree degree);
     // ValveOpenDegree read_valve(uint8_t valve_id) const;
     void write_timestamp(); 
-    void send_wake_up();
-    void send_sleep();
     void send_reset();
-    bool read_is_woken_up();
     void clear_to_ignite(bool value);
     void send_passivate();
     void read_fsm();
     void read_injector_oxygen();
     void read_injector_fuel();
-    void read_injector_cooling_temperature();
+    //void read_injector_cooling_temperature();
+    void read_oxygen_fls();
     void read_combustion_chamber();
     void write_igniter(uint32_t cmd);
     void write_valves(const uint32_t cmd);

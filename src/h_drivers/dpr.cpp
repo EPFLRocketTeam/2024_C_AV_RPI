@@ -43,33 +43,6 @@ void DPR::write_timestamp() {
     Logger::log_eventf(Logger::DEBUG, "Writing TIMESTAMP to DPR_%s: %f", m_code.c_str(), tmsp);
 }
 
-void DPR::wake_up() {
-    const uint32_t order(AV_NET_CMD_ON);
-    try {
-        I2CInterface::getInstance().write(m_address, AV_NET_DPR_WAKE_UP, (uint8_t*)&order, AV_NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::string msg("DPR " + m_code + " wake_up error: ");
-        throw DPRException(msg + e.what());
-    }
-}
-
-bool DPR::read_is_woken_up() {
-    uint32_t rslt(0);
-    try {
-        I2CInterface::getInstance().read(m_address, AV_NET_DPR_IS_WOKEN_UP, (uint8_t*)&rslt, AV_NET_XFER_SIZE);
-    }catch(I2CInterfaceException& e) {
-        std::string msg("DPR " + m_code + " read_is_woken_up error: ");
-        throw DPRException(msg + e.what());
-    }
-
-    bool dpr_woken_up(rslt == AV_NET_CMD_ON);
-    Data::GoatReg gr(m_address == AV_NET_ADDR_DPR_ETH ? Data::EVENT_DPR_ETH_READY : Data::EVENT_DPR_LOX_READY);
-
-    Data::get_instance().write(gr, &dpr_woken_up);
-
-    return dpr_woken_up;
-}
-
 void DPR::send_pressurize(const bool active) {
     const uint32_t order(active ? AV_NET_CMD_ON : AV_NET_CMD_OFF);
     try {
@@ -207,6 +180,62 @@ float DPR::read_copv_temperature() {
     return rslt;
 }
 
+void DPR::read_copv_ext_temperature() {
+    if (m_address != AV_NET_ADDR_DPR_ETH) {
+        return;
+    }
+
+    float rslt(0);
+    try {
+        I2CInterface::getInstance().read(m_address, AV_NET_DPR_T_COPV_EXT, (uint8_t*)&rslt, AV_NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("DPR " + m_code + " read_oxygen_fls error: ");
+        throw DPRException(msg + e.what());
+    }
+
+    if (std::isfinite(rslt) && CHECK_TEMPERATURE(rslt)) {
+        Data::get_instance().write(Data::PR_SENSOR_T_NCO_EXT, &rslt);
+    }
+
+    Logger::log_eventf(Logger::DEBUG, "Reading T_NCO_EXT from DPR_ETH: %f", rslt);
+}
+
+void DPR::read_oxygen_fls() {
+    float fls_low(0);
+    float fls_high(0);
+
+    const uint8_t reg_low(m_address == AV_NET_ADDR_DPR_ETH ? AV_NET_DPR_T_FLS_90 : AV_NET_DPR_T_FLS_50);
+    try {
+        I2CInterface::getInstance().read(m_address, reg_low, (uint8_t*)&fls_low, AV_NET_XFER_SIZE);
+    }catch(I2CInterfaceException& e) {
+        std::string msg("DPR " + m_code + " read_oxygen_fls error: ");
+        throw DPRException(msg + e.what());
+    }
+
+    const auto goatreg_low(m_address == AV_NET_ADDR_DPR_ETH ? Data::PR_SENSOR_T_FLS_90 : Data::PR_SENSOR_T_FLS_50);
+    if (std::isfinite(fls_low) && CHECK_TEMPERATURE(fls_low)) {
+        Data::get_instance().write(goatreg_low, &fls_low);
+    }
+
+    if (m_address == AV_NET_ADDR_DPR_LOX) {
+        try {
+            I2CInterface::getInstance().read(m_address, AV_NET_DPR_T_FLS_80, (uint8_t*)&fls_high, AV_NET_XFER_SIZE);
+        }catch(I2CInterfaceException& e) {
+            std::string msg("DPR " + m_code + " read_oxygen_fls error: ");
+            throw DPRException(msg + e.what());
+        }
+
+        if (std::isfinite(fls_high) && CHECK_TEMPERATURE(fls_high)) {
+            Data::get_instance().write(Data::PR_SENSOR_T_FLS_80, &fls_high);
+        }
+
+        Logger::log_eventf(Logger::DEBUG, "Reading T_FLS_50 from DPR_LOX: %f", fls_low);
+        Logger::log_eventf(Logger::DEBUG, "Reading T_FLS_80 from DPR_LOX: %f", fls_high);
+    }else {
+        Logger::log_eventf(Logger::DEBUG, "Reading T_FLS_90 from DPR_ETH: %f", fls_low);
+    }
+}
+
 void DPR::write_valves(const uint32_t cmd) {
 	uint32_t valves_state(cmd);
     try {
@@ -323,6 +352,10 @@ void DPR::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     read_tank_temperature();
     read_copv_pressure(dump);
     read_copv_temperature();
+    if (m_address == AV_NET_ADDR_DPR_ETH) {
+        read_copv_ext_temperature();
+    }
+    read_oxygen_fls();
     read_valves();
 }
 

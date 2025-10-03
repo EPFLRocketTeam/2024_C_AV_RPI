@@ -237,11 +237,16 @@ void Telecom::send_telemetry() {
     
     packet.N2_pressure = data.prop.N2_pressure;
     packet.N2_temp = data.prop.N2_temperature;
+    packet.N2_PT1000_temp = data.prop.N2_ext_temperature;
     packet.fuel_pressure = data.prop.fuel_pressure;
     packet.LOX_pressure = data.prop.LOX_pressure;
     packet.LOX_temp = data.prop.LOX_temperature;
     packet.LOX_inj_pressure = data.prop.LOX_inj_pressure;
-    packet.LOX_inj_temp = data.prop.LOX_inj_temperature;
+    packet.LOX_cap_fls_0 = data.prop.LOX_fls_cap_0;
+    packet.LOX_fls_10 = data.prop.LOX_fls_10;
+    packet.LOX_fls_50 = data.prop.LOX_fls_50;
+    packet.LOX_fls_80 = data.prop.LOX_fls_80;
+    packet.LOX_fls_90 = data.prop.LOX_fls_90;
     packet.fuel_inj_pressure = data.prop.fuel_inj_pressure;
     packet.chamber_pressure = data.prop.chamber_pressure;
 

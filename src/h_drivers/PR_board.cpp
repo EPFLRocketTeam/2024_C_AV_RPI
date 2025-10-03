@@ -35,29 +35,10 @@ void PR_board::write_timestamp() {
     Logger::log_eventf(Logger::DEBUG, "Writing TIMESTAMP to PRB: %u", timestamp);
 }
 
-void PR_board::send_wake_up() {
-    const uint32_t order(AV_NET_CMD_ON);
-    write_register(AV_NET_PRB_WAKE_UP, (uint8_t*)&order);
-}
-
-void PR_board::send_sleep() {
-    const uint32_t order(AV_NET_CMD_OFF);
-    write_register(AV_NET_PRB_WAKE_UP, (uint8_t*)&order);
-}
-
 void PR_board::send_reset() {
     const uint32_t order(AV_NET_CMD_ON);
     write_register(AV_NET_PRB_RESET, (uint8_t*)&order);
     Logger::log_eventf(Logger::DEBUG, "Sending RESET to PRB");
-}
-
-bool PR_board::read_is_woken_up() {
-    uint32_t rslt(0);
-    read_register(AV_NET_PRB_IS_WOKEN_UP, (uint8_t*)&rslt);
-
-    bool prb_woken_up(rslt == AV_NET_CMD_ON);
-    Data::get_instance().write(Data::EVENT_PRB_READY, &prb_woken_up);
-    return prb_woken_up;
 }
 
 void PR_board::clear_to_ignite(bool value) {
@@ -81,20 +62,19 @@ void PR_board::read_fsm() {
 
 void PR_board::read_injector_oxygen() {
     float pressure(0);
-    float temperature(0);
 
     read_register(AV_NET_PRB_P_OIN, (uint8_t*)&pressure);
-    read_register(AV_NET_PRB_T_OIN, (uint8_t*)&temperature);
 
     if (std::isfinite(pressure) && CHECK_TANK_PRESS(pressure)) {
         Data::get_instance().write(Data::PR_SENSOR_P_OIN, &pressure);
     }
-    if (std::isfinite(temperature) && CHECK_TEMPERATURE(temperature)) {
-        Data::get_instance().write(Data::PR_SENSOR_T_OIN, &temperature);
-    }
 
-    Logger::log_eventf(Logger::DEBUG, "Reading P_OIN from PRB: %f", pressure);
-    Logger::log_eventf(Logger::DEBUG, "Reading T_OIN from PRB: %f", temperature);
+    State state(Data::get_instance().get().av_state);
+    if (state == State::IGNITION || state == State::BURN) {
+        Logger::log_eventf(Logger::INFO, "Reading P_OIN from PRB: %f", pressure);
+    }else {
+        Logger::log_eventf(Logger::DEBUG, "Reading P_OIN from PRB: %f", pressure);
+    }
 }
 
 void PR_board::read_injector_fuel() {
@@ -111,17 +91,42 @@ void PR_board::read_injector_fuel() {
         Data::get_instance().write(Data::PR_SENSOR_T_EIN, &temperature);
     }
 
-    Logger::log_eventf(Logger::DEBUG, "Reading P_EIN from PRB: %f", pressure);
+    State state(Data::get_instance().get().av_state);
+    if (state == State::IGNITION || state == State::BURN) {
+        Logger::log_eventf(Logger::INFO, "Reading P_EIN from PRB: %f", pressure);
+    }else {
+        Logger::log_eventf(Logger::DEBUG, "Reading P_EIN from PRB: %f", pressure);
+    }
     Logger::log_eventf(Logger::DEBUG, "Reading T_EIN from PRB: %f", temperature);
 }
 
+/*
 void PR_board::read_injector_cooling_temperature() {
     float temperature(0);
     read_register(AV_NET_PRB_T_EIN_PT1000, (uint8_t*)&temperature);
     if (std::isfinite(temperature) && CHECK_TEMPERATURE(temperature)) {
         Data::get_instance().write(Data::PR_SENSOR_T_EIN_CF, &temperature);
     }
-    Logger::log_eventf(Logger::DEBUG, "Reading T_EIN_PT1000 from PRB: %f", temperature);
+    Logger::log_eventf(Logger::INFO, "Reading T_EIN_PT1000 from PRB: %f", temperature);
+}
+*/
+
+void PR_board::read_oxygen_fls() {
+    float fls_0(0);
+    float fls_10(0);
+
+    read_register(AV_NET_PRB_T_FLS_0, (uint8_t*)&fls_0);
+    read_register(AV_NET_PRB_T_FLS_10, (uint8_t*)&fls_10);
+
+    if (std::isfinite(fls_0) && CHECK_TEMPERATURE(fls_0)) {
+        Data::get_instance().write(Data::PR_SENSOR_T_FLS_0, &fls_0);
+    }
+    if (std::isfinite(fls_10) && CHECK_TEMPERATURE(fls_10)) {
+        Data::get_instance().write(Data::PR_SENSOR_T_FLS_10, &fls_10);
+    }
+
+    Logger::log_eventf(Logger::DEBUG, "Reading T_FLS_0 from PRB: %f", fls_0);
+    Logger::log_eventf(Logger::DEBUG, "Reading T_FLS_10 from PRB: %f", fls_10);
 }
 
 void PR_board::read_combustion_chamber() {
@@ -138,7 +143,12 @@ void PR_board::read_combustion_chamber() {
         Data::get_instance().write(Data::PR_SENSOR_T_CCC, &temperature);
     }
 
-    Logger::log_eventf(Logger::DEBUG, "Reading P_CCC from PRB: %f", pressure);
+    State state(Data::get_instance().get().av_state);
+    if (state == State::IGNITION || state == State::BURN) {
+        Logger::log_eventf(Logger::INFO, "Reading P_CCC from PRB: %f", pressure);
+    }else {
+        Logger::log_eventf(Logger::DEBUG, "Reading P_CCC from PRB: %f", pressure);
+    }
     Logger::log_eventf(Logger::DEBUG, "Reading T_CCC from PRB: %f", temperature);
 }
 
@@ -247,8 +257,8 @@ void PR_board::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     read_valves();
     read_injector_oxygen();
     read_injector_fuel();
-    read_injector_cooling_temperature();
     read_combustion_chamber();
+    read_oxygen_fls();
     read_impulse(dump);
 }
 

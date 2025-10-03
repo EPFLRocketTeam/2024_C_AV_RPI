@@ -18,17 +18,19 @@ PropSensors::PropSensors()
 :   N2_pressure(0),
     fuel_pressure(0),
     LOX_pressure(0),
-    igniter_pressure(0),
     LOX_inj_pressure(0),
     fuel_inj_pressure(0),
     chamber_pressure(0),
     N2_temperature(0),
+    N2_ext_temperature(0),
     fuel_temperature(0),
     LOX_temperature(0),
-    igniter_temperature(0),
     fuel_inj_temperature(0),
-    fuel_inj_cooling_temperature(0),
-    LOX_inj_temperature(0),
+    LOX_fls_90(0),
+    LOX_fls_80(0),
+    LOX_fls_50(0),
+    LOX_fls_10(0),
+    LOX_fls_cap_0(0),
     chamber_temperature(0),
     pressure_check(0),
     total_impulse(0),
@@ -167,9 +169,6 @@ void Data::write(GoatReg reg, void* data) {
         case PR_SENSOR_P_OTA:
             prop_sensors.LOX_pressure = *reinterpret_cast<float*>(data);
             break;
-        case PR_SENSOR_P_CIG:
-            prop_sensors.igniter_pressure = *reinterpret_cast<float*>(data);
-            break;
         case PR_SENSOR_P_EIN:
             prop_sensors.fuel_inj_pressure = *reinterpret_cast<float*>(data);
             break;
@@ -182,23 +181,32 @@ void Data::write(GoatReg reg, void* data) {
         case PR_SENSOR_T_NCO:
             prop_sensors.N2_temperature = *reinterpret_cast<float*>(data);
             break;
+        case PR_SENSOR_T_NCO_EXT:
+            prop_sensors.N2_ext_temperature = *reinterpret_cast<float*>(data);
+            break;
         case PR_SENSOR_T_ETA:
             prop_sensors.fuel_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_OTA:
             prop_sensors.LOX_temperature = *reinterpret_cast<float*>(data);
             break;
-        case PR_SENSOR_T_CIG:
-            prop_sensors.igniter_temperature = *reinterpret_cast<float*>(data);
-            break;
         case PR_SENSOR_T_EIN:
             prop_sensors.fuel_inj_temperature = *reinterpret_cast<float*>(data);
             break;
-        case PR_SENSOR_T_EIN_CF:
-            prop_sensors.fuel_inj_cooling_temperature = *reinterpret_cast<float*>(data);
+        case PR_SENSOR_T_FLS_90:
+            prop_sensors.LOX_fls_90 = *reinterpret_cast<float*>(data);
             break;
-        case PR_SENSOR_T_OIN:
-            prop_sensors.LOX_inj_temperature = *reinterpret_cast<float*>(data);
+        case PR_SENSOR_T_FLS_80:
+            prop_sensors.LOX_fls_80 = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_T_FLS_50:
+            prop_sensors.LOX_fls_50 = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_T_FLS_10:
+            prop_sensors.LOX_fls_10 = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_T_FLS_0:
+            prop_sensors.LOX_fls_cap_0 = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_CCC:
             prop_sensors.chamber_temperature = *reinterpret_cast<float*>(data);

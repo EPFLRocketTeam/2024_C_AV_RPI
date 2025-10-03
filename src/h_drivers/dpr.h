@@ -13,8 +13,6 @@ public:
 
     // I2C registers R/W low-level functions
     void write_timestamp();
-    void wake_up();
-    bool read_is_woken_up();
     void send_pressurize(const bool active);
     void send_passivate();
     void send_reset();
@@ -23,6 +21,8 @@ public:
     float read_tank_temperature();
     float read_copv_pressure(const DataDump& dump);
     float read_copv_temperature();
+    void read_copv_ext_temperature();
+    void read_oxygen_fls();
     void write_valves(const uint32_t cmd);
     uint32_t read_valves();
 

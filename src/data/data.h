@@ -65,17 +65,19 @@ struct PropSensors {
     float    N2_pressure;
     float    fuel_pressure;
     float    LOX_pressure;
-    float    igniter_pressure;
     float    LOX_inj_pressure;
     float    fuel_inj_pressure;
     float    chamber_pressure;
     float    N2_temperature;
+    float    N2_ext_temperature;
     float    fuel_temperature;
     float    LOX_temperature;
-    float    igniter_temperature;
     float    fuel_inj_temperature;
-    float    fuel_inj_cooling_temperature;
-    float    LOX_inj_temperature;
+    float    LOX_fls_90;
+    float    LOX_fls_80;
+    float    LOX_fls_50;
+    float    LOX_fls_10;
+    float    LOX_fls_cap_0;
     float    chamber_temperature;
     float    pressure_check;
     float    total_impulse;
@@ -263,17 +265,20 @@ public:
         PR_SENSOR_P_NCO, // N2 Pressure
         PR_SENSOR_P_ETA, // Ethanol Tank Pressure
         PR_SENSOR_P_OTA, // Lox Tank Pressure
-        PR_SENSOR_P_CIG, // Igniter Pressure
         PR_SENSOR_P_EIN, // Ethanol Injector Pressure
         PR_SENSOR_P_OIN, // Lox Injector Pressure
         PR_SENSOR_P_CCC, // Combustion Chamber Pressure
         PR_SENSOR_T_NCO, // N2 Temperature
+        PR_SENSOR_T_NCO_EXT, // N2 Surface Temperature from PT1000
         PR_SENSOR_T_ETA, // Ethanol Tank Temperature
         PR_SENSOR_T_OTA, // Lox Tank Temperature
-        PR_SENSOR_T_CIG, // Igniter Temperature
-        PR_SENSOR_T_EIN , // Ethanol Injector Temperature (Sensata PTE7300)
-        PR_SENSOR_T_EIN_CF, // Ethanol Injector Cooling Fluid Tempreature (PT1000)
-        PR_SENSOR_T_OIN, // Lox Injector Temperature
+        PR_SENSOR_T_EIN, // Ethanol Injector Temperature (Sensata PTE7300)
+        PR_SENSOR_T_FLS_90, // DPR_ETH T_OIN
+        PR_SENSOR_T_FLS_80, // DPR_LOX T_EIN
+        PR_SENSOR_T_FLS_50, // DPR_LOX T_OIN
+        //PR_SENSOR_T_EIN_CF, // Ethanol Injector Cooling Fluid Tempreature (PT1000)
+        PR_SENSOR_T_FLS_10, // DPR_ETH T_EIN
+        PR_SENSOR_T_FLS_0, // DPR_ETH T_OIN
         PR_SENSOR_T_CCC,  // Combustion Chamber Temperature
 
         /* Propulsion State */
