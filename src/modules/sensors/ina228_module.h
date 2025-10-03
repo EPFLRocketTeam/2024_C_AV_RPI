@@ -14,18 +14,21 @@ public:
         const char* module_config, 
         uint32_t i2c_address,
         Data::GoatReg voltage_reg,
+        Data::GoatReg current_reg,
         float shunt,
         float maxCurrent
     );
     
     static INA228Module* make_lpb();
-    static INA228Module* make_hpb();
+    static INA228Module* make_hpb_trb();
+    static INA228Module* make_hpb_prb();
 private:
     INA228* ina = nullptr;
     
     uint32_t i2c_address;
 
     Data::GoatReg voltage_reg;
+    Data::GoatReg current_reg;
 
     float shunt;
     float maxCurrent;

@@ -14,6 +14,7 @@ public:
     void send_wake_up();
     void send_sleep();
     bool read_is_woken_up();
+    void send_reset();
     void write_clear_to_trigger(const bool go);
     void write_pyros(const uint32_t pyros);    
     uint32_t read_pyros();
@@ -30,16 +31,16 @@ private:
 
     void handle_init();
     void handle_calibration();
-    void handle_manual();
+    void handle_filling();
     void handle_armed(const DataDump& dump);
-    void handle_ready();
-    void handle_thrustsequence();
-    void handle_liftoff();
+    void handle_pressurized();
+    void handle_ignition();
+    void handle_burn();
     void handle_ascent();
     void handle_descent(const DataDump& dump);
     void handle_landed();
-    void handle_errorground();
-    void handle_errorflight();
+    void handle_abort_ground();
+    void handle_abort_flight();
 };
 
 class TriggerBoardException : public std::exception {

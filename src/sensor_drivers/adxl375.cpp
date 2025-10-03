@@ -621,7 +621,6 @@ void Adxl375::calibrate() {
 
 	float samples = 0;
     adxl375_data sum = {0, 0, 0};
-	int8_t rslt;
 
     // Sum up samples for averaging
     while (samples < 1000) {

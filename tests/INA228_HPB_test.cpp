@@ -7,7 +7,7 @@
 /*********                     Macros                              ******/
 /************************************************************************/
 /* Iteration count to run example code */
-#define ITERATION 3
+#define ITERATION 10
 
 /************************************************************************/
 /*********                     Test code                           ******/
@@ -15,7 +15,7 @@
 int main() {
     try
     {
-        INA228 ina(INA228_ADDRESS_HPB);
+        INA228 ina(0x45);
     
         if (!ina.isConnected()){
             std::cerr << "INA228 High Power 24V not connected." << std::endl;

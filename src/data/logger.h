@@ -26,7 +26,7 @@ namespace Logger {
     // Default log severity is INFO
     template <typename ...Args>
     inline void log_eventf(const char* fmt, Args&&... args) {
-        const int size = std::snprintf(NULL, 0, fmt, args...);
+        const size_t size = std::snprintf(NULL, 0, fmt, args...);
         if (size < 0) {
             return;
         }
@@ -45,7 +45,7 @@ namespace Logger {
 
     template <typename ...Args>
     inline void log_eventf(Severity lvl, const char* fmt, Args&&... args) {
-        const int size = std::snprintf(NULL, 0, fmt, args...);
+        const size_t size = std::snprintf(NULL, 0, fmt, args...);
         if (size < 0) {
             return;
         }

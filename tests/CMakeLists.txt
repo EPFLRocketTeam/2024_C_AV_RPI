@@ -1,3 +1,6 @@
+# Legacy tests either deprecated or useless
+add_subdirectory(legacy)
+
 add_executable(adxl375_test ADXL375_test.cpp)
 target_link_libraries(adxl375_test adxl375)
 
@@ -18,14 +21,11 @@ add_executable(bmp390_test BMP390_test.cpp)
 target_link_libraries(bmp390_test bmp3)
 
 add_executable(gps_test I2CGPS_test.cpp)
-target_link_libraries(gps_test gps)
+target_link_libraries(gps_test gps flight_computer)
 
 add_executable(lora_test LoRa_test.cpp)
 target_link_libraries(lora_test LoRa4Raspi ERT_RF_Protocol_Interface)
 target_include_directories(lora_test PUBLIC ${CMAKE_SOURCE_DIR}/src/)
-
-add_executable(main_test main_test.cpp)
-target_link_libraries(main_test flight_computer)
 
 add_executable(ina228_lpb_test INA228_LPB_test.cpp)
 target_link_libraries(ina228_lpb_test ina228)
@@ -36,17 +36,14 @@ target_link_libraries(ina228_hpb_test ina228)
 add_executable(TMP1075_test TMP1075_test.cpp)
 target_link_libraries(TMP1075_test PRIVATE tmp1075)
 
-add_executable(data_test data_test.cpp)
-target_link_libraries(data_test flight_computer)
-target_include_directories(data_test PUBLIC ${CMAKE_SOURCE_DIR}/src/data)
-# Register the test with CTest
-add_test(NAME DataTest COMMAND data_test)
-
 add_executable(trb_test TRB_test.cpp)
 target_link_libraries(trb_test flight_computer)
 
 add_executable(buzzer_test buzzer_test.cpp)
 target_link_libraries(buzzer_test flight_computer)
+
+add_executable(led_ws2812_test led_ws2812_test.cpp)
+target_link_libraries(led_ws2812_test neopixel)
 
 add_executable(telecom_test telecom_test.cpp)
 target_link_libraries(telecom_test flight_computer)
@@ -57,15 +54,20 @@ target_link_libraries(avtimer_test flight_computer)
 add_executable(prb_test prb_test.cpp)
 target_link_libraries(prb_test flight_computer)
 
+add_executable(prb_saturation_test prb_saturation_test.cpp)
+target_link_libraries(prb_saturation_test flight_computer)
+
+add_executable(dpr_test dpr_test.cpp)
+target_link_libraries(dpr_test flight_computer)
+
 add_executable(dpr_test_sequence dpr_test_sequence.cpp)
 target_link_libraries(dpr_test_sequence flight_computer)
-
-add_executable(valves_test valves_test.cpp)
-target_link_libraries(valves_test flight_computer)
 
 add_executable(GS_valves_test GS_valves_test.cpp)
 target_link_libraries(GS_valves_test flight_computer)
 
+add_executable(camera_test camera_test.cpp)
+target_link_libraries(camera_test flight_computer)
 
 #set(MOCK_SENSOR src/MockSensor.cpp)
 #add_library(mock_sensor ${MOCK_SENSOR})

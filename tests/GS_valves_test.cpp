@@ -9,7 +9,7 @@
 
 int main() {
     Logger::init();
-	State av_state(State::MANUAL);
+	State av_state(State::FILLING);
 	Data::get_instance().write(Data::AV_STATE, &av_state);
 
 	//DPR dpr_lox(AV_NET_ADDR_DPR_LOX);
@@ -40,20 +40,23 @@ int main() {
 			uint32_t cmd(0);
 			switch (data.telemetry_cmd.id) {
 				case CMD_ID::AV_CMD_MAIN_LOX:
-					Logger::log_eventf("Command AV_CMD_MAIN_LOX");
+					Logger::log_eventf("Received command AV_CMD_MAIN_LOX: %u", cmd);
 					if (data.telemetry_cmd.value) {
-						cmd = AV_NET_CMD_ON << 8;
+						cmd = AV_NET_CMD_ON << 8 | AV_NET_CMD_OFF << 0;
 					}else {
-						cmd = AV_NET_CMD_OFF << 8;
+						cmd = AV_NET_CMD_OFF << 8 | AV_NET_CMD_OFF << 0;
 					}
+                    Logger::log_eventf("Writing LOX valve to PRB: %x", cmd);
 					I2CInterface::getInstance().write(AV_NET_ADDR_PRB, AV_NET_PRB_VALVES_STATE, (uint8_t*)&cmd, AV_NET_XFER_SIZE);
 					break;
 				case CMD_ID::AV_CMD_MAIN_FUEL:
+                    Logger::log_eventf("Received command AV_CMD_MAIN_FUEL: %u", data.telemetry_cmd.value);
 					if (data.telemetry_cmd.value) {
 						cmd = AV_NET_CMD_ON;
 					}else {
 						cmd = AV_NET_CMD_OFF;
 					}
+                    Logger::log_eventf("Writing FUEL valve to PRB: %x", cmd);
 					I2CInterface::getInstance().write(AV_NET_ADDR_PRB, AV_NET_PRB_VALVES_STATE, (uint8_t*)&cmd, AV_NET_XFER_SIZE);
 					break;
 				default:

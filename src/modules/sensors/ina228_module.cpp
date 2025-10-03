@@ -1,6 +1,8 @@
 #include "config.h"
 #include "ina228_module.h"
 #include "INA228.h"
+#include "logger.h"
+#include "data.h"
 
 bool INA228Module::run_init() {
     ina = new INA228(i2c_address, shunt, maxCurrent);
@@ -12,9 +14,19 @@ bool INA228Module::run_update() {
         return false;
     }
 
-    float voltage (ina->getBusVoltage());
+    float voltage(ina->getBusVoltage());
+    float current(ina->getCurrent());
+    float temperature(ina->getTemperature());
 
     Data::get_instance().write(voltage_reg, &voltage);
+    Data::get_instance().write(current_reg, &current);
+
+    /*
+    DataDump dump(Data::get_instance().get());
+    if (dump.av_state == State::PRESSURIZATION || dump.av_state == State::IGNITION || dump.av_state == State::BURN) {
+        Logger::log_eventf("INA228: voltage: %f | current: %f | temp: %f", voltage, current, temperature);
+    }
+    */
 
     return true;
 }
@@ -34,12 +46,14 @@ INA228Module::INA228Module(
     const char* module_config, 
     uint32_t i2c_address,
     Data::GoatReg voltage_reg,
+    Data::GoatReg current_reg,
     float shunt,
     float maxCurrent
 )
 :   SensorModule(module_name, module_config),
     i2c_address(i2c_address),
     voltage_reg(voltage_reg),
+    current_reg(current_reg),
     shunt(shunt),
     maxCurrent(maxCurrent)
 {}
@@ -50,18 +64,32 @@ INA228Module* INA228Module::make_lpb() {
         "sensors.ina228_lpb",
         INA228_ADDRESS_LPB,
         Data::GoatReg::BAT_LPB_VOLTAGE,
+        Data::GoatReg::BAT_LPB_CURRENT,
         INA228_LPB_SHUNT,
         INA228_LPB_MAX_CUR
     );
 }
 
-INA228Module* INA228Module::make_hpb() {
+INA228Module* INA228Module::make_hpb_trb() {
     return new INA228Module(
-        "Sensors::Ina228.HPB",
-        "sensors.ina228_hpb",
-        INA228_ADDRESS_HPB,
-        Data::GoatReg::BAT_HPB_VOLTAGE,
-        INA228_HPB_SHUNT,
-        INA228_HPB_MAX_CUR
+        "Sensors::Ina228.HPB_TRB",
+        "sensors.ina228_hpb_trb",
+        INA228_ADDRESS_HPB_TRB,
+        Data::GoatReg::BAT_HPB_VOLTAGE_TRB,
+        Data::GoatReg::BAT_HPB_CURRENT_TRB,
+        INA228_HPB_TRB_SHUNT,
+        INA228_HPB_TRB_MAX_CUR
+    );
+}
+
+INA228Module* INA228Module::make_hpb_prb() {
+    return new INA228Module(
+        "Sensors::Ina228.HPB_PRB",
+        "sensors.ina228_hpb_prb",
+        INA228_ADDRESS_HPB_PRB,
+        Data::GoatReg::BAT_HPB_VOLTAGE_PRB,
+        Data::GoatReg::BAT_HPB_CURRENT_PRB,
+        INA228_HPB_PRB_SHUNT,
+        INA228_HPB_PRB_MAX_CUR
     );
 }

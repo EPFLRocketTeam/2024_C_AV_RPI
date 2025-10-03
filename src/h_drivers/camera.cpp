@@ -40,17 +40,18 @@ void Camera::read_register(const uint8_t reg_addr, uint8_t* data) {
         std::string msg("Camera " + m_id + " I2C error: failed reading from register ");
         throw CameraException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
     }
-    assert(sizeof(data) <= AV_NET_XFER_SIZE);
+    //assert(sizeof(data) <= AV_NET_XFER_SIZE);
 }
 
 void Camera::write_register(const uint8_t reg_addr, const uint8_t* value) {
-    assert(sizeof(value) <= AV_NET_XFER_SIZE);
+    //assert(sizeof(value) <= AV_NET_XFER_SIZE);
     try {
         I2CInterface::getInstance().write(m_address, reg_addr, value, AV_NET_XFER_SIZE);
     }catch(I2CInterfaceException& e) {
         std::string msg("Camera " + m_id + " I2C error: failed writing to register ");
         throw CameraException(msg + std::to_string(reg_addr) + "\n\t" + e.what());
     }
+    Logger::log_eventf(Logger::DEBUG, "Writing to CAM_%s register %x: | %x: ", m_id, reg_addr, value);
 }
 
 void Camera::write_timestamp(const DataDump& dump) {
@@ -87,24 +88,24 @@ void Camera::check_policy(const DataDump& dump, const uint32_t delta_ms) {
     switch (dump.av_state) {
         case State::INIT:
         case State::CALIBRATION:
-        case State::MANUAL:
+        case State::FILLING:
         case State::ARMED:
             break;
-        case State::READY:
-            handle_ready();
+        case State::PRESSURIZATION:
+            handle_pressurized();
             break;
-        case State::THRUSTSEQUENCE:
-        case State::LIFTOFF:
+        case State::IGNITION:
+        case State::BURN:
         case State::ASCENT:
         case State::DESCENT:
         case State::LANDED:
-        case State::ERRORGROUND:
-        case State::ERRORFLIGHT:
+        case State::ABORT_ON_GROUND:
+        case State::ABORT_IN_FLIGHT:
             break;
     }
 }
 
-void Camera::handle_ready() {
+void Camera::handle_pressurized() {
     // Send 'start recording' command every 100ms until camera acks it's recording 
     if (count_ms >= 100 && !m_recording) {
         static unsigned attempts(0);

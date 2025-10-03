@@ -726,7 +726,6 @@ int8_t enable_bmi08_interrupt(struct bmi08_dev *bmi08dev,
                               struct bmi08_gyro_int_channel_cfg *gyro_int_config)
 {
     int8_t rslt;
-    uint8_t data = 0;
 
     /* Check for null pointer in the device structure */
     rslt = null_ptr_check(bmi08dev);

@@ -1,13 +1,55 @@
 #include <Protocol.h>
+#include "PacketDefinition_Firehorn.h"
 #include "av_state.h"
 #include "data.h"
 #include "logger.h"
+#include "av_timer.h"
 #include <iostream>
 
-
-AvState::AvState()
+MovingAverage::MovingAverage(size_t power) : maxSize(power), sum(0.0f)
 {
-    this->currentState = State::INIT;
+    samples.reserve(1 << power);
+}
+
+void MovingAverage::addSample(float sample)
+{
+    if (samples.size() >= (unsigned)(1 << maxSize))
+    {
+        sum -= samples.front();
+        samples.erase(samples.begin());
+    }
+
+    samples.push_back(sample);
+    sum += sample;
+}
+
+float MovingAverage::getAverage() const
+{
+    if (samples.empty())
+    {
+        return 0.0f; // or handle empty case as needed
+    }
+    // Could opti if we remove division by having a fix size TBD
+    return sum / samples.size();
+}
+
+void MovingAverage::reset()
+{
+    samples.clear();
+    sum = 0.0f;
+}
+
+
+///////////////////////////////
+// AvState: Flight Computer FSM
+///////////////////////////////
+AvState::AvState()
+:   pressurization_start_time(0),
+    timer_accel(0),
+    timer_liftoff_timeout(0)
+
+{
+    reset_flight();
 }
 
 // Destructor
@@ -16,263 +58,392 @@ AvState::~AvState()
     // Nothing to do
 }
 
+void AvState::reset_flight() {
+    pressure_fuel_avg.reset();
+    pressure_lox_avg.reset();
+    pressurization_start_time = 0;
+    timer_accel = 0;
+    timer_liftoff_timeout = 0;
+    ascent_elapsed = 0;
+    descent_elapsed = 0;
+    accel_g_offset = 0;
+    this->currentState = State::INIT;
+    Data::get_instance().reset_events();
+}
+
 // This function allows to get the current state of the FSM
 State AvState::getCurrentState()
 {
     return currentState;
 }
 
-State AvState::fromInit(DataDump const &dump)
+State AvState::from_init(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
     {
         Logger::log_eventf("FSM transition INIT->CALIBRATION");
+        const int samples(1000);
+        float sum(0);
+        for (int i(0); i < samples; ++i) {
+            float acc_x(dump.nav.accel.x);
+            sum += acc_x;
+            AvTimer::sleep(1);
+        }
+        accel_g_offset = sum / samples;
         return State::CALIBRATION;
     }
     return currentState;
 }
 
-State AvState::fromCalibration(DataDump const &dump)
+State AvState::from_calibration(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition CALIBRATION->ERROR_GROUND");
-        return State::ERRORGROUND;
+        Logger::log_eventf("FSM transition CALIBRATION->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
     }
-    else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_RECOVER)
-    {
-        Logger::log_eventf("FSM transition CALIBRATION->INIT");
-        return State::INIT;
-    }
-    // If all the sensors are calibrated and ready for use we go to the MANUAL state
+    // If all the sensors are calibrated and ready for use we go to the FILLING state
     else if (dump.event.calibrated)
     {
-        Logger::log_eventf("FSM transition CALIBRATION->MANUAL");
-        return State::MANUAL;
+        Logger::log_eventf("FSM transition CALIBRATION->FILLING");
+        return State::FILLING;
     }
     return currentState;
 }
 
-State AvState::fromManual(DataDump const &dump)
+State AvState::from_filling(DataDump const &dump, uint32_t delta_ms)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT) 
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition MANUAL->ERROR_GROUND");
-        return State::ERRORGROUND;
+        Logger::log_eventf("FSM transition FILLING->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
     }
     else if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ARM)
     {
-        Logger::log_eventf("FSM transition MANUAL->ARMED");
+        Logger::log_eventf("FSM transition FILLING->ARMED");
         return State::ARMED;
     }
     return currentState;
 }
 
-State AvState::fromArmed(DataDump const &dump)
+State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.event.catastrophic_failure)
+    // Switch to fault state ABORT_ON_GROUND when receiving ABORT from ground operators
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        // print error
-        std::cerr << "Catastrophic failure detected" << dump.event.catastrophic_failure << " " << (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT ? "true" : "false") << std::endl;
-        Logger::log_eventf("FSM transition ARMED->ERROR_GROUND");
-        return State::ERRORGROUND;
+        Logger::log_eventf("FSM transition ARMED->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
     }
-    // If the propulsion is OK we go to the READY state
-    else if (dump.event.dpr_eth_pressure_ok)
+    
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_PRESSURIZE)
     {
-        Logger::log_eventf("FSM transition ARMED->READY");
-        return State::READY;
+        Logger::log_eventf("FSM transition ARMED->PRESSURIZATION");
+        Logger::log_eventf(Logger::WARN, "PRESSURIZATION is imminent");
+        return State::PRESSURIZATION;
     }
+
     return currentState;
 }
 
-State AvState::fromReady(DataDump const &dump)
+void inline reset_pressurization(MovingAverage &avg_lox, MovingAverage &avg_fuel, uint32_t &start_time)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_IGNITION)
-    {
-        Logger::log_eventf("FSM transition READY->THRUST_SEQUENCE");
-        return State::THRUSTSEQUENCE;
-    }
-    return currentState;
+    avg_lox.reset();
+    avg_fuel.reset();
+    start_time = 0;
 }
 
-State AvState::fromThrustSequence(DataDump const &dump)
-{
-    if (dump.telemetry_cmd.id== CMD_ID::AV_CMD_ABORT)
-    {
-        Logger::log_eventf("FSM transition THRUST_SEQUENCE->ERROR_FLIGHT");
-        return State::ERRORFLIGHT;
-    }
-    else if (dump.event.ignition_failed)
-    {
-        Logger::log_eventf("FSM transition THRUST_SEQUENCE->ARMED");
-        return State::ARMED;
-    }
-    // If the engine is properly ignited and a liftoff has been detected we go to LIFTOFF state
-    else if (dump.nav.accel.z > ACCEL_ZERO && dump.nav.altitude > ALTITUDE_ZERO && dump.event.ignited)
-    {
-        Logger::log_eventf("FSM transition THRUST_SEQUENCE->LIFTOFF");
-        //TODO: for VSFT must be abort
-        return State::LIFTOFF;
-    }
-    return currentState;
-}
-
-State AvState::fromLiftoff(DataDump const &dump)
+State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
 {
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition LOFTOFF->ERROR_FLIGHT");
-        return State::ERRORFLIGHT;
+        Logger::log_eventf("FSM transition PRESSURIZED->ABORT_ON_GROUND");
+        reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+        return State::ABORT_ON_GROUND;
     }
-    // If the altitude threashold is cleared we go to the ASCENT state
-    else if (dump.nav.altitude > ALTITUDE_THRESHOLD && dump.nav.speed.z >= SPEED_MIN_ASCENT && dump.nav.accel.z > ACCEL_ZERO)
+
+    // advance timer
+    pressurization_start_time += delta_ms;
+
+    // update moving averages
+    if (-10 <= dump.prop.LOX_pressure && dump.prop.LOX_pressure <= 1000) {
+        pressure_lox_avg.addSample(dump.prop.LOX_pressure);
+    }
+    if (-10 <= dump.prop.fuel_pressure && dump.prop.fuel_pressure <= 1000) {
+        pressure_fuel_avg.addSample(dump.prop.fuel_pressure);
+    }
+
+    const float fuel_avg = pressure_fuel_avg.getAverage();
+    const float lox_avg = pressure_lox_avg.getAverage();
+
+    // allow a short grace period after entering this state before triggering overpressure aborts
+    if (pressurization_start_time > OVERPRESSURE_GRACE_MS)
     {
-        Logger::log_eventf("FSM transition LIFTOFF->ASCENT");
-        return State::ASCENT;
+        if (fuel_avg > PRESSURIZATION_CHECK_PRESSURE || lox_avg > PRESSURIZATION_CHECK_PRESSURE)
+        {
+            reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+            Logger::log_eventf(
+                    Logger::FATAL,
+                    "Tank overpressure detected! Fuel: %.2f / LOX: %.2f. ",
+                    fuel_avg, lox_avg);
+            Logger::log_eventf("FSM transition PRESSURIZED->ABORT_ON_GROUND");
+            return State::ABORT_ON_GROUND;
+        }
     }
+
+    // success path once we've waited long enough
+    Logger::log_eventf("pressurization_elapsed: %u", pressurization_start_time);
+    Logger::log_eventf("Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_LAUNCH )
+    {
+        if (fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
+            lox_avg <= PRESSURIZATION_CHECK_PRESSURE) {
+            reset_pressurization(pressure_lox_avg, pressure_fuel_avg, pressurization_start_time);
+            Logger::log_eventf("Pressurization successful");
+            Logger::log_eventf("FSM transition PRESSURIZATION->IGNITION");
+            Logger::log_eventf(Logger::WARN, "IGNITION is imminent");
+            return State::IGNITION;
+        }
+    }
+
     return currentState;
 }
 
-State AvState::fromAscent(DataDump const &dump)
+void inline reset_ignition_timers(uint32_t &timer_accel, uint32_t &timer_liftoff_timeout, uint32_t &timer_burn_timeout)
 {
-    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    timer_accel = 0;
+    timer_liftoff_timeout = 0;
+    timer_burn_timeout = 0;
+}
+
+State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
+{
+    timer_liftoff_timeout += delta_ms;
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition ASCENT->ERROR_FLIGHT");
-        return State::ERRORFLIGHT;
+        Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
+        reset_ignition_timers(timer_accel, timer_liftoff_timeout, timer_burn_timeout);
+        return State::ABORT_ON_GROUND;
     }
-    else if (dump.nav.speed.z < SPEED_ZERO)
+
+    
+    if (0/*dump.nav.accel.x > ACCEL_LIFTOFF*/)
+    {
+        timer_accel += delta_ms;
+    }
+    else
+    {
+        timer_accel = 0;
+    }
+    if (timer_accel > ACCEL_LIFTOFF_DURATION_MS)
+    {
+        Logger::log_eventf(Logger::WARN, "Vertical acceleration detected. ABORTING");
+        Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
+    }
+    
+
+    if (dump.event.ignited) {
+        Logger::log_eventf("FSM transition IGNITION->BURN");
+        return State::BURN;
+    }
+
+    else if (dump.event.ignition_failed)
+    {
+        reset_ignition_timers(timer_accel, timer_liftoff_timeout, timer_burn_timeout);
+        Logger::log_eventf(Logger::WARN, "BURN SEQUENCE ABORTION");
+#if (ABORT_FLIGHT_EN)
+        Logger::log_eventf("FSM transition IGNITION->ABORT_IN_FLIGHT");
+        return State::ABORT_IN_FLIGHT;
+#else
+        Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
+#endif
+    }
+
+    return currentState;
+}
+
+State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
+{
+    timer_burn_timeout += delta_ms;
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
+    {
+#if (ABORT_FLIGHT_EN)
+        Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
+        return State::ABORT_IN_FLIGHT;
+#else
+        Logger::log_eventf("FSM transition BURN->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
+#endif
+    }
+    // If ECO is confirmed we go to the ASCENT state
+    // New condition, after a certain burn time, we force the transition
+    if (dump.event.engine_cut_off || timer_burn_timeout > BURN_MAX_DURATION_MS)
+    {
+        Logger::log_eventf("FSM transition BURN->ASCENT");
+        return State::ASCENT;
+    }
+    
+    return currentState;
+}
+
+State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
+{
+    Logger::log_eventf("ASCENT elapsed: %u", ascent_elapsed);
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
+    {
+#if (ABORT_FLIGHT_EN)
+        Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
+        return State::ABORT_IN_FLIGHT;
+#else
+        Logger::log_eventf("FSM transition BURN->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
+#endif
+    }
+    //TODO: better apogee detection
+    else if (0/*dump.nav.speed.z < SPEED_ZERO*/ || ascent_elapsed > ASCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
         return State::DESCENT;
     }
+    ascent_elapsed += delta_ms;
     return currentState;
 }
 
-State AvState::fromDescent(DataDump const &dump)
+State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
 {
-    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT || dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_MANUAL_DEPLOY)
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
-        Logger::log_eventf("FSM transition DESCENT->ERROR_FLIGHT");
-        return State::ERRORFLIGHT;
+#if (ABORT_FLIGHT_EN)
+        Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
+        return State::ABORT_IN_FLIGHT;
+#else
+        Logger::log_eventf("FSM transition BURN->ABORT_ON_GROUND");
+        return State::ABORT_ON_GROUND;
+#endif
     }
-    else if (dump.nav.speed.norm() <= SPEED_ZERO && dump.depressurised())
+    //TODO:probably a safety against an exactly zero speed apogee detection like a timer of 200ms
+    else if (dump.nav.speed.norm() <= SPEED_ZERO && descent_elapsed > 180e3)
     {
         Logger::log_eventf("FSM transition DESCENT->LANDED");
         return State::LANDED;
     }
+
+    Logger::log_eventf("DESCENT elapsed: %u", descent_elapsed);
+    descent_elapsed += delta_ms;
     return currentState;
 }
 
-State AvState::fromLanded(DataDump const &dump) {
-    return currentState;
-}
-
-State AvState::fromErrorGround(DataDump const &dump)
+State AvState::from_landed(DataDump const &dump, uint32_t delta_ms)
 {
-    //TODO: add pressure verification
-    if (dump.telemetry_cmd.id ==  CMD_ID::AV_CMD_RECOVER && dump.depressurised())
+    return currentState;
+}
+
+State AvState::from_abort_ground(DataDump const &dump, uint32_t delta_ms)
+{
+    if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_RECOVER)
     {
-        Logger::log_eventf("FSM transition ERROR_GROUND->INIT");
+        Logger::log_eventf(Logger::WARN, "RECOVER command received, resetting flight variables");
+        reset_flight();
+        Logger::log_eventf("FSM transition ABORT_ON_GROUND->INIT");
         return State::INIT;
     }
-    return  currentState;
+
+    return currentState;
 }
 
-State AvState::fromErrorFlight(DataDump const &dump)
+State AvState::from_abort_flight(DataDump const &dump, uint32_t delta_ms)
 {
     return currentState;
 }
 
-void AvState::update(const DataDump &dump)
+void AvState::update(const DataDump &dump, uint32_t delta_ms)
 {
     switch (currentState)
     {
-        case State::INIT:
-            currentState = fromInit(dump);
-            break;
-        case State::LANDED:
-            currentState = fromLanded(dump);
-            break;
-        case State::DESCENT:
-            currentState = fromDescent(dump);
-            break;
-        case State::READY:
-            currentState = fromReady(dump);
-            break;
-        case State::LIFTOFF:
-            currentState = fromLiftoff(dump);
-            break;
-        case State::ASCENT:
-            currentState = fromAscent(dump);
-            break;
-        case State::CALIBRATION:
-            currentState = fromCalibration(dump);
-            break;
-        case State::ERRORGROUND:
-            currentState = fromErrorGround(dump);
-            break;
-        case State::ERRORFLIGHT:
-            currentState = fromErrorFlight(dump);
-            break;
-        case State::THRUSTSEQUENCE:
-            currentState = fromThrustSequence(dump);
-            break;
-        case State::MANUAL:
-            currentState = fromManual(dump);
-            break;
-        case State::ARMED:
-            currentState = fromArmed(dump);
-            break;
-        default:
-            currentState = State::ERRORFLIGHT;
+    case State::INIT:
+        currentState = from_init(dump, delta_ms);
+        break;
+    case State::CALIBRATION:
+        currentState = from_calibration(dump, delta_ms);
+        break;
+    case State::FILLING:
+        currentState = from_filling(dump, delta_ms);
+        break;
+    case State::ARMED:
+        currentState = from_armed(dump, delta_ms);
+        break;
+    case State::PRESSURIZATION:
+        currentState = from_pressurization(dump, delta_ms);
+        break;
+    case State::ABORT_ON_GROUND:
+        currentState = from_abort_ground(dump, delta_ms);
+        break;
+    case State::IGNITION:
+        currentState = from_ignition(dump, delta_ms);
+        break;
+    case State::BURN:
+        currentState = from_burn(dump, delta_ms);
+        break;
+    case State::ASCENT:
+        currentState = from_ascent(dump, delta_ms);
+        break;
+    case State::DESCENT:
+        currentState = from_descent(dump, delta_ms);
+        break;
+    case State::LANDED:
+        currentState = from_landed(dump, delta_ms);
+        break;
+    case State::ABORT_IN_FLIGHT:
+        currentState = from_abort_flight(dump, delta_ms);
+        break;
+    default:
+        currentState = State::ABORT_ON_GROUND;
     }
+    Data::get_instance().write(Data::AV_STATE, &currentState);
 }
 std::string AvState::stateToString(State state)
 {
     switch (state)
     {
-        case State::INIT:
-            return "INIT";
-            break;
-        case State::LANDED:
-            return "LANDED";
-            break;
-        case State::DESCENT:
-            return "DESCENT";
-            break;
-        case State::ASCENT:
-            return "ASCENT";
-            break;
-        case State::CALIBRATION:
-            return "CALIBRATION";
-            break;
-        case State::ERRORGROUND:
-            return "ERRORGROUND";
-            break;
-        case State::ERRORFLIGHT:
-            return "ERRORFLIGHT";
-            break;
-        case State::THRUSTSEQUENCE:
-            return "THRUSTSEQUENCE";
-            break;
-        case State::MANUAL:
-            return "MANUAL";
-            break;
-        case State::ARMED:
-            return "ARMED";
-            break;
-        case State::READY:
-            return "READY";
-            break;
-        case State::LIFTOFF:
-            return "LIFTOFF";
-            break;
-        default:
-            return "ERROR";
-            break;
+    case State::INIT:
+        return "INIT";
+        break;
+    case State::CALIBRATION:
+        return "CALIBRATION";
+        break;
+    case State::FILLING:
+        return "FILLING";
+        break;
+    case State::ARMED:
+        return "ARMED";
+        break;
+    case State::PRESSURIZATION:
+        return "PRESSURIZATION";
+        break;
+    case State::ABORT_ON_GROUND:
+        return "ABORT_ON_GROUND";
+        break;
+    case State::IGNITION:
+        return "IGNITION";
+        break;
+    case State::BURN:
+        return "BURN";
+        break;
+    case State::ASCENT:
+        return "ASCENT";
+        break;
+    case State::DESCENT:
+        return "DESCENT";
+        break;
+    case State::LANDED:
+        return "LANDED";
+        break;
+    case State::ABORT_IN_FLIGHT:
+        return "ABORT_IN_FLIGHT";
+        break;
+    default:
+        return "N/A";
+        break;
     }
 }
-
-
-
