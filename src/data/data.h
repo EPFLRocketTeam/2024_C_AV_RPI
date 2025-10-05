@@ -184,6 +184,7 @@ struct Event {
 struct DataDump {
     State av_state;
     uint32_t av_timestamp;
+    uint32_t av_delta_ms;
     UplinkCmd telemetry_cmd;
     float av_fc_temp;
     float av_amb_temp;
@@ -210,6 +211,7 @@ public:
     enum GoatReg {
         AV_STATE = 0x00,
         AV_TIMESTAMP, // milliseconds since init
+        AV_DELTA_MS, // delta time in milliseconds
 
         /* Telemetry command */
         TLM_CMD_ID,
@@ -351,6 +353,7 @@ private:
 
     State av_state;
     uint32_t av_timestamp;
+    uint32_t av_delta_ms;
     UplinkCmd telemetry_cmd;
     float av_fc_temp;
     float av_amb_temp;
