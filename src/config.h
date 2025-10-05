@@ -7,7 +7,8 @@
 
 /* Frequencies */
 #define MAIN_LOOP_MAX_FREQUENCY  100
-#define DATADUMP_FSYNC_FREQUENCY 50
+#define DATADUMP_FSYNC_INV_FREQUENCY 250
+#define EVENT_FSYNC_INV_FREQUENCY    500
 
 /* Logger */
 #define LOG_DUMP_DEFAULT_PATH   "/boot/av_log/dump_log.log"
