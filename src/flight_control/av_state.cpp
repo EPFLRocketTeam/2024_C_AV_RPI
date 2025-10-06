@@ -112,8 +112,7 @@ State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
 
     return currentState;
 }
-
-//TODO: should be in h_driver
+f
 void inline reset_pressurization(MovingAverage &avg_lox, MovingAverage &avg_fuel, uint32_t &start_time)
 {
     avg_lox.reset();
@@ -194,8 +193,8 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
         return State::ABORT_ON_GROUND;
     }
 
-    
-    if (0/*dump.nav.accel.x > ACCEL_LIFTOFF*/)
+    //TODO: more than g
+    if (dump.nav.accel.x > ACCEL_LIFTOFF)
     {
         timer_accel += delta_ms;
     }
@@ -203,30 +202,23 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     {
         timer_accel = 0;
     }
-    if (timer_accel > ACCEL_LIFTOFF_DURATION_MS)
+    //TODO: MUST BE 1 second
+    if (timer_accel > ACCEL_LIFTOFF_DURATION_MS || dump.event.ignited)
     {
-        Logger::log_eventf(Logger::WARN, "Vertical acceleration detected. ABORTING");
+        Logger::log_eventf(Logger::WARN, "Vertical acceleration detected. WE are burning");
         Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
-        return State::ABORT_ON_GROUND;
-    }
-    
-
-    if (dump.event.ignited) {
-        Logger::log_eventf("FSM transition IGNITION->BURN");
         return State::BURN;
     }
+    
 
     else if (dump.event.ignition_failed)
     {
         reset_ignition_timers(timer_accel, timer_liftoff_timeout, timer_burn_timeout);
         Logger::log_eventf(Logger::WARN, "BURN SEQUENCE ABORTION");
-#if (ABORT_FLIGHT_EN)
-        Logger::log_eventf("FSM transition IGNITION->ABORT_IN_FLIGHT");
-        return State::ABORT_IN_FLIGHT;
-#else
+
         Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
-#endif
+
     }
 
     return currentState;
@@ -264,6 +256,8 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
     if(dump.nav.vertical_speed < 0.0){
         apogee_counter++;
         Logger::log_eventf("Negative speed detected = %f for the %d consecutive time", dump.nav.vertical_speed,apogee_counter);
+    }else{
+        apogee_counter=0;
     }
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
@@ -276,11 +270,12 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 #endif
     }
     //TODO: better apogee detection
-    else if (apogee_counter>=4 || flight_elapsed > ASCENT_MAX_DURATION_MS)
+    else if (apogee_counter>=10 || flight_elapsed > ASCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
         return State::DESCENT;
     }
+
     flight_elapsed += delta_ms;
     return currentState;
 }
