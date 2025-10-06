@@ -17,7 +17,12 @@
 #include "telecom.h"
 #include "intranet_commands.h"
 
-#define PRB_ERROR_LIMIT 4
+#define PRB_ERROR_LIMIT 100
+
+#define SLEEP_MS_DEFAULT 100
+#define SLEEP_MS_VALID (SLEEP_MS_DEFAULT>>1)
+#define SLEEP_MS_NEXT_MODULE (SLEEP_MS_DEFAULT*10)
+#define MS_TO_S 1000
 
 int main() {
     if (!Logger::init()) {
@@ -35,7 +40,7 @@ int main() {
     Sensors sensors;
     sensors.init_sensors();
     
-    AvTimer::sleep(100);
+    AvTimer::sleep(SLEEP_MS);
 
     // HDrivers
     TriggerBoard trigger_board;
@@ -43,7 +48,7 @@ int main() {
     DPR dpr_ethanol(AV_NET_ADDR_DPR_ETH);
     DPR dpr_lox(AV_NET_ADDR_DPR_LOX);
 
-    AvTimer::sleep(100);
+    AvTimer::sleep(SLEEP_MS_DEFAULT);
 
     // Telecom
     Telecom telecom;
@@ -59,27 +64,28 @@ int main() {
         Logger::log_eventf("%s: %b", u.first.c_str(), u.second);
         
         Buzzer::enable();
-        AvTimer::sleep(100);
+        AvTimer::sleep(SLEEP_MS_DEFAULT);
         Buzzer::disable();
-        AvTimer::sleep(500);
+        AvTimer::sleep(SLEEP_MS_DEFAULT*5);
         
         if (u.second) {
             for (int i(0); i < 3; ++i) {
                 
                 Buzzer::toggle();
-                AvTimer::sleep(50);
+                AvTimer::sleep(SLEEP_MS_VALID);
                 Buzzer::toggle();
-                AvTimer::sleep(50);
+                AvTimer::sleep(SLEEP_MS_VALID);
                 
                 }
         }
-        AvTimer::sleep(1000);
+        AvTimer::sleep(SLEEP_MS_NEXT_MODULE);
     }
 
-    const uint32_t inv_freq = 1000 * (float)(1.0 / MAIN_LOOP_MAX_FREQUENCY);
+    const uint32_t inv_freq = MS_TO_S * (float)(1.0 / MAIN_LOOP_MAX_FREQUENCY);
     uint32_t now_ms(AvTimer::tick());
     uint32_t old_ms(0);
     uint32_t delta_ms(0);
+    uint32_t prop_cons_error_count(0);
     while (1) {
         old_ms = now_ms;
         now_ms = AvTimer::tick();
@@ -101,9 +107,16 @@ int main() {
         // Execute PRB
         try {
             prop_board.check_policy(dump, delta_ms);
-        }catch(PRBoardException& e)
+            // Reset error counter on success
+            prop_cons_error_count = 0;
+        }
+        catch (PRBoardException &e)
         {
-            Logger::log_eventf(Logger::ERROR, "%s", e.what());
+            prop_cons_error_count++;
+            if (prop_cons_error_count >= PRB_ERROR_LIMIT)
+            {
+                Logger::log_eventf(Logger::ERROR, "%s", e.what());
+            }
         }
         // Execute DPRs
         try {
