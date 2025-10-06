@@ -138,7 +138,7 @@ NavigationData::NavigationData()
 :   time{0, 0, 0, 0, 0, 0, 0},
     position{0, 0, 0},
     gnss_speed(0),
-    speed{0, 0, 0},
+    vertical_speed{0, 0, 0},
     accel{0, 0, 0},
     attitude{0, 0, 0},
     course(0),
@@ -426,13 +426,11 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_KALMAN_DATA:
             const NavigationData temp = *reinterpret_cast<NavigationData*>(data);
             // only update the data given by the kalman filter
-            nav.position_kalman = temp.position_kalman;
-            nav.speed = temp.speed;
-            nav.accel = temp.accel;
-            nav.attitude = temp.attitude;
-            nav.altitude = temp.altitude;
-            nav.baro = temp.baro;
+            //!! kalmann not not updatting
             break;
+            case NAV_VERTICAL_SPEED:
+                nav.vertical_speed = *reinterpret_cast<float*>(data);
+                break;
     }
 }
 

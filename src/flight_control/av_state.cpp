@@ -32,7 +32,7 @@ void AvState::reset_flight() {
     pressurization_start_time = 0;
     timer_accel = 0;
     timer_liftoff_timeout = 0;
-    ascent_elapsed = 0;
+    flight_elapsed = 0;
     descent_elapsed = 0;
     accel_g_offset = 0;
     this->currentState = State::INIT;
@@ -234,6 +234,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
 
 State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 {
+    Logger::log_eventf("FLIGHT elapsed: %u", flight_elapsed);
     timer_burn_timeout += delta_ms;
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
@@ -252,18 +253,17 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
         Logger::log_eventf("FSM transition BURN->ASCENT");
         return State::ASCENT;
     }
-    ascent_elapsed += delta_ms;
+    flight_elapsed += delta_ms;
     
     return currentState;
 }
 
 State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
-    Logger::log_eventf("ASCENT elapsed: %u", ascent_elapsed);
-    if(dump.nav.speed < 0.0){
-        
+    Logger::log_eventf("FLIGHT elapsed: %u", flight_elapsed);
+    if(dump.nav.vertical_speed < 0.0){
         apogee_counter++;
-        Logger::log_eventf("Negative speed detected = %f for the %d consecutive time", dump.nav.speed,apogee_counter);
+        Logger::log_eventf("Negative speed detected = %f for the %d consecutive time", dump.nav.vertical_speed,apogee_counter);
     }
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
@@ -276,12 +276,12 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 #endif
     }
     //TODO: better apogee detection
-    else if (apogee_counter>=4 || ascent_elapsed > ASCENT_MAX_DURATION_MS)
+    else if (apogee_counter>=4 || flight_elapsed > ASCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
         return State::DESCENT;
     }
-    ascent_elapsed += delta_ms;
+    flight_elapsed += delta_ms;
     return currentState;
 }
 
@@ -298,7 +298,7 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
 #endif
     }
     //TODO:probably a safety against an exactly zero speed apogee detection like a timer of 200ms
-    else if (dump.nav.speed.norm() <= SPEED_ZERO && descent_elapsed > 180e3)
+    else if (dump.nav.gnss_speed <= SPEED_ZERO && descent_elapsed > DESCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition DESCENT->LANDED");
         return State::LANDED;

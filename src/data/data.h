@@ -160,7 +160,7 @@ struct NavigationData {
     double    gnss_speed;
     //referentiel earth
     Vector3   position_kalman;
-    float   speed;
+    float   vertical_speed;
     //ref of accel TBD !!!!
     Vector3   accel;
     Vector3   attitude; // Quaternion vector q = {w, x, y, z} -> {x,y,z}
@@ -291,7 +291,7 @@ public:
       
         NAV_KALMAN_DATA,
 
-        NAV_SPEED, //SPEED calculated with barometer
+        NAV_VERTICAL_SPEED, //SPEED calculated with barometer
 
         /* Propulsion sensors */
         PR_SENSOR_P_NCO_ETH, // N2 Pressure from DPR_ETH

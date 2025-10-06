@@ -87,7 +87,7 @@ void Sensors::write_speed(const DataDump& dump) {
     buffer_delta_ms.push_back(dump.delta_ms);
 
     auto speed = (altitude_avg1.getAverage() - altitude_avg2.getAverage()) / (total_delta_ms  * 0.001); // m/s
-    Data::get_instance().write(Data::NAV_SPEED, &speed);
+    Data::get_instance().write(Data::NAV_VERTICAL_SPEED, &speed);
 
     
 }

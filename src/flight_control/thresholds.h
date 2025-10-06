@@ -21,6 +21,7 @@
 #define ALTITUDE_THRESHOLD        300
 #define SPEED_ZERO                0.1
 #define ASCENT_MAX_DURATION_MS    30000
+#define DESCENT_MAX_DURATION_MS    180e3
 #define ACCEL_ZERO                0.1
 #define ACCEL_LIFTOFF             0.1 * G_GRAVITY_CST
 #define ACCEL_LIFTOFF_DURATION_MS 500

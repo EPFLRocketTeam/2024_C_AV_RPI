@@ -53,7 +53,7 @@ private:
     uint32_t timer_accel;
     uint32_t timer_liftoff_timeout;
     uint32_t timer_burn_timeout;
-    uint32_t ascent_elapsed;
+    uint32_t flight_elapsed;
     uint32_t descent_elapsed;
     float accel_g_offset;
     uint8_t apogee_counter;
