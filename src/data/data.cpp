@@ -3,7 +3,7 @@
 #include "data.h"
 #include "thresholds.h"
 #include <stdexcept>
-
+#include "logger.h"
 
 MovingAverage::MovingAverage(size_t power) : maxSize(power), sum(0.0f)
 {
@@ -39,9 +39,7 @@ void MovingAverage::reset()
 }
 
 MovingWeightedAverage::MovingWeightedAverage(std::vector<float> weights)
-: maxSize(weights.size()), sum(0.0f), weights(weights)
-{
-    samples.reserve(maxSize);
+: maxSize(weights.size()), sum(0.0){
     if (weights.empty()) {
         throw std::invalid_argument("Weights vector cannot be empty");
     } else {
@@ -51,7 +49,7 @@ MovingWeightedAverage::MovingWeightedAverage(std::vector<float> weights)
             totalWeight += w;
         }
         for (float &w : weights) {
-            w /= totalWeight;
+           this->weights.push_back(w / totalWeight);
         }
     }
 }
@@ -76,10 +74,13 @@ float MovingWeightedAverage::getAverage() const
     float weightedSum = 0.0f;
     size_t weightCount = weights.size();
     size_t sampleCount = samples.size();
+    
+    Logger::log_eventf( ": weights: %d | samples: %d", weights.size(),samples.size());
     for (size_t i = 0; i < sampleCount; ++i)
     {
         // Apply weights in reverse order to give more importance to recent samples
-        weightedSum += samples[i] * weights[weightCount - sampleCount + i];
+   
+        weightedSum += samples[i] * weights[i];
     }
     return weightedSum;
 }
@@ -138,7 +139,7 @@ NavigationData::NavigationData()
 :   time{0, 0, 0, 0, 0, 0, 0},
     position{0, 0, 0},
     gnss_speed(0),
-    vertical_speed{0, 0, 0},
+    vertical_speed(0.0),
     accel{0, 0, 0},
     attitude{0, 0, 0},
     course(0),
@@ -423,14 +424,14 @@ void Data::write(GoatReg reg, void* data) {
             break;
             //TODO: add event apogee reached ?
 
-        case NAV_KALMAN_DATA:
+        case NAV_KALMAN_DATA:{
             const NavigationData temp = *reinterpret_cast<NavigationData*>(data);
             // only update the data given by the kalman filter
             //!! kalmann not not updatting
-            break;
-            case NAV_VERTICAL_SPEED:
-                nav.vertical_speed = *reinterpret_cast<float*>(data);
-                break;
+            break;}
+        case NAV_VERTICAL_SPEED:
+             nav.vertical_speed = *reinterpret_cast<float*>(data);
+             break;
     }
 }
 

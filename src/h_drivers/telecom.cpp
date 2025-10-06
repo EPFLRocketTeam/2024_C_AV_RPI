@@ -233,7 +233,7 @@ void Telecom::send_telemetry() {
     packet.gnss_lon = data.nav.position.lng;
     packet.gnss_lat = data.nav.position.lat;
     packet.gnss_alt = data.nav.position.alt;
-    packet.gnss_vertical_speed = data.nav.speed.norm();
+    packet.gnss_vertical_speed = data.nav.gnss_speed;
     
     packet.N2_pressure = data.prop.N2_pressure;
     packet.N2_temp = data.prop.N2_temperature;

@@ -160,6 +160,7 @@ struct NavigationData {
     double    gnss_speed;
     //referentiel earth
     Vector3   position_kalman;
+    Vector3 velocity_kalman;
     float   vertical_speed;
     //ref of accel TBD !!!!
     Vector3   accel;

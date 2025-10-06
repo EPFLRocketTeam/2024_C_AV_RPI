@@ -31,7 +31,7 @@ int main() {
     }
 
     ConfigManager::initConfig("./config.conf");
-    AvTimer::sleep(100);
+    AvTimer::sleep(SLEEP_MS_DEFAULT);
 
     AvState fsm;
     State fsm_state(fsm.getCurrentState());
@@ -40,7 +40,7 @@ int main() {
     Sensors sensors;
     sensors.init_sensors();
     
-    AvTimer::sleep(SLEEP_MS);
+    AvTimer::sleep(SLEEP_MS_DEFAULT);
 
     // HDrivers
     TriggerBoard trigger_board;

@@ -19,7 +19,7 @@
 #define ALTITUDE_ZERO             10
 #define ALTITUDE_MAX              4000
 #define ALTITUDE_THRESHOLD        300
-#define SPEED_ZERO                0.1
+#define SPEED_ZERO                -0.5
 #define ASCENT_MAX_DURATION_MS    30000
 #define DESCENT_MAX_DURATION_MS    180e3
 #define ACCEL_ZERO                0.1

@@ -4,6 +4,7 @@
 #include "data.h"
 #include "logger.h"
 #include "av_timer.h"
+#include "buzzer.h"
 #include <iostream>
 
 
@@ -18,6 +19,7 @@ AvState::AvState()
 
 {
     reset_flight();
+    this->currentState = State::ASCENT;
 }
 
 // Destructor
@@ -112,7 +114,7 @@ State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
 
     return currentState;
 }
-f
+
 void inline reset_pressurization(MovingAverage &avg_lox, MovingAverage &avg_fuel, uint32_t &start_time)
 {
     avg_lox.reset();
@@ -253,10 +255,15 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
     Logger::log_eventf("FLIGHT elapsed: %u", flight_elapsed);
-    if(dump.nav.vertical_speed < 0.0){
+    if(dump.nav.vertical_speed < SPEED_ZERO){
         apogee_counter++;
+        Buzzer::enable();
+        AvTimer::sleep(25);
+        Buzzer::disable();
         Logger::log_eventf("Negative speed detected = %f for the %d consecutive time", dump.nav.vertical_speed,apogee_counter);
     }else{
+
+        Logger::log_eventf("Positive speed detected = %f for the %d consecutive time",dump.nav.vertical_speed);
         apogee_counter=0;
     }
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
@@ -273,6 +280,17 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
     else if (apogee_counter>=10 || flight_elapsed > ASCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
+        Buzzer::enable();
+        AvTimer::sleep(50);
+        Buzzer::disable();
+        AvTimer::sleep(50);
+        Buzzer::enable();
+        AvTimer::sleep(50);
+        Buzzer::disable();
+        AvTimer::sleep(50);
+        Buzzer::enable();
+        AvTimer::sleep(50);
+        Buzzer::disable();
         return State::DESCENT;
     }
 

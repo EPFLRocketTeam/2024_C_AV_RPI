@@ -1,4 +1,6 @@
 #include <iostream>
+#include <numeric>
+#include <cmath>
 #include "sensors.h"
 #include "av_timer.h"
 #include "INA228.h"
@@ -15,11 +17,11 @@
 #include "tmp1075_module.h"
 #define BUFFER_SIZE 16
 // from 1-64
-const std::vector<float> weights = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,
-    18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
+const std::vector<float> weights = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
 Sensors::Sensors():
-(altitude_avg1(weights)),
+altitude_avg1(weights),
  altitude_avg2(weights)
 /* :   kalman(INITIAL_COV_GYR_BIAS,
            INITIAL_COV_ACCEL_BIAS,
@@ -30,8 +32,6 @@ Sensors::Sensors():
            ACCEL_BIAS_COV,
            GPS_OBS_COV,
            ALT_OBS_COV) */ {
-            buffer_delta_ms.reserve(BUFFER_SIZE+1);
-            buffer_pressure.reserve(BUFFER_SIZE+1);
            }
 
 void Sensors::init_sensors () {
@@ -72,23 +72,25 @@ std::map<std::string, bool> Sensors::sensors_status () {
 }
 
 void Sensors::write_speed(const DataDump& dump) {
-    auto temp = (dump.sens.bmp.pressure + dump.sens.bmp_aux.pressure) * 0.5
-
+    float temp = 44330.0*(1.0 - pow(dump.sens.bmp_aux.pressure/101325.0,0.1903));
+    float speed = 0.0;
     altitude_avg1.addSample(temp);
     if (buffer_pressure.size() == BUFFER_SIZE) {
-       altitude_avg2.addSample(buffer_pressure[0]);
-         buffer_pressure.erase(buffer_pressure.begin());
-        auto total_delta_ms =  sum_of_elems = std::accumulate(buffer_delta_ms.begin(), buffer_delta_ms.end(), 0.0);
+        altitude_avg2.addSample(buffer_pressure[0]);
+        buffer_pressure.erase(buffer_pressure.begin());
         buffer_delta_ms.erase(buffer_delta_ms.begin());
     }
+    
+    Logger::log_eventf( ": altsize: %d | weightsize: %d", altitude_avg2.size(),weights.size());
+    if (altitude_avg2.size()==weights.size()) {
+        auto total_delta_ms  = std::accumulate(buffer_delta_ms.begin(), buffer_delta_ms.end(), 0.0);
+        speed = (altitude_avg2.getAverage() - altitude_avg1.getAverage()) / (total_delta_ms  * 0.001); // m/s
+    }
     buffer_pressure.push_back(temp);
-    //TODO!!!: add dump.delta_ms
-    buffer_delta_ms.push_back(dump.delta_ms);
+    buffer_delta_ms.push_back(dump.av_delta_ms);
 
-    auto speed = (altitude_avg1.getAverage() - altitude_avg2.getAverage()) / (total_delta_ms  * 0.001); // m/s
     Data::get_instance().write(Data::NAV_VERTICAL_SPEED, &speed);
 
-    
 }
 
 void Sensors::check_policy(const DataDump& dump, const uint32_t delta_ms) {
