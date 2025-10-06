@@ -252,6 +252,7 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
         Logger::log_eventf("FSM transition BURN->ASCENT");
         return State::ASCENT;
     }
+    ascent_elapsed += delta_ms;
     
     return currentState;
 }
