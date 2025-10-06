@@ -44,7 +44,7 @@ bool Logger::init(const std::string dump_path, const std::string event_path) {
     dump_fd = open(av_log_dump_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0777);
     event_fd = open(av_log_event_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0777);
     if (dump_fd == -1) {
-        // throw DataLoggerException("Could not open the dump file.\n");
+        //throw DataLoggerException("Could not open the dump file.\n");
         return false;
     }
     if (event_fd == -1) {
@@ -68,15 +68,16 @@ void Logger::log_dump(const DataDump& dump) {
     char* buffer = reinterpret_cast<char*>(&dump_copy);
     write(dump_fd, buffer, sizeof(DataDump));
     
-    counter++;
-
-    if (counter >= DATADUMP_FSYNC_FREQUENCY){
+    counter += Data::get_instance().get().av_delta_ms;
+    if (counter >= DATADUMP_FSYNC_INV_FREQUENCY){
         counter = 0;
         fsync(dump_fd);
     }
 }
 
 void Logger::log_event(const Severity lvl, const std::string event) {
+    static uint32_t counter(0);
+
     if (!DEBUG_LOG && lvl == Logger::DEBUG) {
         return;
     }
@@ -95,7 +96,12 @@ void Logger::log_event(const Severity lvl, const std::string event) {
     if (CONSOLE_LOG) {
         std::cout << timestamp << event_msg << "\n";
     }
-    fsync(event_fd);
+
+    counter += Data::get_instance().get().av_delta_ms;
+    if (counter >= EVENT_FSYNC_INV_FREQUENCY) {
+        counter = 0;
+        fsync(event_fd);
+    }
 }
 
 std::string Logger::get_dump_path() {

@@ -181,6 +181,9 @@ void Data::write(GoatReg reg, void* data) {
         case AV_TIMESTAMP:
             av_timestamp = *reinterpret_cast<uint32_t*>(data);
             break;
+        case AV_DELTA_MS:
+            av_delta_ms = *reinterpret_cast<uint32_t*>(data);
+            break;
         case TLM_CMD_ID:
             telemetry_cmd.id = *reinterpret_cast<uint8_t*>(data);
             break;
@@ -437,6 +440,7 @@ DataDump Data::get() const {
     return {
         av_state,
         av_timestamp,
+        av_delta_ms,
         telemetry_cmd,
         av_fc_temp,
         av_amb_temp,

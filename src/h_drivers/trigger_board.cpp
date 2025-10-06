@@ -270,7 +270,17 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
 
     if (!dump.event.seperated) {
         write_timestamp();
-
+        if (trigger_ms < 200) {
+            uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3);
+            write_pyros(order);
+            trigger_ms += delta_ms;
+        }else {
+            uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO3);
+            write_pyros(order);
+            bool separated(true);
+            Data::get_instance().write(Data::EVENT_SEPERATED, &separated);
+        }
+        /*
         // Send main pyro order to trigger the sep mech
         if (!pyro_main_fail) {
             if (trigger_ms < 400) {
@@ -309,6 +319,7 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
                 }
             }
         }
+        */
     }else {
         // After separation, write timestamp at 2Hz
         count_ms += delta_ms;

@@ -57,22 +57,23 @@ int main() {
     Logger::log_eventf("Verifying sensors status...");
     for (auto u : _mp) {
         Logger::log_eventf("%s: %b", u.first.c_str(), u.second);
-        /*
+        
         Buzzer::enable();
-        AvTimer::sleep(250);
+        AvTimer::sleep(100);
         Buzzer::disable();
-        AvTimer::sleep(750);
-        */
+        AvTimer::sleep(500);
+        
         if (u.second) {
-            for (int i(0); i < 5; ++i) {
-                /*
+            for (int i(0); i < 3; ++i) {
+                
                 Buzzer::toggle();
-                AvTimer::sleep(100);
+                AvTimer::sleep(50);
                 Buzzer::toggle();
-                AvTimer::sleep(100);
-                */
+                AvTimer::sleep(50);
+                
                 }
         }
+        AvTimer::sleep(1000);
     }
 
     const uint32_t inv_freq = 1000 * (float)(1.0 / MAIN_LOOP_MAX_FREQUENCY);
@@ -86,6 +87,7 @@ int main() {
 
         // Write timestamp and retreive GOAT object 
         Data::get_instance().write(Data::AV_TIMESTAMP, &now_ms);
+        Data::get_instance().write(Data::AV_DELTA_MS, &delta_ms);
         DataDump dump = Data::get_instance().get();        
         // Data logging
         Logger::log_dump(dump);
@@ -122,13 +124,13 @@ int main() {
         Data::get_instance().write(Data::PR_SENSOR_P_NCO, &copv_pressure);
 
         // Execute TRB
-        /*
+        
         try {
             trigger_board.check_policy(dump, delta_ms);
         }catch(TriggerBoardException& e) {
             Logger::log_eventf(Logger::ERROR, "%s", e.what());
         }
-        */
+        
 
 
         // Execute telemetry
