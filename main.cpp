@@ -112,10 +112,15 @@ int main() {
         }
         catch (PRBoardException &e)
         {
-            prop_cons_error_count++;
+            
             if (prop_cons_error_count >= PRB_ERROR_LIMIT)
             {
                 Logger::log_eventf(Logger::ERROR, "%s", e.what());
+            }
+            else
+            {
+                Logger::log_eventf(Logger::DEBUG, "PRB communication error %d/%d", prop_cons_error_count, PRB_ERROR_LIMIT);
+                prop_cons_error_count++;
             }
         }
         // Execute DPRs
