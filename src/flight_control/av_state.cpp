@@ -6,38 +6,6 @@
 #include "av_timer.h"
 #include <iostream>
 
-MovingAverage::MovingAverage(size_t power) : maxSize(power), sum(0.0f)
-{
-    samples.reserve(1 << power);
-}
-
-void MovingAverage::addSample(float sample)
-{
-    if (samples.size() >= (unsigned)(1 << maxSize))
-    {
-        sum -= samples.front();
-        samples.erase(samples.begin());
-    }
-
-    samples.push_back(sample);
-    sum += sample;
-}
-
-float MovingAverage::getAverage() const
-{
-    if (samples.empty())
-    {
-        return 0.0f; // or handle empty case as needed
-    }
-    // Could opti if we remove division by having a fix size TBD
-    return sum / samples.size();
-}
-
-void MovingAverage::reset()
-{
-    samples.clear();
-    sum = 0.0f;
-}
 
 
 ///////////////////////////////
@@ -145,6 +113,7 @@ State AvState::from_armed(DataDump const &dump, uint32_t delta_ms)
     return currentState;
 }
 
+//TODO: should be in h_driver
 void inline reset_pressurization(MovingAverage &avg_lox, MovingAverage &avg_fuel, uint32_t &start_time)
 {
     avg_lox.reset();
@@ -290,6 +259,11 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
     Logger::log_eventf("ASCENT elapsed: %u", ascent_elapsed);
+    if(dump.nav.speed < 0.0){
+        
+        apogee_counter++;
+        Logger::log_eventf("Negative speed detected = %f for the %d consecutive time", dump.nav.speed,apogee_counter);
+    }
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
 #if (ABORT_FLIGHT_EN)
@@ -301,7 +275,7 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 #endif
     }
     //TODO: better apogee detection
-    else if (0/*dump.nav.speed.z < SPEED_ZERO*/ || ascent_elapsed > ASCENT_MAX_DURATION_MS)
+    else if (apogee_counter>=4 || ascent_elapsed > ASCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
         return State::DESCENT;

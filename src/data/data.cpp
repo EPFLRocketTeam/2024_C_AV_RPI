@@ -2,6 +2,93 @@
 
 #include "data.h"
 #include "thresholds.h"
+#include <stdexcept>
+
+
+MovingAverage::MovingAverage(size_t power) : maxSize(power), sum(0.0f)
+{
+    samples.reserve(1 << power);
+}
+
+void MovingAverage::addSample(float sample)
+{
+    if (samples.size() >= (unsigned)(1 << maxSize))
+    {
+        sum -= samples.front();
+        samples.erase(samples.begin());
+    }
+
+    samples.push_back(sample);
+    sum += sample;
+}
+
+float MovingAverage::getAverage() const
+{
+    if (samples.empty())
+    {
+        return 0.0f; // or handle empty case as needed
+    }
+    // Could opti if we remove division by having a fix size TBD
+    return sum / samples.size();
+}
+
+void MovingAverage::reset()
+{
+    samples.clear();
+    sum = 0.0f;
+}
+
+MovingWeightedAverage::MovingWeightedAverage(std::vector<float> weights)
+: maxSize(weights.size()), sum(0.0f), weights(weights)
+{
+    samples.reserve(maxSize);
+    if (weights.empty()) {
+        throw std::invalid_argument("Weights vector cannot be empty");
+    } else {
+        // Normalize weights
+        float totalWeight = 0.0f;
+        for (float w : weights) {
+            totalWeight += w;
+        }
+        for (float &w : weights) {
+            w /= totalWeight;
+        }
+    }
+}
+
+void MovingWeightedAverage::addSample(float sample)
+{
+    if (samples.size() >= maxSize)
+    {
+        samples.erase(samples.begin());
+    }
+
+    samples.push_back(sample);
+}
+
+float MovingWeightedAverage::getAverage() const
+{
+    if (samples.empty())
+    {
+        return 0.0f; // or handle empty case as needed
+    }
+
+    float weightedSum = 0.0f;
+    size_t weightCount = weights.size();
+    size_t sampleCount = samples.size();
+    for (size_t i = 0; i < sampleCount; ++i)
+    {
+        // Apply weights in reverse order to give more importance to recent samples
+        weightedSum += samples[i] * weights[weightCount - sampleCount + i];
+    }
+    return weightedSum;
+}
+
+void MovingWeightedAverage::reset()
+{
+    samples.clear();
+    sum = 0.0f;
+}
 
 NavSensors::NavSensors()
 :   adxl{0, 0, 0},
@@ -331,6 +418,7 @@ void Data::write(GoatReg reg, void* data) {
         case EVENT_CHUTE_UNREEFED:
             event.chute_unreefed = *reinterpret_cast<bool*>(data);
             break;
+            //TODO: add event apogee reached ?
 
         case NAV_KALMAN_DATA:
             const NavigationData temp = *reinterpret_cast<NavigationData*>(data);

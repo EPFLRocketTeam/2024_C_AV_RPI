@@ -7,6 +7,7 @@
 #include "bmp3_defs.h"
 #include "adxl375.h"
 #include "math.h"
+#include <vector>
 
 enum class State
 {
@@ -23,6 +24,35 @@ enum class State
     DESCENT,
     ABORT_IN_FLIGHT
 };
+
+class MovingAverage {
+public:
+// power
+    MovingAverage(size_t power);
+    void addSample(float sample);
+    float getAverage() const;
+    void reset();
+private:
+    std::vector<float> samples;
+    size_t maxSize;
+    float sum;
+};
+
+class MovingWeightedAverage {
+public:
+// power
+    MovingWeightedAverage(std::vector<float> weights = {});
+    void addSample(float sample);
+    float getAverage() const;
+    std::size_t size() const { return samples.size(); }
+    void reset();
+private:
+    std::vector<float> samples;
+    std::vector<float> weights;
+    size_t maxSize;
+    float sum;
+};
+
 
 /**
  * @brief A struct made only for convenience. Holds exactly
@@ -130,7 +160,7 @@ struct NavigationData {
     double    gnss_speed;
     //referentiel earth
     Vector3   position_kalman;
-    Vector3   speed;
+    float   speed;
     //ref of accel TBD !!!!
     Vector3   accel;
     Vector3   attitude; // Quaternion vector q = {w, x, y, z} -> {x,y,z}
@@ -258,6 +288,8 @@ public:
         NAV_ACCELERATION,
       
         NAV_KALMAN_DATA,
+
+        NAV_SPEED, //SPEED calculated with barometer
 
         /* Propulsion sensors */
         PR_SENSOR_P_NCO_ETH, // N2 Pressure from DPR_ETH

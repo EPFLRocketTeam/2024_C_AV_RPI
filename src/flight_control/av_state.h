@@ -12,18 +12,6 @@
 #include "thresholds.h"
 #include "data.h"
 
-class MovingAverage {
-public:
-// power
-    MovingAverage(size_t power);
-    void addSample(float sample);
-    float getAverage() const;
-    void reset();
-private:
-    std::vector<float> samples;
-    size_t maxSize;
-    float sum;
-};
 
 
 // Path: AV-Firehorn-Rpi/include/flightControl/AvState.h
@@ -68,6 +56,7 @@ private:
     uint32_t ascent_elapsed;
     uint32_t descent_elapsed;
     float accel_g_offset;
+    uint8_t apogee_counter;
 };
 
 
