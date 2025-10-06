@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 // ABORT CONFIG  - DO NOT TOUCH
-#define ABORT_FLIGHT_EN     0
+#define ABORT_FLIGHT_EN     1
 ///////////////////////////////
 
 /* Frequencies */
