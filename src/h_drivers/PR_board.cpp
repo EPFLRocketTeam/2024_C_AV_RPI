@@ -383,7 +383,7 @@ void PR_board::handle_burn(const DataDump& dump) {
         Data::get_instance().write(Data::EVENT_ENGINE_CUT_OFF, &cut_off);
     }
     burn_elapsed_ms += delta_ms;
-    Logger::log_eventf("BURN elapsed: %u", burn_elapsed_ms);
+    Logger::log_eventf(Logger::DEBUG, "BURN elapsed: %u", burn_elapsed_ms);
 }
 
 void PR_board::handle_ascent(const DataDump& dump) {
