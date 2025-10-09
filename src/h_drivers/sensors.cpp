@@ -80,7 +80,6 @@ std::map<std::string, bool> Sensors::sensors_status () {
 }
 
 void Sensors::write_speed(const DataDump& dump) {
-    GRAVITY_EARTH
     float temp = (SEA_LEVEL_TEMP_DIV_LAPSE_RATE)*(1.0 - pow(dump.sens.bmp_aux.pressure/SEA_LEVEL_PRESSURE,(GAS_CONSTANT_DRY_AIR*LAPSE_RATE)/G_GRAVITY_CST));
     float speed = 0.0;
     altitude_avg1.addSample(temp);
