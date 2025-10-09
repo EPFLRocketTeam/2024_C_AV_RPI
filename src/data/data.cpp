@@ -75,7 +75,7 @@ float MovingWeightedAverage::getAverage() const
     size_t weightCount = weights.size();
     size_t sampleCount = samples.size();
     
-    Logger::log_eventf( ": weights: %d | samples: %d", weights.size(),samples.size());
+    Logger::log_eventf(Logger::DEBUG, ": weights: %d | samples: %d", weights.size(),samples.size());
     for (size_t i = 0; i < sampleCount; ++i)
     {
         // Apply weights in reverse order to give more importance to recent samples
