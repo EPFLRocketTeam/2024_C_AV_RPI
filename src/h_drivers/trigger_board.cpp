@@ -9,6 +9,7 @@
 #include "trigger_board.h"
 #include "i2c_interface.h"
 #include "intranet_commands.h"
+#include "thresholds.h"
 
 TriggerBoard::TriggerBoard() : trigger_ms(0) {
     try {
@@ -262,17 +263,10 @@ void TriggerBoard::handle_ascent() {
 }
 
 // Transition ASCENT->DESCENT is done upon apogee detection
-// TODO: Confirm firing sequence with ST
 void TriggerBoard::handle_descent(const DataDump& dump) {
-    /*
-    static uint32_t trigger_ack_ms(0);
-    static bool pyro_main_fail(false);
-    static bool pyro_spare1_fail(false);
-    */
-
     if (!dump.event.seperated) {
         write_timestamp();
-        if (trigger_ms < 200) {
+        if (trigger_ms < SEPARATION_PYRO_DURATION_MS) {
             uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO2 | AV_NET_CMD_ON << AV_NET_SHIFT_PYRO3);
             write_pyros(order);
             trigger_ms += delta_ms;
@@ -282,46 +276,6 @@ void TriggerBoard::handle_descent(const DataDump& dump) {
             bool separated(true);
             Data::get_instance().write(Data::EVENT_SEPERATED, &separated);
         }
-        /*
-        // Send main pyro order to trigger the sep mech
-        if (!pyro_main_fail) {
-            if (trigger_ms < 400) {
-                uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO1);
-                write_pyros(order);
-                trigger_ms += delta_ms;
-            }else {
-                read_has_triggered();
-                uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO1);
-                write_pyros(order);
-
-                trigger_ack_ms += delta_ms;
-                if (trigger_ack_ms >= 200) {
-                    pyro_main_fail = true;
-                    trigger_ms = 0;
-                    trigger_ack_ms = 0;
-                }
-            }
-        }
-        // If passed a delay of no trigger ACK, fire on the spare channels
-        else if (!pyro_spare1_fail) {
-            if (trigger_ms < 400) {
-                uint32_t order(AV_NET_CMD_ON << AV_NET_SHIFT_PYRO2);
-                write_pyros(order);
-                trigger_ms += delta_ms;
-            }else {
-                read_has_triggered();
-                uint32_t order(AV_NET_CMD_OFF << AV_NET_SHIFT_PYRO2);
-                write_pyros(order);
-
-                trigger_ack_ms += delta_ms;
-                if (trigger_ack_ms >= 200) {
-                    pyro_spare1_fail = true;
-                    trigger_ms = 0;
-                    trigger_ack_ms = 0;
-                }
-            }
-        }
-        */
     }else {
         // After separation, write timestamp at 2Hz
         count_ms += delta_ms;

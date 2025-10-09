@@ -48,11 +48,10 @@ private:
 
     MovingAverage pressure_fuel_avg{6}; // 64 samples
     MovingAverage pressure_lox_avg{6}; // 64 samples
-    MovingAverage gnss_velocity_avg{6}; // 64 samples
                                        
     uint32_t pressurization_start_time;
-    uint32_t timer_accel;
-    uint32_t timer_liftoff_timeout;
+    uint32_t counter_accel;
+    float    buffer_accel;
     uint32_t timer_burn_timeout;
     uint32_t flight_elapsed;
     uint32_t descent_elapsed;

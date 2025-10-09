@@ -42,18 +42,57 @@ int main() {
     
     AvTimer::sleep(SLEEP_MS_DEFAULT);
 
-    // HDrivers
+    //
+    // HDrivers initialization and status test
+    Logger::log_eventf("Initializing HDrivers and performing I2C status test...");
+    bool trigger_board_status(1);
     TriggerBoard trigger_board;
+    try {
+        trigger_board.write_timestamp();
+        Logger::log_eventf("TRB OK");
+    }catch(TriggerBoardException& e) {
+        Logger::log_eventf(Logger::FATAL, "TRB not responding");
+        trigger_board_status = 0;
+    }
+
+    bool pr_board_status(1);
     PR_board prop_board;
+    try {
+        prop_board.write_timestamp();
+        Logger::log_eventf("PRB OK");
+    }catch(PRBoardException& e) {
+        Logger::log_eventf(Logger::FATAL, "PRB not responding");
+        pr_board_status = 0;
+    }
+
+    bool dpr_ethanol_status(1);
     DPR dpr_ethanol(AV_NET_ADDR_DPR_ETH);
+    try {
+        dpr_ethanol.write_timestamp();
+        Logger::log_eventf("DPR_ETH OK");
+    }catch(DPRException& e) {
+        Logger::log_eventf(Logger::FATAL, "DPR Ethanol not responding");
+        dpr_ethanol_status = 0;
+    }
+
+    bool dpr_lox_status(1);
     DPR dpr_lox(AV_NET_ADDR_DPR_LOX);
+    try {
+        dpr_lox.write_timestamp();
+        Logger::log_eventf("DPR_LOX OK");
+    }catch(DPRException& e) {
+        Logger::log_eventf(Logger::FATAL, "DPR LOX not responding");
+        dpr_lox_status = 0;
+    }
 
     AvTimer::sleep(SLEEP_MS_DEFAULT);
 
     // Telecom
     Telecom telecom;
+    bool telecom_status(0);
     try {
-        telecom.begin();
+        telecom_status = telecom.begin();
+        Logger::log_eventf("Telecom OK");
     }catch(TelecomException& e) {
         Logger::log_eventf(Logger::ERROR, "%s", e.what());
     }
@@ -80,6 +119,84 @@ int main() {
         }
         AvTimer::sleep(SLEEP_MS_NEXT_MODULE);
     }
+
+    Buzzer::enable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT);
+    Buzzer::disable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT*5);
+    if (telecom_status) {
+        for (int i(0); i < 3; ++i) {
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+
+        }
+    }
+    AvTimer::sleep(SLEEP_MS_NEXT_MODULE);
+
+    Buzzer::enable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT);
+    Buzzer::disable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT*5);
+    if (trigger_board_status) {
+        for (int i(0); i < 3; ++i) {
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+
+        }
+    }
+    AvTimer::sleep(SLEEP_MS_NEXT_MODULE);
+
+    Buzzer::enable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT);
+    Buzzer::disable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT*5);
+    if (pr_board_status) {
+        for (int i(0); i < 3; ++i) {
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+
+        }
+    }
+    AvTimer::sleep(SLEEP_MS_NEXT_MODULE);
+
+    Buzzer::enable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT);
+    Buzzer::disable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT*5);
+    if (dpr_ethanol_status) {
+        for (int i(0); i < 3; ++i) {
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+
+        }
+    }
+    AvTimer::sleep(SLEEP_MS_NEXT_MODULE);
+
+    Buzzer::enable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT);
+    Buzzer::disable();
+    AvTimer::sleep(SLEEP_MS_DEFAULT*5);
+    if (dpr_lox_status) {
+        for (int i(0); i < 3; ++i) {
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+            Buzzer::toggle();
+            AvTimer::sleep(SLEEP_MS_VALID);
+
+        }
+    }
+    AvTimer::sleep(SLEEP_MS_NEXT_MODULE);
+    // Modules and HDrivers status buzzer END
+    // --------------------------
+
 
     const uint32_t inv_freq = MS_TO_S * (float)(1.0 / MAIN_LOOP_MAX_FREQUENCY);
     uint32_t now_ms(AvTimer::tick());
