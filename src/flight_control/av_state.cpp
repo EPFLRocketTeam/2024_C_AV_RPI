@@ -60,6 +60,7 @@ State AvState::from_init(DataDump const &dump, uint32_t delta_ms)
             AvTimer::sleep(1);
         }
         accel_g_offset = sum / samples;
+        Logger::log_eventf("accel_g_offset: %f", accel_g_offset);
         return State::CALIBRATION;
     }
     return currentState;
@@ -195,8 +196,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
         return State::ABORT_ON_GROUND;
     }
 
-    //TODO: more than g
-    if (dump.nav.accel.z > ACCEL_LIFTOFF)
+    if ((dump.nav.accel.z - accel_g_offset) > ACCEL_LIFTOFF)
     {
         timer_accel += delta_ms;
     }
@@ -310,8 +310,12 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
         return State::ABORT_ON_GROUND;
 #endif
     }
+
+
+    gnss_velocity_avg.addSample(dump.nav.gnss_speed);
+    const float vel_avg(gnss_velocity_avg.getAverage());
     //TODO:probably a safety against an exactly zero speed apogee detection like a timer of 200ms
-    else if (dump.nav.gnss_speed <= SPEED_ZERO_TOUCHDOWN && descent_elapsed > DESCENT_MAX_DURATION_MS)
+    else if (vel_avg <= SPEED_ZERO_TOUCHDOWN && descent_elapsed > DESCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition DESCENT->LANDED");
         return State::LANDED;
