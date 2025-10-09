@@ -29,6 +29,7 @@ void AvState::reset_flight() {
     pressure_fuel_avg.reset();
     pressure_lox_avg.reset();
     pressurization_start_time = 0;
+    timer_accel = 0;
     counter_accel = 0;
     buffer_accel = 0;
     timer_burn_timeout = 0;
@@ -50,6 +51,7 @@ State AvState::from_init(DataDump const &dump, uint32_t delta_ms)
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_CALIBRATE)
     {
         Logger::log_eventf("FSM transition INIT->CALIBRATION");
+        Logger::log_eventf("Calculating Z-axis acceleration g offset...");
         const int samples(1000);
         float sum(0);
         for (int i(0); i < samples; ++i) {
@@ -92,6 +94,8 @@ State AvState::from_filling(DataDump const &dump, uint32_t delta_ms)
         Logger::log_eventf("FSM transition FILLING->ARMED");
         return State::ARMED;
     }
+
+
     return currentState;
 }
 
@@ -160,8 +164,8 @@ State AvState::from_pressurization(DataDump const &dump, uint32_t delta_ms)
     }
 
     // success path once we've waited long enough
-    Logger::log_eventf("pressurization_elapsed: %u", pressurization_start_time);
-    Logger::log_eventf("Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
+    Logger::log_eventf(Logger::DEBUG, "pressurization_elapsed: %u", pressurization_start_time);
+    Logger::log_eventf(Logger::DEBUG, "Fuel Avg: %f | LOx avg: %f", fuel_avg, lox_avg);
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_LAUNCH )
     {
         if (fuel_avg <= PRESSURIZATION_CHECK_PRESSURE &&
@@ -188,9 +192,15 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
 
     // Wait ignition rampup and compute Z-acceleration average
     if (dump.event.ignited) {
-        if (counter_accel < ACCEL_LIFTOFF_DURATION_MS) {
+        if (timer_accel < ACCEL_LIFTOFF_DURATION_MS) {
             buffer_accel += (dump.nav.accel.z - accel_g_offset);
+            timer_accel += delta_ms;
             ++counter_accel;
+            if (dump.nav.accel.z - accel_g_offset > ACCEL_LIFTOFF) {
+                Buzzer::enable();
+                AvTimer::sleep(2);
+                Buzzer::disable();
+            }
         }else {
             const float accel_avg(buffer_accel / counter_accel);
             if (accel_avg >= ACCEL_LIFTOFF) {
@@ -210,7 +220,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
 
 State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 {
-    Logger::log_eventf("FLIGHT elapsed: %u", flight_elapsed);
+    Logger::log_eventf(Logger::DEBUG, "FLIGHT elapsed: %u", flight_elapsed);
     timer_burn_timeout += delta_ms;
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
@@ -236,15 +246,15 @@ State AvState::from_burn(DataDump const &dump, uint32_t delta_ms)
 
 State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
 {
-    Logger::log_eventf("FLIGHT elapsed: %u", flight_elapsed);
+    Logger::log_eventf(Logger::DEBUG, "FLIGHT elapsed: %u", flight_elapsed);
     if (dump.nav.vertical_speed < DESCENT_THRESHOLD_SPEED) {
         apogee_counter++;
         Buzzer::enable();
-        AvTimer::sleep(25);
+        AvTimer::sleep(5);
         Buzzer::disable();
-        Logger::log_eventf("Negative speed detected = %f for the %d consecutive time", dump.nav.vertical_speed,apogee_counter);
+        Logger::log_eventf(Logger::DEBUG, "Negative speed detected = %f for the %d consecutive time", dump.nav.vertical_speed,apogee_counter);
     }else {
-        Logger::log_eventf("Positive speed detected = %f for the %d consecutive time",dump.nav.vertical_speed);
+        Logger::log_eventf(Logger::DEBUG, "Positive speed detected = %f for the %d consecutive time",dump.nav.vertical_speed);
         apogee_counter=0;
     }
 
@@ -301,7 +311,7 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
         return State::LANDED;
     }
 
-    Logger::log_eventf("DESCENT elapsed: %u", descent_elapsed);
+    Logger::log_eventf(Logger::DEBUG, "DESCENT elapsed: %u", descent_elapsed);
     descent_elapsed += delta_ms;
     return currentState;
 }

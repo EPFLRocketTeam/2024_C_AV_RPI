@@ -50,6 +50,7 @@ private:
     MovingAverage pressure_lox_avg{6}; // 64 samples
                                        
     uint32_t pressurization_start_time;
+    float    timer_accel;
     uint32_t counter_accel;
     float    buffer_accel;
     uint32_t timer_burn_timeout;
