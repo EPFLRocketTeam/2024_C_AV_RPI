@@ -10,7 +10,7 @@
 #include "i2c_interface.h"
 #include "intranet_commands.h"
 
-TriggerBoard::TriggerBoard() {
+TriggerBoard::TriggerBoard() : trigger_ms(0) {
     try {
         I2CInterface::getInstance().open(AV_NET_ADDR_TRB);
     }catch(const I2CInterfaceException& e) {
@@ -174,6 +174,7 @@ void TriggerBoard::handle_init() {
         send_reset();
         send_sleep();
         count_ms = 0;
+        trigger_ms = 0;
     }
 }
 
@@ -263,10 +264,11 @@ void TriggerBoard::handle_ascent() {
 // Transition ASCENT->DESCENT is done upon apogee detection
 // TODO: Confirm firing sequence with ST
 void TriggerBoard::handle_descent(const DataDump& dump) {
-    static uint32_t trigger_ms(0);
+    /*
     static uint32_t trigger_ack_ms(0);
     static bool pyro_main_fail(false);
     static bool pyro_spare1_fail(false);
+    */
 
     if (!dump.event.seperated) {
         write_timestamp();

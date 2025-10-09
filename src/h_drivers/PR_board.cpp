@@ -391,10 +391,11 @@ void PR_board::handle_ascent(const DataDump& dump) {
 }
 
 void PR_board::handle_descent(const DataDump& dump) {
-    periodic_timestamp(100);
+    //periodic_timestamp(100);
     if (passivation_count_ms >= PASSIVATION_DELAY_AFTER_APOGEE) {
        send_passivate();
     }else {
+        Logger::log_eventf(Logger::DEBUG, "PRB Passivation delay: %f ms", passivation_count_ms);
         passivation_count_ms += delta_ms;
     }
 }

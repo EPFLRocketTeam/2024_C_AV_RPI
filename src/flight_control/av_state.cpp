@@ -19,7 +19,6 @@ AvState::AvState()
 
 {
     reset_flight();
-    this->currentState = State::ASCENT;
 }
 
 // Destructor
@@ -33,6 +32,7 @@ void AvState::reset_flight() {
     pressure_lox_avg.reset();
     pressurization_start_time = 0;
     timer_accel = 0;
+    timer_burn_timeout = 0;
     timer_liftoff_timeout = 0;
     flight_elapsed = 0;
     descent_elapsed = 0;
@@ -196,7 +196,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     }
 
     //TODO: more than g
-    if (dump.nav.accel.x > ACCEL_LIFTOFF)
+    if (dump.nav.accel.z > ACCEL_LIFTOFF)
     {
         timer_accel += delta_ms;
     }

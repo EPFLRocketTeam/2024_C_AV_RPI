@@ -81,10 +81,10 @@ void Sensors::write_speed(const DataDump& dump) {
         buffer_delta_ms.erase(buffer_delta_ms.begin());
     }
     
-    Logger::log_eventf( ": altsize: %d | weightsize: %d", altitude_avg2.size(),weights.size());
+    //Logger::log_eventf( ": altsize: %d | weightsize: %d", altitude_avg2.size(),weights.size());
     if (altitude_avg2.size()==weights.size()) {
         auto total_delta_ms  = std::accumulate(buffer_delta_ms.begin(), buffer_delta_ms.end(), 0.0);
-        speed = (altitude_avg2.getAverage() - altitude_avg1.getAverage()) / (total_delta_ms  * 0.001); // m/s
+        speed = (altitude_avg1.getAverage() - altitude_avg2.getAverage()) / (total_delta_ms  * 0.001); // m/s
     }
     buffer_pressure.push_back(temp);
     buffer_delta_ms.push_back(dump.av_delta_ms);

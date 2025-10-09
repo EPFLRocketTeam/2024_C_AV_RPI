@@ -419,11 +419,11 @@ void DPR::handle_ascent(const DataDump& dump) {
 void DPR::handle_descent(const DataDump& dump) {
     // Write timestamp at a freq of 1Hz
     periodic_timestamp(1000);
-    Logger::log_eventf(Logger::DEBUG, "Passivation delay elapsed: %u", passivation_count_ms);
     if (passivation_count_ms >= PASSIVATION_DELAY_FOR_DPR) {
         send_passivate();
     }else {
         passivation_count_ms += delta_ms;
+        Logger::log_eventf(Logger::DEBUG, "Passivation delay elapsed: %u", passivation_count_ms);
     }
 }
 

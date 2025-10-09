@@ -25,6 +25,7 @@ public:
 private:
     uint32_t delta_ms;
     uint32_t count_ms;
+    uint32_t trigger_ms;
 
     void read_register(const uint8_t  reg_addr, uint8_t* data);
     void write_register(const uint8_t reg_addr, const uint8_t* data);
