@@ -55,8 +55,8 @@ State AvState::from_init(DataDump const &dump, uint32_t delta_ms)
         const int samples(1000);
         float sum(0);
         for (int i(0); i < samples; ++i) {
-            float acc_x(dump.nav.accel.x);
-            sum += acc_x;
+            float acc_z(dump.nav.accel.z);
+            sum += acc_z;
             AvTimer::sleep(1);
         }
         accel_g_offset = sum / samples;
@@ -208,7 +208,7 @@ State AvState::from_ignition(DataDump const &dump, uint32_t delta_ms)
     if (timer_accel > ACCEL_LIFTOFF_DURATION_MS || dump.event.ignited)
     {
         Logger::log_eventf(Logger::WARN, "Vertical acceleration detected. WE are burning");
-        Logger::log_eventf("FSM transition IGNITION->ABORT_ON_GROUND");
+        Logger::log_eventf("FSM transition IGNITION->BURN");
         return State::BURN;
     }
     
@@ -281,15 +281,15 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
     {
         Logger::log_eventf("FSM transition ASCENT->DESCENT");
         Buzzer::enable();
-        AvTimer::sleep(50);
+        AvTimer::sleep(25);
         Buzzer::disable();
-        AvTimer::sleep(50);
+        AvTimer::sleep(25);
         Buzzer::enable();
-        AvTimer::sleep(50);
+        AvTimer::sleep(25);
         Buzzer::disable();
-        AvTimer::sleep(50);
+        AvTimer::sleep(25);
         Buzzer::enable();
-        AvTimer::sleep(50);
+        AvTimer::sleep(25);
         Buzzer::disable();
         return State::DESCENT;
     }
@@ -311,7 +311,7 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
 #endif
     }
     //TODO:probably a safety against an exactly zero speed apogee detection like a timer of 200ms
-    else if (dump.nav.gnss_speed <= SPEED_ZERO && descent_elapsed > DESCENT_MAX_DURATION_MS)
+    else if (dump.nav.gnss_speed <= SPEED_ZERO_TOUCHDOWN && descent_elapsed > DESCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition DESCENT->LANDED");
         return State::LANDED;
