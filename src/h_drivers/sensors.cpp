@@ -18,9 +18,8 @@
 #include "thresholds.h"
 #define BUFFER_SIZE 16
 #define LAPSE_RATE 0.0065 // K/m
-#define SEA_LEVEL_TEMP 298.15 // K
-#define SEA_LEVEL_TEMP_DIV_LAPSE_RATE (SEA_LEVEL_TEMP / LAPSE_RATE) // m
 #define SEA_LEVEL_PRESSURE 101325.0 // Pa
+#define SEA_LEVEL_TEMP 298.15 // K
 #define GAS_CONSTANT_DRY_AIR 287.05 // J/(kg*K)
 
 
@@ -29,8 +28,10 @@ const std::vector<float> weights = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
 Sensors::Sensors():
-altitude_avg1(weights),
- altitude_avg2(weights)
+    altitude_avg1(weights),
+    altitude_avg2(weights),
+    ref_pressure(SEA_LEVEL_PRESSURE),
+    ref_temperature(SEA_LEVEL_TEMP)
 /* :   kalman(INITIAL_COV_GYR_BIAS,
            INITIAL_COV_ACCEL_BIAS,
            INITIAL_COV_ORIENTATION,
@@ -80,7 +81,20 @@ std::map<std::string, bool> Sensors::sensors_status () {
 }
 
 void Sensors::write_speed(const DataDump& dump) {
-    float temp = (SEA_LEVEL_TEMP_DIV_LAPSE_RATE)*(1.0 - pow(dump.sens.bmp_aux.pressure/SEA_LEVEL_PRESSURE,(GAS_CONSTANT_DRY_AIR*LAPSE_RATE)/G_GRAVITY_CST));
+    switch (dump.av_state) {
+        case State::INIT:
+        case State::CALIBRATION:
+        case State::FILLING:
+        case State::ARMED:
+        case State::PRESSURIZATION:
+            ref_pressure = dump.sens.bmp_aux.pressure;
+            ref_temperature = dump.sens.bmp_aux.temperature;
+        default:
+            break;
+    }
+
+    float temp = (ref_temperature / LAPSE_RATE)*(1.0 - pow(dump.sens.bmp_aux.pressure / ref_pressure,(GAS_CONSTANT_DRY_AIR*LAPSE_RATE)/G_GRAVITY_CST));
+    Logger::log_eventf(Logger::DEBUG, "Altitude form BMP: %f [m]", temp);
     float speed = 0.0;
     altitude_avg1.addSample(temp);
     if (buffer_pressure.size() == BUFFER_SIZE) {

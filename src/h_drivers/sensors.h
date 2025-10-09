@@ -40,21 +40,17 @@ public:
     // inline SensFiltered get_clean() const { return clean_data; }
 private:
     std::vector<SensorModule*> sensors;
-    //TODO: add altitude calculation module here ?
 
     MovingWeightedAverage altitude_avg1;
     MovingWeightedAverage altitude_avg2;
 
     void write_speed(const DataDump& dump);
+    float ref_pressure;
+    float ref_temperature;
 
     std::vector<float>  buffer_pressure;
     std::vector<float>  buffer_delta_ms;
     //calculate apogee, max velocity, etc
-
-
-    // SensStatus status;
-    // SensRaw raw_data;
-    // SensFiltered clean_data;
 
     // Kalman kalman;
 };
