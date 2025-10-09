@@ -315,7 +315,7 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
     gnss_velocity_avg.addSample(dump.nav.gnss_speed);
     const float vel_avg(gnss_velocity_avg.getAverage());
     //TODO:probably a safety against an exactly zero speed apogee detection like a timer of 200ms
-    else if (vel_avg <= SPEED_ZERO_TOUCHDOWN && descent_elapsed > DESCENT_MAX_DURATION_MS)
+    if (vel_avg <= SPEED_ZERO_TOUCHDOWN && descent_elapsed > DESCENT_MAX_DURATION_MS)
     {
         Logger::log_eventf("FSM transition DESCENT->LANDED");
         return State::LANDED;
