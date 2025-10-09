@@ -16,6 +16,16 @@
 #include "gps_module.h"
 #include "tmp1075_module.h"
 #define BUFFER_SIZE 16
+#define LAPSE_RATE 0.0065 // K/m
+#define SEA_LEVEL_TEMP 298.15 // K
+#define SEA_LEVEL_TEMP_DIV_LAPSE_RATE (SEA_LEVEL_TEMP / LAPSE_RATE) // m
+#define SEA_LEVEL_PRESSURE 101325.0 // Pa
+#define GAS_CONSTANT_DRY_AIR 287.05 // J/(kg*K)
+#define GRAVITY 9.80665 // m/s^2
+
+
+
+
 // from 1-64
 const std::vector<float> weights = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
@@ -72,7 +82,7 @@ std::map<std::string, bool> Sensors::sensors_status () {
 }
 
 void Sensors::write_speed(const DataDump& dump) {
-    float temp = 44330.0*(1.0 - pow(dump.sens.bmp_aux.pressure/101325.0,0.1903));
+    float temp = (SEA_LEVEL_TEMP_DIV_LAPSE_RATE)*(1.0 - pow(dump.sens.bmp_aux.pressure/SEA_LEVEL_PRESSURE,(GAS_CONSTANT_DRY_AIR*LAPSE_RATE)/GRAVITY_CONSTANT));
     float speed = 0.0;
     altitude_avg1.addSample(temp);
     if (buffer_pressure.size() == BUFFER_SIZE) {
