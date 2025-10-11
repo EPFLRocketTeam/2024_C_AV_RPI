@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "av_timer.h"
 #include "buzzer.h"
+#include "config.h"
 #include <iostream>
 
 
@@ -261,10 +262,10 @@ State AvState::from_ascent(DataDump const &dump,uint32_t delta_ms)
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
 #if (ABORT_FLIGHT_EN)
-        Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
+        Logger::log_eventf("FSM transition ASCENT->ABORT_IN_FLIGHT");
         return State::ABORT_IN_FLIGHT;
 #else
-        Logger::log_eventf("FSM transition BURN->ABORT_ON_GROUND");
+        Logger::log_eventf("FSM transition ASCENT->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
 #endif
     }
@@ -296,10 +297,10 @@ State AvState::from_descent(DataDump const &dump, uint32_t delta_ms)
     if (dump.telemetry_cmd.id == CMD_ID::AV_CMD_ABORT)
     {
 #if (ABORT_FLIGHT_EN)
-        Logger::log_eventf("FSM transition BURN->ABORT_IN_FLIGHT");
+        Logger::log_eventf("FSM transition DESCENT->ABORT_IN_FLIGHT");
         return State::ABORT_IN_FLIGHT;
 #else
-        Logger::log_eventf("FSM transition BURN->ABORT_ON_GROUND");
+        Logger::log_eventf("FSM transition DESCENT->ABORT_ON_GROUND");
         return State::ABORT_ON_GROUND;
 #endif
     }

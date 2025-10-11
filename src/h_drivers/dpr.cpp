@@ -62,7 +62,7 @@ void DPR::send_passivate() {
         std::string msg("DPR_" + m_code + " write_passivate error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending PASSIVATE to DPR_%s", m_code.c_str());
+    Logger::log_eventf(Logger::WARN, "Sending PASSIVATE to DPR_%s", m_code.c_str());
 }
 
 void DPR::send_reset() {
@@ -73,7 +73,7 @@ void DPR::send_reset() {
         std::string msg("DPR_" + m_code + "send_reset error: ");
         throw DPRException(msg + e.what());
     }
-    Logger::log_eventf(Logger::DEBUG, "Sending RESET to DPR_%s", m_code.c_str());
+    Logger::log_eventf(Logger::WARN, "Sending RESET to DPR_%s", m_code.c_str());
 }
 
 void DPR::send_abort(const bool in_flight) {

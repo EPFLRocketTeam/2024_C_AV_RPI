@@ -670,7 +670,7 @@ int8_t bmi08_init(struct bmi08_dev *bmi08dev)
     rslt = bmi08a_get_power_mode(bmi08dev);
     if (rslt == BMI08_OK)
     {
-        printf("Uploading config file !\n");
+        //printf("Uploading config file !\n");
         rslt = bmi08a_load_config_file(bmi08dev);
         bmi08_error_codes_print_result("bmi08a_load_config_file", rslt);
     }
@@ -832,50 +832,50 @@ void bmi08_error_codes_print_result(const char api_name[], int8_t rslt)
 {
     if (rslt != BMI08_OK)
     {
-        printf("%s\t", api_name);
+        //printf("%s\t", api_name);
         if (rslt == BMI08_E_NULL_PTR)
         {
-            printf("Error [%d] : Null pointer\r\n", rslt);
+            //printf("Error [%d] : Null pointer\r\n", rslt);
         }
         else if (rslt == BMI08_E_COM_FAIL)
         {
-            printf("Error [%d] : Communication failure\r\n", rslt);
+            //printf("Error [%d] : Communication failure\r\n", rslt);
         }
         else if (rslt == BMI08_E_DEV_NOT_FOUND)
         {
-            printf("Error [%d] : Device not found\r\n", rslt);
+            //printf("Error [%d] : Device not found\r\n", rslt);
         }
         else if (rslt == BMI08_E_OUT_OF_RANGE)
         {
-            printf("Error [%d] : Out of Range\r\n", rslt);
+            //printf("Error [%d] : Out of Range\r\n", rslt);
         }
         else if (rslt == BMI08_E_INVALID_INPUT)
         {
-            printf("Error [%d] : Invalid input\r\n", rslt);
+            //printf("Error [%d] : Invalid input\r\n", rslt);
         }
         else if (rslt == BMI08_E_CONFIG_STREAM_ERROR)
         {
-            printf("Error [%d] : Config stream error\r\n", rslt);
+            //printf("Error [%d] : Config stream error\r\n", rslt);
         }
         else if (rslt == BMI08_E_RD_WR_LENGTH_INVALID)
         {
-            printf("Error [%d] : Invalid Read write length\r\n", rslt);
+            //printf("Error [%d] : Invalid Read write length\r\n", rslt);
         }
         else if (rslt == BMI08_E_INVALID_CONFIG)
         {
-            printf("Error [%d] : Invalid config\r\n", rslt);
+            //printf("Error [%d] : Invalid config\r\n", rslt);
         }
         else if (rslt == BMI08_E_FEATURE_NOT_SUPPORTED)
         {
-            printf("Error [%d] : Feature not supported\r\n", rslt);
+            //printf("Error [%d] : Feature not supported\r\n", rslt);
         }
         else if (rslt == BMI08_W_FIFO_EMPTY)
         {
-            printf("Warning [%d] : FIFO empty\r\n", rslt);
+            //printf("Warning [%d] : FIFO empty\r\n", rslt);
         }
         else
         {
-            printf("Error [%d] : Unknown error code\r\n", rslt);
+            //printf("Error [%d] : Unknown error code\r\n", rslt);
         }
     }
 }
