@@ -2,6 +2,94 @@
 
 #include "data.h"
 #include "thresholds.h"
+#include <stdexcept>
+#include "logger.h"
+
+MovingAverage::MovingAverage(size_t power) : maxSize(power), sum(0.0f)
+{
+    samples.reserve(1 << power);
+}
+
+void MovingAverage::addSample(float sample)
+{
+    if (samples.size() >= (unsigned)(1 << maxSize))
+    {
+        sum -= samples.front();
+        samples.erase(samples.begin());
+    }
+
+    samples.push_back(sample);
+    sum += sample;
+}
+
+float MovingAverage::getAverage() const
+{
+    if (samples.empty())
+    {
+        return 0.0f; // or handle empty case as needed
+    }
+    // Could opti if we remove division by having a fix size TBD
+    return sum / samples.size();
+}
+
+void MovingAverage::reset()
+{
+    samples.clear();
+    sum = 0.0f;
+}
+
+MovingWeightedAverage::MovingWeightedAverage(std::vector<float> weights)
+: maxSize(weights.size()), sum(0.0){
+    if (weights.empty()) {
+        throw std::invalid_argument("Weights vector cannot be empty");
+    } else {
+        // Normalize weights
+        float totalWeight = 0.0f;
+        for (float w : weights) {
+            totalWeight += w;
+        }
+        for (float &w : weights) {
+           this->weights.push_back(w / totalWeight);
+        }
+    }
+}
+
+void MovingWeightedAverage::addSample(float sample)
+{
+    if (samples.size() >= maxSize)
+    {
+        samples.erase(samples.begin());
+    }
+
+    samples.push_back(sample);
+}
+
+float MovingWeightedAverage::getAverage() const
+{
+    if (samples.empty())
+    {
+        return 0.0f; // or handle empty case as needed
+    }
+
+    float weightedSum = 0.0f;
+    size_t weightCount = weights.size();
+    size_t sampleCount = samples.size();
+    
+    Logger::log_eventf(Logger::DEBUG, ": weights: %d | samples: %d", weights.size(),samples.size());
+    for (size_t i = 0; i < sampleCount; ++i)
+    {
+        // Apply weights in reverse order to give more importance to recent samples
+   
+        weightedSum += samples[i] * weights[i];
+    }
+    return weightedSum;
+}
+
+void MovingWeightedAverage::reset()
+{
+    samples.clear();
+    sum = 0.0f;
+}
 
 NavSensors::NavSensors()
 :   adxl{0, 0, 0},
@@ -18,26 +106,40 @@ PropSensors::PropSensors()
 :   N2_pressure(0),
     fuel_pressure(0),
     LOX_pressure(0),
-    fuel_level(0),
-    LOX_level(0),
-    igniter_pressure(0),
     LOX_inj_pressure(0),
     fuel_inj_pressure(0),
     chamber_pressure(0),
     N2_temperature(0),
+    N2_ext_temperature(0),
     fuel_temperature(0),
     LOX_temperature(0),
-    igniter_temperature(0),
     fuel_inj_temperature(0),
-    fuel_inj_cooling_temperature(0),
-    LOX_inj_temperature(0),
-    chamber_temperature(0)
+    LOX_fls_90(0),
+    LOX_fls_80(0),
+    LOX_fls_50(0),
+    LOX_fls_10(0),
+    LOX_fls_cap_0(0),
+    chamber_temperature(0),
+    pressure_check(0),
+    total_impulse(0),
+    PRB_state(0)
+{}
+
+Valves::Valves()
+:   valve_dpr_pressure_lox(0),
+    valve_dpr_pressure_fuel(0),
+    valve_dpr_vent_copv(0),
+    valve_dpr_vent_lox(0),
+    valve_dpr_vent_fuel(0),
+    valve_prb_main_lox(0),
+    valve_prb_main_fuel(0)
 {}
 
 NavigationData::NavigationData()
 :   time{0, 0, 0, 0, 0, 0, 0},
     position{0, 0, 0},
-    speed{0, 0, 0},
+    gnss_speed(0),
+    vertical_speed(0.0),
     accel{0, 0, 0},
     attitude{0, 0, 0},
     course(0),
@@ -55,9 +157,11 @@ Event::Event()
     prb_ready(false),
     trb_ready(false),
     ignited(false),
+    ignition_failed(false),
+    engine_cut_off(false),
     seperated(false),
-    chute_unreefed(false),
-    ignition_failed(false)
+    chute_opened(false),
+    chute_unreefed(false)
 {}
 
 
@@ -78,6 +182,9 @@ void Data::write(GoatReg reg, void* data) {
         case AV_TIMESTAMP:
             av_timestamp = *reinterpret_cast<uint32_t*>(data);
             break;
+        case AV_DELTA_MS:
+            av_delta_ms = *reinterpret_cast<uint32_t*>(data);
+            break;
         case TLM_CMD_ID:
             telemetry_cmd.id = *reinterpret_cast<uint8_t*>(data);
             break;
@@ -86,6 +193,9 @@ void Data::write(GoatReg reg, void* data) {
             break;
         case AV_FC_TEMPERATURE:
             av_fc_temp = *reinterpret_cast<float*>(data);
+            break;
+        case AV_AMB_TEMPERATURE:
+            av_amb_temp = *reinterpret_cast<float*>(data);
             break;
         case NAV_SENSOR_ADXL1_STAT:
             sensors_status.adxl_status = *reinterpret_cast<uint8_t*>(data);
@@ -135,59 +245,71 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_SENSOR_BMP2_DATA:
             nav_sensors.bmp_aux = *reinterpret_cast<bmp3_data*>(data);
             break;
+        case PR_SENSOR_P_NCO_ETH:
+            prop_sensors.N2_pressure_eth = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_P_NCO_LOX:
+            prop_sensors.N2_pressure_lox = *reinterpret_cast<float*>(data);
+            break;
         case PR_SENSOR_P_NCO:
-            prop_sensors.N2_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.N2_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_ETA:
-            prop_sensors.fuel_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_OTA:
-            prop_sensors.LOX_pressure = *reinterpret_cast<double*>(data);
-            break;
-        case PR_SENSOR_P_CIG:
-            prop_sensors.igniter_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.LOX_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_EIN:
-            prop_sensors.fuel_inj_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_inj_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_OIN:
-            prop_sensors.LOX_inj_pressure = *reinterpret_cast<double*>(data);
+            prop_sensors.LOX_inj_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_P_CCC:
-            prop_sensors.chamber_pressure = *reinterpret_cast<double*>(data);
-            break;
-        case PR_SENSOR_L_ETA:
-            prop_sensors.fuel_level = *reinterpret_cast<double*>(data);
-            break;
-        case PR_SENSOR_L_OTA:
-            prop_sensors.LOX_level = *reinterpret_cast<double*>(data);
+            prop_sensors.chamber_pressure = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_NCO:
-            prop_sensors.N2_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.N2_temperature = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_T_NCO_EXT:
+            prop_sensors.N2_ext_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_ETA:
-            prop_sensors.fuel_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_OTA:
-            prop_sensors.LOX_temperature = *reinterpret_cast<double*>(data);
-            break;
-        case PR_SENSOR_T_CIG:
-            prop_sensors.igniter_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.LOX_temperature = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_EIN:
-            prop_sensors.fuel_inj_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.fuel_inj_temperature = *reinterpret_cast<float*>(data);
             break;
-        case PR_SENSOR_T_EIN_CF:
-            prop_sensors.fuel_inj_cooling_temperature = *reinterpret_cast<double*>(data);
+        case PR_SENSOR_T_FLS_90:
+            prop_sensors.LOX_fls_90 = *reinterpret_cast<float*>(data);
             break;
-        case PR_SENSOR_T_OIN:
-            prop_sensors.LOX_inj_temperature = *reinterpret_cast<double*>(data);
+        case PR_SENSOR_T_FLS_80:
+            prop_sensors.LOX_fls_80 = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_T_FLS_50:
+            prop_sensors.LOX_fls_50 = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_T_FLS_10:
+            prop_sensors.LOX_fls_10 = *reinterpret_cast<float*>(data);
+            break;
+        case PR_SENSOR_T_FLS_0:
+            prop_sensors.LOX_fls_cap_0 = *reinterpret_cast<float*>(data);
             break;
         case PR_SENSOR_T_CCC:
-            prop_sensors.chamber_temperature = *reinterpret_cast<double*>(data);
+            prop_sensors.chamber_temperature = *reinterpret_cast<float*>(data);
+            break;
+        case PR_PRESSURE_CHECK:
+            prop_sensors.pressure_check = *reinterpret_cast<float*>(data);
+            break;
+        case PR_TOTAL_IMPULSE:
+            prop_sensors.total_impulse = *reinterpret_cast<float*>(data);
             break;
         case PR_BOARD_FSM_STATE:
-            prop_sensors.PR_state = *reinterpret_cast<uint32_t*>(data);
+            prop_sensors.PRB_state = *reinterpret_cast<uint8_t*>(data);
             break;
         case VALVES:
             valves = *reinterpret_cast<Valves*>(data);
@@ -222,14 +344,32 @@ void Data::write(GoatReg reg, void* data) {
         case NAV_GNSS_POS_ALT:
             nav.position.alt = *reinterpret_cast<double*>(data);
             break;
+        case NAV_GNSS_SPEED:
+            nav.gnss_speed = *reinterpret_cast<double*>(data);
+            break;
         case NAV_GNSS_COURSE:
             nav.course = *reinterpret_cast<double*>(data);
+            break;
+        case NAV_ACCELERATION:
+            nav.accel = *reinterpret_cast<Vector3*>(data);
             break;
         case BAT_LPB_VOLTAGE:
             bat.lpb_voltage = *reinterpret_cast<float*>(data);
             break;
-        case BAT_HPB_VOLTAGE:
-            bat.hpb_voltage = *reinterpret_cast<float*>(data);
+        case BAT_LPB_CURRENT:
+            bat.lpb_current = *reinterpret_cast<float*>(data);
+            break;
+        case BAT_HPB_VOLTAGE_TRB:
+            bat.hpb_voltage_trb = *reinterpret_cast<float*>(data);
+            break;
+        case BAT_HPB_CURRENT_TRB:
+            bat.hpb_current_trb = *reinterpret_cast<float*>(data);
+            break;
+        case BAT_HPB_VOLTAGE_PRB:
+            bat.hpb_voltage_prb = *reinterpret_cast<float*>(data);
+            break;
+        case BAT_HPB_CURRENT_PRB:
+            bat.hpb_current_prb = *reinterpret_cast<float*>(data);
             break;
         case CAM_RECORDING_SEP:
             cams_recording.cam_sep = *reinterpret_cast<bool*>(data);
@@ -267,26 +407,31 @@ void Data::write(GoatReg reg, void* data) {
         case EVENT_IGNITED:
             event.ignited = *reinterpret_cast<bool*>(data);
             break;
+        case EVENT_IGNITION_FAILED:
+            event.ignition_failed = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_ENGINE_CUT_OFF:
+            event.engine_cut_off = *reinterpret_cast<bool*>(data);
+            break;
         case EVENT_SEPERATED:
             event.seperated = *reinterpret_cast<bool*>(data);
+            break;
+        case EVENT_CHUTE_OPENED:
+            event.chute_opened = *reinterpret_cast<bool*>(data);
             break;
         case EVENT_CHUTE_UNREEFED:
             event.chute_unreefed = *reinterpret_cast<bool*>(data);
             break;
-            case EVENT_IGNITION_FAILED:
-            event.ignition_failed = *reinterpret_cast<bool*>(data);
-            break;
+            //TODO: add event apogee reached ?
 
-        case NAV_KALMAN_DATA:
+        case NAV_KALMAN_DATA:{
             const NavigationData temp = *reinterpret_cast<NavigationData*>(data);
             // only update the data given by the kalman filter
-            nav.position_kalman = temp.position_kalman;
-            nav.speed = temp.speed;
-            nav.accel = temp.accel;
-            nav.attitude = temp.attitude;
-            nav.altitude = temp.altitude;
-            nav.baro = temp.baro;
-            break;
+            //!! kalmann not not updatting
+            break;}
+        case NAV_VERTICAL_SPEED:
+             nav.vertical_speed = *reinterpret_cast<float*>(data);
+             break;
     }
 }
 
@@ -294,8 +439,10 @@ DataDump Data::get() const {
     return {
         av_state,
         av_timestamp,
+        av_delta_ms,
         telemetry_cmd,
         av_fc_temp,
+        av_amb_temp,
         sensors_status, 
         nav_sensors, 
         prop_sensors, 
@@ -307,12 +454,19 @@ DataDump Data::get() const {
     };
 }
 
-bool DataDump::depressurised() const {
-    return prop.N2_pressure < N2_PRESSURE_ZERO
-        && prop.fuel_pressure < FUEL_PRESSURE_ZERO
-        && prop.LOX_pressure < LOX_PRESSURE_ZERO
-        && prop.fuel_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && prop.LOX_inj_pressure < INJECTOR_PRESSURE_ZERO
-        && prop.chamber_pressure < CHAMBER_PRESSURE_ZERO;
+void Data::reset_events() {
+    event.command_updated = 0;
+    event.calibrated = 0;
+    event.dpr_eth_ready = 0;
+    event.dpr_eth_pressure_ok = 0;
+    event.dpr_lox_ready = 0;
+    event.prb_ready = 0;
+    event.trb_ready = 0;
+    event.ignited = 0;
+    event.ignition_failed = 0;
+    event.engine_cut_off = 0;
+    event.seperated = 0;
+    event.chute_opened = 0;
+    event.chute_unreefed = 0;
+    event.catastrophic_failure = 0;
 }
-

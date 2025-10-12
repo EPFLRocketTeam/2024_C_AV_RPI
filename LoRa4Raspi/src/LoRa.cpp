@@ -86,8 +86,8 @@ LoRaClass::LoRaClass() :
     _packetIndex(0),
     _implicitHeaderMode(0),
     _onReceive(NULL),
-    _onTxDone(NULL),
     _onCadDone(NULL),
+    _onTxDone(NULL),
     _spi_handle(0)
 {
     // overide Stream timeout value

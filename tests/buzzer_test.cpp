@@ -21,7 +21,7 @@ int main() {
     usleep(100e3);
     gpioWrite(BUZZER, 0);
 
-    usleep(5e6);
+    usleep(3e6);
     gpioWrite(LED_LORA_RX, 0);
     gpioWrite(LED_LORA_TX, 0);
 

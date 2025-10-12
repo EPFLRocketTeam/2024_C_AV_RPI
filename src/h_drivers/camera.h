@@ -30,7 +30,7 @@ private:
 
     void read_register(const uint8_t reg_addr, uint8_t* data);
     void write_register(const uint8_t reg_addr, const uint8_t* value);
-    void handle_ready(); 
+    void handle_pressurized(); 
     void handle_landed();
 };
 

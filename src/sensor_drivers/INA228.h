@@ -18,8 +18,10 @@
 #include <string>
 
 #define INA228_LIB_VERSION (F("0.2.0"))
-#define INA228_ADDRESS_LPB 0x40
-#define INA228_ADDRESS_HPB 0x41
+
+#define INA228_ADDRESS_LPB     0x40
+#define INA228_ADDRESS_HPB_TRB 0x41
+#define INA228_ADDRESS_HPB_PRB 0x45
 
 //  for setMode() and getMode()
 enum ina228_mode_enum

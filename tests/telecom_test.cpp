@@ -31,47 +31,45 @@ int main() {
     while (1) {
         std::cout << " - Writing " << timestamp << " as AV_TIMESTAMP to GOAT... ";
         goat.write(Data::AV_TIMESTAMP, &timestamp);
-	State state(State::ARMED);
-	goat.write(Data::AV_STATE, &state);
-	float lpb(5);
-	goat.write(Data::BAT_LPB_VOLTAGE, &lpb);
-	float hpb(24);
-	goat.write(Data::BAT_HPB_VOLTAGE, &hpb);
-	double lon(112.34);
-	goat.write(Data::NAV_GNSS_POS_LNG, &lon);
-	double lat(113.34);
-	goat.write(Data::NAV_GNSS_POS_LAT, &lat);
-	double alt(2974.342);
-	goat.write(Data::NAV_GNSS_POS_ALT, &alt);
-	double N2_pres(150.42);
-	goat.write(Data::PR_SENSOR_P_NCO, &N2_pres);
-	double Fuel_pres(145.423);
-	goat.write(Data::PR_SENSOR_P_ETA, &Fuel_pres);
-	double lox_pres(132.564);
-	goat.write(Data::PR_SENSOR_P_OTA, &lox_pres);
-	double fuel_level(23.56);
-	goat.write(Data::PR_SENSOR_L_ETA, &fuel_level);
-	double lox_level(12.34);
-	goat.write(Data::PR_SENSOR_L_OTA, &lox_level);
-	double N2_temp(-180);
-	goat.write(Data::PR_SENSOR_T_NCO, &N2_temp);
-	double lox_temp(90);
-	goat.write(Data::PR_SENSOR_T_OTA, &lox_temp);
-	float temp(60);
-	goat.write(Data::AV_FC_TEMPERATURE, &temp);
+        State state(State::ARMED);
+        goat.write(Data::AV_STATE, &state);
+        float lpb(5);
+        goat.write(Data::BAT_LPB_VOLTAGE, &lpb);
+        float hpb(24);
+        goat.write(Data::BAT_HPB_VOLTAGE_TRB, &hpb);
+        double lon(112.34);
+        goat.write(Data::NAV_GNSS_POS_LNG, &lon);
+        double lat(113.34);
+        goat.write(Data::NAV_GNSS_POS_LAT, &lat);
+        double alt(2974.342);
+        goat.write(Data::NAV_GNSS_POS_ALT, &alt);
+        double N2_pres(150.42);
+        goat.write(Data::PR_SENSOR_P_NCO, &N2_pres);
+        double Fuel_pres(145.423);
+        goat.write(Data::PR_SENSOR_P_ETA, &Fuel_pres);
+        double lox_pres(132.564);
+        goat.write(Data::PR_SENSOR_P_OTA, &lox_pres);
+        double N2_temp(-180);
+        goat.write(Data::PR_SENSOR_T_NCO, &N2_temp);
+        double lox_temp(90);
+        goat.write(Data::PR_SENSOR_T_OTA, &lox_temp);
+        float temp(60);
+        goat.write(Data::AV_FC_TEMPERATURE, &temp);
+        temp = 25;
+        goat.write(Data::AV_AMB_TEMPERATURE, &temp);
         std::cout << "Done\n";
         //std::cout << " - Writing " << i << " as AV_STATE to GOAT... ";
         //goat.write(Data::AV_STATE, (State*)&i);
-//        std::cout << "Done\n";
+        //        std::cout << "Done\n";
 
 
         std::cout << " - Sending packet on downlink freq (" << AV_DOWNLINK_FREQUENCY << ")... ";
         ttc.send_telemetry();
         std::cout << "\x1b[32mOK\x1b[0m\n";
 
-	ttc.update();
+        ttc.update();
 
-	AvTimer::sleep(1e3);
+        AvTimer::sleep(1e2);
     }
     gpioTerminate();
 }

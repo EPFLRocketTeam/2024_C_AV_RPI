@@ -8,8 +8,11 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <vector>
 #include "thresholds.h"
 #include "data.h"
+
+
 
 // Path: AV-Firehorn-Rpi/include/flightControl/AvState.h
 // Compare this snippet from AV-Firehorn-Rpi/src/flightControl/FSM.cpp:
@@ -24,23 +27,38 @@ public:
     ~AvState();
     // this function allows to get the current state of the FSM
     State getCurrentState();
-    void update(const DataDump &dump);
+    void update(const DataDump &dump,uint32_t delat_ms);
     std::string stateToString(State state);
 
 private:
-    State fromInit(DataDump const &dump);
-    State fromDescent(DataDump const &dump);
-    State fromAscent(DataDump const &dump);
-    State fromCalibration(DataDump const &dump);
-    State fromErrorGround(DataDump const &dump);
-    State fromErrorFlight(DataDump const &dump);
-    State fromThrustSequence(DataDump const &dump);
-    State fromManual(DataDump const &dump);
-    State fromArmed(DataDump const &dump);
-    State fromLanded(DataDump const &dump);
-    State fromLiftoff(DataDump const &dump);
-    State fromReady(DataDump const &dump);
+    void reset_flight();
+    State from_init(DataDump const &dump,uint32_t delta_ms);
+    State from_calibration(DataDump const &dump,uint32_t delta_ms);
+    State from_filling(DataDump const &dump,uint32_t delta_ms);
+    State from_armed(DataDump const &dump,uint32_t delta_ms);
+    State from_pressurization(DataDump const &dump,uint32_t delta_ms);
+    State from_abort_ground(DataDump const &dump,uint32_t delta_ms);
+    State from_ignition(DataDump const &dump,uint32_t delta_ms);
+    State from_landed(DataDump const &dump,uint32_t delta_ms);
+    State from_burn(DataDump const &dump,uint32_t delta_ms);
+    State from_ascent(DataDump const &dump,uint32_t delta_ms);
+    State from_descent(DataDump const &dump,uint32_t delta_ms);
+    State from_abort_flight(DataDump const &dump,uint32_t delta_ms);
     State currentState;
+
+    MovingAverage pressure_fuel_avg{6}; // 64 samples
+    MovingAverage pressure_lox_avg{6}; // 64 samples
+                                       
+    uint32_t pressurization_start_time;
+    float    timer_accel;
+    uint32_t counter_accel;
+    float    buffer_accel;
+    uint32_t timer_burn_timeout;
+    uint32_t flight_elapsed;
+    uint32_t descent_elapsed;
+    float accel_g_offset;
+    uint8_t apogee_counter;
 };
+
 
 #endif

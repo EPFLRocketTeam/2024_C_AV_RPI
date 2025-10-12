@@ -1,4 +1,3 @@
-
 #include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
@@ -7,6 +6,9 @@
 #include "logger.h"
 #include "data.h"
 #include "config.h"
+
+const bool CONSOLE_LOG = 1;
+const bool DEBUG_LOG = 0;
 
 // If the folder contains more than 10^6 files, throw an error
 const int MAX_TEMPLATE_COUNT = 1'000'000;
@@ -42,7 +44,7 @@ bool Logger::init(const std::string dump_path, const std::string event_path) {
     dump_fd = open(av_log_dump_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0777);
     event_fd = open(av_log_event_path.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0777);
     if (dump_fd == -1) {
-        // throw DataLoggerException("Could not open the dump file.\n");
+        //throw DataLoggerException("Could not open the dump file.\n");
         return false;
     }
     if (event_fd == -1) {
@@ -66,15 +68,20 @@ void Logger::log_dump(const DataDump& dump) {
     char* buffer = reinterpret_cast<char*>(&dump_copy);
     write(dump_fd, buffer, sizeof(DataDump));
     
-    counter++;
-
-    if (counter >= DATADUMP_FSYNC_FREQ){
+    counter += Data::get_instance().get().av_delta_ms;
+    if (counter >= DATADUMP_FSYNC_INV_FREQUENCY){
         counter = 0;
         fsync(dump_fd);
     }
 }
 
 void Logger::log_event(const Severity lvl, const std::string event) {
+    static uint32_t counter(0);
+
+    if (!DEBUG_LOG && lvl == Logger::DEBUG) {
+        return;
+    }
+
     const std::string event_msg(fmt_severity_msg(lvl, event));
     const uint32_t str_length = event_msg.size();
 
@@ -86,8 +93,15 @@ void Logger::log_event(const Severity lvl, const std::string event) {
     write(event_fd, buffer_ln, sizeof(uint32_t));
     write(event_fd, event_msg.c_str(), str_length * sizeof(char));
 
-    std::cout << timestamp << event_msg << "\n";
-    fsync(event_fd);
+    if (CONSOLE_LOG) {
+        std::cout << timestamp << event_msg << "\n";
+    }
+
+    counter += Data::get_instance().get().av_delta_ms;
+    if (counter >= EVENT_FSYNC_INV_FREQUENCY) {
+        counter = 0;
+        fsync(event_fd);
+    }
 }
 
 std::string Logger::get_dump_path() {

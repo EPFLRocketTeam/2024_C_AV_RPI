@@ -24,15 +24,15 @@ int main() {
     PR_board prb;
 
     // Valves throttle test
-    throttle_test(prb);
+    //throttle_test(prb);
 
 	uint32_t cmd(0);
 	cmd = AV_NET_CMD_ON;
 
-    prb.send_wake_up();
-    prb.read_is_woken_up();
     prb.write_igniter(cmd);
     prb.clear_to_ignite(cmd);
+    AvTimer::sleep(1e3);
+    prb.write_igniter(AV_NET_CMD_ON);
 
 /*
 	AvTimer::sleep(500);
@@ -40,15 +40,10 @@ int main() {
 	Logger::log_eventf(Logger::DEBUG, "Writing IGNITER");
 */	
 
-	float rslt(0);
     prb.read_combustion_chamber();
-    prb.read_igniter_oxygen();
-    prb.read_igniter_fuel();
+    prb.read_injector_oxygen();
+    prb.read_injector_fuel();
 
-	uint32_t valves_write(AV_NET_CMD_OFF << 0 | AV_NET_CMD_OFF << 8);
-    prb.write_valves(valves_write);
-	
-	uint32_t valves(0);
     prb.read_valves();
 
     prb.read_combustion_chamber();

@@ -41,9 +41,16 @@ public:
 private:
     std::vector<SensorModule*> sensors;
 
-    // SensStatus status;
-    // SensRaw raw_data;
-    // SensFiltered clean_data;
+    MovingWeightedAverage altitude_avg1;
+    MovingWeightedAverage altitude_avg2;
+
+    void write_speed(const DataDump& dump);
+    float ref_pressure;
+    float ref_temperature;
+
+    std::vector<float>  buffer_pressure;
+    std::vector<float>  buffer_delta_ms;
+    //calculate apogee, max velocity, etc
 
     // Kalman kalman;
 };
